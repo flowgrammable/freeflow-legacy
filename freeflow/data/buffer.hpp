@@ -38,7 +38,7 @@ using Byte = uint8_t;
 ///
 /// The Buffer is block of memory that stores data read from or to be
 /// written to a network device. Reading and writing is primarily done through
-/// the Buffer_view class.
+/// the View class.
 ///
 /// A buffer object is in one of two states: good, and bad. A buffer in a 
 /// good state can be read to and written from, whereas reading or writing 
@@ -108,6 +108,76 @@ Buffer read(std::ifstream&);
 bool write(const Buffer&, const char*);
 bool write(const Buffer&, const std::string&);
 bool write(const Buffer&, std::ofstream&);
+
+
+// -------------------------------------------------------------------------- //
+// View
+
+/// The primary interface for reading from and writing to Buffers.
+///
+/// The View class is a reference to a bounded segment of memory within
+/// a buffer. Reading and writng of network messages is done through the
+/// buffer using the get() and put() operations. Each successive read and
+/// write operation advances the bounded range of memory. 
+///
+/// There are a number of operations associated with Views.
+///   * The remaining() function indicates the number of bytes in the bounded
+///     range that can be read or written. 
+///   * The available() operation determines
+///     if there are enough bytes remaining to complete such an operation. 
+///   * The constrain() operation returns another view whose end occurs
+///     before the original (i.e., has fewer bytes).
+///
+/// Note that it is undefined behavior to read from or write to a view when
+/// there are not enough bytes to complete the operation.
+class View {
+public:
+  View(Buffer& b);
+  View(Buffer& b, Byte* f, Byte* l);
+
+  Buffer& buf;
+  Byte* first;
+  Byte* last;
+};
+
+inline std::size_t remaining(const View& v);
+inline bool available(const View& v, std::size_t n);
+inline View constrain(const View& v, std::size_t n);
+inline bool update(View& v, const View& c);
+
+// Put operations
+template<typename T>
+  void put(View& v, const T& x) = delete;
+
+inline void put(View& v, char c);
+inline void put(View& v, uint8_t n);
+inline void put(View& v, uint16_t n);
+inline void put(View& v, uint32_t n);
+inline void put(View& v, uint64_t n);
+
+template<typename T>
+  inline void put(View& v, T* p, std::size_t n);
+
+// Get operations
+template<typename T>
+  void get(View& v, T& x) = delete;
+
+inline void get(View& v, char& c);
+inline void get(View& v, uint8_t& n);
+inline void get(View& v, uint16_t& n);
+inline void get(View& v, uint32_t& n);
+inline void get(View& v, uint64_t& n);
+
+template<typename T>
+  inline T get(View& v);
+
+template<typename T>
+  inline void
+  get(View& v, T* p, std::size_t n);
+
+// Padding
+inline void pad(View& v, std::size_t n);
+
 
 } // namespace freeflow
 

@@ -33,6 +33,7 @@ main(int argc, char* argv[]) {
   if (argc != 3) {
     cerr << "error: not enough arguments\n";
     cerr << "usage: buffer <input-file> <output-file>\n";
+    return -1;
   }
 
   // Reading a buffer from a file is done using the read() function. This opens
