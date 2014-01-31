@@ -12,6 +12,6 @@
 # or implied. See the License for the specific language governing
 # permissions and limitations under the License.
 
-add_library(freeflow_data buffer.cpp)
+add_library(freeflow_data buffer.cpp error.cpp)
 
 add_subdirectory(examples)
