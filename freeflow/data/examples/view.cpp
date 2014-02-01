@@ -38,8 +38,6 @@ main(int argc, char* argv[]) {
 
   // Read the input file into a buffer. 
   Buffer in = read(argv[1]);
-  if (not in)
-    return fail("could not read buffer");
 
   // Attach a view to the input buffer in order to get data from the
   // buffer. Using the view to read from the buffer helps guarantee that
@@ -80,7 +78,6 @@ main(int argc, char* argv[]) {
   put(vout, n);
 
   // Write the buffer to an output file.
-  if (not write(out, argv[2]))
-    return fail("could not write buffer");
+  write(out, argv[2]);
   std::cout << "wrote buffer to file\n";
 }

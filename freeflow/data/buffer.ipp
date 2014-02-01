@@ -14,57 +14,15 @@
 
 namespace freeflow {
 
-inline 
-Buffer::Buffer()
-  : std::vector<Byte>(), state_(GOOD), missing_(0) 
-{ }
-
-inline 
-Buffer::Buffer(Buffer&& x)
-  : std::vector<Byte>(std::move(x)), state_(x.state_), missing_(x.missing_) 
-{ }
-
-inline Buffer&
-Buffer::operator=(Buffer&& x) {
-  std::vector<Byte>::operator=(std::move(x));
-  state_ = x.state_;
-  missing_ = x.missing_;
-  return *this;
-}
-
-inline 
-Buffer::Buffer(const Buffer& x)
-  : std::vector<Byte>(x), state_(x.state_), missing_(x.missing_) 
-{ }
-
-inline Buffer&
-Buffer::operator=(const Buffer& x) {
-  std::vector<Byte>::operator=(x);
-  state_ = x.state_;
-  missing_ = x.missing_;
-  return *this;
-}
-
 inline
-Buffer::Buffer(std::size_t n)
-  : std::vector<Byte>(n), state_(GOOD), missing_(0)
+Buffer::Buffer(std::size_t n, Byte b)
+  : std::vector<Byte>(n, b)
 { }
 
 inline
 Buffer::Buffer(const Byte* first, const Byte* last)
-  : std::vector<Byte>(first, last), state_(GOOD), missing_(0)
+  : std::vector<Byte>(first, last)
 { }
-
-inline void
-Buffer::missing(std::size_t n)
-{
-  state_ = MISSING;
-  missing_ = n;
-}
-
-inline void
-Buffer::bad() { state_ = BAD; }
-
 
 /// \ingroup structure
 /// Returns the number of bytes in the buffer.
@@ -74,8 +32,8 @@ bytes(const Buffer& b) { return b.size(); }
 /// \ingroup semantics
 /// Returns true when the contents of the buffer can be accessed.
 /// This function returns true only when the buffer is in a good state.
-inline bool
-is_valid(const Buffer& b) { return (bool)b; }
+constexpr bool
+is_valid(const Buffer& b) { return true; }
 
 
 // -------------------------------------------------------------------------- //

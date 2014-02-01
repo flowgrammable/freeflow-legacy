@@ -39,76 +39,40 @@ using Byte = uint8_t;
 /// The Buffer is block of memory that stores data read from or to be
 /// written to a network device. Reading and writing is primarily done through
 /// the View class.
-///
-/// A buffer object is in one of two states: good, and bad. A buffer in a 
-/// good state can be read to and written from, whereas reading or writing 
-/// from a buffer in a bad state is undefined behavior. A buffer is put into
-/// a bad state when a structural violation occurs. The buffer records the
-/// number of bytes missing when a structural violation occurs. Testing
-/// the state of the buffer can be done by contextually converting to bool.
-/// For example:
-///
-///     Buffer b;
-///     // read from or write to b.
-///     if (b) {
-///       std::cout << "success!\n";
-///     }
-///
-/// A Buffer is protocol element, meaning that the following operations are
-/// defined:
-///
-/// - bytes
-/// - is_valid
-/// - operator==
-/// - to_string
 class Buffer : public std::vector<Byte> {
 public:
-  enum State { GOOD, MISSING, BAD };
-
-  Buffer();
+  // Default construction
+  Buffer() = default;
 
   // Move semantics
-  Buffer(Buffer&& x);
-  Buffer& operator=(Buffer&& x);
+  Buffer(Buffer&& x) = default;
+  Buffer& operator=(Buffer&& x) = default;
 
   // Copy semantics
-  Buffer(const Buffer& x);
-  Buffer& operator=(const Buffer& x);
+  Buffer(const Buffer& x) = default;
+  Buffer& operator=(const Buffer& x) = default;
 
   // Fill initialization
-  Buffer(std::size_t n);
+  explicit Buffer(std::size_t n, Byte value = Byte());
 
   // Range initialization
   Buffer(const Byte* first, const Byte* last);
-
-  /// Returns true when the state is good.
-  explicit operator bool() const { return state_ == GOOD; }
-
-  /// Returns the number of missing bytes.
-  std::size_t missing() const { return missing_; }
-
-  /// Set the number of missing bytes to n, putting the buffer
-  /// in a bad state..
-  void missing(std::size_t n);
-
-  /// Put the buffer into a bad state.
-  void bad();
-
-private:
-  State state_;
-  std::size_t missing_;
 };
 
 // Reading
-Buffer read(const char*);
-Buffer read(const std::string&);
-Buffer read(std::ifstream&);
+Buffer read(const char* s);
+Buffer read(const std::string& s);
+Buffer read(std::ifstream& s);
+std::size_t read(Buffer& b, std::ifstream& is);
 
 // Writing
-bool write(const Buffer&, const char*);
-bool write(const Buffer&, const std::string&);
-bool write(const Buffer&, std::ofstream&);
+void write(const Buffer& b, const char* s);
+void write(const Buffer& b, const std::string& s);
+void write(const Buffer& b, std::ofstream& os);
 
+// Protocol
+std::size_t bytes(const Buffer& b);
+constexpr bool valid(const Buffer& b);
 
 // -------------------------------------------------------------------------- //
 // View

@@ -14,6 +14,7 @@
 
 #include <iostream>
 #include <fstream>
+#include <string>
 
 #include <freeflow/data/buffer.hpp>
 
@@ -35,23 +36,27 @@ main(int argc, char* argv[]) {
     cerr << "usage: buffer <input-file> <output-file>\n";
     return -1;
   }
+  
+  // Open the input file.
+  ifstream is(argv[1]);
+  if (not is)
+    return fail("coult not open '" + string(argv[1]) + '\'');
 
-  // Reading a buffer from a file is done using the read() function. This opens
-  // the given path name (in binary mode) and copies the contents into the
-  // buffer. The buffer is automatically resized to accommodate the entire
-  // contents of the input file.
-  //
-  // If the file cannot be read for any reason (e.g., the file does not
-  // exist), an exception will be thrown.
-  Buffer buf = read(argv[1]);
-  std::cout << "read buffer of " << buf.size() << " bytes\n";
+  // Create a buffer that can be filled with, at most, 64 bytes of data.
+  constexpr size_t N = 64;
+  Buffer buf(N);
 
-  // Writing a buffer to a file is done using the write() function. This opens
-  // the given path name (in binary mode) and copies the contents of the
-  // the buffer into the output file.
-  //
-  // If the output file cannot be written for any reason, an exception will
-  // be thrown.
+  // Try filling the buffer from the input stream.
+  std::size_t n = read(buf, is);
+  if (n == N) {
+    cout << "read 64 byte buffer\n";
+  } else {
+    // Print the a message indicating how much data was read, and then
+    // resize the buffer is it contains only that data.
+    cout << "read " << n << " bytes into buffer\n";
+    buf.resize(n);
+  }
+
+  // Write to the output file.
   write(buf, argv[2]);
-  std::cout << "wrote buffer to file\n";
 }
