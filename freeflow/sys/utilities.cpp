@@ -15,6 +15,7 @@
 #include "utilities.hpp"
 
 namespace freeflow {
+namespace sys {
 
 /////////////////////////////////////////////////////////////////////
 //
@@ -100,7 +101,7 @@ spin_write(int fd, uint8_t* buff, int n)
   return fd_state < 0 ? fd_state : n_written;
 }
 
-
+} // namespace sys
 } // namespace freeflow
 
 #endif

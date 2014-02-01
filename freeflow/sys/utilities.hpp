@@ -18,6 +18,33 @@
 /// \file sys/utilities.hpp
 
 namespace freeflow {
+namespace sys {
+
+struct Read
+{
+  Read(int f, uint8_t* b, int n);
+
+  void operator()();
+  operator int();
+
+  int fd_state;
+  uint8_t* buff;
+  int n_bytes;
+  int n_read;
+};
+
+struct Write
+{
+  Write(int f, uint8_t* b, int n);
+
+  void operator()();
+  operator int();
+
+  int fd_state;
+  uint8_t* buff;
+  int n_bytes;
+  int n_written;
+};
 
 /// Read n bytes from fd to buff
 /// Loops on read until complete or failure
@@ -29,7 +56,9 @@ spin_read(int fd, uint8_t* buff, int n);
 inline int
 spin_write(int fd, uint8_t* buff, int n);
 
+#include "utilitites.ipp"
 
-}
+} // namespace sys
+} // namespace freeflow
 
 #endif
