@@ -12,13 +12,12 @@
 // or implied. See the License for the specific language governing
 // permissions and limitations under the License.
 
-#ifndef FLOWGRAMMABLE_SYS_UTILITIES_HPP
-#define FLOWGRAMMABLE_SYS_UTILITIES_HPP
+#ifndef FREEFLOW_FD_UTILS_HPP
+#define FREEFLOW_FD_UTILS_HPP
 
 /// \file sys/utilities.hpp
 
 namespace freeflow {
-namespace sys {
 
 struct Read
 {
@@ -56,9 +55,8 @@ spin_read(int fd, uint8_t* buff, int n);
 inline int
 spin_write(int fd, uint8_t* buff, int n);
 
-#include "utilitites.ipp"
+#include "fd_utils.ipp"
 
-} // namespace sys
 } // namespace freeflow
 
 #endif

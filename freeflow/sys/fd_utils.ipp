@@ -1,5 +1,4 @@
 namespace freeflow {
-namespace sys {
 
 inline 
 Read::Read(int f, uint8_t* b, int n) :
@@ -39,5 +38,4 @@ Write::operator int()
   return fd_state < 0 ? fd_state : n_written;
 }
 
-} // namespace sys
 } // namespace freeflow

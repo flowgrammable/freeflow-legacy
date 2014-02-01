@@ -12,10 +12,9 @@
 // or implied. See the License for the specific language governing
 // permissions and limitations under the License.
 
-#include "utilities.hpp"
+#include "fd_utils.hpp"
 
 namespace freeflow {
-namespace sys {
 
 /////////////////////////////////////////////////////////////////////
 //
@@ -101,7 +100,6 @@ spin_write(int fd, uint8_t* buff, int n)
   return fd_state < 0 ? fd_state : n_written;
 }
 
-} // namespace sys
 } // namespace freeflow
 
 #endif
