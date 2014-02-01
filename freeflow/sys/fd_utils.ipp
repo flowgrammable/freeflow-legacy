@@ -1,69 +1,66 @@
 namespace freeflow {
 
-inline 
-Read::Read(int f, uint8_t* b, int n) :
-  fd_state(fd), buff(b), n_bytes(n), n_read(0)
-  { }
+inline
+Transfer(int f, uint8_t* b, int n) :
+  fd_state(fd), buff(b), n_bytes(n), n_transferred(0)
+{ }
 
 inline int
-Read::spin()
-{
-  while(n_read < n_bytes and fd_state > 0)
-    *this();
-  return int(*this);
-}
-
-inline int
-Read::read_available()
-{
-  fd_state = ::read(fd, buff+n_read, n_bytes-n_read);
-  if (fd_state > 0)
-    n_read += fd_state;
-  return fd_state < 0 ? fd_state : n_read;
-}
-
-inline int
-Read::read_all()
-{
-  while(n_read < n and fd_state > 0) {
-  fd_state = ::read(fd, buff+n_read, n_bytes-n_read);
-  if (fd_state > 0)
-    n_read += fd_state;
-  }
-  return fd_state < 0 ? fd_state : n_read;
-}
-
-inline int
-Read::operator int()
-{
-  return fd_state < 0 ? fd_state : n_read;
-}
-
-inline 
-Write::Write(int f, uint8_t* b, int n) :
-  fd_state(fd), buff(b), n_bytes(n), n_written(0)
-  { }
-
-inline int
-Write::spin()
-{
-  while(n_written < n_bytes and fd_state > 0)
-    *this();
-  return int(*this);
-}
-
-inline void
-Write::operator()()
-{
-  fd_state = ::write(fd, buff+n_written, n_bytes-n_written);
-  if (fd_state > 0)
-    n_written += fd_state;
-}
-
-inline int
-Write::operator int()
+Transfer::operator int()
 {
   return fd_state < 0 ? fd_state : n_written;
 }
+
+inline int
+transfer_available(Transfer& t, int (*op)(int, uint8_t*, int))
+{
+  // Read the remainder to the buff
+  fd_state = op(fd, buff+n_transferred, n_bytes-n_transferred);
+  // If successful update bytes read
+  if (fd_state > 0)
+    n_transferred += fd_state;
+  // Return fd state on failure or number of bytes read
+  return fd_state < 0 ? fd_state : n_transferred;
+}
+
+inline int
+transfer_all(Transfer& t, int (*op)(int, uint8_t*, int))
+{
+  // More to read and fd state good
+  while(n_transferred < n_bytes and fd_state > 0) {
+    // Read the remainder to the buff
+    fd_state = op(fd, buff+n_transferred, n_bytes-n_transferred);
+    // If successful update bytes read
+    if (fd_state > 0)
+      n_transferred += fd_state;
+  }
+  // Return fd state on failure or number of bytes read
+  return fd_state < 0 ? fd_state : n_transferred;
+}
+
+inline int
+read_available(Transfer& t)
+{
+  return transfer_available(t, ::read);
+}
+
+inline int
+read_all(Transfer& t)
+{
+  return transfer_all(t, ::read);
+}
+
+inline int
+write_available(Transfer& t)
+{
+  return transfer_available(t, ::write);
+}
+
+inline int
+write_all(Transfer& t)
+{
+  return transfer_all(t, ::write);
+}
+
 
 } // namespace freeflow
