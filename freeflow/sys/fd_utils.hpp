@@ -19,7 +19,7 @@
 
 namespace freeflow {
 
-struct ransfer
+struct Transfer
 {
   Transfer(int f, uint8_t* b, int n);
 
