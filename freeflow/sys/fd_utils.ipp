@@ -13,7 +13,7 @@ Transfer::operator int()
 }
 
 inline int
-transfer_available(Transfer& t, std::size_t (*op)(int, void*, std::size_t))
+transfer_available(Transfer& t, ssize_t (*op)(int, void*, size_t))
 {
   // Read the remainder to the buff
   t.fd_state = op(t.fd, t.buff+t.n_transferred, t.n_bytes-t.n_transferred);
@@ -25,7 +25,7 @@ transfer_available(Transfer& t, std::size_t (*op)(int, void*, std::size_t))
 }
 
 inline int
-transfer_all(Transfer& t, std::size_t (*op)(int, void*, std::size_t))
+transfer_all(Transfer& t, ssize_t (*op)(int, void*, size_t))
 {
   // More to read and fd state good
   while(t.n_transferred < t.n_bytes and t.fd_state > 0) {
@@ -54,13 +54,13 @@ read_all(Transfer& t)
 inline int
 write_available(Transfer& t)
 {
-  return transfer_available(t, ::write);
+  return transfer_available(t, (ssize_t (*)(int, void*, size_t))::write);
 }
 
 inline int
 write_all(Transfer& t)
 {
-  return transfer_all(t, ::write);
+  return transfer_all(t, (ssize_t (*)(int, void*, size_t))::write);
 }
 
 } // namespace freeflow
