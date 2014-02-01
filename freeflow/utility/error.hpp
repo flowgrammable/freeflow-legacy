@@ -52,7 +52,6 @@ public:
   /// error data is the number of bytes by which the boundary was overrun.
   static constexpr Code BUFFER_OVERRUN = 2;
   
-
   /// Associated data is interpreted by the error code. Errors involving 
   /// insufficient or excess data will associate the number of bytes by
   /// which a read or write would overflow or underflow a boundary.
