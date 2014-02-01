@@ -12,8 +12,9 @@
 # or implied. See the License for the specific language governing
 # permissions and limitations under the License.
 
-# Ensure that the the top-level dir is in the inclue path
-# for all projects built at this level.
-include_directories(${CMAKE_SOURCE_DIR})
+add_executable(buffer buffer.cpp)
+target_link_libraries(buffer freeflow_data)
 
-add_subdirectory(data)
+add_executable(view view.cpp)
+target_link_libraries(view freeflow_data)
+

@@ -37,21 +37,8 @@ include(FreeFlowDepend)
 include(FreeFlowTest)
 include(FreeFlowDoc)
 
-# # Build the library and associated tools.
-# add_subdirectory(libopenflow)
-# add_subdirectory(applications)
-# add_subdirectory(tools)
+# ---------------------------------------------------------------------------- #
+# Build
 
-# # Only build the bindings when configured to do so.
-# if (FLOG_BUILD_BINDINGS)
-#  add_subdirectory(bindings)
-# endif()
+add_subdirectory(freeflow)
 
-# # Add test suites that depend on the creation of various
-# # tools (e.g., all of the message tests).
-# add_subdirectory(libopenflow/proto/ofp/v1_0.test)
-# add_subdirectory(libopenflow/proto/ofp/v1_1.test)
-# add_subdirectory(libopenflow/proto/ofp/v1_2.test)
-# add_subdirectory(libopenflow/proto/ofp/v1_3.test)
-# add_subdirectory(libopenflow/proto/ofp/v1_3_1.test)
-# add_subdirectory(libopenflow/proto/ofp/sm.test)
