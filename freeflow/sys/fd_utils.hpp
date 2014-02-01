@@ -15,20 +15,28 @@
 #ifndef FREEFLOW_FD_UTILS_HPP
 #define FREEFLOW_FD_UTILS_HPP
 
+extern "C" {
+#include <unistd.h>
+}
+
+#include <cstdint>
+
 /// \file sys/utilities.hpp
 
 namespace freeflow {
 
 struct Transfer
 {
-  Transfer(int f, uint8_t* b, int n);
+  Transfer(int f, uint8_t* b, std::size_t n);
 
   operator int();
 
-  int fd_state;
+  int fd;
   uint8_t* buff;
-  int n_bytes;
-  int n_transferred;
+  std::size_t n_bytes;
+
+  int fd_state;
+  std::size_t n_transferred;
 };
 
 int read_available(Transfer& t);
@@ -47,8 +55,8 @@ spin_read(int fd, uint8_t* buff, int n);
 inline int
 spin_write(int fd, uint8_t* buff, int n);
 
-#include "fd_utils.ipp"
-
 } // namespace freeflow
+
+#include "fd_utils.ipp"
 
 #endif

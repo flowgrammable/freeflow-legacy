@@ -1,41 +1,42 @@
+
 namespace freeflow {
 
 inline
-Transfer(int f, uint8_t* b, int n) :
-  fd_state(fd), buff(b), n_bytes(n), n_transferred(0)
+Transfer::Transfer(int f, uint8_t* b, std::size_t n) :
+  fd(f), buff(b), n_bytes(n), fd_state(1), n_transferred(0)
 { }
 
-inline int
+inline
 Transfer::operator int()
 {
-  return fd_state < 0 ? fd_state : n_written;
+  return fd_state < 0 ? fd_state : n_transferred;
 }
 
 inline int
-transfer_available(Transfer& t, int (*op)(int, uint8_t*, int))
+transfer_available(Transfer& t, int (*op)(int, void*, std::size_t))
 {
   // Read the remainder to the buff
-  fd_state = op(fd, buff+n_transferred, n_bytes-n_transferred);
+  t.fd_state = op(t.fd, t.buff+t.n_transferred, t.n_bytes-t.n_transferred);
   // If successful update bytes read
-  if (fd_state > 0)
-    n_transferred += fd_state;
+  if (t.fd_state > 0)
+    t.n_transferred += t.fd_state;
   // Return fd state on failure or number of bytes read
-  return fd_state < 0 ? fd_state : n_transferred;
+  return t.fd_state < 0 ? t.fd_state : t.n_transferred;
 }
 
 inline int
-transfer_all(Transfer& t, int (*op)(int, uint8_t*, int))
+transfer_all(Transfer& t, int (*op)(int, void*, std::size_t))
 {
   // More to read and fd state good
-  while(n_transferred < n_bytes and fd_state > 0) {
+  while(t.n_transferred < t.n_bytes and t.fd_state > 0) {
     // Read the remainder to the buff
-    fd_state = op(fd, buff+n_transferred, n_bytes-n_transferred);
+    t.fd_state = op(t.fd, t.buff+t.n_transferred, t.n_bytes-t.n_transferred);
     // If successful update bytes read
-    if (fd_state > 0)
-      n_transferred += fd_state;
+    if (t.fd_state > 0)
+      t.n_transferred += t.fd_state;
   }
   // Return fd state on failure or number of bytes read
-  return fd_state < 0 ? fd_state : n_transferred;
+  return t.fd_state < 0 ? t.fd_state : t.n_transferred;
 }
 
 inline int
@@ -61,6 +62,5 @@ write_all(Transfer& t)
 {
   return transfer_all(t, ::write);
 }
-
 
 } // namespace freeflow

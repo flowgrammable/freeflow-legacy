@@ -102,4 +102,3 @@ spin_write(int fd, uint8_t* buff, int n)
 
 } // namespace freeflow
 
-#endif
