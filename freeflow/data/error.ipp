@@ -14,18 +14,54 @@
 
 namespace freeflow {
 
+// -------------------------------------------------------------------------- //
+// Error
+
 /// Initialize the message with the SUCCESS code.
 constexpr 
-Error::Error() : code(SUCCESS), data() { }
+Error::Error() : code_(SUCCESS), data_() { }
 
 /// Initialize the message result with the result code and data.
 constexpr 
-Error::Error(Code c, Data d) : code(c), data(d) { }
+Error::Error(Code c, Data d) : code_(c), data_(d) { }
 
 /// Allows contextual conversion to bool, returning true iff and only
 /// if code != SUCCESS 
 constexpr 
-Error::operator bool() const { return code == SUCCESS; }
+Error::operator bool() const { return code_ == SUCCESS; }
+
+/// Returns the error code.
+Error::Code 
+Error::code() const { return code_; }
+
+/// Returns the error data.
+Error::Data
+Error::data() const { return data_; }
+
+// -------------------------------------------------------------------------- //
+// Trap
+
+/// Initialzie the trap with an error. This allows implicit conversions
+/// to trap objects.
+constexpr 
+Trap::Trap(Error e)
+  : err_(e) { }
+
+/// Allows contextual conversion to bool, returning true if and only if
+/// the underlying error indicates failure.
+constexpr 
+Trap::operator bool() const { return !err_; }
+
+/// Returns the error code.
+Error::Code 
+Trap::code() const { return err_.code(); }
+
+/// Returns the error data.
+Error::Data
+Trap::data() const { return err_.data(); }
+
+// -------------------------------------------------------------------------- //
+// Misc
 
 /// Returns an error condition based on a predicate.
 ///

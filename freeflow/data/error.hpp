@@ -19,12 +19,8 @@
 
 namespace freeflow {
 
-/// There are two important classes of errors: data overflow and underflow.
-/// An overflow occurs when the reading or writing of data through a View
-/// would exceed the Views available bytes (cross a memory boundary). An
-/// underflow occurs when completing a read or write does not reach the
-/// boundary and would leave uninterpreted data in the buffer. Note that
-/// underflow is sometimes a recoverable error.
+/// The Error class contains error codes and associated data from various
+/// operations.
 ///
 /// Usage in if statements:
 ///
@@ -35,15 +31,15 @@ namespace freeflow {
 ///
 /// In other words the assignment as an error succeeds only when an error
 /// is actually present. To capture the opposite, see the Valid 
-struct Error {
-  /// The error code is an integer value indicating a specific kind of error.
-  using Code = int;
-  static constexpr Code SUCCESS = 0;            // Not an error
-  static constexpr Code FAILURE = -1;           // Unspecified failure
-  static constexpr Code BUFFER_OVERFLOW = 1;    // Insufficient bytes in buffer
-  static constexpr Code STRING_OVERFLOW = 2;    // Insufficient bytes in string
-  static constexpr Code SEQUENCE_UNDERFLOW = 3; // Excess data in sequence
-
+class Error {
+public:
+  /// The error code is an unsigned value indicating a specific kind of 
+  /// error.
+  using Code = std::size_t;
+  static constexpr Code SUCCESS = 0;        // Not an error
+  static constexpr Code FAILURE = -1;       // Unspecified failure
+  static constexpr Code BUFFER_OVERRUN = 1; // Insufficient bytes in buffer
+  
   /// Associated data is interpreted by the error code. Errors involving 
   /// insufficient or excess data will associate the number of bytes by
   /// which a read or write would overflow or underflow a boundary.
@@ -54,24 +50,35 @@ struct Error {
 
   constexpr operator bool() const;
 
-  Code code;
-  Data data;
+  Code code() const;
+  Data data() const;
+
+private:
+  Code code_;
+  Data data_;
 };
 
-/// Like an error object, but opposite.
+
+/// A Trap object is used to capture failures in if statements, allowing
+/// the following kinds of programs.
 ///
-///    if (Failure f = valid(x))
-///     cout << f.code();
-struct Failure {
-  constexpr Failure(Error e)
-    : err(e) { }
+///    if (Trap f = valid(x))
+///     print(f.error());
+class Trap {
+public:
+  constexpr Trap(Error e);
 
-  constexpr operator bool() const { return !err; }
+  constexpr operator bool() const;
 
-  Error err;
+  Error::Code code() const;
+  Error::Data data() const;
+
+private:
+  Error err_;
 };
 
 
+// Error constructors.
 constexpr Error ok(bool b, Error err);
 
 
