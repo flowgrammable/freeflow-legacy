@@ -13,7 +13,7 @@ Transfer::operator int()
 }
 
 inline int
-transfer_available(Transfer& t, int (*op)(int, void*, std::size_t))
+transfer_available(Transfer& t, std::size_t (*op)(int, void*, std::size_t))
 {
   // Read the remainder to the buff
   t.fd_state = op(t.fd, t.buff+t.n_transferred, t.n_bytes-t.n_transferred);
@@ -25,7 +25,7 @@ transfer_available(Transfer& t, int (*op)(int, void*, std::size_t))
 }
 
 inline int
-transfer_all(Transfer& t, int (*op)(int, void*, std::size_t))
+transfer_all(Transfer& t, std::size_t (*op)(int, void*, std::size_t))
 {
   // More to read and fd state good
   while(t.n_transferred < t.n_bytes and t.fd_state > 0) {
