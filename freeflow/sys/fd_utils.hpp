@@ -19,11 +19,31 @@
 
 namespace freeflow {
 
+struct Transfer
+{
+  Transfer(int f, uint8_t* b, int n);
+
+  operator int();
+
+  int fd_state;
+  uint8_t* buff;
+  int n_bytes;
+  int n_transferred;
+};
+
+int read_available(Transfer& t);
+int read_all(Transfer& t);
+
+int write_available(Transfer& t);
+int write_all(Transfer& t);
+
 struct Read
 {
   Read(int f, uint8_t* b, int n);
 
-  void operator()();
+  int read_available();
+  int read_all();
+
   operator int();
 
   int fd_state;
@@ -36,7 +56,8 @@ struct Write
 {
   Write(int f, uint8_t* b, int n);
 
-  void operator()();
+  int write_available();
+  int write_all();
   operator int();
 
   int fd_state;
