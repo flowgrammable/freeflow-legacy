@@ -15,6 +15,9 @@
 add_executable(buffer buffer.cpp)
 target_link_libraries(buffer freeflow_data)
 
+add_executable(buffer2 buffer2.cpp)
+target_link_libraries(buffer2 freeflow_data)
+
 add_executable(view view.cpp)
 target_link_libraries(view freeflow_data)
 

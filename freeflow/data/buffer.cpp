@@ -13,6 +13,7 @@
 // permissions and limitations under the License.
 
 #include <fstream>
+#include <string>
 
 #include "buffer.hpp"
 
@@ -21,65 +22,68 @@ namespace freeflow {
 // Reading
 
 /// Reads the contents of the file indicated by str into a new buffer.
-/// If reading fails, the resulting buffer is in a bad state.
+/// An exception is thrown if the file cannot be opened.
 Buffer
-read(const char* str) {
-  std::ifstream is(str, std::ios::binary);
+read(const char* s) {
+  std::ifstream is(s, std::ios::binary);
+  if (not is)
+    throw std::runtime_error("could not open '" + std::string(s) + '\'');
   return read(is);
 }
 
 /// Reads the contents of the file indicated by str into a buffer.
-/// If reading fails, the resulting buffer is in a bad state.
+/// An exception is thrown if the file cannot be opened.
 Buffer
-read(const std::string& str) {
-  return read(str.c_str());
+read(const std::string& s) {
+  return read(s.c_str());
 }
 
-/// Reads the contents of the given input stream into the buffer.
-/// The buffer is created large enough to accommodate the contents
-/// of the entire stream. If reading fails, the resulting buffer is 
-/// in a bad state.
+/// Reads the contents of the given input stream into the buffer. The
+/// stream must be in a good state, otherwise behavior is undefined.
 Buffer
 read(std::ifstream& is) {
   Buffer buf;
-  if (not is) {
-    buf.bad();
-  } else {
-    is.seekg(0, std::ios::end);
-    buf.resize(is.tellg());
-    is.seekg(0, std::ios::beg);
-    is.read((char*)buf.data(), buf.size());
-  }
+  is.seekg(0, std::ios::end);
+  buf.resize(is.tellg());
+  is.seekg(0, std::ios::beg);
+  is.read((char*)buf.data(), buf.size());
   return buf;
+}
+
+/// Reads contents from the input stream into the buffer. The number of
+/// bytes read depends on the size of the buffer. The number of successfully
+/// read bytes is returned. Not that behavior is undefined if the stream is
+/// in an initially bad state.
+std::size_t
+read(Buffer& b, std::ifstream& is) {
+  is.read((char*)b.data(), b.size());
+  return is.gcount();
 }
 
 // Writing
 
 /// Writes the contents of buf into the file indicated by str.
-/// If writing the buffer fails, the function returns false.
-bool
+/// An exception is thrown if the file cannot be opened.
+void
 write(const Buffer& buf, const char* str) {
   std::ofstream os(str, std::ios::binary);
+  if (not os)
+    throw std::runtime_error("could not open '" + std::string(str) + '\'');
   return write(buf, os);
 }
 
 /// Writes the contents of buf into the file indicated by str.
-// If writing the buffer fails, the function return false.
-bool
+/// An exception is thrown if the file cannot be opened.
+void
 write(const Buffer& buf, const std::string& str) {
   return write(buf, str.c_str());
 }
 
-/// Writes the contents of buf into the output stream os. 
-/// If the buffer is in a bad state or the writing fails, 
-/// If writing fails, then the failbit on the output stream is set.
-bool
+/// Writes the contents of buf into the output stream os. The stream must
+/// be in a good state, otherwise behavior is undefined.
+void
 write(const Buffer& buf, std::ofstream& os) {
-  if (not buf)
-    os.setstate(std::ios::failbit);
-  else
-    os.write((char*)buf.data(), buf.size());
-  return os;
+  os.write((char*)buf.data(), buf.size());
 }
 
 } // namespace freeflow
