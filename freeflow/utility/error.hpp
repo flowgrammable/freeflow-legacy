@@ -16,6 +16,7 @@
 #define FREEFLOW_ERROR_HPP
 
 #include <cstdint>
+#include <cerrno>
 
 namespace freeflow {
 
@@ -36,10 +37,22 @@ public:
   /// The error code is an unsigned value indicating a specific kind of 
   /// error.
   using Code = std::size_t;
-  static constexpr Code SUCCESS = 0;        // Not an error
-  static constexpr Code FAILURE = -1;       // Unspecified failure
-  static constexpr Code BUFFER_OVERRUN = 1; // Insufficient bytes in buffer
+
+  /// An error did not occur.
+  static constexpr Code SUCCESS = 0;
   
+  /// An unspecified failure. There is no associated error data.
+  static constexpr Code FAILURE = -1;
+  
+  /// A POSIX system error. The error data is set to the corresponding
+  /// error number (errno).
+  static constexpr Code SYSTEM_ERROR = 1;
+  
+  /// An attempt to read or write past the end of a View or Buffer. The
+  /// error data is the number of bytes by which the boundary was overrun.
+  static constexpr Code BUFFER_OVERRUN = 2;
+  
+
   /// Associated data is interpreted by the error code. Errors involving 
   /// insufficient or excess data will associate the number of bytes by
   /// which a read or write would overflow or underflow a boundary.

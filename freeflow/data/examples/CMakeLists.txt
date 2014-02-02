@@ -1,4 +1,4 @@
-# Copyright (c) 2013-2014 Flowgrammable, LLC.
+# Copyright (c) 2013-2014 Flowgrammable.org
 # 
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -20,6 +20,3 @@ target_link_libraries(buffer2 freeflow_data)
 
 add_executable(view view.cpp)
 target_link_libraries(view freeflow_data)
-
-add_executable(error error.cpp)
-target_link_libraries(error freeflow_data)

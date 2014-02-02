@@ -15,7 +15,7 @@
 #include <iostream>
 #include <fstream>
 
-#include <freeflow/data/error.hpp>
+#include <freeflow/utility/error.hpp>
 
 using namespace std;
 using namespace freeflow;
