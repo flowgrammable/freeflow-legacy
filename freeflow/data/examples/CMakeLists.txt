@@ -20,3 +20,6 @@ target_link_libraries(buffer2 freeflow_data)
 
 add_executable(view view.cpp)
 target_link_libraries(view freeflow_data)
+
+add_executable(error error.cpp)
+target_link_libraries(error freeflow_data)
