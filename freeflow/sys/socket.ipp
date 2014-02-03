@@ -15,7 +15,15 @@
 namespace freeflow {
 namespace socket {
 
+inline
+Address::Address()
+{
+}
 
+inline
+Socket::Socket()
+{
+}
 
 } // namespace socket
 } // namespace freeflow
