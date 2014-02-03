@@ -163,6 +163,44 @@ accept(Socket& s)
 }
 
 inline bool
+read(Socket& s, uint8_t* b, std::size_t l)
+{
+  auto result = ::read(s.fd, b, l);
+  if(result < 0)
+    throw 1;
+  return result;
+}
+
+inline bool
+write(Socket& s, const uint8_t* b, std::size_t l)
+{
+  auto result = ::write(s.fd, b, l);
+  if(result < 0)
+    throw 1;
+  return result;
+}
+
+inline bool
+recvfrom(Socket& s, uint8_t* b, std::size_t l, Address& a)
+{
+  socklen_t length;
+  auto result = ::recvfrom(s.fd, b, l, 0, addr(a), &length);
+  if(result < 0)
+    throw 1;
+  return result;
+}
+
+inline bool
+sendto(Socket& s, const uint8_t* b, std::size_t l, const Address& a)
+{
+  auto result = ::sendto(s.fd, b, l, 0, addr(a), len(a));
+  if(result < 0)
+    throw 1;
+  return result;
+}
+
+
+inline bool
 close(Socket& s)
 {
   if(s.fd > -1) {

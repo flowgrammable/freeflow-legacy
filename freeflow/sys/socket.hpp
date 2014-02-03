@@ -85,12 +85,10 @@ bool connect(Socket& s, const Address& a);
 bool listen(Socket& s, int backlog=5);
 Socket accept(Socket& s);
 
-/*
 bool read(Socket& s);
 bool wriet(Socket& s);
 bool sendto(Socket& s);
 bool recvfrom(Socket& s);
-*/
 
 bool close(Socket& s);
 
