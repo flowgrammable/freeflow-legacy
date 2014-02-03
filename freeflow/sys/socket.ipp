@@ -16,16 +16,25 @@ namespace freeflow {
 namespace socket {
 
 inline
-Address::Address(Type t, const std::string n) : 
+Address::Address() :
+  type(IPv4)
+{
+  ::bzero(&v4, sizeof(sockaddr));
+}
+
+inline
+Address::Address(Type t, const std::string n, uint16_t p) : 
   type(t)
 {
   ::bzero(&v4, sizeof(sockaddr));
   if(t == IPv4) {
     v4.sin_family = IPv4;
+    v4.sin_port = p;
     if (inet_pton(IPv4, n.c_str(), &v4.sin_addr) != 1)
       throw 1;
   } else if(t == IPv6) {
     v6.sin6_family = IPv6;
+    v6.sin6_port = p;
     if (inet_pton(IPv6, n.c_str(), &v6.sin6_addr) != 1)
       throw 1;
   }
@@ -47,6 +56,51 @@ Address::Address(ipv6::Address a, uint16_t p)
   v6.sin6_family = IPv6;
   ::memcpy(&v6.sin6_addr, &a.value, sizeof(in6_addr));
   v6.sin6_port = htons(p);
+}
+
+inline
+Address::Address(const Address& a) :
+  type(a.type)
+{
+  memcpy(&v4, &a.v4, sizeof(sockaddr));
+}
+
+inline Address&
+Address::operator=(const Address& a)
+{
+  type = a.type;
+  memcpy(&v4, &a.v4, sizeof(sockaddr));
+  return *this;
+}
+
+inline bool
+operator==(const Address& l, const Address& r)
+{
+  return l.type == r.type and
+    memcmp(&l.v4, &r.v4, sizeof(sockaddr)) == 0;
+}
+
+inline bool
+operator!=(const Address& l, const Address& r)
+{
+  return not (l==r);
+}
+
+inline
+Socket::Socket(Transport t, Address a)
+{
+}
+
+inline
+Socket::Socket(Socket&& s)
+{
+  // Move the address(s)
+  local = std::move(s.local);
+  peer  = std::move(s.peer);
+
+  // Move the fd
+  fd    = s.fd;
+  s.fd = -1;
 }
 
 inline

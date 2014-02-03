@@ -36,9 +36,13 @@ struct Address
     IPv6 = AF_INET6
   };
 
-  Address(Type t, const std::string n = std::string());
+  Address();
+  Address(Type t, const std::string n = std::string(), uint16_t p=0);
   Address(ipv4::Address a, uint16_t p=0);
   Address(ipv6::Address a, uint16_t p=0);
+
+  Address(const Address& a);
+  Address& operator=(const Address& a);
 
   union {
     sockaddr_in v4;
@@ -48,24 +52,25 @@ struct Address
   Type type;
 };
 
+bool operator==(const Address& l, const Address& r);
+bool operator!=(const Address& l, const Address& r);
 std::string to_string(const Address& a);
 
 struct Socket
 {
-  enum Type { 
+  enum Transport { 
     UDP = SOCK_DGRAM, 
     TCP = SOCK_STREAM
   };
 
-  /*
+  Socket(Transport t, Address a = Address());
   Socket(Socket&& s);
-  Socket(Transport t);
-  Socket(Transport t, Address a);
-  */
   ~Socket();
 
   Address local;
   Address peer;
+
+  Transport trans;
   int fd;
 };
 
