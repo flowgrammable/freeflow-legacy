@@ -70,7 +70,7 @@ struct Socket
   Address local;
   Address peer;
 
-  Transport trans;
+  Transport transport;
   int fd;
 };
 

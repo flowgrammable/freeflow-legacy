@@ -88,7 +88,11 @@ operator!=(const Address& l, const Address& r)
 
 inline
 Socket::Socket(Transport t, Address a)
+  : local(a), transport(t)
 {
+  fd = ::socket(local.type, transport, 0);
+  if (fd < 0)
+    throw 1;
 }
 
 inline
