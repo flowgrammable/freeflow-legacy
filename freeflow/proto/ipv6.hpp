@@ -15,5 +15,10 @@
 namespace freeflow {
 namespace ipv6 {
 
+struct Address
+{
+  uint8_t value[16];
+};
+
 } // namesapce ipv6
 } // namespace freeflow

@@ -17,8 +17,14 @@
 
 extern "C" {
 #include <sys/socket.h>
-#include <in/inet.h>
+#include <arpa/inet.h>
+#include <unistd.h>
+#include <string.h>
+#include <strings.h>
 }
+
+#include "../proto/ipv4.hpp"
+#include "../proto/ipv6.hpp"
 
 namespace freeflow {
 namespace socket {
@@ -30,9 +36,13 @@ struct Address
     IPv6 = AF_INET6
   };
 
+  Address(Type t, const std::string n = std::string());
+  Address(ipv4::Address a, uint16_t p=0);
+  Address(ipv6::Address a, uint16_t p=0);
+
   union {
-    sockaddr_in ipv4;
-    sockaddr_in6 ipv6;
+    sockaddr_in v4;
+    sockaddr_in6 v6;
   };
 
   Type type;
@@ -47,15 +57,19 @@ struct Socket
     TCP = SOCK_STREAM
   };
 
+  /*
   Socket(Socket&& s);
   Socket(Transport t);
   Socket(Transport t, Address a);
+  */
   ~Socket();
 
-  Address addr;
+  Address local;
+  Address peer;
   int fd;
 };
 
+/*
 bool bind(Socket& s);
 bool connect(Address a);
 
@@ -68,9 +82,9 @@ bool sendto(Socket& s);
 bool recvfrom(Socket& s);
 
 bool close(Socket& s);
+*/
 
 std::string to_string(const Socket& s);
-
 
 } // namespace socket
 } // namespace freeflow

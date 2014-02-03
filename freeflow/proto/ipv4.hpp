@@ -15,5 +15,10 @@
 namespace freeflow {
 namespace ipv4 {
 
+struct Address
+{
+  uint32_t value;
+};
+
 } // namesapce ipv4
 } // namespace freeflow
