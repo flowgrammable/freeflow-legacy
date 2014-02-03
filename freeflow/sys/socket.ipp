@@ -86,6 +86,23 @@ operator!=(const Address& l, const Address& r)
   return not (l==r);
 }
 
+inline sockaddr*
+addr(Address& a)
+{
+  return reinterpret_cast<sockaddr*>(&a.v4);
+}
+
+inline socklen_t
+len(const Address& a)
+{
+  return sizeof(sockaddr);
+}
+
+inline
+Socket::Socket(int f, Transport t, const Address& l, const Address& p)
+  : local(l), peer(p), transport(t), fd(f)
+{ }
+
 inline
 Socket::Socket(Transport t, Address a)
   : local(a), transport(t)
@@ -103,15 +120,58 @@ Socket::Socket(Socket&& s)
   peer  = std::move(s.peer);
 
   // Move the fd
-  fd    = s.fd;
+  fd = s.fd;
   s.fd = -1;
 }
 
 inline
 Socket::~Socket()
 {
-  if(fd > -1)
-    ::close(fd);
+  close(*this);
+}
+
+inline bool
+bind(Socket& s, Address a)
+{
+  s.local = a;
+  auto result = ::bind(s.fd, addr(s.local), len(s.local));
+  return result == 0;
+}
+
+inline bool
+connect(Socket& s, const Address& a)
+{
+  s.peer = a;
+  auto result = ::connect(s.fd, addr(s.peer), len(s.peer));
+  return result == 0;
+}
+
+inline bool
+listen(Socket& s, int backlog)
+{
+  s.backlog = backlog;
+  auto result = ::listen(s.fd, backlog);
+  return result == 0;
+}
+
+inline Socket
+accept(Socket& s)
+{
+  socklen_t length;
+  int child = accept(s.fd, addr(s.peer), &length);
+  return Socket(child, s.transport, s.local, s.peer);
+}
+
+inline bool
+close(Socket& s)
+{
+  if(s.fd > -1) {
+    auto result = ::close(s.fd);
+    s.fd = -1;
+    if(result != 0)
+      return false;
+  }
+  return true;
 }
 
 } // namespace socket

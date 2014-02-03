@@ -54,6 +54,9 @@ struct Address
 
 bool operator==(const Address& l, const Address& r);
 bool operator!=(const Address& l, const Address& r);
+
+sockaddr* addr(const Address& a);
+socklen_t len(const Address& a);
 std::string to_string(const Address& a);
 
 struct Socket
@@ -63,6 +66,7 @@ struct Socket
     TCP = SOCK_STREAM
   };
 
+  Socket(int f, Transport t, const Address& l, const Address& p);
   Socket(Transport t, Address a = Address());
   Socket(Socket&& s);
   ~Socket();
@@ -72,22 +76,23 @@ struct Socket
 
   Transport transport;
   int fd;
+  int backlog;
 };
 
+bool bind(Socket& s, Address a = Address());
+bool connect(Socket& s, const Address& a);
+
+bool listen(Socket& s, int backlog=5);
+Socket accept(Socket& s);
+
 /*
-bool bind(Socket& s);
-bool connect(Address a);
-
-bool listen(Socket& s);
-bool accept(Socket& s);
-
 bool read(Socket& s);
 bool wriet(Socket& s);
 bool sendto(Socket& s);
 bool recvfrom(Socket& s);
+*/
 
 bool close(Socket& s);
-*/
 
 std::string to_string(const Socket& s);
 
