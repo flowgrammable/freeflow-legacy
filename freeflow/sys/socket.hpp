@@ -23,9 +23,9 @@ extern "C" {
 #include <strings.h>
 }
 
-#include "../utility/error.hpp"
-#include "../proto/ipv4.hpp"
-#include "../proto/ipv6.hpp"
+#include "freeflow/utility/error.hpp"
+#include "freeflow/proto/ipv4.hpp"
+#include "freeflow/proto/ipv6.hpp"
 
 namespace freeflow {
 namespace socket {
