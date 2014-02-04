@@ -12,6 +12,14 @@
 # or implied. See the License for the specific language governing
 # permissions and limitations under the License.
 
-add_library(freeflow_utility error.cpp)
+set(src
+    error.cpp
+)
+
+install(FILES error.hpp
+        DESTINATION include/freeflow/utilities
+       )
+
+add_library(freeflow_utility ${src})
 
 add_subdirectory(examples)
