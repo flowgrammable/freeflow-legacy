@@ -83,7 +83,7 @@ struct Socket
 Error bind(Socket& s, Address a = Address());
 Error connect(Socket& s, const Address& a);
 
-Error listen(Socket& s, int backlog=5);
+Error listen(Socket& s, int backlog=SOMAXCONN);
 Socket accept(Socket& s);
 
 int read(Socket& s);

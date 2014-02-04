@@ -1,4 +1,4 @@
-# Copyright (c) 2013-2014 Flowgrammable, LLC.
+# Copyright (c) 2013-2014 Flowgrammable.org
 # 
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,10 +12,8 @@
 # or implied. See the License for the specific language governing
 # permissions and limitations under the License.
 
-# Ensure that the the top-level dir is in the inclue path
-# for all projects built at this level.
-include_directories(${CMAKE_SOURCE_DIR})
+add_executable(client client.cpp)
+target_link_libraries(client freeflow_sys)
 
-add_subdirectory(utility)
-add_subdirectory(data)
-add_subdirectory(sys)
+add_executable(server server.cpp)
+target_link_libraries(server freeflow_sys)
