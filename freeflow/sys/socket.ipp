@@ -109,7 +109,7 @@ Socket::Socket(Transport t, Address a)
 {
   fd = ::socket(local.type, transport, 0);
   if (fd < 0)
-    throw 1;
+    throw Error(Error::SYSTEM_ERROR, errno);
 }
 
 inline
@@ -130,28 +130,37 @@ Socket::~Socket()
   close(*this);
 }
 
-inline bool
+inline Error
 bind(Socket& s, Address a)
 {
   s.local = a;
   auto result = ::bind(s.fd, addr(s.local), len(s.local));
-  return result == 0;
+  if(result < 0)
+    return Error(Error::SYSTEM_ERROR, errno);
+  else
+    return Error();
 }
 
-inline bool
+inline Error
 connect(Socket& s, const Address& a)
 {
   s.peer = a;
   auto result = ::connect(s.fd, addr(s.peer), len(s.peer));
-  return result == 0;
+  if(result < 0)
+    return Error(Error::SYSTEM_ERROR, errno);
+  else
+    return Error();
 }
 
-inline bool
+inline Error
 listen(Socket& s, int backlog)
 {
   s.backlog = backlog;
   auto result = ::listen(s.fd, backlog);
-  return result == 0;
+  if(result < 0)
+    return Error(Error::SYSTEM_ERROR, errno);
+  else
+    return Error();
 }
 
 inline Socket
@@ -162,54 +171,54 @@ accept(Socket& s)
   return Socket(child, s.transport, s.local, s.peer);
 }
 
-inline bool
+inline int
 read(Socket& s, uint8_t* b, std::size_t l)
 {
   auto result = ::read(s.fd, b, l);
   if(result < 0)
-    throw 1;
+    throw Error(Error::SYSTEM_ERROR, errno);
   return result;
 }
 
-inline bool
+inline int
 write(Socket& s, const uint8_t* b, std::size_t l)
 {
   auto result = ::write(s.fd, b, l);
   if(result < 0)
-    throw 1;
+    throw Error(Error::SYSTEM_ERROR, errno);
   return result;
 }
 
-inline bool
+inline int
 recvfrom(Socket& s, uint8_t* b, std::size_t l, Address& a)
 {
   socklen_t length;
   auto result = ::recvfrom(s.fd, b, l, 0, addr(a), &length);
   if(result < 0)
-    throw 1;
+    throw Error(Error::SYSTEM_ERROR, errno);
   return result;
 }
 
-inline bool
+inline int
 sendto(Socket& s, const uint8_t* b, std::size_t l, const Address& a)
 {
   auto result = ::sendto(s.fd, b, l, 0, addr(a), len(a));
   if(result < 0)
-    throw 1;
+    throw Error(Error::SYSTEM_ERROR, errno);
   return result;
 }
 
 
-inline bool
+inline Error
 close(Socket& s)
 {
   if(s.fd > -1) {
     auto result = ::close(s.fd);
     s.fd = -1;
-    if(result != 0)
-      return false;
+    if(result == -1) 
+      return Error(Error::SYSTEM_ERROR, errno);
   }
-  return true;
+  return Error();
 }
 
 } // namespace socket

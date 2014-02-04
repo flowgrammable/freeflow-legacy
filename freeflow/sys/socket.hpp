@@ -23,6 +23,7 @@ extern "C" {
 #include <strings.h>
 }
 
+#include "../utility/error.hpp"
 #include "../proto/ipv4.hpp"
 #include "../proto/ipv6.hpp"
 
@@ -79,18 +80,18 @@ struct Socket
   int backlog;
 };
 
-bool bind(Socket& s, Address a = Address());
-bool connect(Socket& s, const Address& a);
+Error bind(Socket& s, Address a = Address());
+Error connect(Socket& s, const Address& a);
 
-bool listen(Socket& s, int backlog=5);
+Error listen(Socket& s, int backlog=5);
 Socket accept(Socket& s);
 
-bool read(Socket& s);
-bool wriet(Socket& s);
-bool sendto(Socket& s);
-bool recvfrom(Socket& s);
+int read(Socket& s);
+int wriet(Socket& s);
+int sendto(Socket& s);
+int recvfrom(Socket& s);
 
-bool close(Socket& s);
+Error close(Socket& s);
 
 std::string to_string(const Socket& s);
 
