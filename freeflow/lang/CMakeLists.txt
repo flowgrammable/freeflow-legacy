@@ -12,12 +12,12 @@
 # or implied. See the License for the specific language governing
 # permissions and limitations under the License.
 
-set(src
-)
+#set(src
+#)
 
-install(FILES fd_utils.hpp
-        DESTINATION include/freeflow/lang)
+#install(FILES 
+#        DESTINATION include/freeflow/lang)
 
-add_library(freeflow_lang ${src})
+#add_library(freeflow_lang ${src})
 
-add_subdirectory(examples)
+#add_subdirectory(examples)

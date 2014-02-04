@@ -12,5 +12,5 @@
 # or implied. See the License for the specific language governing
 # permissions and limitations under the License.
 
-add_executable(client client.cpp)
-target_link_libraries(client freeflow_sys)
+#add_executable(client client.cpp)
+#target_link_libraries(client freeflow_sys)
