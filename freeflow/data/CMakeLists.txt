@@ -12,6 +12,13 @@
 # or implied. See the License for the specific language governing
 # permissions and limitations under the License.
 
-add_library(freeflow_data buffer.cpp)
+set(src
+  buffer.cpp
+)
+
+install(FILES buffer.hpp
+        DESTINATION include/freeflow/data)
+
+add_library(freeflow_data ${src})
 
 add_subdirectory(examples)
