@@ -29,12 +29,12 @@ Address::Address(Type t, const std::string n, uint16_t p) :
   ::bzero(&v4, sizeof(sockaddr));
   if(t == IPv4) {
     v4.sin_family = IPv4;
-    v4.sin_port = p;
+    v4.sin_port = htons(p);
     if (inet_pton(IPv4, n.c_str(), &v4.sin_addr) != 1)
       throw 1;
   } else if(t == IPv6) {
     v6.sin6_family = IPv6;
-    v6.sin6_port = p;
+    v6.sin6_port = htons(p);
     if (inet_pton(IPv6, n.c_str(), &v6.sin6_addr) != 1)
       throw 1;
   }

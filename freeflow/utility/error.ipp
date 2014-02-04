@@ -31,11 +31,11 @@ constexpr
 Error::operator bool() const { return code_ == SUCCESS; }
 
 /// Returns the error code.
-Error::Code 
+inline Error::Code 
 Error::code() const { return code_; }
 
 /// Returns the error data.
-Error::Data
+inline Error::Data
 Error::data() const { return data_; }
 
 // -------------------------------------------------------------------------- //
@@ -53,11 +53,11 @@ constexpr
 Trap::operator bool() const { return !err_; }
 
 /// Returns the error code.
-Error::Code 
+inline Error::Code 
 Trap::code() const { return err_.code(); }
 
 /// Returns the error data.
-Error::Data
+inline Error::Data
 Trap::data() const { return err_.data(); }
 
 // -------------------------------------------------------------------------- //
