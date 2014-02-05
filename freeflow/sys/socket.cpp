@@ -22,25 +22,27 @@ std::string
 to_string(const Address& a)
 {
   std::stringstream ss;
-  if(a.type == Address::IPv4) {
+  if(family(a) == Address::IPv4) {
     char name[INET_ADDRSTRLEN];
-    ::bzero(&name, INET_ADDRSTRLEN);
-    inet_ntop(Address::IPv4, &a.v4.sin_addr, name, sizeof(in_addr));
+    ::memset(&name, 0, INET_ADDRSTRLEN);
+    const sockaddr_in *v4 = reinterpret_cast<const sockaddr_in*>(&a.storage);
+    inet_ntop(Address::IPv4, &v4->sin_addr, name, sizeof(in_addr));
 
     ss << "ipv4(";
     ss << name;
     ss << ",";
-    ss << ntohs(a.v4.sin_port) ;
+    ss << ntohs(v4->sin_port) ;
     ss << ")";
-  } else if(a.type == Address::IPv6) {
+  } else if(family(a) == Address::IPv6) {
     char name[INET6_ADDRSTRLEN];
-    ::bzero(&name, INET6_ADDRSTRLEN);
-    inet_ntop(Address::IPv6, &a.v6.sin6_addr, name, sizeof(in6_addr));
+    ::memset(&name, 0, INET6_ADDRSTRLEN);
+    const sockaddr_in6 *v6 = reinterpret_cast<const sockaddr_in6*>(&a.storage);
+    inet_ntop(Address::IPv6, &v6->sin6_addr, name, sizeof(in6_addr));
 
     ss << "ipv6(";
     ss << name;
     ss << ",";
-    ss << ntohs(a.v6.sin6_port) ;
+    ss << ntohs(v6->sin6_port) ;
     ss << ")";
   }
 

@@ -22,8 +22,8 @@
 #include <strings.h>
 
 #include <freeflow/sys/error.hpp>
-#include "freeflow/proto/ipv4.hpp"
-#include "freeflow/proto/ipv6.hpp"
+#include <freeflow/proto/ipv4.hpp>
+#include <freeflow/proto/ipv6.hpp>
 
 namespace freeflow {
 namespace socket {
@@ -43,17 +43,13 @@ struct Address
   Address(const Address& a);
   Address& operator=(const Address& a);
 
-  union {
-    sockaddr_in v4;
-    sockaddr_in6 v6;
-  };
-
-  Type type;
+  sockaddr_storage storage;
 };
 
 bool operator==(const Address& l, const Address& r);
 bool operator!=(const Address& l, const Address& r);
 
+sa_family_t family(const Address& a);
 sockaddr* addr(const Address& a);
 socklen_t len(const Address& a);
 std::string to_string(const Address& a);

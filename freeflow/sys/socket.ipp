@@ -18,27 +18,26 @@ namespace freeflow {
 namespace socket {
 
 inline
-Address::Address() :
-  type(IPv4)
+Address::Address()
 {
-  ::bzero(&v4, sizeof(sockaddr_in));
+  ::memset(&storage, 0, sizeof(sockaddr_storage));
+  storage.ss_family = IPv4;
 }
 
 inline
-Address::Address(Type t, const std::string n, uint16_t p) : 
-  type(t)
+Address::Address(Type t, const std::string n, uint16_t p)
 {
+  ::memset(&storage, 0, sizeof(sockaddr_storage));
+  storage.ss_family = t;
   if(t == IPv4) {
-    ::bzero(&v4, sizeof(sockaddr_in));
-    v4.sin_family = IPv4;
-    v4.sin_port = htons(p);
-    if (inet_pton(IPv4, n.c_str(), &v4.sin_addr) != 1)
+    sockaddr_in *v4 = reinterpret_cast<sockaddr_in*>(&storage);
+    v4->sin_port = htons(p);
+    if (inet_pton(IPv4, n.c_str(), &v4->sin_addr) != 1)
       throw Error(Error::SYSTEM_ERROR, errno);
   } else if(t == IPv6) {
-    ::bzero(&v6, sizeof(sockaddr_in6));
-    v6.sin6_family = IPv6;
-    v6.sin6_port = htons(p);
-    if (inet_pton(IPv6, n.c_str(), &v6.sin6_addr) != 1)
+    sockaddr_in6 *v6 = reinterpret_cast<sockaddr_in6*>(&storage);
+    v6->sin6_port = htons(p);
+    if (inet_pton(IPv6, n.c_str(), &v6->sin6_addr) != 1)
       throw Error(Error::SYSTEM_ERROR, errno);
   }
 }
@@ -46,53 +45,57 @@ Address::Address(Type t, const std::string n, uint16_t p) :
 inline
 Address::Address(ipv4::Address a, uint16_t p)
 {
-  ::bzero(&v4, sizeof(sockaddr_in));
-  v4.sin_family = IPv4;
-  ::memcpy(&v4.sin_addr, &a.value, sizeof(in_addr));
-  v4.sin_port = htons(p);
+  ::memset(&storage, 0, sizeof(sockaddr_storage));
+  sockaddr_in *v4 = reinterpret_cast<sockaddr_in*>(&storage);
+
+  v4->sin_family = IPv4;
+  v4->sin_port = htons(p);
+  ::memcpy(&v4->sin_addr, &a.value, sizeof(in_addr));
 }
 
 inline
 Address::Address(ipv6::Address a, uint16_t p)
 {
-  ::bzero(&v6, sizeof(sockaddr_in6));
-  v6.sin6_family = IPv6;
-  ::memcpy(&v6.sin6_addr, &a.value, sizeof(in6_addr));
-  v6.sin6_port = htons(p);
+  ::memset(&storage, 0, sizeof(sockaddr_storage));
+  sockaddr_in6 *v6 = reinterpret_cast<sockaddr_in6*>(&storage);
+
+  v6->sin6_family = IPv6;
+  v6->sin6_port = htons(p);
+  ::memcpy(&v6->sin6_addr, &a.value, sizeof(in6_addr));
 }
 
 inline
-Address::Address(const Address& a) :
-  type(a.type)
+Address::Address(const Address& a)
 {
-  if(type == IPv4) {
-    memcpy(&v4, &a.v4, sizeof(sockaddr_in));
-  } else if(type == IPv6) {
-    memcpy(&v6, &a.v6, sizeof(sockaddr_in6));
-  }
+  memcpy(&storage, &a.storage, sizeof(sockaddr_storage));
 }
 
 inline Address&
 Address::operator=(const Address& a)
 {
-  type = a.type;
-  if(type == IPv4) {
-    memcpy(&v4, &a.v4, sizeof(sockaddr_in));
-  } else if(type == IPv6) {
-    memcpy(&v6, &a.v6, sizeof(sockaddr_in6));
-  }
+  memcpy(&storage, &a.storage, sizeof(sockaddr_storage));
   return *this;
 }
 
 inline bool
 operator==(const Address& l, const Address& r)
 {
-  if(l.type != r.type)
-    return false;
-  if(l.type == Address::IPv4) {
-    return memcmp(&l.v4, &r.v4, sizeof(sockaddr_in)) == 0;
-  } else if(l.type == Address::IPv6) {
-    return memcmp(&l.v6, &r.v6, sizeof(sockaddr_in6)) == 0;
+  if(l.storage.ss_family != r.storage.ss_family)
+    return false; 
+  if(l.storage.ss_family == Address::IPv4) {
+    const sockaddr_in *lv4 = reinterpret_cast<const sockaddr_in*>(&l.storage);
+    const sockaddr_in *rv4 = reinterpret_cast<const sockaddr_in*>(&r.storage);
+    if(lv4->sin_port != rv4->sin_port)
+      return false;
+    if(memcmp(&lv4->sin_addr, &rv4->sin_addr, sizeof(in_addr)) == 0)
+      return true;
+  } else if (l.storage.ss_family == Address::IPv6) {
+    const sockaddr_in6 *lv6 = reinterpret_cast<const sockaddr_in6*>(&l.storage);
+    const sockaddr_in6 *rv6 = reinterpret_cast<const sockaddr_in6*>(&r.storage);
+    if(lv6->sin6_port != rv6->sin6_port)
+      return false;
+    if(memcmp(&lv6->sin6_addr, &rv6->sin6_addr, sizeof(in6_addr)) == 0)
+      return true;
   }
   return false;
 }
@@ -103,15 +106,16 @@ operator!=(const Address& l, const Address& r)
   return not (l==r);
 }
 
+inline sa_family_t
+family(const Address& a)
+{
+  return a.storage.ss_family;
+}
+
 inline sockaddr*
 addr(Address& a)
 {
-  if(a.type == Address::IPv4) {
-    return reinterpret_cast<sockaddr*>(&a.v4);
-  } else if(a.type == Address::IPv6) {
-    return reinterpret_cast<sockaddr*>(&a.v4);
-  }
-  return nullptr;
+  return reinterpret_cast<sockaddr*>(&a.storage);
 }
 
 inline socklen_t
@@ -129,7 +133,7 @@ inline
 Socket::Socket(Transport t, Address a)
   : local(a), transport(t)
 {
-  fd = ::socket(local.type, transport, 0);
+  fd = ::socket(family(local), transport, 0);
   if (fd < 0)
     throw Error(Error::SYSTEM_ERROR, errno);
 }
