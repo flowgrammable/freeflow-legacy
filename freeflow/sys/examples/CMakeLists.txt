@@ -12,6 +12,9 @@
 # or implied. See the License for the specific language governing
 # permissions and limitations under the License.
 
+add_executable(error error.cpp)
+target_link_libraries(error freeflow_sys)
+
 add_executable(client client.cpp)
 target_link_libraries(client freeflow_sys)
 
@@ -20,3 +23,12 @@ target_link_libraries(server freeflow_sys)
 
 add_executable(console console.cpp)
 target_link_libraries(console freeflow_sys)
+
+add_executable(buffer buffer.cpp)
+target_link_libraries(buffer freeflow_sys)
+
+add_executable(buffer2 buffer2.cpp)
+target_link_libraries(buffer2 freeflow_sys)
+
+add_executable(view view.cpp)
+target_link_libraries(view freeflow_sys)

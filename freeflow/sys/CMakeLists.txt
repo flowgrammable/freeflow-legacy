@@ -12,15 +12,26 @@
 # or implied. See the License for the specific language governing
 # permissions and limitations under the License.
 
-set(src
-  fd_utils.cpp
-  socket.cpp
-)
+set(src fd_utils.cpp
+        error.cpp
+        socket.cpp
+        buffer.cpp)
 
-install(FILES fd_utils.hpp
-              socket.hpp
-        DESTINATION include/freeflow/sys)
+set(inc fd_utils.hpp
+        error.hpp
+        socket.hpp
+        buffer.hpp)
 
 add_library(freeflow_sys ${src})
+
+# --------------------------------------------------------------------------- //
+# Installation
+#
+# TODO: Install the library!
+
+install(FILES ${inc} DESTINATION include/freeflow/sys)
+
+# --------------------------------------------------------------------------- //
+# Examples and docs
 
 add_subdirectory(examples)
