@@ -21,6 +21,9 @@ target_link_libraries(client freeflow_sys)
 add_executable(server server.cpp)
 target_link_libraries(server freeflow_sys)
 
+add_executable(server2 server2.cpp)
+target_link_libraries(server2 freeflow_sys)
+
 add_executable(console console.cpp)
 target_link_libraries(console freeflow_sys)
 

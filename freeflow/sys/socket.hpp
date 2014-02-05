@@ -35,8 +35,7 @@ struct Address
     IPv6 = AF_INET6
   };
 
-  Address();
-  Address(Type t, const std::string n = std::string(), uint16_t p=0);
+  Address(Type t = IPv4, const std::string n = std::string(), uint16_t p=0);
   Address(ipv4::Address a, uint16_t p=0);
   Address(ipv6::Address a, uint16_t p=0);
 
@@ -63,6 +62,7 @@ struct Socket
 
   Socket(int f, Transport t, const Address& l, const Address& p);
   Socket(Transport t, Address a = Address());
+
   Socket(Socket&& s);
   ~Socket();
 
@@ -76,16 +76,14 @@ struct Socket
 
 Error bind(Socket& s, Address a = Address());
 Error connect(Socket& s, const Address& a);
-
 Error listen(Socket& s, int backlog=SOMAXCONN);
 Socket accept(Socket& s);
+Error close(Socket& s);
 
 int read(Socket& s);
 int wriet(Socket& s);
 int sendto(Socket& s);
 int recvfrom(Socket& s);
-
-Error close(Socket& s);
 
 std::string to_string(const Socket& s);
 

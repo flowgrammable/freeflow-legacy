@@ -18,23 +18,16 @@ namespace freeflow {
 namespace socket {
 
 inline
-Address::Address()
-{
-  ::memset(&storage, 0, sizeof(sockaddr_storage));
-  storage.ss_family = IPv4;
-}
-
-inline
 Address::Address(Type t, const std::string n, uint16_t p)
 {
   ::memset(&storage, 0, sizeof(sockaddr_storage));
   storage.ss_family = t;
-  if(t == IPv4) {
+  if(t == IPv4 and n.length() > 0) {
     sockaddr_in *v4 = reinterpret_cast<sockaddr_in*>(&storage);
     v4->sin_port = htons(p);
     if (inet_pton(IPv4, n.c_str(), &v4->sin_addr) != 1)
       throw Error(Error::SYSTEM_ERROR, errno);
-  } else if(t == IPv6) {
+  } else if(t == IPv6 and n.length() > 0) {
     sockaddr_in6 *v6 = reinterpret_cast<sockaddr_in6*>(&storage);
     v6->sin6_port = htons(p);
     if (inet_pton(IPv6, n.c_str(), &v6->sin6_addr) != 1)
