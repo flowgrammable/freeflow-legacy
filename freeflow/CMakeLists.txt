@@ -16,6 +16,4 @@
 # for all projects built at this level.
 include_directories(${CMAKE_SOURCE_DIR})
 
-add_subdirectory(utility)
-add_subdirectory(data)
 add_subdirectory(sys)

@@ -15,7 +15,7 @@
 #include <iostream>
 #include <fstream>
 
-#include <freeflow/data/buffer.hpp>
+#include <freeflow/sys/buffer.hpp>
 
 using namespace std;
 using namespace freeflow;
