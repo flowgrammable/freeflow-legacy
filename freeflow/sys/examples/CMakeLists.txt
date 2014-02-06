@@ -15,8 +15,8 @@
 add_executable(error error.cpp)
 target_link_libraries(error freeflow_sys)
 
-add_executable(client client.cpp)
-target_link_libraries(client freeflow_sys)
+add_executable(selector selector.cpp)
+target_link_libraries(selector freeflow_sys)
 
 add_executable(server server.cpp)
 target_link_libraries(server freeflow_sys)

@@ -5,25 +5,19 @@
 #include "freeflow/sys/selector.hpp"
 
 int main(int argc, char** argv) {
-  std::cout << "Client..." << std::endl;
 
   using namespace freeflow;
   Selector sel;
+  add_reader(sel, fileno(stdin));
 
-  bool done = false;
-  while(not done) {
-    add_reader(sel, fileno(stdin));
-    std::cout << ">" << std::flush ;
-
+  while(true) {
+    std::cout << ">" << std::flush;
     auto result = select(sel, nullptr);
 
-    char input[256];
-    ::memset(input, 0, 256);
-
     if(is_readable(sel, fileno(stdin))) {
+      char input[256];
+      ::memset(input, 0, 256);
       read(fileno(stdin), input, 256);
-      std::cout << "input was: " << input ;
     }
-
   }
 }
