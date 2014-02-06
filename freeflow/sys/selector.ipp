@@ -74,7 +74,11 @@ is_writable(const Selector& s, int fd)
 inline int
 select(Selector& s, timeval* tv)
 {
-  return ::select(max(s), &s.readset, &s.writeset, nullptr, tv);
+  int result;
+  result = ::select(max(s), &s.readset, &s.writeset, nullptr, tv);
+  if(result == -1)
+    throw Error(Error::SYSTEM_ERROR, errno);
+  return result;
 }
 
 } // namespace freeflow

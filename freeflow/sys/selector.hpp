@@ -18,6 +18,8 @@
 #include <sys/select.h>
 #include <set>
 
+#include "freeflow/sys/error.hpp"
+
 namespace freeflow {
 
 struct Selector
