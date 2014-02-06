@@ -17,14 +17,16 @@ set(src fd_utils.cpp
         socket.cpp
         buffer.cpp
         signal.cpp
-        syslog.cpp)
+        syslog.cpp
+        pipe.cpp)
 
 set(inc fd_utils.hpp
         error.hpp
         socket.hpp
         buffer.hpp
         signal.hpp
-        syslog.hpp)
+        syslog.hpp
+        pipe.hpp)
 
 add_library(freeflow_sys ${src})
 
