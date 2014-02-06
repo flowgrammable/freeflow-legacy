@@ -16,7 +16,10 @@
 #define FREEFLOW_PIPEL_HPP
 
 #include <unistd.h>
+#include <fcntl.h>
+#include <string>
 #include "error.hpp"
+
 
 namespace freeflow {
 
@@ -24,6 +27,7 @@ struct Pipe
 {
   Pipe(std::string n = std::string());
   Pipe(Pipe&& p);
+  ~Pipe();
 
   std::string name;
   int fd;

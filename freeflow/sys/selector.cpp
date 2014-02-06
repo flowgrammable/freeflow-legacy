@@ -12,24 +12,4 @@
 // or implied. See the License for the specific language governing
 // permissions and limitations under the License.
 
-namespace freeflow {
-
-inline
-Pipe::Pipe(std::string n) :
-  name(n)
-{
-  fd = ::open(n.c_str(), O_RDWR);
-  if(fd == -1)
-    throw Error(Error::SYSTEM_ERROR, errno);
-}
-
-inline
-Pipe::~Pipe()
-{
-  if(fd > -1) {
-    ::close(fd);
-    fd = -1;
-  }
-}
-
-} // namespace freeflow
+#include "selector.hpp"

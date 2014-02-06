@@ -17,6 +17,7 @@ set(src fd_utils.cpp
         socket.cpp
         buffer.cpp
         signal.cpp
+        selector.cpp
         syslog.cpp
         pipe.cpp)
 
@@ -25,6 +26,7 @@ set(inc fd_utils.hpp
         socket.hpp
         buffer.hpp
         signal.hpp
+        selector.hpp
         syslog.hpp
         pipe.hpp)
 

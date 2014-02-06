@@ -12,24 +12,38 @@
 // or implied. See the License for the specific language governing
 // permissions and limitations under the License.
 
+#ifndef FREEFLOW_SELECTOR_HPP
+#define FREEFLOW_SELECTOR_HPP
+
+#include <sys/select.h>
+#include <set>
+
 namespace freeflow {
 
-inline
-Pipe::Pipe(std::string n) :
-  name(n)
+struct Selector
 {
-  fd = ::open(n.c_str(), O_RDWR);
-  if(fd == -1)
-    throw Error(Error::SYSTEM_ERROR, errno);
-}
+  Selector();
 
-inline
-Pipe::~Pipe()
-{
-  if(fd > -1) {
-    ::close(fd);
-    fd = -1;
-  }
-}
+  fd_set readset;
+  fd_set writeset;
+  std::set<int> read_fds;
+  std::set<int> write_fds;
+};
+
+int max(const Selector& s);
+
+void add_reader(Selector& s, int fd);
+void add_writer(Selector& s, int fd);
+void del_reader(Selector& s, int fd);
+void del_writer(Selector& s, int fd);
+
+bool is_readable(const Selector& s, int fd);
+bool is_writable(const Selector& s, int fd);
+
+int select(timeval* tv);
 
 } // namespace freeflow
+
+#include "selector.ipp"
+
+#endif
