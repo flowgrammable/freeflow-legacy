@@ -14,4 +14,22 @@
 
 namespace freeflow {
 
+inline
+Pipe::Pipe(std::string n) :
+  name(n)
+{
+  fd = ::open(n, O_RDWR);
+  if(fd == -1)
+    throw Error(SYSTEM_ERROR, errno);
+}
+
+inline
+Pipe::~Pipe()
+{
+  if(fd > -1) {
+    ::close(fd);
+    fd = -1;
+  }
+}
+
 } // namespace freeflow

@@ -15,9 +15,22 @@
 #ifndef FREEFLOW_PIPE_HPP
 #define FREEFLOW_PIPEL_HPP
 
+#include <unistd.h>
+#include "error.hpp"
+
 namespace freeflow {
 
+struct Pipe
+{
+  Pipe(std::string n = std::string());
+  Pipe(Pipe&& p);
 
+  std::string name;
+  int fd;
+};
+
+int write(Pipe& p, const uint8_t* b, std::size_t l);
+int read(Pipe& p, uint8_t* b, std::size_t l);
 
 } // namespace freeflow 
 
