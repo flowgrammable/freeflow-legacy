@@ -54,8 +54,10 @@ bool Less(const Task* lhs, const Task* rhs);
 
 struct Scheduler
 {
+  Scheduler(const MicroTime& mt = MicroTime(100000));
   std::map<int,Task*> tasks;
   Selector sel;
+  MicroTime timeout;
 };
 
 void add_task(Scheduler& sched, Task* t);

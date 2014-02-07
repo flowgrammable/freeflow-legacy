@@ -62,6 +62,11 @@ Less(const Task* lhs, const Task* rhs)
   return rhs->priority < lhs->priority;
 }
 
+inline
+Scheduler::Scheduler(const MicroTime& mt)
+  : timeout(mt)
+{ }
+
 inline void
 clr_tasks(Scheduler& s)
 {

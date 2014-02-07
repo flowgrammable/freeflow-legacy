@@ -56,7 +56,7 @@ void
 execute_round(Scheduler& s)
 {
   // Execute the select
-  select(s.sel, MicroTime(1000));
+  select(s.sel, s.timeout);
   TimePoint now = std::chrono::high_resolution_clock::now();
 
   // Build a run queue
