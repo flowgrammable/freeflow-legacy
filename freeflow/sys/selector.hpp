@@ -17,14 +17,11 @@
 
 #include <sys/select.h>
 #include <set>
-#include <chrono>
 
 #include "freeflow/sys/error.hpp"
+#include "freeflow/sys/time.hpp"
 
 namespace freeflow {
-
-using TimePoint = std::chrono::high_resolution_clock::time_point;
-using MicroTime = std::chrono::duration<int,std::micro>;
 
 struct Selector
 {

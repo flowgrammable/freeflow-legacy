@@ -14,22 +14,5 @@
 
 namespace freeflow {
   
-inline
-Time::Time(uint32_t s, uint32_t ns) :
-  sec(s), nsec(ns)
-{ }
-
-inline bool
-operator<(const Time& lhs, const Time& rhs)
-{
-  if(lhs.sec < rhs.sec)
-    return true;
-  if(rhs.sec < lhs.sec)
-    return false;
-  if(lhs.nsec < rhs.nsec)
-    return true;
-  return false;
-}
-
 } // namespace freeflow
 

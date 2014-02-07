@@ -15,7 +15,34 @@
 #ifndef FREEFLOW_KQUEUE_HPP
 #define FREEFLOW_KQUEUE_HPP
 
+#include <unistd.h>
+#include <sys/event.h>
+#include <sys/types.h>
+
+#include <map>
+#include <vector>
+
+#include "freeflow/sys/error.hpp"
+#include "freeflow/sys/time.hpp"
+
 namespace freeflow {
+
+struct KQueue
+{
+  KQueue();
+  ~KQueue();
+
+  std::map<int,struct kevent> in_events;
+  std::vector<struct kevent> out_events;
+  int queue;
+};
+
+void add_reader(KQueue& kq, int fd);
+void add_writer(KQueue& kq, int fd);
+void del_reader(KQueue& kq, int fd);
+void del_writer(KQueue& kq, int fd);
+
+int kevent(KQueue& kq, const MicroTime& mt);
 
 } // namespace freeflow
 

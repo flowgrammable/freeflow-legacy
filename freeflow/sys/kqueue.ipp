@@ -14,4 +14,62 @@
 
 namespace freeflow {
 
+inline
+KQueue::KQueue() :
+  queue(::kqueue())
+{
+  if(queue == -1)
+    throw Error(Error::SYSTEM_ERROR, errno);
+}
+
+inline
+KQueue::~KQueue()
+{
+  if(queue > -1) {
+    ::close(queue);
+    queue = -1;
+  }
+}
+
+inline void 
+add_reader(KQueue& kq, int fd) {
+  struct kevent ev;
+  EV_SET(&ev, fd, EVFILT_READ, EV_ADD, 0, 0, 0);
+  kq.in_events[fd] = ev;
+}
+
+inline void 
+add_writer(KQueue& kq, int fd) {
+  struct kevent ev;
+  EV_SET(&ev, fd, EVFILT_WRITE, EV_ADD, 0, 0, 0);
+  kq.in_events[fd] = ev;
+}
+
+inline void 
+del_reader(KQueue& kq, int fd) {
+  struct kevent ev;
+  EV_SET(&ev, fd, EVFILT_READ, EV_DELETE, 0, 0, 0);
+  kq.in_events.erase(fd);
+}
+
+inline void 
+del_writer(KQueue& kq, int fd) {
+  struct kevent ev;
+  EV_SET(&ev, fd, EVFILT_WRITE, EV_DELETE, 0, 0, 0);
+  kq.in_events.erase(fd);
+}
+
+inline int
+kevent(KQueue& kq, const MicroTime& mt)
+{
+  std::vector<struct kevent> input;
+  for(auto event : kq.in_events)
+    input.push_back(event.second);
+  kq.in_events.clear();
+
+  ::kevent(kq.queue, input.data(), input.size(), 0, 0, 0);
+
+  return 0;
+}
+
 } // namespace freeflow

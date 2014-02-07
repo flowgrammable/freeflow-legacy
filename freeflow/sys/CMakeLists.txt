@@ -17,6 +17,7 @@ set(src fd_utils.cpp
         socket.cpp
         buffer.cpp
         signal.cpp
+        time.cpp
         selector.cpp
         epoll.cpp
         kqueue.cpp
@@ -29,6 +30,7 @@ set(inc fd_utils.hpp
         socket.hpp
         buffer.hpp
         signal.hpp
+        time.hpp
         selector.hpp
         epoll.hpp
         kqueue.hpp
