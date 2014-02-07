@@ -15,7 +15,49 @@
 #ifndef FREEFLOW_EPOLL_HPP
 #define FREEFLOW_EPOLL_HPP
 
+#include <unistd.h>
+#include <sys/epoll.h>
+
+#include <map>
+#include <vector>
+
+#include "freeflow/sys/error.hpp"
+#include "freeflow/sys/time.hpp"
+
 namespace freeflow {
+
+struct EPevent : epoll_event
+{
+  enum Type : uint32_t {
+    READ  = EPOLLIN,
+    WRITE = EPOLLOUT,
+    CLOSED = EPOLLRDHUP,
+    EDGE = EPOLLET,
+    ONESHOT = EPOLLONESHOT,
+  };
+
+  EPevent() = default;
+  EPevent(const EPevent&) = default;
+  EPevent(Type t, int fd);
+};
+
+struct Epoll
+{
+  Epoll();
+  ~Epoll();
+
+  int fd;
+
+  std::map<int,EPevent> watched;
+};
+
+Error add_reader(Epoll& e, int fd);
+Error add_writer(Epoll& e, int fd);
+Error del_reader(Epoll& e, int fd);
+Error del_writer(Epoll& e, int fd);
+
+using EPevents = std::vector<EPevent>;
+EPevents poll(Epoll& ep, const MicroTime& mt);
 
 } // namespace freeflow
 

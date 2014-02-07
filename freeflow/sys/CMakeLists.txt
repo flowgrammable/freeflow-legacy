@@ -20,7 +20,7 @@ set(src fd_utils.cpp
         time.cpp
         selector.cpp
         epoll.cpp
-        kqueue.cpp
+        #        kqueue.cpp
         scheduler.cpp
         syslog.cpp
         pipe.cpp)
@@ -33,7 +33,7 @@ set(inc fd_utils.hpp
         time.hpp
         selector.hpp
         epoll.hpp
-        kqueue.hpp
+        #kqueue.hpp
         scheduler.hpp
         syslog.hpp
         pipe.hpp)
