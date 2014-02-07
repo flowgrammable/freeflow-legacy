@@ -12,7 +12,7 @@ int main(int argc, char** argv) {
 
   while(true) {
     std::cout << ">" << std::flush;
-    auto result = select(sel, nullptr);
+    select(sel, nullptr);
 
     if(is_readable(sel, fileno(stdin))) {
       char input[256];
