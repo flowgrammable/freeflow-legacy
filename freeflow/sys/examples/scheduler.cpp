@@ -9,11 +9,11 @@ struct Console : public freeflow::Task
   Console() : Task(READABLE, 1)
   { }
 
-  void init() {
+  void init(const freeflow::TimePoint& tp) {
     std::cout << ">" << std::flush;
   }
 
-  void read() {
+  void read(const freeflow::TimePoint& tp) {
     char input[256];
     ::memset(input, 0, 256);
     ::read(fileno(stdin), input, 256);

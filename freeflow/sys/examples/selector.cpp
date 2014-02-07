@@ -12,7 +12,7 @@ int main(int argc, char** argv) {
 
   while(true) {
     std::cout << ">" << std::flush;
-    select(sel, nullptr);
+    select(sel,  MicroTime(1000));
 
     if(is_readable(sel, fileno(stdin))) {
       char input[256];

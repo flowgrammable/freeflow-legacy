@@ -19,6 +19,7 @@
 #include <set>
 
 #include "freeflow/sys/error.hpp"
+#include "freeflow/sys/time.hpp"
 
 namespace freeflow {
 
@@ -42,7 +43,7 @@ void del_writer(Selector& s, int fd);
 bool is_readable(const Selector& s, int fd);
 bool is_writable(const Selector& s, int fd);
 
-int select(timeval* tv);
+int select(Selector& sel, const MicroTime& mt);
 
 } // namespace freeflow
 

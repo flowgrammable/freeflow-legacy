@@ -12,18 +12,6 @@
 // or implied. See the License for the specific language governing
 // permissions and limitations under the License.
 
-#ifndef FREEFLOW_TIME_HPP
-#define FREEFLOW_TIME_HPP
-
-#include <chrono>
-
 namespace freeflow {
 
-using TimePoint = std::chrono::high_resolution_clock::time_point;
-using MicroTime = std::chrono::duration<int,std::micro>;
-
 } // namespace freeflow
-
-#include "time.ipp"
-
-#endif

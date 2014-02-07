@@ -14,11 +14,11 @@ struct Console : public freeflow::Task
     Task(READABLE, 1), pipe(n)
   { }
 
-  void init() {
+  void init(const freeflow::TimePoint& tp) {
     std::cout << ">" << std::flush;
   }
 
-  void read() {
+  void read(const freeflow::TimePoint& tp) {
     char input[256];
     ::memset(input, 0, 256);
     freeflow::Transfer t(pipe.fd, (uint8_t*)input, 256);

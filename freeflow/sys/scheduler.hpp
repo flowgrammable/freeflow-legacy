@@ -37,12 +37,12 @@ struct Task
   bool readable() const;
   bool writable() const;
 
-  virtual void init() {}
-  virtual void fini() {}
+  virtual void init(const TimePoint& tp) {}
+  virtual void fini(const TimePoint& tp) {}
 
-  virtual void read()  = 0;
-  virtual void write() {}
-  virtual void time()  {}
+  virtual void read(const TimePoint& tp)  = 0;
+  virtual void write(const TimePoint& tp) {}
+  virtual void time(const TimePoint& tp)  {}
 
   virtual int fd() const = 0;
 
@@ -54,8 +54,10 @@ bool Less(const Task* lhs, const Task* rhs);
 
 struct Scheduler
 {
+  Scheduler(const MicroTime& mt = MicroTime(100000));
   std::map<int,Task*> tasks;
   Selector sel;
+  MicroTime timeout;
 };
 
 void add_task(Scheduler& sched, Task* t);
@@ -63,7 +65,7 @@ void del_task(Scheduler& sched, Task* t);
 void clr_task(Scheduler& sched);
 
 void run(Scheduler& s);
-void process_task(Scheduler& s, Task* t);
+void process_task(Scheduler& s, Task* t, const TimePoint& tp);
 void execute_round(Scheduler& s);
 
 } // namespace freeflow

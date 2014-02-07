@@ -24,7 +24,8 @@ add_task(Scheduler& s, Task* t)
     add_reader(s.sel, t->fd());
   if(t->type & Task::WRITABLE)
     add_writer(s.sel, t->fd());
-  t->init();
+  TimePoint now = std::chrono::high_resolution_clock::now();
+  t->init(now);
 }
 
 void
@@ -35,26 +36,28 @@ del_task(Scheduler& s, Task* t)
     del_reader(s.sel, t->fd());
   if(t->type & Task::WRITABLE)
     del_writer(s.sel, t->fd());
-  t->fini();
+  TimePoint now = std::chrono::high_resolution_clock::now();
+  t->fini(now);
 }
 
 void
-process_task(Scheduler& s, Task* t)
+process_task(Scheduler& s, Task* t, const TimePoint& now)
 {
   if(is_readable(s.sel, t->fd())) {
-    t->read();
+    t->read(now);
   }
   if(is_writable(s.sel, t->fd())) {
-    t->write();
+    t->write(now);
   }
-  t->time();
+  t->time(now);
 }
 
 void
 execute_round(Scheduler& s)
 {
   // Execute the select
-  select(s.sel, nullptr);
+  select(s.sel, s.timeout);
+  TimePoint now = std::chrono::high_resolution_clock::now();
 
   // Build a run queue
   std::vector<Task*> run_queue;
@@ -69,7 +72,7 @@ execute_round(Scheduler& s)
     Task* task = run_queue.front();
     std::pop_heap(run_queue.begin(), run_queue.end());
     run_queue.pop_back();
-    process_task(s, task);
+    process_task(s, task, now);
   }
 }
 
