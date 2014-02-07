@@ -17,10 +17,14 @@
 
 #include <sys/select.h>
 #include <set>
+#include <chrono>
 
 #include "freeflow/sys/error.hpp"
 
 namespace freeflow {
+
+using TimePoint = std::chrono::high_resolution_clock::time_point;
+using MicroTime = std::chrono::duration<int,std::micro>;
 
 struct Selector
 {
@@ -42,7 +46,7 @@ void del_writer(Selector& s, int fd);
 bool is_readable(const Selector& s, int fd);
 bool is_writable(const Selector& s, int fd);
 
-int select(timeval* tv);
+int select(Selector& sel, const MicroTime& mt);
 
 } // namespace freeflow
 

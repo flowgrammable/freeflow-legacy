@@ -16,6 +16,24 @@
 #define FREEFLOW_TIME_HPP
 
 namespace freeflow {
+
+struct Time
+{
+  Time(uint32_t s, uint32_t ns);
+
+  uint32_t sec;
+  uint32_t nsec;
+};
+
+bool operator<(const Time& lhs, const Time& rhs);
+bool operator==(const Time& lhs, const Time& rhs);
+bool operator!=(const Time& lhs, const Time& rhs);
+
+timeval to_timeval(const Time& t);
+timespec to_timespec(const Time& t);
+
+std::string to_string(const Time& t);
+
 } // namespace freeflow
 
 #include "time.ipp"

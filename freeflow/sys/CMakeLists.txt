@@ -17,7 +17,6 @@ set(src fd_utils.cpp
         socket.cpp
         buffer.cpp
         signal.cpp
-        time.cpp
         selector.cpp
         scheduler.cpp
         syslog.cpp
@@ -28,7 +27,6 @@ set(inc fd_utils.hpp
         socket.hpp
         buffer.hpp
         signal.hpp
-        time.hpp
         selector.hpp
         scheduler.hpp
         syslog.hpp
