@@ -70,6 +70,10 @@ private:
   Data data_;
 };
 
+// Error constructors.
+Error ok(bool b, Error err);
+Error system_error();
+
 
 /// A Trap object is used to capture failures in if statements, allowing
 /// the following kinds of programs.
@@ -88,10 +92,6 @@ public:
 private:
   Error err_;
 };
-
-
-// Error constructors.
-constexpr Error ok(bool b, Error err);
 
 
 } // namespace freeflow

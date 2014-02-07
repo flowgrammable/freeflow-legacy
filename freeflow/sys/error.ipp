@@ -38,6 +38,22 @@ Error::code() const { return code_; }
 inline Error::Data
 Error::data() const { return data_; }
 
+
+// -------------------------------------------------------------------------- //
+// Error constructors
+
+/// Returns an error condition based on a predicate.
+///
+/// If the condition b is true, the resulting error condition will evaluate
+/// to SUCCESS. Otherwise, the condition will evaluate to the code c.
+inline Error 
+ok(bool b, Error err) { return b ? Error() : err; }
+
+/// Returns an error code that encapsulates the current system error.
+inline Error
+system_error() { return {Error::SYSTEM_ERROR, errno}; }
+
+
 // -------------------------------------------------------------------------- //
 // Trap
 
@@ -60,14 +76,5 @@ Trap::code() const { return err_.code(); }
 inline Error::Data
 Trap::data() const { return err_.data(); }
 
-// -------------------------------------------------------------------------- //
-// Misc
-
-/// Returns an error condition based on a predicate.
-///
-/// If the condition b is true, the resulting error condition will evaluate
-/// to SUCCESS. Otherwise, the condition will evaluate to the code c.
-constexpr Error 
-ok(bool b, Error err) { return b ? Error() : err; }
 
 } // namespace freeflow

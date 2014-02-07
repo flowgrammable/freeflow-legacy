@@ -18,26 +18,24 @@ namespace freeflow {
 namespace socket {
 
 inline
-Address::Address(Type t, const std::string n, uint16_t p)
-{
+Address::Address(Type t, const std::string& n, uint16_t p) {
   ::memset(&storage, 0, sizeof(sockaddr_storage));
   storage.ss_family = t;
   if(t == IPv4 and n.length() > 0) {
     sockaddr_in *v4 = reinterpret_cast<sockaddr_in*>(&storage);
     v4->sin_port = htons(p);
     if (inet_pton(IPv4, n.c_str(), &v4->sin_addr) != 1)
-      throw Error(Error::SYSTEM_ERROR, errno);
+      throw system_error();
   } else if(t == IPv6 and n.length() > 0) {
     sockaddr_in6 *v6 = reinterpret_cast<sockaddr_in6*>(&storage);
     v6->sin6_port = htons(p);
     if (inet_pton(IPv6, n.c_str(), &v6->sin6_addr) != 1)
-      throw Error(Error::SYSTEM_ERROR, errno);
+      throw system_error();
   }
 }
 
 inline
-Address::Address(ipv4::Address a, uint16_t p)
-{
+Address::Address(ipv4::Address a, uint16_t p) {
   ::memset(&storage, 0, sizeof(sockaddr_storage));
   sockaddr_in *v4 = reinterpret_cast<sockaddr_in*>(&storage);
 
@@ -47,8 +45,7 @@ Address::Address(ipv4::Address a, uint16_t p)
 }
 
 inline
-Address::Address(ipv6::Address a, uint16_t p)
-{
+Address::Address(ipv6::Address a, uint16_t p) {
   ::memset(&storage, 0, sizeof(sockaddr_storage));
   sockaddr_in6 *v6 = reinterpret_cast<sockaddr_in6*>(&storage);
 
@@ -58,21 +55,18 @@ Address::Address(ipv6::Address a, uint16_t p)
 }
 
 inline
-Address::Address(const Address& a)
-{
+Address::Address(const Address& a) {
   memcpy(&storage, &a.storage, sizeof(sockaddr_storage));
 }
 
 inline Address&
-Address::operator=(const Address& a)
-{
+Address::operator=(const Address& a) {
   memcpy(&storage, &a.storage, sizeof(sockaddr_storage));
   return *this;
 }
 
 inline bool
-operator==(const Address& l, const Address& r)
-{
+operator==(const Address& l, const Address& r) {
   if(l.storage.ss_family != r.storage.ss_family)
     return false; 
   if(l.storage.ss_family == Address::IPv4) {
@@ -94,28 +88,17 @@ operator==(const Address& l, const Address& r)
 }
 
 inline bool
-operator!=(const Address& l, const Address& r)
-{
-  return not (l==r);
-}
+operator!=(const Address& l, const Address& r) { return not (l==r); }
 
-inline sa_family_t
-family(const Address& a)
-{
-  return a.storage.ss_family;
-}
+/// Returns the address famiuly 
+inline Address::Type
+family(const Address& a) { return Address::Type(a.storage.ss_family); }
 
 inline sockaddr*
-addr(Address& a)
-{
-  return reinterpret_cast<sockaddr*>(&a.storage);
-}
+addr(Address& a) { return reinterpret_cast<sockaddr*>(&a.storage); }
 
 inline socklen_t
-len(const Address& a)
-{
-  return sizeof(sockaddr);
-}
+len(const Address& a)  { return sizeof(sockaddr); }
 
 inline
 Socket::Socket(int f, Transport t, const Address& l, const Address& p)
@@ -128,119 +111,88 @@ Socket::Socket(Transport t, Address a)
 {
   fd = ::socket(family(local), transport, 0);
   if (fd < 0)
-    throw Error(Error::SYSTEM_ERROR, errno);
+    throw system_error();
 }
 
 inline
 Socket::Socket(Socket&& s)
+  : local(std::move(s.local)), peer(std::move(s.peer))
 {
-  // Move the address(s)
-  local = std::move(s.local);
-  peer  = std::move(s.peer);
-
-  // Move the fd
   fd = s.fd;
   s.fd = -1;
 }
 
 inline
-Socket::~Socket()
-{
-  close(*this);
-}
+Socket::~Socket() { ::close(fd); }
 
 inline Error
-bind(Socket& s, Address a)
-{
+bind(Socket& s, Address a) {
   s.local = a;
   std::cout << "binding: " << to_string(s.local) << std::endl;
   auto result = ::bind(s.fd, addr(s.local), len(s.local));
   if(result != 0)
-    return Error(Error::SYSTEM_ERROR, errno);
-  else
-    return Error();
+    return system_error();
+  return {};
 }
 
 inline Error
-connect(Socket& s, const Address& a)
-{
+connect(Socket& s, const Address& a) {
   s.peer = a;
   auto result = ::connect(s.fd, addr(s.peer), len(s.peer));
   if(result != 0)
-    return Error(Error::SYSTEM_ERROR, errno);
-  else
-    return Error();
+    return system_error();
+  return {};
 }
 
 inline Error
-listen(Socket& s, int backlog)
-{
+listen(Socket& s, int backlog) {
   s.backlog = backlog;
   auto result = ::listen(s.fd, backlog);
   if(result != 0)
-    return Error(Error::SYSTEM_ERROR, errno);
-  else
-    return Error();
+    return system_error();
+  return {};
 }
 
 inline Socket
-accept(Socket& s)
-{
+accept(Socket& s) {
   socklen_t length;
-  int child = accept(s.fd, addr(s.peer), &length);
+  int child = ::accept(s.fd, addr(s.peer), &length);
   if(child < 0)
-    throw Error(Error::SYSTEM_ERROR, errno);
+    throw system_error();
   return Socket(child, s.transport, s.local, s.peer);
 }
 
 inline int
-read(Socket& s, uint8_t* b, std::size_t l)
-{
+read(Socket& s, uint8_t* b, std::size_t l) {
   auto result = ::read(s.fd, b, l);
   if(result < 0)
-    throw Error(Error::SYSTEM_ERROR, errno);
+    throw system_error();
   return result;
 }
 
 inline int
-write(Socket& s, const uint8_t* b, std::size_t l)
-{
+write(Socket& s, const uint8_t* b, std::size_t l) {
   auto result = ::write(s.fd, b, l);
   if(result < 0)
-    throw Error(Error::SYSTEM_ERROR, errno);
+    throw system_error();
   return result;
 }
 
 inline int
-recvfrom(Socket& s, uint8_t* b, std::size_t l, Address& a)
-{
+recvfrom(Socket& s, uint8_t* b, std::size_t l, Address& a) {
   socklen_t length;
   auto result = ::recvfrom(s.fd, b, l, 0, addr(a), &length);
   if(result < 0)
-    throw Error(Error::SYSTEM_ERROR, errno);
+    throw system_error();
   return result;
 }
 
 inline int
-sendto(Socket& s, const uint8_t* b, std::size_t l, const Address& a)
-{
+sendto(Socket& s, const uint8_t* b, std::size_t l, const Address& a) {
   auto result = ::sendto(s.fd, b, l, 0, addr(a), len(a));
   if(result < 0)
-    throw Error(Error::SYSTEM_ERROR, errno);
+    throw system_error();
   return result;
-}
-
-
-inline Error
-close(Socket& s)
-{
-  if(s.fd > -1) {
-    auto result = ::close(s.fd);
-    s.fd = -1;
-    if(result == -1) 
-      return Error(Error::SYSTEM_ERROR, errno);
-  }
-  return Error();
 }
 
 } // namespace socket
