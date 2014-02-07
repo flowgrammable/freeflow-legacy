@@ -71,7 +71,7 @@ execute_round(Scheduler& s)
     Job* job = run_queue.front();
     std::pop_heap(run_queue.begin(), run_queue.end());
     run_queue.pop_back();
-    process_job(job);
+    process_job(s, job);
   }
 }
 

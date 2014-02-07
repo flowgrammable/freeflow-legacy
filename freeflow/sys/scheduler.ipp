@@ -15,8 +15,8 @@
 namespace freeflow {
 
 inline
-Job::Job(int t) :
-  type(t)
+Job::Job(int t, int p) :
+  priority(p), type(t)
 { }
 
 inline void

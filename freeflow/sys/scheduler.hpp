@@ -28,7 +28,7 @@ struct Job
   static constexpr int READABLE = 1 << 0;
   static constexpr int WRITABLE = 1 << 1;
 
-  Job(int t = CLEAR);
+  Job(int t = CLEAR, int p = 10);
 
   void set_readable();
   void set_writable();
@@ -62,7 +62,7 @@ void add_job(Scheduler& sched, Job* sel);
 void del_job(Scheduler& sched, Job* sel);
 
 void run(Scheduler& s);
-void process_job(Job* j);
+void process_job(Scheduler& s, Job* j);
 void execute_round(Scheduler& s);
 
 } // namespace freeflow
