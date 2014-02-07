@@ -22,7 +22,7 @@ std::string
 to_string(const Address& a)
 {
   std::stringstream ss;
-  if(family(a) == Address::IPv4) {
+  if(a.family() == Address::IPv4) {
     char name[INET_ADDRSTRLEN];
     ::memset(&name, 0, INET_ADDRSTRLEN);
     const sockaddr_in *v4 = reinterpret_cast<const sockaddr_in*>(&a.storage);
@@ -33,7 +33,7 @@ to_string(const Address& a)
     ss << ",";
     ss << ntohs(v4->sin_port) ;
     ss << ")";
-  } else if(family(a) == Address::IPv6) {
+  } else if(a.family() == Address::IPv6) {
     char name[INET6_ADDRSTRLEN];
     ::memset(&name, 0, INET6_ADDRSTRLEN);
     const sockaddr_in6 *v6 = reinterpret_cast<const sockaddr_in6*>(&a.storage);

@@ -18,29 +18,29 @@ int main(int argc, char** argv) {
   using namespace freeflow;
 
   socket::Socket::Transport t;
-  if(tcp.compare(argv[4]) == 0)
+  if (tcp.compare(argv[4]) == 0)
     t = socket::Socket::TCP;
-  else if(tcp.compare(argv[4]) == 0)
+  else if (tcp.compare(argv[4]) == 0)
     t = socket::Socket::UDP;
 
   socket::Address::Type net;
-  if(ipv4.compare(argv[1]) == 0)
+  if (ipv4.compare(argv[1]) == 0)
     net = socket::Address::IPv4;
-  else if(ipv4.compare(argv[1]) == 0)
+  else if (ipv4.compare(argv[1]) == 0)
     net = socket::Address::IPv6;
 
   uint16_t port = atoi(argv[3]);
   
-  try {
+  // try {
     socket::Socket server(t);
     bind(server, socket::Address(net, argv[2], port));
-    if(t == socket::Socket::TCP) {
+    if (t == socket::Socket::TCP) {
       listen(server);
       std::cout << "Listening: " << to_string(server.local) << std::endl ;
       socket::Socket child = accept(server);
-    } else if(t == socket::Socket::UDP) {
+    } else if (t == socket::Socket::UDP) {
     }
-  } catch(Error e) {
-    std::cerr << "Error: " << strerror(e.code()) << std::endl;
-  }
+  // } catch(Error e) {
+  //   std::cerr << "Error: " << strerror(e.code()) << std::endl;
+  // }
 }

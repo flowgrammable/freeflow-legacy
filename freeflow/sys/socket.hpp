@@ -15,11 +15,12 @@
 #ifndef FREEFLOW_SOCKET_HPP
 #define FREEFLOW_SOCKET_HPP
 
-#include <sys/socket.h>
-#include <arpa/inet.h>
 #include <unistd.h>
-#include <string.h>
-#include <strings.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+
+#include <cstring>
 
 #include <freeflow/sys/error.hpp>
 #include <freeflow/proto/ipv4.hpp>
@@ -28,23 +29,116 @@
 namespace freeflow {
 namespace socket {
 
+// -------------------------------------------------------------------------- //
+// Internet protocol support
+//
+// TODO: Consider moving this into a separate file.
+
+using Addres_family = sa_family_t;
+
+/// The type of an Internet port.
+using Ip_port = in_port_t;
+
+// =====
+// Ipv4
+// =====
+
+/// An Ipv4 host adress.
+struct Ipv4_addr : in_addr { 
+  static constexpr Addres_family family = AF_INET;
+
+  Ipv4_addr(const Ipv4_addr&);
+  Ipv4_addr& operator=(const Ipv4_addr&);
+};
+
+/// An Ipv4 socket address is a host and port. This class provides a
+/// read-only view of the underlying system structure.
+struct Ipv4_sockaddr : sockaddr_in {
+  static constexpr Addres_family family = AF_INET;
+
+  Ipv4_sockaddr(const Ipv4_sockaddr&);
+  Ipv4_sockaddr& operator=(const Ipv4_sockaddr&);
+
+  Ipv4_sockaddr(const Ipv4_addr&, Ip_port);
+  Ipv4_sockaddr(const std::string&, Ip_port);
+
+  Ip_port port() const;
+  
+  Ipv4_addr&       addr();
+  const Ipv4_addr& addr() const;
+};
+
+bool operator==(const Ipv4_addr& a, const Ipv4_addr& b);
+bool operator!=(const Ipv4_addr& a, const Ipv4_addr& b);
+
+bool operator==(const Ipv4_sockaddr& a, const Ipv4_sockaddr& b);
+bool operator!=(const Ipv4_sockaddr& a, const Ipv4_sockaddr& b);
+
+// =====
+// Ipv6
+// =====
+
+/// In Ipv6 host address.
+struct Ipv6_addr : in6_addr {
+  static constexpr Addres_family family = AF_INET6;
+
+  Ipv6_addr(const Ipv6_addr&);
+  Ipv6_addr& operator=(const Ipv6_addr&);
+};
+
+/// An Ipv6 socket address is a host and port. This class provides a
+/// read-only view of the underlying system structure.
+struct Ipv6_sockaddr : sockaddr_in6 {
+  static constexpr Addres_family family = AF_INET6;
+
+  Ipv6_sockaddr(const Ipv6_sockaddr&);
+  Ipv6_sockaddr& operator=(const Ipv6_sockaddr&);
+
+  Ipv6_sockaddr(const Ipv6_addr&, Ip_port);
+  Ipv6_sockaddr(const std::string&, Ip_port);
+
+  Ip_port port() const;
+
+  Ipv6_addr&       addr();
+  const Ipv6_addr& addr() const;
+};
+
+bool operator==(const Ipv6_addr& a, const Ipv6_addr& b);
+bool operator!=(const Ipv6_addr& a, const Ipv6_addr& b);
+
+bool operator==(const Ipv6_sockaddr& a, const Ipv6_sockaddr& b);
+bool operator!=(const Ipv6_sockaddr& a, const Ipv6_sockaddr& b);
+
+
+// -------------------------------------------------------------------------- //
+// Socket address
+
+
 /// The address class is a union of the various address family formats
 /// supported by the host system.
 ///
+/// This is the primary interface for constructing and working with
+/// socket addresses.
+///
 /// TODO: Document me.
-struct Address
-{
+struct Address {
   enum Type : sa_family_t { 
     IPv4 = AF_INET, 
     IPv6 = AF_INET6
   };
 
-  Address(Type t = IPv4, const std::string& n = std::string(), uint16_t p = 0);
-  Address(ipv4::Address a, uint16_t p = 0);
-  Address(ipv6::Address a, uint16_t p = 0);
-
   Address(const Address& a);
   Address& operator=(const Address& a);
+
+  Address();
+  Address(Type t, const std::string& n, Ip_port p);
+  Address(Ipv4_addr a, Ip_port p = 0);
+  Address(Ipv6_addr a, Ip_port p = 0);
+
+  Type family() const;
+
+  const Ipv4_sockaddr& as_ipv4() const;
+  const Ipv6_sockaddr& as_ipv6() const;
 
   sockaddr_storage storage;
 };
@@ -59,6 +153,10 @@ socklen_t len(const Address& a);
 // Printing
 std::string to_string(const Address& a);
 
+
+// -------------------------------------------------------------------------- //
+// Socket
+
 /// The socket class wraps the system socket API. This class can be used
 /// to create client and server sockets.
 ///
@@ -70,8 +168,9 @@ struct Socket
     TCP = SOCK_STREAM
   };
 
+  Socket(Transport t);
+  Socket(Transport t, const Address& a);
   Socket(int f, Transport t, const Address& l, const Address& p);
-  Socket(Transport t, Address a = Address());
 
   Socket(Socket&& s);
   ~Socket();

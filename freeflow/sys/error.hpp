@@ -15,8 +15,10 @@
 #ifndef FREEFLOW_ERROR_HPP
 #define FREEFLOW_ERROR_HPP
 
-#include <cstdint>
+#include <cassert>
 #include <cerrno>
+#include <cstdint>
+#include <stdexcept>
 
 namespace freeflow {
 

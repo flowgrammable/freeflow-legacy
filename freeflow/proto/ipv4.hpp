@@ -15,7 +15,7 @@
 namespace freeflow {
 namespace ipv4 {
 
-struct Address
+struct Address : sockaddr_in
 {
   uint32_t value;
 };
