@@ -18,6 +18,9 @@ target_link_libraries(error freeflow_sys)
 add_executable(selector selector.cpp)
 target_link_libraries(selector freeflow_sys)
 
+add_executable(scheduler scheduler.cpp)
+target_link_libraries(scheduler freeflow_sys)
+
 add_executable(server server.cpp)
 target_link_libraries(server freeflow_sys)
 
