@@ -15,63 +15,63 @@
 namespace freeflow {
 
 inline
-Job::Job(int t, int p) :
+Task::Task(int t, int p) :
   priority(p), type(t)
 { }
 
 inline void
-Job::set_readable()
+Task::set_readable()
 {
   type |= READABLE;
 }
 
 inline void
-Job::set_writable()
+Task::set_writable()
 {
   type |= WRITABLE;
 }
 
 inline void
-Job::clr_readable()
+Task::clr_readable()
 {
   type &= ~READABLE;
 }
 
 inline void
-Job::clr_writable()
+Task::clr_writable()
 {
   type &= ~WRITABLE;
 }
 
 inline bool
-Job::readable() const
+Task::readable() const
 {
   return type & READABLE;
 }
 
 inline bool
-Job::writable() const
+Task::writable() const
 {
   return type & WRITABLE;
 }
 
 
 inline bool
-Less(const Job* lhs, const Job* rhs)
+Less(const Task* lhs, const Task* rhs)
 {
   return rhs->priority < lhs->priority;
 }
 
 inline void
-clr_jobs(Scheduler& s)
+clr_tasks(Scheduler& s)
 {
-  s.jobs.clear();
+  s.tasks.clear();
 }
 
 inline void
 run(Scheduler& s)
 {
-  while(s.jobs.size() > 0)
+  while(s.tasks.size() > 0)
     execute_round(s);
 }
 

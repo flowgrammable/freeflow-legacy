@@ -8,10 +8,10 @@
 #include "freeflow/sys/pipe.hpp"
 #include "freeflow/sys/scheduler.hpp"
 
-struct Console : public freeflow::Job
+struct Console : public freeflow::Task
 {
   Console(const std::string& n) :
-    Job(READABLE, 1), pipe(n)
+    Task(READABLE, 1), pipe(n)
   { }
 
   void init() {
@@ -42,7 +42,7 @@ freeflow::Scheduler sched;
 void 
 handler(int arg)
 {
-  freeflow::clr_jobs(sched);
+  freeflow::clr_tasks(sched);
 }
 
 int 
@@ -57,7 +57,7 @@ main(int argc, char** argv)
   ::signal(SIGINT, handler);
   try {
     Console console(argv[1]);
-    add_job(sched, &console);
+    add_task(sched, &console);
     run(sched);
   } catch(Error e) {
     std::cerr << strerror(e.data()) << std::endl;

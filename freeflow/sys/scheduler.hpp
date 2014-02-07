@@ -22,13 +22,13 @@
 
 namespace freeflow {
 
-struct Job
+struct Task
 {
   static constexpr int CLEAR    = 0;
   static constexpr int READABLE = 1 << 0;
   static constexpr int WRITABLE = 1 << 1;
 
-  Job(int t = CLEAR, int p = 10);
+  Task(int t = CLEAR, int p = 10);
 
   void set_readable();
   void set_writable();
@@ -50,20 +50,20 @@ struct Job
   int type;
 };
 
-bool Less(const Job* lhs, const Job* rhs);
+bool Less(const Task* lhs, const Task* rhs);
 
 struct Scheduler
 {
-  std::map<int,Job*> jobs;
+  std::map<int,Task*> tasks;
   Selector sel;
 };
 
-void add_job(Scheduler& sched, Job* sel);
-void del_job(Scheduler& sched, Job* sel);
-void clr_jobs(Scheduler& sched);
+void add_task(Scheduler& sched, Task* t);
+void del_task(Scheduler& sched, Task* t);
+void clr_task(Scheduler& sched);
 
 void run(Scheduler& s);
-void process_job(Scheduler& s, Job* j);
+void process_task(Scheduler& s, Task* t);
 void execute_round(Scheduler& s);
 
 } // namespace freeflow

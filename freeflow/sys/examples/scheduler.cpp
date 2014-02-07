@@ -4,9 +4,9 @@
 #include <iostream>
 #include "freeflow/sys/scheduler.hpp"
 
-struct Console : public freeflow::Job
+struct Console : public freeflow::Task
 {
-  Console() : Job(READABLE, 1)
+  Console() : Task(READABLE, 1)
   { }
 
   void init() {
@@ -29,6 +29,6 @@ int main() {
   Console console;
   Scheduler scheduler;
 
-  add_job(scheduler, &console);
+  add_task(scheduler, &console);
   run(scheduler);
 }

@@ -17,37 +17,37 @@
 namespace freeflow {
 
 void
-add_job(Scheduler& s, Job* j)
+add_task(Scheduler& s, Task* t)
 {
-  s.jobs.insert(std::pair<int,Job*>(j->fd(), j));
-  if(j->type & Job::READABLE)
-    add_reader(s.sel, j->fd());
-  if(j->type & Job::WRITABLE)
-    add_writer(s.sel, j->fd());
-  j->init();
+  s.tasks.insert(std::pair<int,Task*>(t->fd(), t));
+  if(t->type & Task::READABLE)
+    add_reader(s.sel, t->fd());
+  if(t->type & Task::WRITABLE)
+    add_writer(s.sel, t->fd());
+  t->init();
 }
 
 void
-del_job(Scheduler& s, Job* j)
+del_task(Scheduler& s, Task* t)
 {
-  s.jobs.erase(j->fd());
-  if(j->type & Job::READABLE)
-    del_reader(s.sel, j->fd());
-  if(j->type & Job::WRITABLE)
-    del_writer(s.sel, j->fd());
-  j->fini();
+  s.tasks.erase(t->fd());
+  if(t->type & Task::READABLE)
+    del_reader(s.sel, t->fd());
+  if(t->type & Task::WRITABLE)
+    del_writer(s.sel, t->fd());
+  t->fini();
 }
 
 void
-process_job(Scheduler& s, Job* j)
+process_task(Scheduler& s, Task* t)
 {
-  if(is_readable(s.sel, j->fd())) {
-    j->read();
+  if(is_readable(s.sel, t->fd())) {
+    t->read();
   }
-  if(is_writable(s.sel, j->fd())) {
-    j->write();
+  if(is_writable(s.sel, t->fd())) {
+    t->write();
   }
-  j->time();
+  t->time();
 }
 
 void
@@ -57,19 +57,19 @@ execute_round(Scheduler& s)
   select(s.sel, nullptr);
 
   // Build a run queue
-  std::vector<Job*> run_queue;
+  std::vector<Task*> run_queue;
   std::make_heap (run_queue.begin(), run_queue.end());    // is this necessary?
-  for(auto job : s.jobs) {
-    run_queue.push_back(job.second);
+  for(auto task : s.tasks) {
+    run_queue.push_back(task.second);
     std::push_heap(run_queue.begin(), run_queue.end(), Less);
   }
   
   // Execute the run queue 
   while(run_queue.size() > 0) {
-    Job* job = run_queue.front();
+    Task* task = run_queue.front();
     std::pop_heap(run_queue.begin(), run_queue.end());
     run_queue.pop_back();
-    process_job(s, job);
+    process_task(s, task);
   }
 }
 
