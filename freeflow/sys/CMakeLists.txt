@@ -18,6 +18,8 @@ set(src fd_utils.cpp
         buffer.cpp
         signal.cpp
         selector.cpp
+        epoll.cpp
+        kqueue.cpp
         scheduler.cpp
         syslog.cpp
         pipe.cpp)
@@ -28,6 +30,8 @@ set(inc fd_utils.hpp
         buffer.hpp
         signal.hpp
         selector.hpp
+        epoll.hpp
+        kqueue.hpp
         scheduler.hpp
         syslog.hpp
         pipe.hpp)
