@@ -12,41 +12,58 @@
 // or implied. See the License for the specific language governing
 // permissions and limitations under the License.
 
-#ifndef FREEFLOW_SELECTOR_HPP
-#define FREEFLOW_SELECTOR_HPP
+#ifndef FREEFLOW_SCHEDULER_HPP
+#define FREEFLOW_SCHEDULER_HPP
 
 #include <queue>
+#include <map>
 
-#include "freeflow/sys/error.hpp"
+#include "freeflow/sys/selector.hpp"
 
 namespace freeflow {
 
 struct Job
 {
-  virtual void init() = 0;
-  virtual void fini() = 0;
+  static constexpr int CLEAR    = 0;
+  static constexpr int READABLE = 1 << 0;
+  static constexpr int WRITABLE = 1 << 1;
 
-  virtual void read() = 0;
-  virtual void write() = 0;
+  Job(int t = CLEAR);
 
-  virtual void time() = 0;
+  void set_readable();
+  void set_writable();
+  void clr_readable();
+  void clr_writable();
+  bool readable() const;
+  bool writable() const;
+
+  virtual void init() {}
+  virtual void fini() {}
+
+  virtual void read()  = 0;
+  virtual void write() {}
+  virtual void time()  {}
+
   virtual int fd() const = 0;
 
   int priority;
-  int ticks;
-  int max_ticks;
+  int type;
 };
 
-bool operator<(const Job& lhs, const Job& rhs) const;
+bool Less(const Job* lhs, const Job* rhs);
 
 struct Scheduler
 {
-  std::priority_queue<Job*> job_queue;  
+  std::map<int,Job*> jobs;
+  Selector sel;
 };
 
 void add_job(Scheduler& sched, Job* sel);
 void del_job(Scheduler& sched, Job* sel);
+
 void run(Scheduler& s);
+void process_job(Job* j);
+void execute_round(Scheduler& s);
 
 } // namespace freeflow
 

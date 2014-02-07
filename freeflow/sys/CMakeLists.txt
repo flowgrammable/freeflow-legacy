@@ -18,6 +18,7 @@ set(src fd_utils.cpp
         buffer.cpp
         signal.cpp
         selector.cpp
+        scheduler.cpp
         syslog.cpp
         pipe.cpp)
 
@@ -27,6 +28,7 @@ set(inc fd_utils.hpp
         buffer.hpp
         signal.hpp
         selector.hpp
+        scheduler.hpp
         syslog.hpp
         pipe.hpp)
 

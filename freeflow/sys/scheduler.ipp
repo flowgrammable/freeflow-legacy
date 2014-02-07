@@ -14,29 +14,60 @@
 
 namespace freeflow {
 
+inline
+Job::Job(int t) :
+  type(t)
+{ }
+
 inline void
-add_job(Scheduler& s, Job* j)
+Job::set_readable()
 {
-  s.job_queue.push(j);
+  type |= READABLE;
 }
 
 inline void
-Scheduler::exec(Job* j, int tick, int max_tick)
+Job::set_writable()
 {
-  
+  type |= WRITABLE;
 }
 
 inline void
-Scheduler::run()
+Job::clr_readable()
 {
-  while(jobs.length() > 0) {
-    std::priority_queue<Job*> run_queue = jobs.mk_queue();
-    r = select(sel, 0);
-    while(instance.length() > 0) {
-      x = instance.top();
-      x
-    }
-  }
+  type &= ~READABLE;
+}
+
+inline void
+Job::clr_writable()
+{
+  type &= ~WRITABLE;
+}
+
+inline bool
+Job::readable() const
+{
+  return type & READABLE;
+}
+
+inline bool
+Job::writable() const
+{
+  return type & WRITABLE;
+}
+
+
+inline bool
+Less(const Job* lhs, const Job* rhs)
+{
+  return rhs->priority < lhs->priority;
+}
+
+inline void
+run(Scheduler& s)
+{
+  while(s.jobs.size() > 0)
+    execute_round(s);
 }
 
 } // namespace freeflow
+
