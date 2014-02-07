@@ -21,7 +21,6 @@ set(src fd_utils.cpp
         selector.cpp
         epoll.cpp
         #        kqueue.cpp
-        thread.cpp
         scheduler.cpp
         syslog.cpp
         pipe.cpp)
@@ -35,7 +34,6 @@ set(inc fd_utils.hpp
         selector.hpp
         epoll.hpp
         #kqueue.hpp
-        thread.hpp
         scheduler.hpp
         syslog.hpp
         pipe.hpp)
