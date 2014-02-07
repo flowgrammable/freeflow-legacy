@@ -16,11 +16,17 @@ namespace freeflow {
 
 inline
 Pipe::Pipe(std::string n) :
-  name(n)
+  name(n), fd(::open(n.c_str(), O_RDWR))
 {
-  fd = ::open(n.c_str(), O_RDWR);
   if(fd == -1)
     throw Error(Error::SYSTEM_ERROR, errno);
+}
+
+inline
+Pipe::Pipe(Pipe&& p) :
+  name(p.name), fd(p.fd)
+{
+  p.fd = -1;
 }
 
 inline

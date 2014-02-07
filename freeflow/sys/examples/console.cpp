@@ -1,46 +1,55 @@
+#include <string.h>
 #include <iostream>
+#include "freeflow/sys/fd_utils.hpp"
+#include "freeflow/sys/pipe.hpp"
+#include "freeflow/sys/scheduler.hpp"
 
-bool
-eval_bind()
+struct Console : public freeflow::Job
 {
-  return false;
-}
+  Console(const std::string& n) :
+    Job(READABLE, 1), pipe(n)
+  { }
 
-bool
-eval_help()
-{
-  std::cout << std::string(40, '-') << std::endl;
-  std::cout << "bind" << "\t" << "create and bind a socket" << std::endl;
-  std::cout << "quit" << "\t" << "terminate the console" << std::endl;
-  std::cout << "help" << "\t" << "print a listing of commands" << std::endl;
-  std::cout << std::string(40, '-') << std::endl;
-  return false;
-}
+  void init() {
+    std::cout << ">" << std::flush;
+  }
 
-bool
-process(const std::string& input)
-{
-  std::string bind("bind");
-  std::string help("help");
-  std::string quit("quit");
+  void read() {
+    char input[256];
+    ::memset(input, 0, 256);
+    freeflow::Transfer t(pipe.fd, (uint8_t*)input, 256);
+    auto result = freeflow::read_available(t);
+    if(result < 0) {
+      std::cerr << "Error: " << strerror(errno) << std::endl;
+    } else {
+      std::cout << "Rx Bytes: " << result << std::endl;
+      std::cout << input << std::endl;
+    }
+    std::cout << ">" << std::flush;
+  }
 
-  if(input.compare(bind) == 0)
-    return eval_bind();
-  else if(input.compare(help) == 0)
-    return eval_help();
-  else if(input.compare(quit) == 0)
-    return true;
-  return false;
-}
+  int fd() const { return pipe.fd; }
+
+  freeflow::Pipe pipe;
+};
 
 int 
 main(int argc, char** argv)
 {
-  std::string input;
-  bool done = false;
-  while(not done) {
-    std::cout << ">";
-    std::getline(std::cin, input);
-    done = process(input);
+  if(argc != 2) {
+    std::cerr << "usage error: " << argv[0] << " <pipe>" << std::endl;
+    std::exit(-1);
   }
+
+  using namespace freeflow;
+
+  try {
+    Console console(argv[1]);
+    Scheduler sched;
+    add_job(sched, &console);
+    run(sched);
+  } catch(Error e) {
+    std::cerr << strerror(e.data()) << std::endl;
+  }
+
 }

@@ -33,9 +33,6 @@ struct Pipe
   int fd;
 };
 
-int write(Pipe& p, const uint8_t* b, std::size_t l);
-int read(Pipe& p, uint8_t* b, std::size_t l);
-
 } // namespace freeflow 
 
 #include "pipe.ipp"
