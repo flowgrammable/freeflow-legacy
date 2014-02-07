@@ -63,6 +63,12 @@ Less(const Job* lhs, const Job* rhs)
 }
 
 inline void
+clr_jobs(Scheduler& s)
+{
+  s.jobs.clear();
+}
+
+inline void
 run(Scheduler& s)
 {
   while(s.jobs.size() > 0)

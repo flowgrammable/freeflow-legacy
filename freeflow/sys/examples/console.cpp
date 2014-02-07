@@ -1,5 +1,9 @@
+
 #include <string.h>
+#include <signal.h>
+
 #include <iostream>
+
 #include "freeflow/sys/fd_utils.hpp"
 #include "freeflow/sys/pipe.hpp"
 #include "freeflow/sys/scheduler.hpp"
@@ -33,6 +37,14 @@ struct Console : public freeflow::Job
   freeflow::Pipe pipe;
 };
 
+freeflow::Scheduler sched;
+
+void 
+handler(int arg)
+{
+  freeflow::clr_jobs(sched);
+}
+
 int 
 main(int argc, char** argv)
 {
@@ -42,10 +54,9 @@ main(int argc, char** argv)
   }
 
   using namespace freeflow;
-
+  ::signal(SIGINT, handler);
   try {
     Console console(argv[1]);
-    Scheduler sched;
     add_job(sched, &console);
     run(sched);
   } catch(Error e) {

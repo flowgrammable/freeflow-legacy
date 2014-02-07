@@ -74,9 +74,10 @@ is_writable(const Selector& s, int fd)
 inline int
 select(Selector& s, timeval* tv)
 {
-  int result;
-  result = ::select(max(s), &s.readset, &s.writeset, nullptr, tv);
-  if(result == -1)
+  int result = ::select(max(s), &s.readset, &s.writeset, nullptr, tv);
+  while(result == -1 and tv != nullptr and errno == EINTR)
+    result = ::select(max(s), &s.readset, &s.writeset, nullptr, tv);
+  if(result == -1 and errno != EINTR)
     throw Error(Error::SYSTEM_ERROR, errno);
   return result;
 }

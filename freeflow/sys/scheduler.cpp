@@ -53,6 +53,9 @@ process_job(Scheduler& s, Job* j)
 void
 execute_round(Scheduler& s)
 {
+  // Execute the select
+  select(s.sel, nullptr);
+
   // Build a run queue
   std::vector<Job*> run_queue;
   std::make_heap (run_queue.begin(), run_queue.end());    // is this necessary?
@@ -60,11 +63,6 @@ execute_round(Scheduler& s)
     run_queue.push_back(job.second);
     std::push_heap(run_queue.begin(), run_queue.end(), Less);
   }
-  
-  // Execute the select
-  auto result = select(s.sel, nullptr);
-  if(result == -1)
-    throw Error(Error::SYSTEM_ERROR, errno);
   
   // Execute the run queue 
   while(run_queue.size() > 0) {

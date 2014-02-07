@@ -60,6 +60,7 @@ struct Scheduler
 
 void add_job(Scheduler& sched, Job* sel);
 void del_job(Scheduler& sched, Job* sel);
+void clr_jobs(Scheduler& sched);
 
 void run(Scheduler& s);
 void process_job(Scheduler& s, Job* j);

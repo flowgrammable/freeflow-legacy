@@ -21,6 +21,9 @@ target_link_libraries(selector freeflow_sys)
 add_executable(pipe pipe.cpp)
 target_link_libraries(pipe freeflow_sys)
 
+add_executable(signal signal.cpp)
+target_link_libraries(signal freeflow_sys)
+
 add_executable(scheduler scheduler.cpp)
 target_link_libraries(scheduler freeflow_sys)
 
