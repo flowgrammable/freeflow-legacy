@@ -214,6 +214,39 @@ len(const Address& a)  {
 // -------------------------------------------------------------------------- //
 // Socket
 
+inline int
+socket_type(Socket_base::Transport t)
+{
+  switch(t) {
+    case Socket_base::TCP:
+    case Socket_base::SCTP:
+    case Socket_base::TLS:
+      return SOCK_STREAM;
+    case Socket_base::UDP:
+      return SOCK_DGRAM;
+    default:
+      return SOCK_RAW;
+  }
+}
+
+inline int
+socket_protocol(Socket_base::Transport t)
+{
+  switch(t) {
+    case Socket_base::TCP:
+    case Socket_base::TLS:
+    case Socket_base::RAW_TCP:
+      return IPPROTO_TCP;
+    case Socket_base::UDP:
+    case Socket_base::RAW_UDP:
+      return IPPROTO_UDP;
+    case Socket_base::SCTP:
+      return IPPROTO_SCTP;
+    default:
+      return IPPROTO_RAW;
+  }
+}
+
 inline
 Socket_base::Socket_base(Family f, Transport t)
   : family(f), transport(t)
@@ -241,7 +274,7 @@ inline
 Socket::Socket(Family f, Transport t)
   : Socket_base(f, t)
 {
-  fd = ::socket(family, transport, 0);
+  fd = ::socket(family, socket_type(transport), socket_protocol(transport));
   if (fd < 0)
     throw system_error();
 }
