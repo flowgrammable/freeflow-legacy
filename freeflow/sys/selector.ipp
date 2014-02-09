@@ -86,7 +86,7 @@ select(Selector& s, const MicroTime& mt)
 
   int result = ::select(max(s), &s.readset, &s.writeset, nullptr, tv_ptr);
   if(result == -1 and errno != EINTR)
-    throw Error(Error::SYSTEM_ERROR, errno);
+    throw system_error();
   return result;
 }
 

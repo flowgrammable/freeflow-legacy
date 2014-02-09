@@ -33,8 +33,6 @@ struct Selector
   std::set<int> write_fds;
 };
 
-int max(const Selector& s);
-
 void add_reader(Selector& s, int fd);
 void add_writer(Selector& s, int fd);
 void del_reader(Selector& s, int fd);
