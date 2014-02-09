@@ -172,22 +172,42 @@ static_assert(std::is_trivial<Address>::value, "");
 // -------------------------------------------------------------------------- //
 // Socket
 
-/// The socket is an endpoint for communicating systems.
-///
-/// Note that sockets are resources; they can be moved but not copied. 
-///
-/// TODO: Document me!
-struct Socket : Address_info
-{
+// The socket base class encapsulates informaiton about a socket. This
+// is used to provide efficient move semantics for a Socket (since the
+// state is a trivial type).
+struct Socket_base : Address_info {
   enum Transport { 
+    // Internet protocols
     UDP = SOCK_DGRAM, 
     TCP = SOCK_STREAM,
+    
+    // Raw sockets
     RAW_IPV4,
     RAW_IPV6,
     RAW_UDP,
     RAW_TCP,
   };
 
+  Socket_base() = default;
+  Socket_base(Family f, Transport t);
+  Socket_base(int, Transport, const Address&, const Address&);
+
+  Family    family;
+  Transport transport;
+  Address   local;
+  Address   peer;
+  int       fd;
+  int       backlog;
+};
+
+static_assert(std::is_trivial<Socket_base>::value, "");
+
+/// The socket is an endpoint for communicating systems.
+///
+/// Note that sockets are resources; they can be moved but not copied. 
+///
+/// TODO: Document me!
+struct Socket : Socket_base {
   // Not default constructible.
   Socket() = delete;
 
@@ -204,13 +224,6 @@ struct Socket : Address_info
   Socket(int, Transport, const Address&, const Address&);
 
   ~Socket();
-
-  Family    family;
-  Transport transport;
-  Address   local;
-  Address   peer;
-  int       fd;
-  int       backlog;
 };
 
 // Socket operations

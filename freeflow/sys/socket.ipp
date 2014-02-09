@@ -230,11 +230,32 @@ len(const Address& a)  {
 // -------------------------------------------------------------------------- //
 // Socket
 
-// FIXME: I'm not sure we should have a constructor that selects an
-// address fammily as a default.
+inline
+Socket_base::Socket_base(Family f, Transport t)
+  : family(f), transport(t)
+{ }
+
+inline
+Socket_base::Socket_base(int f, Transport t, const Address& l, const Address& p)
+  : transport(t), local(l), peer(p), fd(f)
+{ }
+
+inline
+Socket::Socket(Socket&& s)
+  : Socket_base(s) 
+{
+  s.fd = -1;
+}
+
+inline Socket&
+Socket::operator=(Socket&& s) {
+  Socket_base::operator=(s);
+  return *this;
+}
+
 inline
 Socket::Socket(Family f, Transport t)
-  : family(f), transport(t)
+  : Socket_base(f, t)
 {
   fd = ::socket(family, transport, 0);
   if (fd < 0)
@@ -243,16 +264,8 @@ Socket::Socket(Family f, Transport t)
 
 inline
 Socket::Socket(int f, Transport t, const Address& l, const Address& p)
-  : transport(t), local(l), peer(p), fd(f)
+  : Socket_base(f, t, l, p)
 { }
-
-inline
-Socket::Socket(Socket&& s)
-  : local(std::move(s.local)), peer(std::move(s.peer))
-{
-  fd = s.fd;
-  s.fd = -1;
-}
 
 inline
 Socket::~Socket() { 
