@@ -182,8 +182,10 @@ static_assert(std::is_trivial<Address>::value, "");
 struct Socket_base : Address_info {
   enum Transport { 
     // Internet protocols
-    UDP = SOCK_DGRAM, 
-    TCP = SOCK_STREAM,
+    UDP, 
+    TCP,
+    TLS,
+    SCTP,
     
     // Raw sockets
     RAW_IPV4,
@@ -205,6 +207,9 @@ struct Socket_base : Address_info {
 };
 
 static_assert(std::is_trivial<Socket_base>::value, "");
+
+int socket_type(Socket_base::Transport t);
+int socket_protocol(Socket_base::Transport t);
 
 /// The socket is an endpoint for communicating systems.
 ///
