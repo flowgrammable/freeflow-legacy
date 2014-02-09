@@ -45,28 +45,6 @@ init_addr(const std::string& str, Addr& a) {
 // Ipv4
 
 inline
-Ipv4_addr::Ipv4_addr(const Ipv4_addr& x) {
-  std::memcpy(this, &x, sizeof(Ipv4_addr));
-}
-
-inline Ipv4_addr&
-Ipv4_addr::operator=(const Ipv4_addr& x) {
-  std::memcpy(this, &x, sizeof(Ipv4_addr));
-  return *this;
-}
-
-inline
-Ipv4_sockaddr::Ipv4_sockaddr(const Ipv4_sockaddr& x) {
-  std::memcpy(this, &x, sizeof(Ipv4_sockaddr));
-}
-
-inline Ipv4_sockaddr&
-Ipv4_sockaddr::operator=(const Ipv4_sockaddr& x) {
-  std::memcpy(this, &x, sizeof(Ipv4_sockaddr));
-  return *this;
-}
-
-inline
 Ipv4_sockaddr::Ipv4_sockaddr(const Ipv4_addr& a, Ip_port p) {
   sin_family = family;
   sin_port = htons(p);
@@ -115,28 +93,6 @@ operator!=(const Ipv4_sockaddr& a, const Ipv4_sockaddr& b) {
 
 // -------------------------------------------------------------------------- //
 // Ipv6
-
-inline
-Ipv6_addr::Ipv6_addr(const Ipv6_addr& x) {
-  std::memcpy(this, &x, sizeof(Ipv6_addr));
-}
-
-inline Ipv6_addr&
-Ipv6_addr::operator=(const Ipv6_addr& x) {
-  std::memcpy(this, &x, sizeof(Ipv6_addr));
-  return *this;
-}
-
-inline
-Ipv6_sockaddr::Ipv6_sockaddr(const Ipv6_sockaddr& x) {
-  std::memcpy(this, &x, sizeof(Ipv6_sockaddr));
-}
-
-inline Ipv6_sockaddr&
-Ipv6_sockaddr::operator=(const Ipv6_sockaddr& x) {
-  std::memcpy(this, &x, sizeof(Ipv6_sockaddr));
-  return *this;
-}
 
 inline
 Ipv6_sockaddr::Ipv6_sockaddr(const std::string& a, Ip_port p) {
@@ -193,51 +149,36 @@ operator!=(const Ipv6_sockaddr& a, const Ipv6_sockaddr& b) {
 // -------------------------------------------------------------------------- //
 // Address
 
-// NOTE: Memsetting the storage results in double-initialization of
+// TODO: Memsetting the storage results in double-initialization of
 // sockaddr members. If we find we're doing this a lot, we may want
 // to find ways to reduce the overhead.
 
 inline
-Address::Address() {
-  std::memset(&storage, sizeof(sockaddr_storage), 0);
-}
-
-inline
-Address::Address(Type t, const std::string& n, uint16_t p) 
-  : Address()
-{
-  if (t == IPv4)
+Address::Address(Family f, const std::string& n, Ip_port p) {
+  // FIXME: Don't use placement new. We've already constructed
+  // that memory (and initialized it), so we're technically 
+  // double-constructing the storage object.
+  if (f == IPv4)
     new (&storage) Ipv4_sockaddr(n, p);
-  else if (t == IPv6)
+  else if (f == IPv6)
     new (&storage) Ipv6_sockaddr(n, p);
   else
     throw std::runtime_error("unknown address family");
 }
 
 inline
-Address::Address(Ipv4_addr a, uint16_t p) {
+Address::Address(Ipv4_addr a, Ip_port p) {
   new (&storage) Ipv4_sockaddr(a, p);
 }
 
 inline
-Address::Address(Ipv6_addr a, uint16_t p) {
+Address::Address(Ipv6_addr a, Ip_port p) {
   new (&storage) Ipv6_sockaddr(a, p);
 }
 
-inline
-Address::Address(const Address& a) {
-  memcpy(&storage, &a.storage, sizeof(sockaddr_storage));
-}
-
-inline Address&
-Address::operator=(const Address& a) {
-  memcpy(&storage, &a.storage, sizeof(sockaddr_storage));
-  return *this;
-}
-
-inline Address::Type
+inline Address::Family
 Address::family() const {
-  return Type(storage.ss_family);
+  return Family(storage.ss_family);
 }
 
 inline const Ipv4_sockaddr&
@@ -292,17 +233,17 @@ len(const Address& a)  {
 // FIXME: I'm not sure we should have a constructor that selects an
 // address fammily as a default.
 inline
-Socket::Socket(Transport t)
-  : transport(t)
+Socket::Socket(Family f, Transport t)
+  : family(f), transport(t)
 {
-  fd = ::socket(Address::IPv4, transport, 0);
+  fd = ::socket(family, transport, 0);
   if (fd < 0)
     throw system_error();
 }
 
 inline
 Socket::Socket(int f, Transport t, const Address& l, const Address& p)
-  : local(l), peer(p), transport(t), fd(f)
+  : transport(t), local(l), peer(p), fd(f)
 { }
 
 inline

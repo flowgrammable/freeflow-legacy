@@ -21,6 +21,7 @@
 #include <arpa/inet.h>
 
 #include <cstring>
+#include <type_traits>
 
 #include <freeflow/sys/error.hpp>
 #include <freeflow/proto/ipv4.hpp>
@@ -34,7 +35,15 @@ namespace socket {
 //
 // TODO: Consider moving this into a separate file.
 
-using Addres_family = sa_family_t;
+/// A class used to encapsulate static information about address
+/// families. This provides names for derived classes, to help improve
+/// writability.
+struct Address_info {
+  enum Family : sa_family_t {
+    IPv4 = AF_INET, 
+    IPv6 = AF_INET6
+  };
+};
 
 /// The type of an Internet port.
 using Ip_port = in_port_t;
@@ -43,22 +52,20 @@ using Ip_port = in_port_t;
 // Ipv4
 // =====
 
-/// An Ipv4 host adress.
-struct Ipv4_addr : in_addr { 
-  static constexpr Addres_family family = AF_INET;
 
-  Ipv4_addr(const Ipv4_addr&);
-  Ipv4_addr& operator=(const Ipv4_addr&);
+/// An Ipv4 host adress.
+struct Ipv4_addr : in_addr, Address_info { 
+  static constexpr Family family = IPv4;
 };
+
+static_assert(sizeof(Ipv4_addr) == sizeof(in_addr), "non-conforming compiler");
 
 /// An Ipv4 socket address is a host and port. This class provides a
 /// read-only view of the underlying system structure.
-struct Ipv4_sockaddr : sockaddr_in {
-  static constexpr Addres_family family = AF_INET;
+struct Ipv4_sockaddr : sockaddr_in, Address_info {
+  static constexpr Family family = IPv4;
 
-  Ipv4_sockaddr(const Ipv4_sockaddr&);
-  Ipv4_sockaddr& operator=(const Ipv4_sockaddr&);
-
+  Ipv4_sockaddr() = default;
   Ipv4_sockaddr(const Ipv4_addr&, Ip_port);
   Ipv4_sockaddr(const std::string&, Ip_port);
 
@@ -79,21 +86,16 @@ bool operator!=(const Ipv4_sockaddr& a, const Ipv4_sockaddr& b);
 // =====
 
 /// In Ipv6 host address.
-struct Ipv6_addr : in6_addr {
-  static constexpr Addres_family family = AF_INET6;
-
-  Ipv6_addr(const Ipv6_addr&);
-  Ipv6_addr& operator=(const Ipv6_addr&);
+struct Ipv6_addr : in6_addr, Address_info {
+  static constexpr Family family = IPv6;
 };
 
 /// An Ipv6 socket address is a host and port. This class provides a
 /// read-only view of the underlying system structure.
-struct Ipv6_sockaddr : sockaddr_in6 {
-  static constexpr Addres_family family = AF_INET6;
+struct Ipv6_sockaddr : sockaddr_in6, Address_info {
+  static constexpr Family family = IPv6;
 
-  Ipv6_sockaddr(const Ipv6_sockaddr&);
-  Ipv6_sockaddr& operator=(const Ipv6_sockaddr&);
-
+  Ipv6_sockaddr() = default;
   Ipv6_sockaddr(const Ipv6_addr&, Ip_port);
   Ipv6_sockaddr(const std::string&, Ip_port);
 
@@ -109,33 +111,41 @@ bool operator!=(const Ipv6_addr& a, const Ipv6_addr& b);
 bool operator==(const Ipv6_sockaddr& a, const Ipv6_sockaddr& b);
 bool operator!=(const Ipv6_sockaddr& a, const Ipv6_sockaddr& b);
 
+// TODO: Move these assertions into a unit test.
+
+// The implementation relies on the compiler's implementation of the
+// empty base optimization. 
+static_assert(sizeof(Ipv4_addr) == sizeof(in_addr), "");
+static_assert(sizeof(Ipv4_sockaddr) == sizeof(sockaddr_in), "");
+static_assert(sizeof(Ipv6_addr) == sizeof(in6_addr), "");
+static_assert(sizeof(Ipv6_sockaddr) == sizeof(sockaddr_in6), "");
+
+// Require that all of these classes are trivial types.
+static_assert(std::is_trivial<Ipv4_addr>::value, "");
+static_assert(std::is_trivial<Ipv4_sockaddr>::value, "");
+static_assert(std::is_trivial<Ipv6_addr>::value, "");
+static_assert(std::is_trivial<Ipv6_sockaddr>::value, "");
 
 // -------------------------------------------------------------------------- //
 // Socket address
 
 
-/// The address class is a union of the various address family formats
-/// supported by the host system.
+/// The address class represents a socket address for a local or remote
+/// host. The details of the address are determined by its address family.
+/// Examples include IPv4 and IPv6 socket addresses, which are comprised
+/// of a 32 or 128 bit host address and a 16 bit port number.
 ///
 /// This is the primary interface for constructing and working with
 /// socket addresses.
-///
-/// TODO: Document me.
-struct Address {
-  enum Type : sa_family_t { 
-    IPv4 = AF_INET, 
-    IPv6 = AF_INET6
-  };
+struct Address : Address_info {
 
-  Address(const Address& a);
-  Address& operator=(const Address& a);
+  Address() = default;
 
-  Address();
-  Address(Type t, const std::string& n, Ip_port p);
+  Address(Family t, const std::string& n, Ip_port p);
   Address(Ipv4_addr a, Ip_port p = 0);
   Address(Ipv6_addr a, Ip_port p = 0);
 
-  Type family() const;
+  Family family() const;
 
   const Ipv4_sockaddr& as_ipv4() const;
   const Ipv6_sockaddr& as_ipv6() const;
@@ -146,38 +156,55 @@ struct Address {
 bool operator==(const Address& l, const Address& r);
 bool operator!=(const Address& l, const Address& r);
 
-Address::Type family(const Address& a);
 sockaddr* addr(const Address& a);
 socklen_t len(const Address& a);
 
 // Printing
 std::string to_string(const Address& a);
 
+// TODO: Move all of these assertions into a unit test.
+
+// Compiler guarantees
+static_assert(std::is_trivial<sockaddr_storage>::value, "");
+static_assert(std::is_trivial<Address>::value, "");
+
 
 // -------------------------------------------------------------------------- //
 // Socket
 
-/// The socket class wraps the system socket API. This class can be used
-/// to create client and server sockets.
+/// The socket is an endpoint for communicating systems.
+///
+/// Note that sockets are resources; they can be moved but not copied. 
 ///
 /// TODO: Document me!
-struct Socket
+struct Socket : Address_info
 {
   enum Transport { 
     UDP = SOCK_DGRAM, 
     TCP = SOCK_STREAM
   };
 
-  Socket(Transport t);
-  Socket(Transport t, const Address& a);
-  Socket(int f, Transport t, const Address& l, const Address& p);
+  // Not default constructible.
+  Socket() = delete;
 
-  Socket(Socket&& s);
+  // Not copyable.
+  Socket(const Socket&) = delete;
+  Socket& operator=(const Socket&) = delete;
+
+  // Move semantics
+  Socket(Socket&&);
+  Socket& operator=(Socket&&);
+
+  // Socket construction
+  Socket(Family, Transport);
+  Socket(int, Transport, const Address&, const Address&);
+
   ~Socket();
 
+  Family    family;
+  Transport transport;
   Address   local;
   Address   peer;
-  Transport transport;
   int       fd;
   int       backlog;
 };

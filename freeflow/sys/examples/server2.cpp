@@ -23,7 +23,7 @@ int main(int argc, char** argv) {
   else if (tcp.compare(argv[4]) == 0)
     t = socket::Socket::UDP;
 
-  socket::Address::Type net;
+  socket::Address::Family net;
   if (ipv4.compare(argv[1]) == 0)
     net = socket::Address::IPv4;
   else if (ipv4.compare(argv[1]) == 0)
@@ -32,7 +32,7 @@ int main(int argc, char** argv) {
   uint16_t port = atoi(argv[3]);
   
   // try {
-    socket::Socket server(t);
+    socket::Socket server(net, t);
     bind(server, socket::Address(net, argv[2], port));
     if (t == socket::Socket::TCP) {
       listen(server);
