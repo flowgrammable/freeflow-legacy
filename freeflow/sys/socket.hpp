@@ -41,7 +41,8 @@ namespace socket {
 struct Address_info {
   enum Family : sa_family_t {
     IPv4 = AF_INET, 
-    IPv6 = AF_INET6
+    IPv6 = AF_INET6,
+    RAW  = PF_NDRV,
   };
 };
 
@@ -192,6 +193,8 @@ struct Socket_base : Address_info {
     RAW_IPV6,
     RAW_UDP,
     RAW_TCP,
+    RAW_ICMPv4,
+    RAW_ICMPv6,
   };
 
   Socket_base() = default;

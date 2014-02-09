@@ -242,6 +242,10 @@ socket_protocol(Socket_base::Transport t)
       return IPPROTO_UDP;
     case Socket_base::SCTP:
       return IPPROTO_SCTP;
+    case Socket_base::RAW_ICMPv4:
+      return IPPROTO_ICMP;
+    case Socket_base::RAW_ICMPv6:
+      return IPPROTO_ICMPV6;
     default:
       return IPPROTO_RAW;
   }
