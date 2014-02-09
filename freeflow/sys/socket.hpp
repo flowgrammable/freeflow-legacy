@@ -52,7 +52,6 @@ using Ip_port = in_port_t;
 // Ipv4
 // =====
 
-
 /// An Ipv4 host adress.
 struct Ipv4_addr : in_addr, Address_info { 
   static constexpr Family family = IPv4;
@@ -142,12 +141,15 @@ struct Address : Address_info {
   Address() = default;
 
   Address(Family t, const std::string& n, Ip_port p);
-  Address(Ipv4_addr a, Ip_port p = 0);
-  Address(Ipv6_addr a, Ip_port p = 0);
+  Address(const Ipv4_addr& a, Ip_port p = 0);
+  Address(const Ipv6_addr& a, Ip_port p = 0);
 
   Family family() const;
 
+  Ipv4_sockaddr&       as_ipv4();
   const Ipv4_sockaddr& as_ipv4() const;
+  
+  Ipv6_sockaddr&       as_ipv6();
   const Ipv6_sockaddr& as_ipv6() const;
 
   sockaddr_storage storage;
@@ -156,7 +158,9 @@ struct Address : Address_info {
 bool operator==(const Address& l, const Address& r);
 bool operator!=(const Address& l, const Address& r);
 
-sockaddr* addr(const Address& a);
+sockaddr*       addr(Address& a);
+const sockaddr* addr(const Address& a);
+
 socklen_t len(const Address& a);
 
 // Printing

@@ -17,46 +17,8 @@
 namespace freeflow {
 namespace socket {
 
-// TODO: Is memcpy really a valid means of copying sockaddr structures?
-
-// -------------------------------------------------------------------------- //
-// Utility
-
-namespace {
-
-// Convert the string to an address of the given type.
-template<typename Addr>
-inline void
-init_addr(const std::string& str, Addr& a) {
-  int result = inet_pton(a.family, str.c_str(), &a);
-  if (result <= 0) {
-    if (result == 0)
-      // throw std::runtime_error("invalid address string");
-      throw system_error();
-    else
-      throw system_error();
-  }
-}
-
-} // namespace
-
-
 // -------------------------------------------------------------------------- //
 // Ipv4
-
-inline
-Ipv4_sockaddr::Ipv4_sockaddr(const Ipv4_addr& a, Ip_port p) {
-  sin_family = family;
-  sin_port = htons(p);
-  addr() = a;
-}
-
-inline
-Ipv4_sockaddr::Ipv4_sockaddr(const std::string& a, Ip_port p) {
-  sin_family = family;
-  sin_port = htons(p);
-  init_addr(a, addr());
-}
 
 inline Ip_port 
 Ipv4_sockaddr::port() const { return sin_port; }
@@ -93,24 +55,6 @@ operator!=(const Ipv4_sockaddr& a, const Ipv4_sockaddr& b) {
 
 // -------------------------------------------------------------------------- //
 // Ipv6
-
-inline
-Ipv6_sockaddr::Ipv6_sockaddr(const std::string& a, Ip_port p) {
-  sin6_family = AF_INET6;
-  sin6_port = htons(p);
-  sin6_flowinfo = 0;
-  sin6_scope_id = 0;
-  init_addr(a, addr());
-}
-
-inline
-Ipv6_sockaddr::Ipv6_sockaddr(const Ipv6_addr& a, Ip_port p) {
-  sin6_family = AF_INET6;
-  sin6_port = htons(p);
-  sin6_flowinfo = 0;
-  sin6_scope_id = 0;
-  addr() = a;
-}
 
 inline Ip_port 
 Ipv6_sockaddr::port() const { 
@@ -149,30 +93,57 @@ operator!=(const Ipv6_sockaddr& a, const Ipv6_sockaddr& b) {
 // -------------------------------------------------------------------------- //
 // Address
 
-// TODO: Memsetting the storage results in double-initialization of
-// sockaddr members. If we find we're doing this a lot, we may want
-// to find ways to reduce the overhead.
+namespace {
+
+// Convert the string to an address of the given type. This directly
+// populates the underlyinh object by passing it as a sockaddr pointer.
+inline void
+init_addr(const std::string& str, Address& a) {
+  int result = inet_pton(a.family(), str.c_str(), addr(a));
+  if (result <= 0) {
+    if (result == 0)
+      throw std::runtime_error("invalid address string");
+    else
+      throw system_error();
+  }
+}
+
+// Assign the port to the given address. 
+inline void
+init_port(Ip_port p, Address& a) {
+  switch (a.family()) {
+  case Address::IPv4: a.as_ipv4().sin_port = p;
+  case Address::IPv6: a.as_ipv6().sin6_port = p;
+
+  // FIXME: Throw a more intuitive error?
+  default: throw std::runtime_error("unknown address family");
+  }
+}
+
+} // namespace
+
+// TODO: Zero initializing the storage results in redundant assignments.
+// In general, this is necessary since POSIX only specifies the required
+// fields and not all fields. On some systems, we may be able to omit
+// the zero initialization since the sockaddr_in* contain only the required
+// fields. Very, very system-dependent optimization.
 
 inline
-Address::Address(Family f, const std::string& n, Ip_port p) {
-  // FIXME: Don't use placement new. We've already constructed
-  // that memory (and initialized it), so we're technically 
-  // double-constructing the storage object.
-  if (f == IPv4)
-    new (&storage) Ipv4_sockaddr(n, p);
-  else if (f == IPv6)
-    new (&storage) Ipv6_sockaddr(n, p);
-  else
-    throw std::runtime_error("unknown address family");
+Address::Address(Family f, const std::string& a, Ip_port p)
+    : storage() // Zero-initialize the storage
+{
+  storage.ss_family = f;
+  init_port(p, *this);
+  init_addr(a, *this);
 }
 
 inline
-Address::Address(Ipv4_addr a, Ip_port p) {
+Address::Address(const Ipv4_addr& a, Ip_port p) {
   new (&storage) Ipv4_sockaddr(a, p);
 }
 
 inline
-Address::Address(Ipv6_addr a, Ip_port p) {
+Address::Address(const Ipv6_addr& a, Ip_port p) {
   new (&storage) Ipv6_sockaddr(a, p);
 }
 
@@ -181,9 +152,19 @@ Address::family() const {
   return Family(storage.ss_family);
 }
 
+inline Ipv4_sockaddr&
+Address::as_ipv4() {
+  return *reinterpret_cast<Ipv4_sockaddr*>(&storage);
+}
+
 inline const Ipv4_sockaddr&
 Address::as_ipv4() const {
   return *reinterpret_cast<const Ipv4_sockaddr*>(&storage);
+}
+
+inline Ipv6_sockaddr&
+Address::as_ipv6() {
+  return *reinterpret_cast<Ipv6_sockaddr*>(&storage);
 }
 
 inline const Ipv6_sockaddr&
@@ -215,6 +196,9 @@ operator!=(const Address& l, const Address& r) {
 /// Returns a pointer to the underlying socket address structure.
 inline sockaddr*
 addr(Address& a) { return reinterpret_cast<sockaddr*>(&a.storage); }
+
+inline const sockaddr*
+addr(const Address& a) { return reinterpret_cast<const sockaddr*>(&a.storage); }
 
 /// Returns the size of the underlying address.
 inline socklen_t
