@@ -19,7 +19,7 @@ Pipe::Pipe(std::string n) :
   name(n), fd(::open(n.c_str(), O_RDWR))
 {
   if(fd == -1)
-    throw Error(Error::SYSTEM_ERROR, errno);
+    throw system_error();
 }
 
 inline

@@ -19,7 +19,7 @@ KQueue::KQueue() :
   queue(::kqueue())
 {
   if(queue == -1)
-    throw Error(Error::SYSTEM_ERROR, errno);
+    throw system_error();
 }
 
 inline
@@ -49,14 +49,14 @@ inline void
 del_reader(KQueue& kq, int fd) {
   struct kevent ev;
   EV_SET(&ev, fd, EVFILT_READ, EV_DELETE, 0, 0, 0);
-  kq.in_events.erase(fd);
+  kq.in_events[fd] = ev;
 }
 
 inline void 
 del_writer(KQueue& kq, int fd) {
   struct kevent ev;
   EV_SET(&ev, fd, EVFILT_WRITE, EV_DELETE, 0, 0, 0);
-  kq.in_events.erase(fd);
+  kq.in_events[fd] = ev;
 }
 
 inline int
@@ -67,7 +67,11 @@ kevent(KQueue& kq, const MicroTime& mt)
     input.push_back(event.second);
   kq.in_events.clear();
 
-  ::kevent(kq.queue, input.data(), input.size(), 0, 0, 0);
+  timespec ts;
+  int N = 10;
+  struct kevent output[N];
+
+  ::kevent(kq.queue, input.data(), input.size(), output, N, &ts);
 
   return 0;
 }
