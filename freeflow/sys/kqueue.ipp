@@ -124,10 +124,15 @@ kevent(KQueue& kq, const MicroTime& mt)
   kq.in_events.clear();
 
   timespec ts;
+  ts.tv_sec = 0;
+  ts.tv_nsec = mt.count() * 1000;
   KEvents output(kq.active.size());
 
   int N = ::kevent(kq.queue, input.data(), input.size(), 
                    output.data(), output.size(), &ts);
+
+  if(N == -1)
+    throw system_error();
 
   output.resize(N);
 

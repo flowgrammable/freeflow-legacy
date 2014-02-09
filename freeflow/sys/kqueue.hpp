@@ -12,8 +12,11 @@
 // or implied. See the License for the specific language governing
 // permissions and limitations under the License.
 
+
 #ifndef FREEFLOW_KQUEUE_HPP
 #define FREEFLOW_KQUEUE_HPP
+
+#include <iostream>
 
 #include <unistd.h>
 #include <sys/event.h>

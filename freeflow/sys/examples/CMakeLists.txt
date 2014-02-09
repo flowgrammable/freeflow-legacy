@@ -18,6 +18,9 @@ target_link_libraries(error freeflow_sys)
 add_executable(selector selector.cpp)
 target_link_libraries(selector freeflow_sys)
 
+add_executable(kqueue kqueue.cpp)
+target_link_libraries(kqueue freeflow_sys)
+
 add_executable(pipe pipe.cpp)
 target_link_libraries(pipe freeflow_sys)
 
