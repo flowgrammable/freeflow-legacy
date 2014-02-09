@@ -165,7 +165,11 @@ struct Socket
 {
   enum Transport { 
     UDP = SOCK_DGRAM, 
-    TCP = SOCK_STREAM
+    TCP = SOCK_STREAM,
+    RAW_IPV4,
+    RAW_IPV6,
+    RAW_UDP,
+    RAW_TCP,
   };
 
   Socket(Transport t);
