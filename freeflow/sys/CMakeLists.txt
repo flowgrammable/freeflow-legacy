@@ -19,11 +19,20 @@ set(src fd_utils.cpp
         signal.cpp
         time.cpp
         selector.cpp
-        epoll.cpp
-        #        kqueue.cpp
         scheduler.cpp
         syslog.cpp
         pipe.cpp)
+
+set(bsd_src kqueue.cpp)
+set(linux_src epoll.cpp)
+
+if(BSD)
+  LIST(APPEND src ${bsd_src})
+endif(BSD)
+
+if(LINUX)
+  LIST(APPEND src ${linux_src})
+endif(LINUX)
 
 set(inc fd_utils.hpp
         error.hpp
@@ -32,11 +41,20 @@ set(inc fd_utils.hpp
         signal.hpp
         time.hpp
         selector.hpp
-        epoll.hpp
-        #kqueue.hpp
         scheduler.hpp
         syslog.hpp
         pipe.hpp)
+
+set(bsd_inc kqueue.hpp)
+set(linux_inc epoll.hpp)
+
+if(BSD)
+  LIST(APPEND inc ${bsd_inc})
+endif(BSD)
+
+if(LINUX)
+  LIST(APPEND inc ${linux_inc})
+endif(LINUX)
 
 add_library(freeflow_sys ${src})
 

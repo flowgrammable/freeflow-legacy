@@ -42,8 +42,11 @@ struct Address_info {
   enum Family : sa_family_t {
     IPv4 = AF_INET, 
     IPv6 = AF_INET6,
-    //RAW  = PF_NDRV,             // This is BSD only 
+#ifdef BSD
+    RAW  = PF_NDRV,             // This is BSD only 
+#elif LINUX 
     RAW  = AF_PACKET,           // This is Linux only
+#endif
   };
 };
 
