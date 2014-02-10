@@ -16,6 +16,7 @@
 #define FREEFLOW_SELECTOR_HPP
 
 #include <sys/select.h>
+
 #include <set>
 
 #include "freeflow/sys/error.hpp"
@@ -23,6 +24,8 @@
 
 namespace freeflow {
 
+/// The selector class provides a simple wrapper over the POSIX pselect
+/// function.
 struct Selector
 {
   Selector();

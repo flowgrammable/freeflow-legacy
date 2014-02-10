@@ -15,9 +15,7 @@
 #ifndef FREEFLOW_FD_UTILS_HPP
 #define FREEFLOW_FD_UTILS_HPP
 
-extern "C" {
 #include <unistd.h>
-}
 
 #include <cstdint>
 
@@ -25,10 +23,14 @@ extern "C" {
 
 namespace freeflow {
 
-struct Transfer
-{
+/// A Transfer object encapsulates a request to read data from or write
+/// data to a file descriptor.
+///
+/// \todo This class needs a lot of work.
+struct Transfer {
   Transfer(int f, uint8_t* b, std::size_t n);
 
+  // FIXME: this is dangerous.
   operator int();
 
   int fd;
