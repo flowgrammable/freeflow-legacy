@@ -15,7 +15,7 @@
 #ifndef FREEFLOW_SELECTOR_HPP
 #define FREEFLOW_SELECTOR_HPP
 
-#include <sys/select.h>
+#include <unistd.h>
 
 #include <set>
 

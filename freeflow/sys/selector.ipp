@@ -74,17 +74,17 @@ is_writable(const Selector& s, int fd)
 inline int
 select(Selector& s, const MicroTime& mt)
 {
-  timeval tv, *tv_ptr;
-  tv_ptr = nullptr;
+  timespec ts, *ts_ptr;
+  ts_ptr = nullptr;
 
   std::chrono::microseconds usec = std::chrono::duration_cast<std::chrono::microseconds>(mt);
   if(usec != std::chrono::microseconds(0)) {
-    tv.tv_sec = usec.count() / 1000000;
-    tv.tv_usec = usec.count() % 1000000;
-    tv_ptr = &tv;
+    ts.tv_sec = usec.count() / 1000000;
+    ts.tv_nsec = 1000*(usec.count() % 1000000);
+    ts_ptr = &ts;
   }
 
-  int result = ::select(max(s), &s.readset, &s.writeset, nullptr, tv_ptr);
+  int result = ::pselect(max(s), &s.readset, &s.writeset, nullptr, ts_ptr, nullptr);
   if(result == -1 and errno != EINTR)
     throw system_error();
   return result;
