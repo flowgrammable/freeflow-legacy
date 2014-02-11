@@ -34,28 +34,24 @@ max(const Selector& s)
 inline void
 add_reader(Selector& s, int fd)
 {
-  FD_SET(fd, &s.readset);
   s.read_fds.insert(fd);
 }
 
 inline void
 add_writer(Selector& s, int fd)
 {
-  FD_SET(fd, &s.writeset);
   s.write_fds.insert(fd);
 }
 
 inline void
 del_reader(Selector& s, int fd)
 {
-  FD_CLR(fd, &s.readset);
   s.read_fds.erase(fd);
 }
 
 inline void
 del_writer(Selector& s, int fd)
 {
-  FD_CLR(fd, &s.writeset);
   s.write_fds.erase(fd);
 }
 
@@ -71,6 +67,17 @@ is_writable(const Selector& s, int fd)
   return FD_ISSET(fd, &s.writeset);
 }
 
+void inline
+init_sets(Selector& s)
+{
+  for(auto fd : s.read_fds) {
+    FD_SET(fd, &s.readset);
+  }
+  for(auto fd : s.write_fds) {
+    FD_SET(fd, &s.writeset);
+  }
+}
+
 inline int
 select(Selector& s, const MicroTime& mt)
 {
@@ -84,6 +91,7 @@ select(Selector& s, const MicroTime& mt)
     ts_ptr = &ts;
   }
 
+  init_sets(s);
   int result = ::pselect(max(s), &s.readset, &s.writeset, nullptr, ts_ptr, nullptr);
   if(result == -1 and errno != EINTR)
     throw system_error();
