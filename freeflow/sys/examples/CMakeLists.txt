@@ -12,8 +12,17 @@
 # or implied. See the License for the specific language governing
 # permissions and limitations under the License.
 
+
+macro(add_example tgt)
+  add_executable(${tgt} ${tgt}.cpp)
+  target_link_libraries(${tgt} freeflow_sys)
+endmacro()
+
+
 add_executable(error error.cpp)
 target_link_libraries(error freeflow_sys)
+
+add_example(file)
 
 add_executable(selector selector.cpp)
 target_link_libraries(selector freeflow_sys)

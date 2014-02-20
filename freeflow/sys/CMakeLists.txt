@@ -12,8 +12,9 @@
 # or implied. See the License for the specific language governing
 # permissions and limitations under the License.
 
-set(src fd_utils.cpp
-        error.cpp
+set(src error.cpp
+        fd_utils.cpp
+        file.cpp
         socket.cpp
         buffer.cpp
         signal.cpp
@@ -34,8 +35,9 @@ if(LINUX)
   LIST(APPEND src ${linux_src})
 endif(LINUX)
 
-set(inc fd_utils.hpp
-        error.hpp
+set(inc error.hpp
+        fd_utils.hpp
+        file.hpp
         socket.hpp
         buffer.hpp
         signal.hpp
