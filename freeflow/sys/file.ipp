@@ -15,47 +15,103 @@
 namespace freeflow {
 
 inline
-File_status::File_status()
-  : stat() // Zero-initialize the file buffer.
+Resource::Resource()
+  : fd_(-1) { }
+
+inline
+Resource::Resource(Resource&& r)
+    : fd_(r.fd_)
+  { r.fd_ = -1; }
+
+inline
+Resource& Resource::operator=(Resource&& r) {
+  fd_ = r.fd_;
+  r.fd_ = -1;
+  return *this;
+}
+
+/// Initialize the file resource with a file descriptor.
+inline
+Resource::Resource(int f)
+  : fd_(f) { }
+
+// Close the resource.
+inline
+Resource::~Resource() { 
+  if (operator bool())
+    ::close(fd_); 
+}
+
+
+// -------------------------------------------------------------------------- //
+
+/// Construct status information about the file designated by the
+/// given path name. If path designates a symbolic link, then the 
+/// status information pertains to the linked file, and not the 
+/// link.
+inline
+Status::Status(const char* p) {
+  if (::stat(p, this))
+    throw system_error();
+}
+
+/// Construct status information about the file designated by the
+/// given path name. If path designates a symbolic link, then the 
+/// status information pertains to the linked file, and not the 
+/// link.
+inline
+Status::Status(const Path& p)
+  : Status(p.c_str())
 { }
 
+/// Construct status information about the given resource.
+inline
+Status::Status(const Resource& r) {
+  if (::fstat(r.fd(), this))
+    throw system_error();
+}
+
+
+/// Construct information about file designated by the given path.
+/// If p designates a symbolic link, the status describes the link,
+/// and not the linked file.
+Link_status::Link_status(const char* p) {
+  if (::lstat(p, this))
+    throw system_error();
+}
+
+/// Construct information about file designated by the given path.
+/// If p designates a symbolic link, the status describes the link,
+/// and not the linked file.
+Link_status::Link_status(const Path& p)
+  : Link_status(p.c_str()) { }
+
+
+// -------------------------------------------------------------------------- //
 
 inline
 File::File(File&& f)
-  : fd(f.fd), path(f.path), stat(f.stat)
-{
-  f.fd = -1;
-}
+  : Resource(std::move(f)), path_(f.path_)
+{ }
 
 inline File&
 File::operator=(File&& f) {
-  fd = f.fd;
-  path = f.path;
-  stat = f.stat;
-  f.fd = -1;
+  Resource::operator=(std::move(f));
+  path_= std::move(f.path_);
   return *this;
 }
 
 inline
-File::File(const char* p)
-  : fd(::open(p, O_RDONLY)), path(p), stat()
+File::File(const char* p, Flags f)
+  : Resource(::open(p, f)), path_(p)
 {
-  if (fd < 0)
+  if (not *this)
     throw system_error();
 }
 
 inline
-File::File(const Path& p)
-  : File(p.c_str()) 
+File::File(const Path& p, Flags f)
+  : File(p.c_str(), f)
 { }
-
-// TODO: Cache the file status on the first read.
-inline const File_status&
-File::status() {
-  int err = ::fstat(fd, &stat);
-  if (err < 0)
-    throw system_error();
-  return stat;
-}
 
 } // namespace freeflow

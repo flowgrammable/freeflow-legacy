@@ -14,6 +14,7 @@
 
 set(src error.cpp
         fd_utils.cpp
+        path.cpp
         file.cpp
         socket.cpp
         buffer.cpp
@@ -37,6 +38,7 @@ endif(LINUX)
 
 set(inc error.hpp
         fd_utils.hpp
+        path.hpp
         file.hpp
         socket.hpp
         buffer.hpp

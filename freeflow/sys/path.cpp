@@ -1,4 +1,4 @@
-// Copyright (c) 2013-2014 Flowgrammable, LLC.
+// Copyright (c) 2013-2014 Flowgrammable.org
 // 
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,19 +12,4 @@
 // or implied. See the License for the specific language governing
 // permissions and limitations under the License.
 
-#include <iostream>
-#include <fstream>
-
-#include <freeflow/sys/file.hpp>
-
-using namespace std;
-using namespace freeflow;
-
-int 
-main(int argc, char* argv[]) {
-  File f("/dev/null", File::WRITE);
-
-  // FIXME: Don't use ::operations
-  ::write(f.fd(), "hello", 5);
-
-}
+#include "path.hpp"
