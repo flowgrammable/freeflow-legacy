@@ -24,7 +24,6 @@ add_example(buffer2)
 add_example(view)
 
 add_example(selector)
-add_example(kqueue)
 add_example(pipe)
 add_example(signal)
 add_example(scheduler)
