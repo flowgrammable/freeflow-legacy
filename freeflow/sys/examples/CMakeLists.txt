@@ -12,38 +12,22 @@
 # or implied. See the License for the specific language governing
 # permissions and limitations under the License.
 
-add_executable(error error.cpp)
-target_link_libraries(error freeflow_sys)
+macro(add_example tgt)
+  add_executable(${tgt} ${tgt}.cpp)
+  target_link_libraries(${tgt} freeflow_sys)
+endmacro()
 
-add_executable(selector selector.cpp)
-target_link_libraries(selector freeflow_sys)
 
-#add_executable(kqueue kqueue.cpp)
-#target_link_libraries(kqueue freeflow_sys)
+add_example(error)
+add_example(file)
+add_example(buffer)
+add_example(buffer2)
+add_example(view)
 
-add_executable(pipe pipe.cpp)
-target_link_libraries(pipe freeflow_sys)
-
-add_executable(signal signal.cpp)
-target_link_libraries(signal freeflow_sys)
-
-add_executable(scheduler scheduler.cpp)
-target_link_libraries(scheduler freeflow_sys)
-
-add_executable(server server.cpp)
-target_link_libraries(server freeflow_sys)
-
-add_executable(server2 server2.cpp)
-target_link_libraries(server2 freeflow_sys)
-
-add_executable(console console.cpp)
-target_link_libraries(console freeflow_sys)
-
-add_executable(buffer buffer.cpp)
-target_link_libraries(buffer freeflow_sys)
-
-add_executable(buffer2 buffer2.cpp)
-target_link_libraries(buffer2 freeflow_sys)
-
-add_executable(view view.cpp)
-target_link_libraries(view freeflow_sys)
+add_example(selector)
+add_example(kqueue)
+add_example(pipe)
+add_example(signal)
+add_example(scheduler)
+add_example(server)
+add_example(server2)

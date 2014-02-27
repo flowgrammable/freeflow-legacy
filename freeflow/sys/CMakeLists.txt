@@ -13,6 +13,8 @@
 # permissions and limitations under the License.
 
 set(src fd_utils.cpp
+        path.cpp
+        file.cpp
         error.cpp
         socket.cpp
         buffer.cpp
@@ -26,6 +28,8 @@ set(src fd_utils.cpp
         pipe.cpp)
 
 set(inc fd_utils.hpp
+        path.hpp
+        path.cpp
         error.hpp
         socket.hpp
         buffer.hpp
