@@ -83,4 +83,20 @@ File::File(const Path& p, Flags f)
   : File(p.c_str(), f)
 { }
 
+inline std::size_t
+File::read(void* buf, std::size_t n) {
+  ssize_t r = ::read(fd(), buf, n);
+  if (r < 0)
+    throw system_error();
+  return r;
+}
+
+inline std::size_t
+File::write(void* buf, std::size_t n) {
+  ssize_t r = ::write(fd(), buf, n);
+  if (r < 0)
+    throw system_error();
+  return r;
+}
+
 } // namespace freeflow

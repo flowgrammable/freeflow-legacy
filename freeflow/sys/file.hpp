@@ -110,7 +110,8 @@ public:
   File(const char*, Flags);
   File(const Path&, Flags);
 
-  // TODO: Add read/write operatoin.
+  std::size_t read(void*, std::size_t);
+  std::size_t write(void*, std::size_t);
 
 private:
   Path path_;
