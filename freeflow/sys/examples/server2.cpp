@@ -6,7 +6,8 @@
 
 int main(int argc, char** argv) {
   if(argc != 5) {
-    std::cerr << "usage syntax: " << argv[0] << "ipv4|ipv6 addr port tcp|udp" << std::endl;
+    std::cerr << "usage syntax: " << argv[0] 
+              << "ipv4|ipv6 addr port tcp|udp" << std::endl;
     std::exit(-1);
   }
 

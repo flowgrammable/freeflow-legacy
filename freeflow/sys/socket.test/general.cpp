@@ -37,4 +37,7 @@ static_assert(std::is_trivial<Ipv6_sockaddr>::value, "");
 static_assert(std::is_trivial<sockaddr_storage>::value, "");
 static_assert(std::is_trivial<Address>::value, "");
 
+// The socket base also.
+static_assert(std::is_trivial<Socket_base>::value, "");
+
 int main() { }

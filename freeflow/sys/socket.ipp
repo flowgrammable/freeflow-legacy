@@ -98,7 +98,7 @@ namespace {
 // populates the underlyinh object by passing it as a sockaddr pointer.
 inline void
 init_addr(const std::string& str, Address& a) {
-  int result = inet_pton(a.family(), str.c_str(), addr(a));
+  int result = inet_pton(a.family(), str.c_str(), a.addr());
   if (result <= 0) {
     if (result == 0)
       throw std::runtime_error("invalid address string");
@@ -111,8 +111,8 @@ init_addr(const std::string& str, Address& a) {
 inline void
 init_port(Ip_port p, Address& a) {
   switch (a.family()) {
-  case Address::IPv4: a.as_ipv4().sin_port = p;
-  case Address::IPv6: a.as_ipv6().sin6_port = p;
+  case Address::IPv4: a.as_ipv4().sin_port = p; break;
+  case Address::IPv6: a.as_ipv6().sin6_port = p; break;
 
   // FIXME: Throw a more intuitive error?
   default: throw std::runtime_error("unknown address family");
@@ -147,9 +147,7 @@ Address::Address(const Ipv6_addr& a, Ip_port p) {
 }
 
 inline Address::Family
-Address::family() const {
-  return Family(storage.ss_family);
-}
+Address::family() const { return Family(storage.ss_family); }
 
 inline Ipv4_sockaddr&
 Address::as_ipv4() {
@@ -170,6 +168,28 @@ inline const Ipv6_sockaddr&
 Address::as_ipv6() const {
   return *reinterpret_cast<const Ipv6_sockaddr*>(&storage);
 }
+
+inline sockaddr*
+Address::addr() { 
+  return reinterpret_cast<sockaddr*>(&storage); 
+}
+
+inline const sockaddr*
+Address::addr() const { 
+  return reinterpret_cast<const sockaddr*>(&storage); 
+}
+
+/// Returns the size of the underlying address.
+inline socklen_t
+Address::len() const { 
+  if (family() == Address::IPv4)
+    return sizeof(Ipv4_sockaddr);
+  else if (family() == Address::IPv6)
+    return sizeof(Ipv6_sockaddr);
+  else
+    throw std::runtime_error("unknown address family");
+}
+
 
 // Two addresses compare equal when they are in the same address family
 // and represent the same socket addresses.
@@ -192,29 +212,22 @@ operator!=(const Address& l, const Address& r) {
   return not (l==r); 
 }
 
-/// Returns a pointer to the underlying socket address structure.
-inline sockaddr*
-addr(Address& a) { return reinterpret_cast<sockaddr*>(&a.storage); }
-
-inline const sockaddr*
-addr(const Address& a) { return reinterpret_cast<const sockaddr*>(&a.storage); }
-
-/// Returns the size of the underlying address.
-inline socklen_t
-len(const Address& a)  { 
-  if (a.family() == Address::IPv4)
-    return sizeof(Ipv4_sockaddr);
-  else if (a.family() == Address::IPv6)
-    return sizeof(Ipv6_sockaddr);
-  else
-    throw std::runtime_error("unknown address family");
-}
-
 // -------------------------------------------------------------------------- //
 // Socket
 
+inline
+Socket_base::Socket_base(Family f, Transport t)
+  : family(f), transport(t)
+{ }
+
+inline
+Socket_base::Socket_base(int f, Transport t, const Address& l, const Address& p)
+  : transport(t), local(l), peer(p), fd(f)
+{ }
+
+/// Return the socket type 
 inline int
-socket_type(Socket_base::Transport t)
+Socket_base::type(Transport t)
 {
   switch(t) {
     case Socket_base::TCP:
@@ -229,36 +242,38 @@ socket_type(Socket_base::Transport t)
 }
 
 inline int
-socket_protocol(Socket_base::Transport t)
+Socket_base::type() const { return type(transport); }
+
+
+inline int
+Socket_base::protocol(Transport t)
 {
   switch(t) {
     case Socket_base::TCP:
     case Socket_base::TLS:
     case Socket_base::RAW_TCP:
       return IPPROTO_TCP;
+    
     case Socket_base::UDP:
     case Socket_base::RAW_UDP:
       return IPPROTO_UDP;
+    
     case Socket_base::SCTP:
       return IPPROTO_SCTP;
+    
     case Socket_base::RAW_ICMPv4:
       return IPPROTO_ICMP;
+    
     case Socket_base::RAW_ICMPv6:
       return IPPROTO_ICMPV6;
+    
     default:
       return IPPROTO_RAW;
   }
 }
 
-inline
-Socket_base::Socket_base(Family f, Transport t)
-  : family(f), transport(t)
-{ }
-
-inline
-Socket_base::Socket_base(int f, Transport t, const Address& l, const Address& p)
-  : transport(t), local(l), peer(p), fd(f)
-{ }
+inline int
+Socket_base::protocol() const { return protocol(transport); }
 
 inline
 Socket::Socket(Socket&& s)
@@ -277,7 +292,7 @@ inline
 Socket::Socket(Family f, Transport t)
   : Socket_base(f, t)
 {
-  fd = ::socket(family, socket_type(transport), socket_protocol(transport));
+  fd = ::socket(family, type(), protocol());
   if (fd < 0)
     throw system_error();
 }
@@ -296,7 +311,7 @@ Socket::~Socket() {
 inline Error
 bind(Socket& s, Address a) {
   s.local = a;
-  auto result = ::bind(s.fd, addr(s.local), len(s.local));
+  int result = ::bind(s.fd, s.local.addr(), s.local.len());
   if(result != 0)
     return system_error();
   return {};
@@ -305,7 +320,7 @@ bind(Socket& s, Address a) {
 inline Error
 connect(Socket& s, const Address& a) {
   s.peer = a;
-  auto result = ::connect(s.fd, addr(s.peer), len(s.peer));
+  auto result = ::connect(s.fd, s.peer.addr(), s.peer.len());
   if(result != 0)
     return system_error();
   return {};
@@ -314,7 +329,7 @@ connect(Socket& s, const Address& a) {
 inline Error
 listen(Socket& s, int backlog) {
   s.backlog = backlog;
-  auto result = ::listen(s.fd, backlog);
+  int result = ::listen(s.fd, backlog);
   if(result != 0)
     return system_error();
   return {};
@@ -323,7 +338,7 @@ listen(Socket& s, int backlog) {
 inline Socket
 accept(Socket& s) {
   socklen_t length;
-  int child = ::accept(s.fd, addr(s.peer), &length);
+  int child = ::accept(s.fd, s.peer.addr(), &length);
   if(child < 0)
     throw system_error();
   return Socket(child, s.transport, s.local, s.peer);
@@ -331,7 +346,7 @@ accept(Socket& s) {
 
 inline int
 read(Socket& s, uint8_t* b, std::size_t l) {
-  auto result = ::read(s.fd, b, l);
+  int result = ::read(s.fd, b, l);
   if(result < 0)
     throw system_error();
   return result;
@@ -339,24 +354,24 @@ read(Socket& s, uint8_t* b, std::size_t l) {
 
 inline int
 write(Socket& s, const uint8_t* b, std::size_t l) {
-  auto result = ::write(s.fd, b, l);
+  int result = ::write(s.fd, b, l);
   if(result < 0)
     throw system_error();
   return result;
 }
 
 inline int
-recvfrom(Socket& s, uint8_t* b, std::size_t l, Address& a) {
+recv_from(Socket& s, uint8_t* b, std::size_t l, Address& a) {
   socklen_t length;
-  auto result = ::recvfrom(s.fd, b, l, 0, addr(a), &length);
+  int result = ::recvfrom(s.fd, b, l, 0, a.addr(), &length);
   if(result < 0)
     throw system_error();
   return result;
 }
 
 inline int
-sendto(Socket& s, const uint8_t* b, std::size_t l, const Address& a) {
-  auto result = ::sendto(s.fd, b, l, 0, addr(a), len(a));
+send_to(Socket& s, const uint8_t* b, std::size_t l, const Address& a) {
+  int result = ::sendto(s.fd, b, l, 0, a.addr(), a.len());
   if(result < 0)
     throw system_error();
   return result;

@@ -41,9 +41,9 @@ struct Address_info {
   enum Family : sa_family_t {
     IPv4 = AF_INET, 
     IPv6 = AF_INET6,
-#ifdef BSD
+#if defined(BSD)
     RAW  = PF_NDRV,             // This is BSD only 
-#elif LINUX 
+#elif defined(LINUX)
     RAW  = AF_PACKET,           // This is Linux only
 #endif
   };
@@ -125,7 +125,6 @@ bool operator!=(const Ipv6_sockaddr& a, const Ipv6_sockaddr& b);
 /// This is the primary interface for constructing and working with
 /// socket addresses.
 struct Address : Address_info {
-
   Address() = default;
 
   Address(Family t, const std::string& n, Ip_port p);
@@ -134,22 +133,26 @@ struct Address : Address_info {
 
   Family family() const;
 
+  // Returns the underlying IPv4 address.
   Ipv4_sockaddr&       as_ipv4();
   const Ipv4_sockaddr& as_ipv4() const;
   
+  // Returns the underlying IPv6 address.
   Ipv6_sockaddr&       as_ipv6();
   const Ipv6_sockaddr& as_ipv6() const;
+
+  // Returns the underlying general address.
+  sockaddr*       addr();
+  const sockaddr* addr() const;
+
+  // Returns the size of the address object.
+  socklen_t len() const;
 
   sockaddr_storage storage;
 };
 
 bool operator==(const Address& l, const Address& r);
 bool operator!=(const Address& l, const Address& r);
-
-sockaddr*       addr(Address& a);
-const sockaddr* addr(const Address& a);
-
-socklen_t len(const Address& a);
 
 // Printing
 std::string to_string(const Address& a);
@@ -182,6 +185,12 @@ struct Socket_base : Address_info {
   Socket_base(Family f, Transport t);
   Socket_base(int, Transport, const Address&, const Address&);
 
+  static int type(Transport);
+  static int protocol(Transport);
+
+  int type() const;
+  int protocol() const;
+
   Family    family;
   Transport transport;
   Address   local;
@@ -189,11 +198,6 @@ struct Socket_base : Address_info {
   int       fd;
   int       backlog;
 };
-
-static_assert(std::is_trivial<Socket_base>::value, "");
-
-int socket_type(Socket_base::Transport t);
-int socket_protocol(Socket_base::Transport t);
 
 /// The socket is an endpoint for communicating systems.
 ///
@@ -227,8 +231,8 @@ Socket accept(Socket& s);
 
 int read(Socket& s);
 int write(Socket& s);
-int sendto(Socket& s);
-int recvfrom(Socket& s);
+int send_to(Socket& s);
+int recv_from(Socket& s);
 
 // Pretty printing
 std::string to_string(const Socket& s);
