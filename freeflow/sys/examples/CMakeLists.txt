@@ -17,7 +17,6 @@ macro(add_example tgt)
   target_link_libraries(${tgt} freeflow_sys)
 endmacro()
 
-
 add_example(error)
 add_example(file)
 add_example(buffer)
@@ -31,3 +30,7 @@ add_example(signal)
 add_example(scheduler)
 add_example(server)
 add_example(server2)
+
+if(BSD)
+  add_example(kqueue)
+endif(BSD)

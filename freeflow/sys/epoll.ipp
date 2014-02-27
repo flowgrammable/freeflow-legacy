@@ -40,7 +40,7 @@ inline Error
 add_reader(Epoll& ep, int fd)
 {
   EPevent ev(EPevent::READ, fd);
-  ep.watched.insert(std::pair<int,EPevent>(fd, ev));
+  ep.watched[fd] = ev;
   if(::epoll_ctl(ep.fd, EPOLL_CTL_ADD, fd, &ev) == -1)
     return system_error();
   return Error();
@@ -50,7 +50,7 @@ inline Error
 add_writer(Epoll& ep, int fd)
 {
   EPevent ev(EPevent::WRITE, fd);
-  ep.watched.insert(std::pair<int,EPevent>(fd, ev));
+  ep.watched[fd] = ev;
   if(::epoll_ctl(ep.fd, EPOLL_CTL_ADD, fd, &ev) == -1)
     return system_error();
   return Error();
@@ -60,7 +60,7 @@ inline Error
 del_reader(Epoll& ep, int fd)
 {
   EPevent ev(EPevent::READ, fd);
-  ep.watched.insert(std::pair<int,EPevent>(fd, ev));
+  ep.watched.erase(fd);
   if(::epoll_ctl(ep.fd, EPOLL_CTL_DEL, fd, &ev) == -1)
     return system_error();
   return Error();
@@ -70,7 +70,7 @@ inline Error
 del_writer(Epoll& ep, int fd)
 {
   EPevent ev(EPevent::WRITE, fd);
-  ep.watched.insert(std::pair<int,EPevent>(fd, ev));
+  ep.watched.erase(fd);
   if(::epoll_ctl(ep.fd, EPOLL_CTL_DEL, fd, &ev) == -1)
     return system_error();
   return Error();

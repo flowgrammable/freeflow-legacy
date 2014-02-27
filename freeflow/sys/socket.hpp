@@ -41,7 +41,12 @@ namespace socket {
 struct Address_info {
   enum Family : sa_family_t {
     IPv4 = AF_INET, 
-    IPv6 = AF_INET6
+    IPv6 = AF_INET6,
+#ifdef BSD
+    RAW  = PF_NDRV,             // This is BSD only 
+#elif LINUX 
+    RAW  = AF_PACKET,           // This is Linux only
+#endif
   };
 };
 
@@ -182,14 +187,18 @@ static_assert(std::is_trivial<Address>::value, "");
 struct Socket_base : Address_info {
   enum Transport { 
     // Internet protocols
-    UDP = SOCK_DGRAM, 
-    TCP = SOCK_STREAM,
+    UDP, 
+    TCP,
+    TLS,
+    SCTP,
     
     // Raw sockets
     RAW_IPV4,
     RAW_IPV6,
     RAW_UDP,
     RAW_TCP,
+    RAW_ICMPv4,
+    RAW_ICMPv6,
   };
 
   Socket_base() = default;
@@ -205,6 +214,9 @@ struct Socket_base : Address_info {
 };
 
 static_assert(std::is_trivial<Socket_base>::value, "");
+
+int socket_type(Socket_base::Transport t);
+int socket_protocol(Socket_base::Transport t);
 
 /// The socket is an endpoint for communicating systems.
 ///
