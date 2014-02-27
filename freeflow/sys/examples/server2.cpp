@@ -17,28 +17,28 @@ int main(int argc, char** argv) {
 
   using namespace freeflow;
 
-  socket::Socket::Transport t;
+  Socket::Transport t;
   if (tcp.compare(argv[4]) == 0)
-    t = socket::Socket::TCP;
+    t = Socket::TCP;
   else if (tcp.compare(argv[4]) == 0)
-    t = socket::Socket::UDP;
+    t = Socket::UDP;
 
-  socket::Address::Family net;
+  Address::Family net;
   if (ipv4.compare(argv[1]) == 0)
-    net = socket::Address::IPv4;
+    net = Address::IPv4;
   else if (ipv4.compare(argv[1]) == 0)
-    net = socket::Address::IPv6;
+    net = Address::IPv6;
 
   uint16_t port = atoi(argv[3]);
   
   // try {
-    socket::Socket server(net, t);
-    bind(server, socket::Address(net, argv[2], port));
-    if (t == socket::Socket::TCP) {
+    Socket server(net, t);
+    bind(server, Address(net, argv[2], port));
+    if (t == Socket::TCP) {
       listen(server);
       std::cout << "Listening: " << to_string(server.local) << std::endl ;
-      socket::Socket child = accept(server);
-    } else if (t == socket::Socket::UDP) {
+      Socket child = accept(server);
+    } else if (t == Socket::UDP) {
     }
   // } catch(Error e) {
   //   std::cerr << "Error: " << strerror(e.code()) << std::endl;

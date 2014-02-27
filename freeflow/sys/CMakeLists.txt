@@ -63,3 +63,18 @@ install(FILES ${inc} DESTINATION include/freeflow/sys)
 # Examples
 
 add_subdirectory(examples)
+
+# --------------------------------------------------------------------------- //
+# Testing
+
+# Add a unit test the given target and file name. Note that unit tests
+# must be prefixed sys_${mod}, where ${mod} is the name of the module
+# for which the test is written.
+macro(add_unit_test tgt file)
+  add_executable(${tgt} ${file})
+  target_link_libraries(${tgt} freeflow_sys)
+  add_test(test_${tgt} ${tgt})
+endmacro()
+
+add_subdirectory(socket.test)
+

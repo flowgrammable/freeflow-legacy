@@ -16,11 +16,9 @@
 #include "socket.hpp"
 
 namespace freeflow {
-namespace socket {
 
 std::string
-to_string(const Address& a)
-{
+to_string(const Address& a) {
   std::stringstream ss;
   if(a.family() == Address::IPv4) {
     char name[INET_ADDRSTRLEN];
@@ -50,8 +48,7 @@ to_string(const Address& a)
 }
 
 std::string
-to_string(const Socket& s)
-{
+to_string(const Socket& s) {
   std::stringstream ss;
   ss << "socket(";
   ss << "local=" << to_string(s.local);
@@ -61,6 +58,5 @@ to_string(const Socket& s)
   return ss.str();
 }
 
-} // namespace socket
 } // namespace freeflow
 

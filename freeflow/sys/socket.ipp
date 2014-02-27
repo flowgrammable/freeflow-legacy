@@ -15,7 +15,6 @@
 #include <iostream>
 
 namespace freeflow {
-namespace socket {
 
 // -------------------------------------------------------------------------- //
 // Ipv4
@@ -363,5 +362,4 @@ sendto(Socket& s, const uint8_t* b, std::size_t l, const Address& a) {
   return result;
 }
 
-} // namespace socket
 } // namespace freeflow

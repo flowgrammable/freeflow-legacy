@@ -28,7 +28,6 @@
 #include <freeflow/proto/ipv6.hpp>
 
 namespace freeflow {
-namespace socket {
 
 // -------------------------------------------------------------------------- //
 // Internet protocol support
@@ -62,7 +61,6 @@ struct Ipv4_addr : in_addr, Address_info {
   static constexpr Family family = IPv4;
 };
 
-static_assert(sizeof(Ipv4_addr) == sizeof(in_addr), "non-conforming compiler");
 
 /// An Ipv4 socket address is a host and port. This class provides a
 /// read-only view of the underlying system structure.
@@ -115,21 +113,6 @@ bool operator!=(const Ipv6_addr& a, const Ipv6_addr& b);
 bool operator==(const Ipv6_sockaddr& a, const Ipv6_sockaddr& b);
 bool operator!=(const Ipv6_sockaddr& a, const Ipv6_sockaddr& b);
 
-// TODO: Move these assertions into a unit test.
-
-// The implementation relies on the compiler's implementation of the
-// empty base optimization. 
-static_assert(sizeof(Ipv4_addr) == sizeof(in_addr), "");
-static_assert(sizeof(Ipv4_sockaddr) == sizeof(sockaddr_in), "");
-static_assert(sizeof(Ipv6_addr) == sizeof(in6_addr), "");
-static_assert(sizeof(Ipv6_sockaddr) == sizeof(sockaddr_in6), "");
-
-// Require that all of these classes are trivial types.
-static_assert(std::is_trivial<Ipv4_addr>::value, "");
-static_assert(std::is_trivial<Ipv4_sockaddr>::value, "");
-static_assert(std::is_trivial<Ipv6_addr>::value, "");
-static_assert(std::is_trivial<Ipv6_sockaddr>::value, "");
-
 // -------------------------------------------------------------------------- //
 // Socket address
 
@@ -170,12 +153,6 @@ socklen_t len(const Address& a);
 
 // Printing
 std::string to_string(const Address& a);
-
-// TODO: Move all of these assertions into a unit test.
-
-// Compiler guarantees
-static_assert(std::is_trivial<sockaddr_storage>::value, "");
-static_assert(std::is_trivial<Address>::value, "");
 
 
 // -------------------------------------------------------------------------- //
@@ -256,7 +233,6 @@ int recvfrom(Socket& s);
 // Pretty printing
 std::string to_string(const Socket& s);
 
-} // namespace socket
 } // namespace freeflow
 
 #include "socket.ipp"
