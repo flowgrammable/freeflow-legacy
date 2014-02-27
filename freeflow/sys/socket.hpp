@@ -173,8 +173,8 @@ struct Socket_base : Address_info {
     SCTP,
     
     // Raw sockets
-    RAW_IPV4,
-    RAW_IPV6,
+    RAW_IPv4,
+    RAW_IPv6,
     RAW_UDP,
     RAW_TCP,
     RAW_ICMPv4,
