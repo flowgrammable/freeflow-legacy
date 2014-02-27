@@ -23,38 +23,10 @@
 #include <iostream>
 
 #include <freeflow/sys/error.hpp>
+#include <freeflow/sys/resource.hpp>
 #include <freeflow/sys/path.hpp>
 
 namespace freeflow {
-
-/// The Resource class is the base class of all POSIX resources that
-/// are interanally represented by a file descriptor.
-class Resource {
-public:
-  // The default resource is an invalid file descriptor.
-  Resource();
-
-  /// Move semantics. Moving a resources causes the original to be
-  /// invalidated.
-  Resource(Resource&& r);
-  Resource& operator=(Resource&& r);
-
-  // Resource initialization
-  explicit Resource(int f);
-
-  // Destructor
-  ~Resource();
-
-  /// Evaluates to true only when the resource is valid.
-  explicit operator bool() const { return fd_ >= 0; }
-
-  /// Returns the file descriptor.
-  int fd() const { return fd_; }
-
-private:
-  int fd_;
-}; 
-
 
 // -------------------------------------------------------------------------- //
 // File status

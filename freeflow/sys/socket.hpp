@@ -24,8 +24,7 @@
 #include <type_traits>
 
 #include <freeflow/sys/error.hpp>
-#include <freeflow/proto/ipv4.hpp>
-#include <freeflow/proto/ipv6.hpp>
+#include <freeflow/sys/resource.hpp>
 
 namespace freeflow {
 
@@ -164,7 +163,7 @@ std::string to_string(const Address& a);
 // The socket base class encapsulates informaiton about a socket. This
 // is used to provide efficient move semantics for a Socket (since the
 // state is a trivial type).
-struct Socket_base : Address_info {
+struct Socket_info : Address_info {
   enum Transport { 
     // Internet protocols
     UDP, 
@@ -181,9 +180,9 @@ struct Socket_base : Address_info {
     RAW_ICMPv6,
   };
 
-  Socket_base() = default;
-  Socket_base(Family f, Transport t);
-  Socket_base(int, Transport, const Address&, const Address&);
+  Socket_info() = default;
+  Socket_info(Family f, Transport t);
+  Socket_info(Transport, const Address&, const Address&);
 
   static int type(Transport);
   static int protocol(Transport);
@@ -195,7 +194,6 @@ struct Socket_base : Address_info {
   Transport transport;
   Address   local;
   Address   peer;
-  int       fd;
   int       backlog;
 };
 
@@ -204,7 +202,7 @@ struct Socket_base : Address_info {
 /// Note that sockets are resources; they can be moved but not copied. 
 ///
 /// TODO: Document me!
-struct Socket : Socket_base {
+struct Socket : Socket_info, Resource {
   // Not default constructible.
   Socket() = delete;
 
@@ -219,8 +217,6 @@ struct Socket : Socket_base {
   // Socket construction
   Socket(Family, Transport);
   Socket(int, Transport, const Address&, const Address&);
-
-  ~Socket();
 };
 
 // Socket operations

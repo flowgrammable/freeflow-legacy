@@ -13,9 +13,10 @@
 # permissions and limitations under the License.
 
 set(src fd_utils.cpp
-        path.cpp
-        file.cpp
         error.cpp
+        path.cpp
+        resource.cpp
+        file.cpp
         socket.cpp
         buffer.cpp
         signal.cpp
@@ -32,8 +33,10 @@ elseif(LINUX)
 endif()
 
 set(inc fd_utils.hpp
-        path.hpp
         error.hpp
+        path.hpp
+        resoource.hpp
+        file.hpp
         socket.hpp
         buffer.hpp
         signal.hpp

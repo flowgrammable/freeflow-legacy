@@ -216,25 +216,25 @@ operator!=(const Address& l, const Address& r) {
 // Socket
 
 inline
-Socket_base::Socket_base(Family f, Transport t)
+Socket_info::Socket_info(Family f, Transport t)
   : family(f), transport(t)
 { }
 
 inline
-Socket_base::Socket_base(int f, Transport t, const Address& l, const Address& p)
-  : transport(t), local(l), peer(p), fd(f)
+Socket_info::Socket_info(Transport t, const Address& l, const Address& p)
+  : transport(t), local(l), peer(p)
 { }
 
 /// Return the socket type 
 inline int
-Socket_base::type(Transport t)
+Socket_info::type(Transport t)
 {
   switch(t) {
-    case Socket_base::TCP:
-    case Socket_base::SCTP:
-    case Socket_base::TLS:
+    case Socket_info::TCP:
+    case Socket_info::SCTP:
+    case Socket_info::TLS:
       return SOCK_STREAM;
-    case Socket_base::UDP:
+    case Socket_info::UDP:
       return SOCK_DGRAM;
     default:
       return SOCK_RAW;
@@ -242,29 +242,29 @@ Socket_base::type(Transport t)
 }
 
 inline int
-Socket_base::type() const { return type(transport); }
+Socket_info::type() const { return type(transport); }
 
 
 inline int
-Socket_base::protocol(Transport t)
+Socket_info::protocol(Transport t)
 {
   switch(t) {
-    case Socket_base::TCP:
-    case Socket_base::TLS:
-    case Socket_base::RAW_TCP:
+    case Socket_info::TCP:
+    case Socket_info::TLS:
+    case Socket_info::RAW_TCP:
       return IPPROTO_TCP;
     
-    case Socket_base::UDP:
-    case Socket_base::RAW_UDP:
+    case Socket_info::UDP:
+    case Socket_info::RAW_UDP:
       return IPPROTO_UDP;
     
-    case Socket_base::SCTP:
+    case Socket_info::SCTP:
       return IPPROTO_SCTP;
     
-    case Socket_base::RAW_ICMPv4:
+    case Socket_info::RAW_ICMPv4:
       return IPPROTO_ICMP;
     
-    case Socket_base::RAW_ICMPv6:
+    case Socket_info::RAW_ICMPv6:
       return IPPROTO_ICMPV6;
     
     default:
@@ -273,45 +273,37 @@ Socket_base::protocol(Transport t)
 }
 
 inline int
-Socket_base::protocol() const { return protocol(transport); }
+Socket_info::protocol() const { return protocol(transport); }
 
 inline
 Socket::Socket(Socket&& s)
-  : Socket_base(s) 
-{
-  s.fd = -1;
-}
+  : Socket_info(s), Resource(std::move(s))
+{ }
 
 inline Socket&
 Socket::operator=(Socket&& s) {
-  Socket_base::operator=(s);
+  Socket_info::operator=(s);
+  Resource::operator=(std::move(s));
   return *this;
 }
 
 inline
 Socket::Socket(Family f, Transport t)
-  : Socket_base(f, t)
+  : Socket_info(f, t), Resource(::socket(family, type(), protocol()))
 {
-  fd = ::socket(family, type(), protocol());
-  if (fd < 0)
+  if (fd() < 0)
     throw system_error();
 }
 
 inline
 Socket::Socket(int f, Transport t, const Address& l, const Address& p)
-  : Socket_base(f, t, l, p)
+  : Socket_info(t, l, p), Resource(f)
 { }
-
-inline
-Socket::~Socket() { 
-  if (fd >= 0)
-    ::close(fd); 
-}
 
 inline Error
 bind(Socket& s, Address a) {
   s.local = a;
-  int result = ::bind(s.fd, s.local.addr(), s.local.len());
+  int result = ::bind(s.fd(), s.local.addr(), s.local.len());
   if(result != 0)
     return system_error();
   return {};
@@ -320,7 +312,7 @@ bind(Socket& s, Address a) {
 inline Error
 connect(Socket& s, const Address& a) {
   s.peer = a;
-  auto result = ::connect(s.fd, s.peer.addr(), s.peer.len());
+  auto result = ::connect(s.fd(), s.peer.addr(), s.peer.len());
   if(result != 0)
     return system_error();
   return {};
@@ -329,7 +321,7 @@ connect(Socket& s, const Address& a) {
 inline Error
 listen(Socket& s, int backlog) {
   s.backlog = backlog;
-  int result = ::listen(s.fd, backlog);
+  int result = ::listen(s.fd(), backlog);
   if(result != 0)
     return system_error();
   return {};
@@ -338,7 +330,7 @@ listen(Socket& s, int backlog) {
 inline Socket
 accept(Socket& s) {
   socklen_t length;
-  int child = ::accept(s.fd, s.peer.addr(), &length);
+  int child = ::accept(s.fd(), s.peer.addr(), &length);
   if(child < 0)
     throw system_error();
   return Socket(child, s.transport, s.local, s.peer);
@@ -346,7 +338,7 @@ accept(Socket& s) {
 
 inline int
 read(Socket& s, uint8_t* b, std::size_t l) {
-  int result = ::read(s.fd, b, l);
+  int result = ::read(s.fd(), b, l);
   if(result < 0)
     throw system_error();
   return result;
@@ -354,7 +346,7 @@ read(Socket& s, uint8_t* b, std::size_t l) {
 
 inline int
 write(Socket& s, const uint8_t* b, std::size_t l) {
-  int result = ::write(s.fd, b, l);
+  int result = ::write(s.fd(), b, l);
   if(result < 0)
     throw system_error();
   return result;
@@ -363,7 +355,7 @@ write(Socket& s, const uint8_t* b, std::size_t l) {
 inline int
 recv_from(Socket& s, uint8_t* b, std::size_t l, Address& a) {
   socklen_t length;
-  int result = ::recvfrom(s.fd, b, l, 0, a.addr(), &length);
+  int result = ::recvfrom(s.fd(), b, l, 0, a.addr(), &length);
   if(result < 0)
     throw system_error();
   return result;
@@ -371,7 +363,7 @@ recv_from(Socket& s, uint8_t* b, std::size_t l, Address& a) {
 
 inline int
 send_to(Socket& s, const uint8_t* b, std::size_t l, const Address& a) {
-  int result = ::sendto(s.fd, b, l, 0, a.addr(), a.len());
+  int result = ::sendto(s.fd(), b, l, 0, a.addr(), a.len());
   if(result < 0)
     throw system_error();
   return result;

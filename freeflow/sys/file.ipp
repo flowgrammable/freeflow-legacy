@@ -14,37 +14,6 @@
 
 namespace freeflow {
 
-inline
-Resource::Resource()
-  : fd_(-1) { }
-
-inline
-Resource::Resource(Resource&& r)
-    : fd_(r.fd_)
-  { r.fd_ = -1; }
-
-inline
-Resource& Resource::operator=(Resource&& r) {
-  fd_ = r.fd_;
-  r.fd_ = -1;
-  return *this;
-}
-
-/// Initialize the file resource with a file descriptor.
-inline
-Resource::Resource(int f)
-  : fd_(f) { }
-
-// Close the resource.
-inline
-Resource::~Resource() { 
-  if (operator bool())
-    ::close(fd_); 
-}
-
-
-// -------------------------------------------------------------------------- //
-
 /// Construct status information about the file designated by the
 /// given path name. If path designates a symbolic link, then the 
 /// status information pertains to the linked file, and not the 
