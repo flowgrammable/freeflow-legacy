@@ -25,16 +25,11 @@ set(src fd_utils.cpp
         syslog.cpp
         pipe.cpp)
 
-set(bsd_src kqueue.cpp)
-set(linux_src epoll.cpp)
-
 if(BSD)
-  LIST(APPEND src ${bsd_src})
-endif(BSD)
-
-if(LINUX)
-  LIST(APPEND src ${linux_src})
-endif(LINUX)
+  LIST(APPEND src kqueue.cpp)
+elseif(LINUX)
+  LIST(APPEND src epoll.cpp)
+endif()
 
 set(inc fd_utils.hpp
         path.hpp
@@ -48,16 +43,11 @@ set(inc fd_utils.hpp
         syslog.hpp
         pipe.hpp)
 
-set(bsd_inc kqueue.hpp)
-set(linux_inc epoll.hpp)
-
 if(BSD)
-  LIST(APPEND inc ${bsd_inc})
-endif(BSD)
-
-if(LINUX)
-  LIST(APPEND inc ${linux_inc})
-endif(LINUX)
+  LIST(APPEND inc ${kqueue.hpp})
+elseif(LINUX)
+  LIST(APPEND inc ${epoll.hpp})
+endif()
 
 add_library(freeflow_sys ${src})
 

@@ -32,6 +32,7 @@ option(FREEFLOW_BUILD_TESTS "Build unit tests" ON)
 # The inclusion of these modules configure the build based on the discovery
 # of the host system.
 
+include(FreeFlowHost)
 include(FreeFlowCompiler)
 include(FreeFlowDepend)
 include(FreeFlowTest)
