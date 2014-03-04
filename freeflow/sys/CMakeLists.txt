@@ -13,6 +13,8 @@
 # permissions and limitations under the License.
 
 set(src fd_utils.cpp
+        meta.cpp
+        data.cpp
         error.cpp
         path.cpp
         resource.cpp
@@ -33,6 +35,8 @@ elseif(LINUX)
 endif()
 
 set(inc fd_utils.hpp
+        meta.hpp
+        data.cpp
         error.hpp
         path.hpp
         resoource.hpp
