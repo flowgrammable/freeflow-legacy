@@ -28,7 +28,6 @@ add_example(pipe)
 add_example(signal)
 add_example(scheduler)
 add_example(server)
-add_example(server2)
 
 if(BSD)
   add_example(kqueue)

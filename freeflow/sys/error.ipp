@@ -40,6 +40,16 @@ Error::data() const { return data_; }
 
 
 // -------------------------------------------------------------------------- //
+// System error
+
+/// Construct a system error from the given result code. This associates
+/// the POSIX error code as the result type.
+inline
+System_error::System_error(int r) 
+  : Error(SYSTEM_ERROR, errno) { }
+
+
+// -------------------------------------------------------------------------- //
 // Error constructors
 
 /// Returns an error condition based on a predicate.

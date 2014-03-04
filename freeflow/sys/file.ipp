@@ -92,7 +92,7 @@ File::read(void* buf, std::size_t n) {
 }
 
 inline std::size_t
-File::write(void* buf, std::size_t n) {
+File::write(const void* buf, std::size_t n) {
   ssize_t r = ::write(fd(), buf, n);
   if (r < 0)
     throw system_error();

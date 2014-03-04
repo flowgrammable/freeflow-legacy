@@ -24,7 +24,9 @@ int
 main(int argc, char* argv[]) {
   File f("/dev/null", File::WRITE);
 
-  // FIXME: Don't use ::operations
-  ::write(f.fd(), "hello", 5);
+  f.write("hello", 5);
 
+  // This is guaranteed to be an error.
+  // char buf[20];
+  // f.read(buf, 20);
 }

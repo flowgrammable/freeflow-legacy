@@ -72,6 +72,14 @@ private:
   Data data_;
 };
 
+/// A system error is an error code that represents a POSIX system error.
+/// This class derives from Error, providing special constructors.
+struct System_error : Error {
+  System_error() = default;
+  System_error(int);
+};
+
+
 // Error constructors.
 Error ok(bool b, Error err);
 Error system_error();
@@ -94,7 +102,6 @@ public:
 private:
   Error err_;
 };
-
 
 } // namespace freeflow
 

@@ -111,12 +111,11 @@ public:
   File(const Path&, Flags);
 
   std::size_t read(void*, std::size_t);
-  std::size_t write(void*, std::size_t);
+  std::size_t write(const void*, std::size_t);
 
 private:
   Path path_;
 };
-
 
 } // namespace freeflow
 

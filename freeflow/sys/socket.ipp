@@ -195,7 +195,7 @@ Address::len() const {
 // and represent the same socket addresses.
 inline bool
 operator==(const Address& a, const Address& b) {
-  if(a.storage.ss_family == b.storage.ss_family) {
+  if (a.storage.ss_family == b.storage.ss_family) {
     if (a.family() == Address::IPv4)
       return a.as_ipv4() == b.as_ipv4();
     else if (a.family() == Address::IPv6)
@@ -300,73 +300,80 @@ Socket::Socket(int f, Transport t, const Address& l, const Address& p)
   : Socket_info(t, l, p), Resource(f)
 { }
 
-inline Error
-bind(Socket& s, Address a) {
-  s.local = a;
-  int result = ::bind(s.fd(), s.local.addr(), s.local.len());
-  if(result != 0)
-    return system_error();
-  return {};
+inline System_error
+Socket::bind(Address a) {
+  local = a;
+  return ::bind(fd(), local.addr(), local.len());
 }
 
-inline Error
-connect(Socket& s, const Address& a) {
-  s.peer = a;
-  auto result = ::connect(s.fd(), s.peer.addr(), s.peer.len());
-  if(result != 0)
-    return system_error();
-  return {};
+inline System_error
+Socket::connect(const Address& a) {
+  peer = a;
+  return ::connect(fd(), peer.addr(), peer.len());
 }
 
-inline Error
-listen(Socket& s, int backlog) {
-  s.backlog = backlog;
-  int result = ::listen(s.fd(), backlog);
-  if(result != 0)
-    return system_error();
-  return {};
+inline System_error
+Socket::listen(int backlog) {
+  backlog = backlog;
+  return ::listen(fd(), backlog);
 }
 
 inline Socket
-accept(Socket& s) {
-  socklen_t length;
-  int child = ::accept(s.fd(), s.peer.addr(), &length);
-  if(child < 0)
-    throw system_error();
-  return Socket(child, s.transport, s.local, s.peer);
+Socket::accept() {
+  socklen_t n;
+  int s = ::accept(fd(), peer.addr(), &n);
+  if (s < 0)
+    throw System_error(s);
+  return Socket(s, transport, local, peer);
 }
 
-inline int
-read(Socket& s, uint8_t* b, std::size_t l) {
-  int result = ::read(s.fd(), b, l);
-  if(result < 0)
-    throw system_error();
-  return result;
+inline std::size_t
+Socket::read(void* buf, std::size_t n) {
+  ssize_t r = ::read(fd(), buf, n);
+  if (r < 0)
+    throw System_error(r);
+  return r;
 }
 
-inline int
-write(Socket& s, const uint8_t* b, std::size_t l) {
-  int result = ::write(s.fd(), b, l);
-  if(result < 0)
-    throw system_error();
-  return result;
+inline std::size_t
+Socket::write(const void* buf, std::size_t n) {
+  ssize_t r = ::write(fd(), buf, n);
+  if (r < 0)
+    throw System_error(r);
+  return r;
 }
 
-inline int
-recv_from(Socket& s, uint8_t* b, std::size_t l, Address& a) {
-  socklen_t length;
-  int result = ::recvfrom(s.fd(), b, l, 0, a.addr(), &length);
-  if(result < 0)
-    throw system_error();
-  return result;
+inline std::size_t
+Socket::recv(void* buf, std::size_t n, int f) {
+  ssize_t r = ::recv(fd(), buf, n, f);
+  if (r < 0)
+    throw System_error(r);
+  return r;  
 }
 
-inline int
-send_to(Socket& s, const uint8_t* b, std::size_t l, const Address& a) {
-  int result = ::sendto(s.fd(), b, l, 0, a.addr(), a.len());
-  if(result < 0)
-    throw system_error();
-  return result;
+inline std::size_t
+Socket::recv_from(void* buf, std::size_t n, Address& a) {
+  socklen_t l;
+  ssize_t r = ::recvfrom(fd(), buf, n, 0, a.addr(), &l);
+  if (r < 0)
+    throw System_error(r);
+  return r;
+}
+
+inline std::size_t
+Socket::send(const void* buf, std::size_t n, int f) {
+  ssize_t r = ::send(fd(), buf, n, f);
+  if (r < 0)
+    throw System_error(r);
+  return r;
+}
+
+inline std::size_t
+Socket::send_to(const void* buf, std::size_t n, const Address& a) {
+  ssize_t r = ::sendto(fd(), buf, n, 0, a.addr(), a.len());
+  if (r < 0)
+    throw System_error(r);
+  return r;
 }
 
 } // namespace freeflow

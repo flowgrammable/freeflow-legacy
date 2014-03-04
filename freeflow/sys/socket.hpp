@@ -201,7 +201,13 @@ struct Socket_info : Address_info {
 ///
 /// Note that sockets are resources; they can be moved but not copied. 
 ///
-/// TODO: Document me!
+/// \todo Document me!
+///
+/// \todo Add send/recv flags.
+///
+/// \todo Add support for recvmsg, sendmsg.
+///
+/// \todo Add support for socket options.
 struct Socket : Socket_info, Resource {
   // Not default constructible.
   Socket() = delete;
@@ -217,18 +223,25 @@ struct Socket : Socket_info, Resource {
   // Socket construction
   Socket(Family, Transport);
   Socket(int, Transport, const Address&, const Address&);
+
+  // Socket operations
+  System_error bind(Address a = Address());
+  System_error connect(const Address& a);
+  System_error listen(int backlog = SOMAXCONN);
+  Socket accept();
+
+  // Reading and writing
+  std::size_t read(void*, std::size_t);
+  std::size_t write(const void*, std::size_t);
+
+  // Receiving
+  std::size_t recv(void*, std::size_t, int);
+  std::size_t recv_from(void*, std::size_t, Address&);
+
+  // Sending
+  std::size_t send(const void*, std::size_t, int);
+  std::size_t send_to(const void*, std::size_t, const Address&);
 };
-
-// Socket operations
-Error bind(Socket& s, Address a = Address());
-Error connect(Socket& s, const Address& a);
-Error listen(Socket& s, int backlog = SOMAXCONN);
-Socket accept(Socket& s);
-
-int read(Socket& s);
-int write(Socket& s);
-int send_to(Socket& s);
-int recv_from(Socket& s);
 
 // Pretty printing
 std::string to_string(const Socket& s);
