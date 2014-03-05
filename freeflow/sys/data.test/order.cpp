@@ -38,6 +38,12 @@ int main() {
   // Create network byte-order values...
   char buf[] = {1, 2, 3, 4, 5, 6, 7, 8};
 
+#if defined(FREEFLOW_BIG_ENDIAN)
+  std::cout << "big\n";
+#elif defined(FREEFLOW_LITTLE_ENDIAN)
+  std::cout << "little\n";
+#endif
+
   Uint16 be16;
   std::memcpy(&be16, buf, 2);
 

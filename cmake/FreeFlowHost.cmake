@@ -15,3 +15,14 @@
 
 # TODO: It might be worthwhile to write a config header that includes
 # host, system, and compiler information.
+
+# ---------------------------------------------------------------------------- #
+# Endianness
+
+include(TestBigEndian)
+test_big_endian(is_big)
+if (is_big)
+  add_definitions(-DFREEFLOW_BIG_ENDIAN)
+else()
+  add_definitions(-DFREEFLOW_LITTLE_ENDIAN)
+endif()

@@ -23,7 +23,9 @@
 
 namespace freeflow {
 
-/// Basic data types
+// -------------------------------------------------------------------------- //
+// Data types
+
 using Uint8 = std::uint8_t;
 using Uint16 = std::uint16_t;
 using Uint32 = std::uint32_t;
@@ -31,33 +33,46 @@ using Uint64 = std::uint64_t;
 
 
 // -------------------------------------------------------------------------- //
-// Foreign Byte Order
+// Byte order
 
-/// The Foreign_byte_order class provides facilities for reordering the bytes
+// There's no portable way to do this yet. Note that these macros
+// are used only within the Byte_order class. 
+#if defined(FREEFLOW_BIG_ENDIAN)
+#  define ff_msbf_16(x) x
+#  define ff_lsbf_16(x) __builtin_bswap16(x)
+#  define ff_msbf_32(x) x
+#  define ff_lsbf_32(x) __builtin_bswap32(x)
+#  define ff_msbf_64(x) x
+#  define ff_lsbf_64(x) __builtin_bswap64(x)
+#elif defined(FREEFLOW_LITTLE_ENDIAN)
+#  define ff_msbf_16(x) __builtin_bswap16(x)
+#  define ff_lsbf_16(x) x
+#  define ff_msbf_32(x) __builtin_bswap32(x)
+#  define ff_lsbf_32(x) x
+#  define ff_msbf_64(x) __builtin_bswap64(x)
+#  define ff_lsbf_64(x) x
+#endif
+
+/// The Byte_order class provides facilities for reordering the bytes
 /// in unsigned integral values so that the most or least significant bit
 /// appears first in the byte sequence.
-///
-/// \todo Clang will not compile this class with constexpr byte-ordering
-/// functions as it is written. The reason is that the test against value
-/// is not the active member of the union. Fixing this should rely on 
-/// config-time information, and then write this as constexprs. For now, they 
-/// are made non-constexpr.
 struct Byte_order {
+
   static Uint8 msbf(Uint8 v) { return v; }
-  static Uint16 msbf(Uint16 v) { return htobe16(v); }
-  static Uint32 msbf(Uint32 v) { return htobe32(v); }
-  static Uint64 msbf(Uint64 v) { return htobe64(v); }
+  static Uint16 msbf(Uint16 v) { return ff_msbf_16(v); }
+  static Uint32 msbf(Uint32 v) { return ff_msbf_32(v); }
+  static Uint64 msbf(Uint64 v) { return ff_msbf_64(v); }
 
   template<typename T>
-    static T msbf(T v) { return (T)be(static_cast<T>(v)); }
+    static T msbf(T v) { return msbf(static_cast<T>(v)); }
   
   static Uint8 lsbf(Uint8 v) { return v; }
-  static Uint16 lsbf(Uint16 v) { return htole16(v); }
-  static Uint32 lsbf(Uint32 v) { return htole32(v); }
-  static Uint64 lsbf(Uint64 v) { return htole64(v); }
+  static Uint16 lsbf(Uint16 v) { return ff_lsbf_16(v); }
+  static Uint32 lsbf(Uint32 v) { return ff_lsbf_16(v); }
+  static Uint64 lsbf(Uint64 v) { return ff_lsbf_16(v); }
 
   template<typename T>
-    static T lsbf(T v) { return le(static_cast<T>(v)); }
+    static T lsbf(T v) { return lsbf(static_cast<T>(v)); }
 };
 
 } // namespace freeflow
