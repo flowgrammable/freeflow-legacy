@@ -1,4 +1,4 @@
-# Copyright (c) 2013-2014 Flowgrammable, LLC.
+# Copyright (c) 2013-2014 Flowgrammable.org
 # 
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,6 +12,4 @@
 # or implied. See the License for the specific language governing
 # permissions and limitations under the License.
 
-
-# TODO: It might be worthwhile to write a config header that includes
-# host, system, and compiler information.
+add_unit_test(sys_data_order order.cpp)

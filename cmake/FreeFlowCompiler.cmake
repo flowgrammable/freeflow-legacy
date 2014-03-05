@@ -17,7 +17,9 @@
 # Compiler configuration
 #
 # Minimally, -std=c++11 and -Wall must be enabled.
+
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -Wall -fPIC -g")
+
 
 # For Clang-3.3 installed via MacPorts on MacOS 10.6.8, also be sure to
 # include the following:
