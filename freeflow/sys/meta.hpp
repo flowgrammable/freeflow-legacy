@@ -12,8 +12,8 @@
 // or implied. See the License for the specific language governing
 // permissions and limitations under the License.
 
-#ifndef FREEFLOW_BUFFER_H
-#define FREEFLOW_BUFFER_H
+#ifndef FREEFLOW_META_HPP
+#define FREEFLOW_META_HPP
 
 #include <type_traits>
 

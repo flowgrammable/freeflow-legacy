@@ -15,36 +15,67 @@
 namespace freeflow {
 namespace ofp {
 
-inline bool
-to_buffer(View& v, Uint8 n) {
+inline Error
+to_view(View& v, Uint8 n) {
   put(v, n);
-  return true;
+  return {};
 }
 
-inline bool
-to_buffer(View& v, Uint16 n) {
+inline Error
+to_view(View& v, Uint16 n) {
   put(v, Byte_order::msbf(n));
-  return true;
+  return {};
 }
 
-inline bool
-to_buffer(View& v, Uint32 n) {
+inline Error
+to_view(View& v, Uint32 n) {
   put(v, Byte_order::msbf(n));
-  return true;
+  return {};
 }
 
-inline bool
-to_buffer(View& v, Uint64 n) {
+inline Error
+to_view(View& v, Uint64 n) {
   put(v, Byte_order::msbf(n));
-  return true;
+  return {};
 }
 
 template<typename T, typename X>
-  inline bool
-  to_buffer(View& v, T value) {
-    using U = Underlying_type<T>;
-    put(v, Byte_order::msbf(U(value)));
-    return true;
+  inline Error
+  to_view(View& v, T value) {
+    put(Byte_order::msbf(value));
+    return {};
+  }
+
+
+inline Error
+from_view(View& v, Uint8& n) {
+  put(v, n);
+  return {};
+}
+
+inline Error
+from_view(View& v, Uint16& n) {
+  put(v, Byte_order::msbf(n));
+  return {};
+}
+
+inline Error
+from_view(View& v, Uint32& n) {
+  put(v, Byte_order::msbf(n));
+  return {};
+}
+
+inline Error
+from_view(View& v, Uint64& n) {
+  put(v, Byte_order::msbf(n));
+  return {};
+}
+
+template<typename T, typename X>
+  inline Error
+  from_view(View& v, T& value) {
+    put(Byte_order::msbf(value));
+    return {};
   }
 
 } // namespace ofp

@@ -50,7 +50,7 @@ main(int argc, char* argv[]) {
   // responsibility of the caller to ensure that the read will succeed
   // before reading.
   View vin(in);
-  if (not available(vin, sizeof(uint32_t)))
+  if (not vin.available(sizeof(uint32_t)))
     return fail("buffer is not big enough to read from");
   
   // Read 4 bytes of data from the file and print it. This particular
@@ -63,7 +63,7 @@ main(int argc, char* argv[]) {
   // We prefer the one-line version.
   uint32_t n = get<uint32_t>(vin);
   std::cout << "read value: " << n << '\n';
-  std::cout << "bytes remaining: " << remaining(vin) << '\n';
+  std::cout << "bytes remaining: " << vin.remaining() << '\n';
 
 
   // Create an output buffer large to hold only 4 bytes and a attach a

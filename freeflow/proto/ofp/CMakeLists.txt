@@ -12,20 +12,18 @@
 # or implied. See the License for the specific language governing
 # permissions and limitations under the License.
 
+# ---------------------------------------------------------------------------- #
+# Build
+
+set(src ofp.cpp)
+
+set(hdr ofp.hpp
+        ofp.ipp)
+
+add_library(freeflow_ofp ${src})
 
 # ---------------------------------------------------------------------------- #
-# Protocols
+# Installation
 
-# Each protocol implementation should be its own independent library.
-add_subdirectory(ofp)
-
-
-
-# FIXME: I don't think that this is what we want.
-
-# add_library(freeflow_proto ipv4.cpp ipv6.cpp)
-
-# install(FILES ipv4.hpp ipv6.hpp DESTINATION include/freeflow/proto)
-
-# add_subdirectory(examples)
+install(FILES ${hdr} DESTINATION include/freeflow/proto/ofp)
 

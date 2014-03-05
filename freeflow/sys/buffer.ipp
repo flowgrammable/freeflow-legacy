@@ -53,22 +53,15 @@ View::View(Buffer& b, Byte* f, Byte* l)
   : buf(b), first(f), last(l)
 { }
 
-/// \defgroup view_ops Buffer View Operations
-
-/// \ingroup view_ops
 /// Returns the number of bytes remaining in the view.
 inline std::size_t
-remaining(const View& v) { return v.last - v.first; }
+View::remaining() const { return last - first; }
 
-/// \ingroup view_ops
 /// Returns true if and only if there are at least n bytes available in
 /// the view for reading or writing.
-//
-// FIXME: Modfiy this so that it returns an error condition that evaluates
-// to true when there n bytes are available and false otherwise, while
-// reporting the number of bytes needed to complete the operation.
 inline bool
-available(const View& v, std::size_t n) { return remaining(v) >= n; }
+View::available(std::size_t n) const { return remaining() >= n; }
+
 
 /// \ingroup view_ops
 /// Returns a new view of a buffer containing excatly n bytes. A view

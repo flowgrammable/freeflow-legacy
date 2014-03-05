@@ -12,8 +12,8 @@
 // or implied. See the License for the specific language governing
 // permissions and limitations under the License.
 
-#ifndef FREEFLOW_BUFFER_H
-#define FREEFLOW_BUFFER_H
+#ifndef FREEFLOW_BUFFER_HPP
+#define FREEFLOW_BUFFER_HPP
 
 #include <cassert>
 #include <cstdint>
@@ -99,14 +99,16 @@ public:
   View(Buffer& b);
   View(Buffer& b, Byte* f, Byte* l);
 
+  std::size_t remaining() const;
+  bool available(std::size_t n) const;
+
   Buffer& buf;
   Byte* first;
   Byte* last;
 };
 
-inline std::size_t remaining(const View& v);
-inline bool available(const View& v, std::size_t n);
 inline View constrain(const View& v, std::size_t n);
+
 inline bool update(View& v, const View& c);
 
 // Put operations
