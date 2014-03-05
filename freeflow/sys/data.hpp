@@ -15,8 +15,6 @@
 #ifndef FREEFLOW_DATA_HPP
 #define FREEFLOW_DATA_HPP
 
-#include <endian.h>
-
 #include <cstdint>
 
 #include <freeflow/sys/meta.hpp>
