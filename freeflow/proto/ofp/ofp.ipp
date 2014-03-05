@@ -42,39 +42,41 @@ to_view(View& v, Uint64 n) {
 template<typename T, typename X>
   inline Error
   to_view(View& v, T value) {
-    put(Byte_order::msbf(value));
+    using U = Underlying_type<T>;
+    put(v, Byte_order::msbf(static_cast<U>(value)));
     return {};
   }
 
 
 inline Error
 from_view(View& v, Uint8& n) {
-  put(v, n);
+  n = Byte_order::msbf(get<Uint8>(v));
   return {};
 }
 
 inline Error
 from_view(View& v, Uint16& n) {
-  put(v, Byte_order::msbf(n));
+  n = Byte_order::msbf(get<Uint16>(v));
   return {};
 }
 
 inline Error
 from_view(View& v, Uint32& n) {
-  put(v, Byte_order::msbf(n));
+  n = Byte_order::msbf(get<Uint32>(v));
   return {};
 }
 
 inline Error
 from_view(View& v, Uint64& n) {
-  put(v, Byte_order::msbf(n));
+  n = Byte_order::msbf(get<Uint64>(v));
   return {};
 }
 
 template<typename T, typename X>
   inline Error
   from_view(View& v, T& value) {
-    put(Byte_order::msbf(value));
+    using U = Underlying_type<T>;
+    value = static_cast<T>(Byte_order::msbf(get<U>(v)));
     return {};
   }
 

@@ -48,7 +48,7 @@ struct Error : freeflow::Error {
 // rules and some structures common to all versions of the OpenFlow
 // protocol.
 
-Error to_view(View & v, Uint8 n);
+Error to_view(View& v, Uint8 n);
 Error to_view(View& v, Uint16 n);
 Error to_view(View& v, Uint32 n);
 Error to_view(View& v, Uint64 n);
@@ -56,7 +56,7 @@ Error to_view(View& v, Uint64 n);
 template<typename T, typename = Requires<Enum<T>()>>
   Error to_view(View& v, T value);
 
-Error from_view(View & v, Uint8& n);
+Error from_view(View& v, Uint8& n);
 Error from_view(View& v, Uint16& n);
 Error from_view(View& v, Uint32& n);
 Error from_view(View& v, Uint64& n);

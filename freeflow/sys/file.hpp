@@ -20,9 +20,11 @@
 #include <fcntl.h>
 #include <unistd.h>
 
+#include <cassert>
 #include <iostream>
 
 #include <freeflow/sys/error.hpp>
+#include <freeflow/sys/buffer.hpp>
 #include <freeflow/sys/resource.hpp>
 #include <freeflow/sys/path.hpp>
 
@@ -110,8 +112,18 @@ public:
   File(const char*, Flags);
   File(const Path&, Flags);
 
+  // Observers
+  const Path& path() const;
+
+  // Read
   std::size_t read(void*, std::size_t);
+  std::size_t read(Buffer&, std::size_t);
+  std::size_t read(Buffer&);
+  
+  // Write
   std::size_t write(const void*, std::size_t);
+  std::size_t write(const Buffer&, std::size_t);
+  std::size_t write(const Buffer&);
 
 private:
   Path path_;

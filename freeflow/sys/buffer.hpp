@@ -97,6 +97,7 @@ constexpr bool valid(const Buffer& b);
 class View {
 public:
   View(Buffer& b);
+  View(Buffer& b, std::size_t n);
   View(Buffer& b, Byte* f, Byte* l);
 
   std::size_t remaining() const;

@@ -39,15 +39,23 @@ is_valid(const Buffer& b) { return true; }
 // -------------------------------------------------------------------------- //
 // View
 
-/// Initialize a view over the extent of the underlying buffer.
+/// Initialize a view over the extent of the buffer.
 inline
 View::View(Buffer& b)
   : buf(b), first(b.data()), last(first + b.size())
 { }
 
-/// Initialize the view over a subset of bytes in the given buffer.
+/// Initialize the view over the first n bytes of the buffer.
+inline
+View::View(Buffer& b, std::size_t n)
+  : buf(b), first(b.data()), last(b.data() + n)
+{
+  assert(n <= b.size());
+}
+
+/// Initialize the view over a subset of bytes in the buffer.
 ///
-/// \todo Assert that f is in b, l is in b, and f < l.
+/// \todo Assert that f is in b, l is in b, and f < l. 
 inline
 View::View(Buffer& b, Byte* f, Byte* l)
   : buf(b), first(f), last(l)

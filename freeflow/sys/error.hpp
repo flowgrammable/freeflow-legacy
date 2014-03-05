@@ -96,7 +96,8 @@ public:
 
   constexpr operator bool() const;
 
-  Error::Code code() const;
+  Error error() const;
+  Error::Code code() const; 
   Error::Data data() const;
 
 private:

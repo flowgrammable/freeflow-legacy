@@ -78,6 +78,10 @@ Trap::Trap(Error e)
 constexpr 
 Trap::operator bool() const { return !err_; }
 
+/// Returns the underlying error.
+inline Error
+Trap::error() const { return err_; }
+
 /// Returns the error code.
 inline Error::Code 
 Trap::code() const { return err_.code(); }

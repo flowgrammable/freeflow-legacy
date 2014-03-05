@@ -12,17 +12,9 @@
 # or implied. See the License for the specific language governing
 # permissions and limitations under the License.
 
-# ---------------------------------------------------------------------------- #
-# Build
+macro(add_example tgt)
+  add_executable(${tgt} ${tgt}.cpp)
+  target_link_libraries(${tgt} freeflow_sys freeflow_ofp)
+endmacro()
 
-set(src ofp.cpp)
-set(hdr ofp.hpp ofp.ipp)
-
-add_library(freeflow_ofp ${src})
-add_subdirectory(examples)
-
-# ---------------------------------------------------------------------------- #
-# Installation
-
-install(FILES ${hdr} DESTINATION include/freeflow/proto/ofp)
-
+add_example(reader)

@@ -57,22 +57,15 @@ using Uint64 = std::uint64_t;
 /// in unsigned integral values so that the most or least significant bit
 /// appears first in the byte sequence.
 struct Byte_order {
-
   static Uint8 msbf(Uint8 v) { return v; }
   static Uint16 msbf(Uint16 v) { return ff_msbf_16(v); }
   static Uint32 msbf(Uint32 v) { return ff_msbf_32(v); }
   static Uint64 msbf(Uint64 v) { return ff_msbf_64(v); }
 
-  template<typename T>
-    static T msbf(T v) { return msbf(static_cast<T>(v)); }
-  
   static Uint8 lsbf(Uint8 v) { return v; }
   static Uint16 lsbf(Uint16 v) { return ff_lsbf_16(v); }
   static Uint32 lsbf(Uint32 v) { return ff_lsbf_16(v); }
   static Uint64 lsbf(Uint64 v) { return ff_lsbf_16(v); }
-
-  template<typename T>
-    static T lsbf(T v) { return lsbf(static_cast<T>(v)); }
 };
 
 } // namespace freeflow
