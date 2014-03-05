@@ -231,7 +231,7 @@ Socket_info::type(Transport t)
 {
   switch(t) {
     case Socket_info::TCP:
-    // case Socket_info::SCTP:
+    case Socket_info::SCTP:
     case Socket_info::TLS:
       return SOCK_STREAM;
     case Socket_info::UDP:
