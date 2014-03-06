@@ -21,13 +21,13 @@ int main(int argc, char** argv) {
   Socket::Transport t;
   if (tcp.compare(argv[4]) == 0)
     t = Socket::TCP;
-  else if (tcp.compare(argv[4]) == 0)
+  else if (udp.compare(argv[4]) == 0)
     t = Socket::UDP;
 
   Address::Family net;
   if (ipv4.compare(argv[1]) == 0)
     net = Address::IPv4;
-  else if (ipv4.compare(argv[1]) == 0)
+  else if (ipv6.compare(argv[1]) == 0)
     net = Address::IPv6;
 
   uint16_t port = atoi(argv[3]);
