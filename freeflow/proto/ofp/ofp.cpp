@@ -27,8 +27,6 @@ to_view(View& v, const Header& h) {
   // Minimum semantic checking
   if (h.length < h.bytes);
     return Error::BAD_HEADER_LENGTH;
-  if (h.length > v.remaining())
-    return Error::PAYLOAD_OVERFLOW;
 
   to_view(v, h.version);
   to_view(v, h.type);
@@ -46,10 +44,9 @@ from_view(View& v, Header& h) {
   from_view(v, h.length);
   from_view(v, h.xid);
 
+  // Minimum semantic checking
   if (h.length < h.bytes)
     return Error::BAD_HEADER_LENGTH;
-  if (h.length - h.bytes > v.remaining())
-    return Error::PAYLOAD_OVERFLOW;
   return {};
 }
 

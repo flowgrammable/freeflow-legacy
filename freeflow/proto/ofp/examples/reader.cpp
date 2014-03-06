@@ -30,8 +30,8 @@ int main(int argc, char* argv[]) {
     return -1;
   }
 
-  // Create a buffer that will store the contents of message files.
-  Buffer buf(4096);
+  // Create a buffer that will store only a single header.
+  Buffer buf(8);
 
   // Read a message from each of the paths given in the command
   // line arguments.
@@ -56,10 +56,15 @@ int main(int argc, char* argv[]) {
       // print information about the header. Otherwise, print a diagnostic
       // indicating the reason that parsing failed.
       ofp::Header h;
-      if (Trap t = from_view(v, h))
+      if (Trap t = from_view(v, h)) {
         diagnose(f, h, t.error());
-      else
-        print(f, h);
+        continue;
+      }
+
+      // Print the header
+      print(f, h);
+
+      // TODO: Read the remainder buffer and decode it.
 
     } catch(Error& e) {
       // FIXME: This interface should be improved.
@@ -71,11 +76,11 @@ int main(int argc, char* argv[]) {
 
 void
 print(const File& f, const ofp::Header& h) {
-  // std::cout << "== " << f.path() << " ==\n";
-  // std::cout << "version: " << (int)h.version << '\n';
-  // std::cout << "type:    " << (int)h.type << '\n';
-  // std::cout << "length:  " << h.length << '\n';
-  // std::cout << "xid:     " << h.xid << '\n';
+  std::cout << "== " << f.path() << " ==\n";
+  std::cout << "version: " << (int)h.version << '\n';
+  std::cout << "type:    " << (int)h.type << '\n';
+  std::cout << "length:  " << h.length << '\n';
+  std::cout << "xid:     " << h.xid << '\n';
 }
 
 void 
@@ -89,21 +94,16 @@ diagnose(const File& f, const ofp::Header& h, Error err) {
     return;
   }
 
-  // If we don't know how to handle the protocol, then we can't
-  // provide any further diagnostics.
-  if (h.version > 1) {
-    std::cout << "unhandled protocol version '" << (int)h.version << "'\n";
+  // Check the header length.
+  if (err.code() == ofp::Error::BAD_HEADER_LENGTH) {
+    std::cout << "bad header length\n";
     return;
   }
 
-  // TODO: Make this version specific.
-  switch (err.code()) {
-  case ofp::Error::PAYLOAD_OVERFLOW:
-    std::cout << "payload overflow\n";
-    break;
-  case ofp::Error::BAD_HEADER_LENGTH:
-    std::cout << "bad header length\n";
-    break;
+  // ... Do stuff.
+  if (h.version > 1) {
+    std::cout << "unhandled protocol version '" << (int)h.version << "'\n";
+    return;
   }
 }
 
