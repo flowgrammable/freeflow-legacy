@@ -71,15 +71,31 @@ template<typename T, typename = Requires<Enum<T>()>>
 // -------------------------------------------------------------------------- //
 // Common structures
 
-/// A MAC address is a 6-byte field that uniquely identifies the device.
+/// A MAC address is a 48-bit identifier that uniquely identifies the device.
 struct Mac_addr {
   static constexpr std::size_t bytes = 6;
-
   Uint8 addr[6];
 };
 
+/// An Ipv4 address is a 32-bit identifier.
+struct Ipv4_addr {
+  static constexpr std::size_t bytes = 4;
+  Uint8 addr[4];
+};
+
+// An Ipv6 address is a 128-bit identifier.
+struct Ipv6_addr {
+  static constexpr std::size_t bytes = 8;
+  Uint8 addr[16];
+};
+
 Error to_view(View&, const Mac_addr&);
+Error to_view(View&, const Ipv4_addr&);
+Error to_view(View&, const Ipv6_addr&);
+
 Error from_view(View&, Mac_addr&);
+Error from_view(View&, Ipv4_addr&);
+Error from_view(View&, Ipv6_addr&);
 
 
 /// The OpenFlow header is found at the front of every OpenFlow message.

@@ -15,7 +15,7 @@
 # ---------------------------------------------------------------------------- #
 # Build
 
-set(src message.cpp port.cpp)
+set(src message.cpp port.cpp action.cpp)
 
 set(hdr message.hpp 
         message.ipp

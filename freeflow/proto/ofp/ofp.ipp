@@ -102,7 +102,19 @@ inline Error
 to_view(View& v, const Mac_addr& a) { return to_view(v, a.addr); }
 
 inline Error 
+to_view(View& v, const Ipv4_addr& a) { return to_view(v, a.addr); }
+
+inline Error 
+to_view(View& v, const Ipv6_addr& a) { return to_view(v, a.addr); }
+
+inline Error 
 from_view(View& v, Mac_addr& a) { return from_view(v, a.addr); }
+
+inline Error 
+from_view(View& v, Ipv4_addr& a) { return from_view(v, a.addr); }
+
+inline Error 
+from_view(View& v, Ipv6_addr& a) { return from_view(v, a.addr); }
 
 
 } // namespace ofp
