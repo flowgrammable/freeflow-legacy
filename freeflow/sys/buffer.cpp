@@ -14,6 +14,7 @@
 
 #include <fstream>
 #include <string>
+#include <stdexcept>
 
 #include "buffer.hpp"
 

@@ -14,7 +14,7 @@
 
 macro(add_example tgt)
   add_executable(${tgt} ${tgt}.cpp)
-  target_link_libraries(${tgt} freeflow_sys)
+  target_link_libraries(${tgt} freeflow)
 endmacro()
 
 add_example(error)

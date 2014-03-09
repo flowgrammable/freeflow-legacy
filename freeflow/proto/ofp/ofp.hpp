@@ -56,6 +56,9 @@ Error to_view(View& v, Uint64 n);
 template<typename T, typename = Requires<Enum<T>()>>
   Error to_view(View& v, T value);
 
+template<typename T, std::size_t N>
+  Error to_view(View& v, T(&)[N]);
+
 Error from_view(View& v, Uint8& n);
 Error from_view(View& v, Uint16& n);
 Error from_view(View& v, Uint32& n);
@@ -68,10 +71,20 @@ template<typename T, typename = Requires<Enum<T>()>>
 // -------------------------------------------------------------------------- //
 // Common structures
 
+/// A MAC address is a 6-byte field that uniquely identifies the device.
+struct Mac_addr {
+  static constexpr std::size_t bytes = 6;
+
+  Uint8 addr[6];
+};
+
+Error to_view(View&, const Mac_addr&);
+Error from_view(View&, Mac_addr&);
+
 
 /// The OpenFlow header is found at the front of every OpenFlow message.
 struct Header {
-  static constexpr std::size_t bytes = 8; // 64b
+  static constexpr std::size_t bytes = 8;
 
   Uint8 version;
   Uint8 type;

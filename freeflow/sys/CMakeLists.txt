@@ -15,6 +15,7 @@
 set(src fd_utils.cpp
         meta.cpp
         data.cpp
+        string.cpp
         error.cpp
         path.cpp
         resource.cpp
@@ -34,9 +35,11 @@ elseif(LINUX)
   LIST(APPEND src epoll.cpp)
 endif()
 
-set(inc fd_utils.hpp
+# TODO: We need to install all of the .ipp files also.
+set(hdr fd_utils.hpp
         meta.hpp
-        data.cpp
+        data.hpp
+        string.hpp
         error.hpp
         path.hpp
         resoource.hpp
@@ -51,19 +54,19 @@ set(inc fd_utils.hpp
         pipe.hpp)
 
 if(BSD)
-  LIST(APPEND inc ${kqueue.hpp})
+  LIST(APPEND hdr ${kqueue.hpp})
 elseif(LINUX)
-  LIST(APPEND inc ${epoll.hpp})
+  LIST(APPEND hdr ${epoll.hpp})
 endif()
 
-add_library(freeflow_sys ${src})
+add_library(freeflow ${src})
 
 
 # --------------------------------------------------------------------------- //
 # Installation
 
 
-install(FILES ${inc} DESTINATION include/freeflow/sys)
+install(FILES ${hdr} DESTINATION include/freeflow/sys)
 
 
 # --------------------------------------------------------------------------- //
@@ -79,10 +82,11 @@ add_subdirectory(examples)
 # for which the test is written.
 macro(add_unit_test tgt file)
   add_executable(${tgt} ${file})
-  target_link_libraries(${tgt} freeflow_sys)
+  target_link_libraries(${tgt} freeflow)
   add_test(test_${tgt} ${tgt})
 endmacro()
 
 add_subdirectory(data.test)
 add_subdirectory(socket.test)
+add_subdirectory(string.test)
 

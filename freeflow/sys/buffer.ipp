@@ -128,19 +128,19 @@ put(View& v, char c) { detail::put_value(v, c); }
 
 /// Write an 8-bit data into a view.
 inline void
-put(View& v, uint8_t n) { detail::put_value(v, n); }
+put(View& v, Uint8 n) { detail::put_value(v, n); }
 
 /// Write a 16-bit data into a view.
 inline void
-put(View& v, uint16_t n) { detail::put_value(v, n); }
+put(View& v, Uint16 n) { detail::put_value(v, n); }
 
 /// Write 32-bit data into a view.
 inline void
-put(View& v, uint32_t n) { detail::put_value(v, n); }
+put(View& v, Uint32 n) { detail::put_value(v, n); }
 
 /// Write 64-bit data into a view.
 inline void
-put(View& v, uint64_t n) { detail::put_value(v, n); }
+put(View& v, Uint64 n) { detail::put_value(v, n); }
 
 // Write an n-element array pointed to by p into a view.
 template<typename T>
@@ -159,19 +159,19 @@ get(View& v, char& c) { detail::get_value(v, c); }
 
 /// Get an 8-bit datum from a view.
 inline void
-get(View& v, uint8_t& n) { detail::get_value(v, n); }
+get(View& v, Uint8& n) { detail::get_value(v, n); }
 
 /// Get a 16-bit datum from a view.
 inline void
-get(View& v, uint16_t& n) { detail::get_value(v, n); }
+get(View& v, Uint16& n) { detail::get_value(v, n); }
 
 /// Get a 32-bit datum from a view.
 inline void
-get(View& v, uint32_t& n) { detail::get_value(v, n); }
+get(View& v, Uint32& n) { detail::get_value(v, n); }
 
 /// Get a 64-bit datum from a view.
 inline void
-get(View& v, uint64_t& n) { detail::get_value(v, n); }
+get(View& v, Uint64& n) { detail::get_value(v, n); }
 
 // Get an object of type T from a view if and only if T is a type
 // for which get() is defined.

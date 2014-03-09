@@ -12,18 +12,4 @@
 # or implied. See the License for the specific language governing
 # permissions and limitations under the License.
 
-# ---------------------------------------------------------------------------- #
-# Build
-
-set(src ofp.cpp)
-set(hdr ofp.hpp ofp.ipp)
-
-add_library(freeflow-ofp ${src})
-add_subdirectory(v1.0)
-add_subdirectory(examples)
-
-# ---------------------------------------------------------------------------- #
-# Installation
-
-install(FILES ${hdr} DESTINATION include/freeflow/proto/ofp)
-
+add_unit_test(sys_string_init init.cpp)

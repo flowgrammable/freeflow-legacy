@@ -16,9 +16,10 @@
 #define FREEFLOW_BUFFER_HPP
 
 #include <cassert>
-#include <cstdint>
-#include <algorithm>
 #include <iosfwd>
+#include <vector>
+
+#include <freeflow/sys/data.hpp>
 
 /// \file buffer.hpp
 /// Resources for memory buffers.
@@ -29,7 +30,7 @@ namespace freeflow {
 class Buffer;
 
 /// A standard octet.
-using Byte = uint8_t;
+using Byte = Uint8;
 
 // -------------------------------------------------------------------------- //
 // Buffer
@@ -117,10 +118,10 @@ template<typename T>
   void put(View& v, const T& x) = delete;
 
 inline void put(View& v, char c);
-inline void put(View& v, uint8_t n);
-inline void put(View& v, uint16_t n);
-inline void put(View& v, uint32_t n);
-inline void put(View& v, uint64_t n);
+inline void put(View& v, Uint8 n);
+inline void put(View& v, Uint16 n);
+inline void put(View& v, Uint32 n);
+inline void put(View& v, Uint64 n);
 
 template<typename T>
   inline void put(View& v, T* p, std::size_t n);
@@ -130,10 +131,10 @@ template<typename T>
   void get(View& v, T& x) = delete;
 
 inline void get(View& v, char& c);
-inline void get(View& v, uint8_t& n);
-inline void get(View& v, uint16_t& n);
-inline void get(View& v, uint32_t& n);
-inline void get(View& v, uint64_t& n);
+inline void get(View& v, Uint8& n);
+inline void get(View& v, Uint16& n);
+inline void get(View& v, Uint32& n);
+inline void get(View& v, Uint64& n);
 
 template<typename T>
   inline T get(View& v);

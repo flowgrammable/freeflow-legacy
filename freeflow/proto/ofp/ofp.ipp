@@ -15,6 +15,9 @@
 namespace freeflow {
 namespace ofp {
 
+// -------------------------------------------------------------------------- //
+// Primitives
+
 inline Error
 to_view(View& v, Uint8 n) {
   put(v, n);
@@ -44,6 +47,12 @@ template<typename T, typename X>
   to_view(View& v, T value) {
     using U = Underlying_type<T>;
     put(v, Byte_order::msbf(static_cast<U>(value)));
+    return {};
+  }
+
+template<typename T, std::size_t N>
+  Error to_view(View& v, T(&a)[N]) {
+    put(v, a, sizeof(T[N]));
     return {};
   }
 
@@ -79,6 +88,22 @@ template<typename T, typename X>
     value = static_cast<T>(Byte_order::msbf(get<U>(v)));
     return {};
   }
+
+template<typename T, std::size_t N>
+  Error from_view(View& v, T(&a)[N]) {
+    get(v, a, sizeof(T[N]));
+    return {};
+  }
+
+// -------------------------------------------------------------------------- //
+// Common structures
+
+inline Error 
+to_view(View& v, const Mac_addr& a) { return to_view(v, a.addr); }
+
+inline Error 
+from_view(View& v, Mac_addr& a) { return from_view(v, a.addr); }
+
 
 } // namespace ofp
 } // namespace freeflow
