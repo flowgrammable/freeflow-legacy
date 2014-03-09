@@ -51,11 +51,19 @@ template<typename T, typename X>
   }
 
 template<typename T, std::size_t N>
-  Error to_view(View& v, T(&a)[N]) {
+  inline Error 
+  to_view(View& v, T(&a)[N]) {
     put(v, a, sizeof(T[N]));
     return {};
   }
 
+/// Write the contents of the buffer into the view. Note that no
+/// transformations are applied to the contents of the buffer.
+inline Error
+to_view(View& v, const Buffer& b) {
+  put(v, b.data(), b.size());
+  return {};
+}
 
 inline Error
 from_view(View& v, Uint8& n) {
@@ -90,10 +98,21 @@ template<typename T, typename X>
   }
 
 template<typename T, std::size_t N>
-  Error from_view(View& v, T(&a)[N]) {
+  inline Error 
+  from_view(View& v, T(&a)[N]) {
     get(v, a, sizeof(T[N]));
     return {};
   }
+
+/// Copy the contents from the view into the buffer. The buffer is
+/// resized to accommodate the remaining contents of the view. Note 
+/// that no transformations are applied to the contents of the buffer.
+inline Error
+from_view(View& v, Buffer& b) {
+  b.resize(v.remaining());
+  get(v, b.data(), b.size());
+  return {};
+}
 
 // -------------------------------------------------------------------------- //
 // Common structures

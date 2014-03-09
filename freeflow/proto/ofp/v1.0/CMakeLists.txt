@@ -20,9 +20,11 @@ set(src message.cpp port.cpp action.cpp)
 set(hdr message.hpp 
         message.ipp
         port.hpp
-        port.ipp)
+        port.ipp
+        action.hpp
+        action.ipp)
 
-add_library(freeflow-ofp-v1.0 ${src})
+add_library(freeflow-ofp-1.0 ${src})
 
 # ---------------------------------------------------------------------------- #
 # Installation

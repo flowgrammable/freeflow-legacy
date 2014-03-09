@@ -16,6 +16,15 @@ namespace freeflow {
 namespace ofp {
 namespace v1_0 {
 
+inline std::size_t 
+bytes(const Hello& m) { return m.data.size(); }
+
+inline std::size_t 
+bytes(const Error& m) { return m.bytes + m.data.size(); }
+
+inline std::size_t 
+bytes(const Echo& m) { return m.data.size(); }
+
 } // namespace v1_0
 } // namespace ofp
 } // namespace freeflow

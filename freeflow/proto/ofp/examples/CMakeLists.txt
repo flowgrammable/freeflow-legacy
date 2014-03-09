@@ -12,9 +12,13 @@
 # or implied. See the License for the specific language governing
 # permissions and limitations under the License.
 
+set(libs freeflow
+         freeflow-ofp
+         freeflow-ofp-1.0)
+
 macro(add_example tgt)
   add_executable(${tgt} ${tgt}.cpp)
-  target_link_libraries(${tgt} freeflow freeflow-ofp)
+  target_link_libraries(${tgt} ${libs})
 endmacro()
 
 add_example(reader)

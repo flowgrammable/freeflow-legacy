@@ -36,7 +36,7 @@ struct Error : freeflow::Error {
   static constexpr Code BAD_VERSION       = 102;
 
   /// The header length is less than the size of the header.
-  static constexpr Code BAD_HEADER_LENGTH = 103;
+  static constexpr Code BAD_HEADER_LENGTH = 104;
 
   using freeflow::Error::Error;
 };
@@ -59,6 +59,8 @@ template<typename T, typename = Requires<Enum<T>()>>
 template<typename T, std::size_t N>
   Error to_view(View& v, T(&)[N]);
 
+Error to_view(View&, const Buffer&);
+
 Error from_view(View& v, Uint8& n);
 Error from_view(View& v, Uint16& n);
 Error from_view(View& v, Uint32& n);
@@ -66,6 +68,11 @@ Error from_view(View& v, Uint64& n);
 
 template<typename T, typename = Requires<Enum<T>()>>
   Error from_view(View& v, T& value);
+
+template<typename T, std::size_t N>
+  Error from_view(View& v, T(&)[N]);
+
+Error from_view(View&, Buffer&);
 
 
 // -------------------------------------------------------------------------- //

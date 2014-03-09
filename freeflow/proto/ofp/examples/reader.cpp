@@ -18,10 +18,12 @@
 #include <freeflow/sys/buffer.hpp>
 
 #include <freeflow/proto/ofp/ofp.hpp>
+#include <freeflow/proto/ofp/v1.0/message.hpp>
 
 using namespace freeflow;
 
-void print(const File&, const ofp::Header& h);
+void construct(File&, const ofp::Header&);
+void construct_v1_0(const File&, const ofp::Header&, View&);
 void diagnose(const File&, const ofp::Header&, Error);
 
 int main(int argc, char* argv[]) {
@@ -43,14 +45,13 @@ int main(int argc, char* argv[]) {
       File f(argv[i], File::READ);
 
       // Read some among of data into the buffer.
-      //
-      // FIXME: This only works for small files. We actually need a
-      // buffered file that can correctly pull data from a file or
-      // buffer when more data is requested.
-      std::size_t n = f.read(buf);
+      if (f.read(buf) < buf.size()) {
+        std::cerr << "error: could not read header\n";
+        continue;
+      }
 
       // Create a view over the n bytes read from the buffer.
-      View v(buf, n);
+      View v(buf);
 
       // Try to construct a header from the given buffer. If successful, 
       // print information about the header. Otherwise, print a diagnostic
@@ -62,7 +63,7 @@ int main(int argc, char* argv[]) {
       }
 
       // Print the header
-      print(f, h);
+      construct(f, h);
 
       // TODO: Read the remainder buffer and decode it.
 
@@ -75,34 +76,67 @@ int main(int argc, char* argv[]) {
 }
 
 void
-print(const File& f, const ofp::Header& h) {
-  std::cout << "== " << f.path() << " ==\n";
-  std::cout << "version: " << (int)h.version << '\n';
-  std::cout << "type:    " << (int)h.type << '\n';
-  std::cout << "length:  " << h.length << '\n';
-  std::cout << "xid:     " << h.xid << '\n';
+construct(File& f, const ofp::Header& h) {
+  Buffer buf(h.length);
+  if (f.read(buf) < h.length - h.bytes) {
+    std::cerr << "error: failed to read message content from '" 
+              << f.path() << "'\n";
+    return;
+  }
+  View v = buf;
+
+  switch(h.version) {
+  case 1:
+    construct_v1_0(f, h, v);
+    break;
+  default:
+    std::cerr << "error: unhandled protocol version '" << h.version << "'\n";
+    break;
+  }
+}
+
+// TODO: Just read and pretty print the message.
+void
+construct_v1_0(const File& f, const ofp::Header& h, View& v) {
+  using namespace ofp::v1_0;
+
+  // TODO: This should not be in a try block. Also, I need to validate
+  // that h.type is valid within the context of the protocol version.
+  try {
+    Message m(Message::Type(h.type));
+    switch (m.type) {
+    case HELLO: std::cout << "Hello\n"; break;
+    case ERROR: std::cout << "Error\n"; break;
+    case ECHO_REQUEST: std::cout << "Echo request\n"; break;
+    case ECHO_REPLY: std::cout << "Echo reply\n"; break;
+    default:
+      std::cerr << "error: unhandled message\n";
+    }
+  } catch(...) {
+    std::cerr << "error: unhandled message '" << (int)h.type << "'\n";
+  }
 }
 
 void 
 diagnose(const File& f, const ofp::Header& h, Error err) {
-  std::cout << "error: " << f.path() << ": ";
+  std::cerr << "error: " << f.path() << ": ";
 
   // If there wasn't enough data for the header, then we can't
   // read any parts of the header.
   if (err.code() == ofp::Error::HEADER_OVERFLOW) {
-    std::cout << "header overflow\n";
+    std::cerr << "error: header overflow\n";
     return;
   }
 
   // Check the header length.
   if (err.code() == ofp::Error::BAD_HEADER_LENGTH) {
-    std::cout << "bad header length\n";
+    std::cerr << "error: bad header length\n";
     return;
   }
 
   // ... Do stuff.
   if (h.version > 1) {
-    std::cout << "unhandled protocol version '" << (int)h.version << "'\n";
+    std::cerr << "error: unhandled protocol version '" << (int)h.version << "'\n";
     return;
   }
 }
