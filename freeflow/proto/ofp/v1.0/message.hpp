@@ -116,6 +116,9 @@ Errc from_view(View&, Error&);
 Errc from_view(View&, Echo&);
 Errc from_view(View&, Message& m);
 
+using ofp::to_view;
+using ofp::from_view;
+// using ofp::bytes;
 
 } // namespace v1_0
 } // namespace ofp

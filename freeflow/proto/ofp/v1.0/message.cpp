@@ -22,14 +22,14 @@ Errc
 to_view(View& v, const Hello& m) {
   if (v.remaining() < bytes(m))
     return Errc::HELLO_OVERFLOW;
-  ofp::to_view(v, m.data);
+  to_view(v, m.data);
   return {};
 }
 
 Errc
 from_view(View& v, Hello& m) {
   // No overflow check is needed (the buffer can be 0 bytes).
-  ofp::from_view(v, m.data);
+  from_view(v, m.data);
   return {};
 }
 
@@ -38,9 +38,9 @@ Errc
 to_view(View& v, const Error& m) {
   if (v.remaining() < bytes(m))
     return Errc::ERROR_OVERFLOW;
-  ofp::to_view(v, m.type);
-  ofp::to_view(v, m.code);
-  ofp::to_view(v, m.data);
+  to_view(v, m.type);
+  to_view(v, m.code);
+  to_view(v, m.data);
   return {};
 }
 
@@ -48,9 +48,9 @@ Errc
 from_view(View& v, Error& m) {
   if (v.remaining() < bytes(m))
     return Errc::ERROR_OVERFLOW;
-  ofp::from_view(v, m.type);
-  ofp::from_view(v, m.code);
-  ofp::from_view(v, m.data);
+  from_view(v, m.type);
+  from_view(v, m.code);
+  from_view(v, m.data);
   return {};
 }
 
@@ -59,14 +59,14 @@ Errc
 to_view(View& v, const Echo& m) {
   if (v.remaining() < bytes(m))
     return Errc::HELLO_OVERFLOW;
-  ofp::to_view(v, m.data);
+  to_view(v, m.data);
   return {};
 }
 
 Errc
 from_view(View& v, Echo& m) {
   // No overflow check is needed (the buffer can be 0 bytes).
-  ofp::from_view(v, m.data);
+  from_view(v, m.data);
   return {};
 }
 
