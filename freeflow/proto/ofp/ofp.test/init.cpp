@@ -1,4 +1,4 @@
-// Copyright (c) 2013-2014 Flowgrammable, LLC.
+// Copyright (c) 2013-2014 Flowgrammable.org
 // 
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,4 +12,18 @@
 // or implied. See the License for the specific language governing
 // permissions and limitations under the License.
 
-#include "string.hpp"
+#include <freeflow/proto/ofp/ofp.hpp>
+
+// Test string initialization
+//
+// TODO: This could be a little more comprehensive!
+
+using namespace freeflow::ofp;
+
+int main() { 
+  String<4> s = "ab";
+  assert(s[0] == 'a');
+  assert(s[1] == 'b');
+  assert(s[2] == 0);
+  assert(s[3] == 0);
+}

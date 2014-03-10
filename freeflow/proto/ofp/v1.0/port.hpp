@@ -18,6 +18,7 @@
 #include <freeflow/sys/error.hpp>
 #include <freeflow/sys/buffer.hpp>
 #include <freeflow/proto/ofp/ofp.hpp>
+#include <freeflow/proto/ofp/v1.0/error.hpp>
 
 namespace freeflow {
 namespace ofp {
@@ -89,6 +90,12 @@ struct Port {
   Features   supported;
   Features   peer;
 };
+
+// Protocol
+constexpr std::size_t bytes(const Port&);
+
+Errc to_view(View&, const Port&);
+Errc from_view(View&, Port&);
 
 } // namespace v1_0
 } // namespace ofp

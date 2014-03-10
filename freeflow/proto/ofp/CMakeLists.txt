@@ -15,14 +15,9 @@
 # ---------------------------------------------------------------------------- #
 # Build
 
-set(src string.cpp 
-        sequence.cpp 
-        ofp.cpp)
+set(src ofp.cpp)
 
-set(hdr string.hpp
-        string.ipp
-        sequence.hpp
-        sequence.ipp
+set(hdr error.hpp
         ofp.hpp 
         ofp.ipp)
 
@@ -34,7 +29,7 @@ add_subdirectory(examples)
 # ---------------------------------------------------------------------------- #
 # Testing
 
-add_subdirectory(string.test)
+add_subdirectory(ofp.test)
 
 
 # ---------------------------------------------------------------------------- #

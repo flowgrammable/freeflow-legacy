@@ -16,14 +16,39 @@ namespace freeflow {
 namespace ofp {
 namespace v1_0 {
 
+// Bytes
+
+constexpr std::size_t
+bytes(const Empty&) { return 0; }
+
 inline std::size_t 
 bytes(const Hello& m) { return m.data.size(); }
 
 inline std::size_t 
-bytes(const Error& m) { return m.bytes + m.data.size(); }
+bytes(const Error& m) { return 4 + m.data.size(); }
 
 inline std::size_t 
 bytes(const Echo& m) { return m.data.size(); }
+
+inline std::size_t 
+bytes(const Vendor& m) { return 4 + m.data.size(); }
+
+inline std::size_t 
+bytes(const Feature& m) { return 24 + m.ports.size(); }
+
+constexpr std::size_t 
+bytes(const Config& m) { return 4; }
+
+// To view
+
+inline Errc
+to_view(View&, const Empty&) { return {}; }
+
+// From view
+
+inline Errc
+from_view(View&, Empty&) { return {}; }
+
 
 } // namespace v1_0
 } // namespace ofp

@@ -16,6 +16,9 @@ namespace freeflow {
 namespace ofp {
 namespace v1_0 {
 
+constexpr std::size_t
+bytes(const Port&) { return 48; }
+
 } // namespace v1_0
 } // namespace ofp
 } // namespace freeflow

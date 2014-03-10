@@ -32,8 +32,11 @@ struct Error : freeflow::Error {
   /// Reading or writing the payload would overflow the buffer. 
   static constexpr Code PAYLOAD_OVERFLOW  = 101;
 
+  /// Reading or writing a seuqence would overflow the buffer. 
+  static constexpr Code SEQUENCE_OVERFLOW = 102;
+
   /// The protocol version is unsupported.
-  static constexpr Code BAD_VERSION       = 102;
+  static constexpr Code BAD_VERSION       = 103;
 
   /// The header length is less than the size of the header.
   static constexpr Code BAD_HEADER_LENGTH = 104;

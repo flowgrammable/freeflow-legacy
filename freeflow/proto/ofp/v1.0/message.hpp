@@ -18,24 +18,12 @@
 #include <freeflow/sys/error.hpp>
 #include <freeflow/sys/buffer.hpp>
 #include <freeflow/proto/ofp/ofp.hpp>
-
-#include "port.hpp"
+#include <freeflow/proto/ofp/v1.0/error.hpp>
+#include <freeflow/proto/ofp/v1.0/port.hpp>
 
 namespace freeflow {
 namespace ofp {
 namespace v1_0 {
-
-// Note that this class is named "Errc" (for error code) in this 
-// namespace to avoid collisions with the Error message.
-struct Errc : ofp::Error {
-  /// The message type is unsupported
-  static constexpr Code BAD_MESSAGE_TYPE = 200;
-
-  static constexpr Code HELLO_OVERFLOW = 201;
-  static constexpr Code ERROR_OVERFLOW = 201;
-
-  using ofp::Error::Error;
-};
 
 /// The type of supported messages.
 enum Message_type : Uint16 {
@@ -63,13 +51,20 @@ enum Message_type : Uint16 {
   QUEUE_GET_CONFIG_REPLY   = 21
 };
 
+/// Represents an empty message component. No additional data is provided
+/// beyond a header.
+struct Empty { };
+
+/// The Hello message is sent to negotiate the protocol version.
+///
+/// TODO: Does this message need to be made version neutral?
 struct Hello {
-  static constexpr std::size_t bytes = 0;
   Buffer data;
 };
 
+/// The Error message is sent to indicate an error in a previous
+/// communication.
 struct Error {
-  static constexpr std::size_t bytes = 4;
   Uint16 type;
   Uint16 code;
   Buffer data;
@@ -78,20 +73,75 @@ struct Error {
 /// The Echo message is used to communicate both echo requests and
 /// replys between the switch and the controller.
 struct Echo {
-  static constexpr std::size_t bytes = 0;
   Buffer data;
 };
 
+struct Vendor {
+  Uint32 vendor_id;
+  Buffer data;
+};
 
+struct Feature {
+  enum Capability : Uint32 {
+    FLOW_STATS   = 0x00000001,
+    TABLE_STATS  = 0x00000002,
+    PORT_STATS   = 0x00000004,
+    STP          = 0x00000008,
+    RESERVED     = 0x00000010,
+    IP_REASM     = 0x00000020,
+    QUEUE_STATS  = 0x00000040,
+    ARP_MATCH_IP = 0x00000080 
+  };
+
+  enum Action : Uint32 {
+    OUTPUT       = 0x00000001,
+    SET_VLAN_VID = 0x00000002,
+    SET_VLAN_PCP = 0x00000003,
+    STRIP_VLAN   = 0x00000008,
+    SET_DL_SRC   = 0x00000010,
+    SET_DL_DST   = 0x00000020,
+    SET_NW_SRC   = 0x00000040,
+    SET_NW_DST   = 0x00000080,
+    SET_NW_TOS   = 0x00000100,
+    SET_TP_SRC   = 0x00000200,
+    SET_TP_DST   = 0x00000400,
+    ENQUEUE      = 0x00000800 
+  };
+
+  Uint64         datapath_id;
+  Uint32         nbuffers;
+  Uint8          ntables;
+  Capability     capabilities;
+  Action         actions;
+  Sequence<Port> ports;
+};
+
+struct Config {
+  enum Flags : Uint16 {
+    FRAG_NORMAL = 0x0000, 
+    FRAG_DROP   = 0x0001, 
+    FRAG_REASM  = 0x0002, 
+    FRAG_MASK   = 0x0003
+  };
+
+  Flags  flags;
+  Uint16 miss_send_len;
+};
+
+/// The message class embodies a specific kind of OpenFlow message.
 struct Message {
   using Type = Message_type;
   union Payload {
     Payload() { }
     ~Payload() { }
     
-    Hello hello;
-    Error error;
-    Echo  echo;
+    Empty   empty;
+    Hello   hello;
+    Error   error;
+    Echo    echo;
+    Vendor  vendor;
+    Feature feature;
+    Config  config;
   };
 
   Message(Type);
@@ -101,24 +151,38 @@ struct Message {
   Payload payload;
 };
 
-std::size_t bytes(const Hello&);
-std::size_t bytes(const Error&);
-std::size_t bytes(const Echo&);
-std::size_t bytes(const Message&);
-
-Errc to_view(View&, const Hello&);
-Errc to_view(View&, const Error&);
-Errc to_view(View&, const Echo&);
-Errc to_view(View&, const Message& m);
-
-Errc from_view(View&, Hello&);
-Errc from_view(View&, Error&);
-Errc from_view(View&, Echo&);
-Errc from_view(View&, Message& m);
+// Protocol
 
 using ofp::to_view;
 using ofp::from_view;
-// using ofp::bytes;
+using ofp::bytes;
+
+constexpr std::size_t bytes(const Empty&);
+std::size_t bytes(const Hello&);
+std::size_t bytes(const Error&);
+std::size_t bytes(const Echo&);
+std::size_t bytes(const Vendor&);
+std::size_t bytes(const Feature&);
+constexpr std::size_t bytes(const Config&);
+std::size_t bytes(const Message&);
+
+Errc to_view(View&, const Empty&);
+Errc to_view(View&, const Hello&);
+Errc to_view(View&, const Error&);
+Errc to_view(View&, const Echo&);
+Errc to_view(View&, const Vendor&);
+Errc to_view(View&, const Feature&);
+Errc to_view(View&, const Config&);
+Errc to_view(View&, const Message& m);
+
+Errc from_view(View&, Empty&);
+Errc from_view(View&, Hello&);
+Errc from_view(View&, Error&);
+Errc from_view(View&, Echo&);
+Errc from_view(View&, Vendor&);
+Errc from_view(View&, Feature&);
+Errc from_view(View&, Config&);
+Errc from_view(View&, Message& m);
 
 } // namespace v1_0
 } // namespace ofp

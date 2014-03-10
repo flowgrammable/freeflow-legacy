@@ -18,6 +18,38 @@ namespace freeflow {
 namespace ofp {
 namespace v1_0 {
 
+using ofp::to_view;
+using ofp::from_view;
+
+Errc
+to_view(View& v, const Port& p) {
+  to_view(v, p.port_id);
+  to_view(v, p.hw_addr);
+  to_view(v, p.name);
+  to_view(v, p.config);
+  to_view(v, p.state);
+  to_view(v, p.current);
+  to_view(v, p.advertised);
+  to_view(v, p.supported);
+  to_view(v, p.peer);
+  return {};  
+}
+
+
+Errc
+from_view(View& v, Port& p) {
+  from_view(v, p.port_id);
+  from_view(v, p.hw_addr);
+  from_view(v, p.name);
+  from_view(v, p.config);
+  from_view(v, p.state);
+  from_view(v, p.current);
+  from_view(v, p.advertised);
+  from_view(v, p.supported);
+  from_view(v, p.peer);
+  return {};  
+}
+
 } // namespace v1_0
 } // namespace ofp
 } // namespace freeflow

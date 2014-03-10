@@ -18,6 +18,8 @@ namespace freeflow {
 namespace ofp {
 namespace v1_0 {
 
+// To view
+
 Errc
 to_view(View& v, const Hello& m) {
   if (v.remaining() < bytes(m))
@@ -27,20 +29,61 @@ to_view(View& v, const Hello& m) {
 }
 
 Errc
-from_view(View& v, Hello& m) {
-  // No overflow check is needed (the buffer can be 0 bytes).
-  from_view(v, m.data);
-  return {};
-}
-
-
-Errc
 to_view(View& v, const Error& m) {
   if (v.remaining() < bytes(m))
     return Errc::ERROR_OVERFLOW;
   to_view(v, m.type);
   to_view(v, m.code);
   to_view(v, m.data);
+  return {};
+}
+
+Errc
+to_view(View& v, const Echo& m) {
+  if (v.remaining() < bytes(m))
+    return Errc::HELLO_OVERFLOW;
+  to_view(v, m.data);
+  return {};
+}
+
+Errc
+to_view(View& v, const Vendor& m) {
+  if (v.remaining() < bytes(m))
+    return Errc::VENDOR_OVERFLOW;
+  to_view(v, m.vendor_id);
+  to_view(v, m.data);
+  return {};
+}
+
+Errc
+to_view(View& v, const Feature& m) {
+  if (v.remaining() < bytes(m))
+    return Errc::FEATURE_OVERFLOW;
+  to_view(v, m.datapath_id);
+  to_view(v, m.nbuffers);
+  to_view(v, m.ntables);
+  pad(v, 3);
+  to_view(v, m.capabilities);
+  to_view(v, m.actions);
+  to_view(v, m.ports);
+  return {};
+}
+
+Errc
+to_view(View& v, const Config& m) {
+  if (v.remaining() < bytes(m))
+    return Errc::CONFIG_OVERFLOW;
+  to_view(v, m.flags);
+  to_view(v, m.miss_send_len);
+  return {};
+}
+
+// From view
+
+Errc
+from_view(View& v, Hello& m) {
+  // No overflow check is needed (the buffer can be 0 bytes).
+  from_view(v, m.data);
   return {};
 }
 
@@ -54,21 +97,47 @@ from_view(View& v, Error& m) {
   return {};
 }
 
-
-Errc
-to_view(View& v, const Echo& m) {
-  if (v.remaining() < bytes(m))
-    return Errc::HELLO_OVERFLOW;
-  to_view(v, m.data);
-  return {};
-}
-
 Errc
 from_view(View& v, Echo& m) {
   // No overflow check is needed (the buffer can be 0 bytes).
   from_view(v, m.data);
   return {};
 }
+
+Errc
+from_view(View& v, Vendor& m) {
+  if (v.remaining() < bytes(m))
+    return Errc::VENDOR_OVERFLOW;
+  from_view(v, m.vendor_id);
+  from_view(v, m.data);
+  return {};
+}
+
+Errc
+from_view(View& v, Feature& m) {
+  if (v.remaining() < bytes(m))
+    return Errc::FEATURE_OVERFLOW;
+  from_view(v, m.datapath_id);
+  from_view(v, m.nbuffers);
+  from_view(v, m.ntables);
+  pad(v, 3);
+  from_view(v, m.capabilities);
+  from_view(v, m.actions);
+  from_view(v, m.ports);
+  return {};
+}
+
+Errc
+from_view(View& v, Config& m) {
+  if (v.remaining() < bytes(m))
+    return Errc::CONFIG_OVERFLOW;
+  from_view(v, m.flags);
+  from_view(v, m.miss_send_len);
+  return {};
+}
+
+// -------------------------------------------------------------------------- //
+// Message
 
 Message::Message(Type t)
   : type(t) 
@@ -79,13 +148,13 @@ Message::Message(Type t)
   case ERROR: new (&p.error) Error(); break;
   case ECHO_REQUEST: new (&p.echo) Echo(); break;
   case ECHO_REPLY: new (&p.echo) Echo(); break;
-  /*
   case VENDOR: new (&p.vendor) Vendor(); break;
-  case FEATURE_REQUEST: new (&p.feature_request) Feature_request(); break;
-  case FEATURE_REPLY: new (&p.feature_reply) Feature_reply(); break;
-  case GET_CONFIG_REQUEST: new (&p.get_config_request) Get_config_request(); break;
-  case GET_CONFIG_REPLY: new (&p.get_config_reply) Get_config_reply(); break;
-  case SET_CONFIG: new (&p.set_config) Set_config(); break;
+  case FEATURE_REQUEST: new (&p.empty) Empty(); break;
+  case FEATURE_REPLY: new (&p.feature) Feature(); break;
+  case GET_CONFIG_REQUEST: new (&p.empty) Empty(); break;
+  case GET_CONFIG_REPLY: new (&p.config) Config(); break;
+  case SET_CONFIG: new (&p.config) Config(); break;
+  /*
   case PACKET_IN: new (&p.packet_in) Packet_in(); break;
   case FLOW_REMOVED: new (&p.flow_removed) Flow_removed(); break;
   case PORT_STATUS: new (&p.port_status) Port_status(); break;
@@ -111,13 +180,13 @@ Message::~Message() {
   case ERROR: p.error.~Error(); break;
   case ECHO_REQUEST: p.echo.~Echo(); break;
   case ECHO_REPLY: p.echo.~Echo(); break;
-  /*
   case VENDOR: p.vendor.~Vendor(); break;
-  case FEATURE_REQUEST: p.feature_request.~Feature_request(); break;
-  case FEATURE_REPLY: p.feature_reply.~Feature_reply(); break;
-  case GET_CONFIG_REQUEST: p.get_config_request.~Get_config_request(); break;
-  case GET_CONFIG_REPLY: p.get_config_reply.~Get_config_reply(); break;
-  case SET_CONFIG: p.set_config.~Set_config(); break;
+  case FEATURE_REQUEST: p.empty.~Empty(); break;
+  case FEATURE_REPLY: p.feature.~Feature(); break;
+  case GET_CONFIG_REQUEST: p.empty.~Empty(); break;
+  case GET_CONFIG_REPLY: p.config.~Config(); break;
+  case SET_CONFIG: p.config.~Config(); break;
+  /*
   case PACKET_IN: p.packet_in.~Packet_in(); break;
   case FLOW_REMOVED: p.flow_removed.~Flow_removed(); break;
   case PORT_STATUS: p.port_status.~Port_status(); break;
@@ -144,13 +213,13 @@ bytes(const Message& m) {
   case ERROR: return bytes(p.error);
   case ECHO_REQUEST: return bytes(p.echo);
   case ECHO_REPLY: return bytes(p.echo);
-  /*
   case VENDOR: return bytes(p.vendor);
-  case FEATURE_REQUEST: return bytes(p.feature_request);
-  case FEATURE_REPLY: return bytes(p.feature_reply);
-  case GET_CONFIG_REQUEST: return bytes(p.get_config_request);
-  case GET_CONFIG_REPLY: return bytes(p.get_config_reply);
-  case SET_CONFIG: return bytes(p.set_config);
+  case FEATURE_REQUEST: return bytes(p.empty);
+  case FEATURE_REPLY: return bytes(p.feature);
+  case GET_CONFIG_REQUEST: return bytes(p.empty);
+  case GET_CONFIG_REPLY: return bytes(p.config);
+  case SET_CONFIG: return bytes(p.config);
+  /*
   case PACKET_IN: return bytes(p.packet_in);
   case FLOW_REMOVED: return bytes(p.flow_removed);
   case PORT_STATUS: return bytes(p.port_status);
@@ -177,13 +246,13 @@ to_view(View& v, const Message& m) {
   case ERROR: return to_view(v, p.error);
   case ECHO_REQUEST: return to_view(v, p.echo);
   case ECHO_REPLY: return to_view(v, p.echo);
-  /*
   case VENDOR: return to_view(v, p.vendor);
-  case FEATURE_REQUEST: return to_view(v, p.feature_request);
-  case FEATURE_REPLY: return to_view(v, p.feature_reply);
-  case GET_CONFIG_REQUEST: return to_view(v, p.get_config_request);
-  case GET_CONFIG_REPLY: return to_view(v, p.get_config_reply);
-  case SET_CONFIG: return to_view(v, p.set_config);
+  case FEATURE_REQUEST: return to_view(v, p.empty);
+  case FEATURE_REPLY: return to_view(v, p.feature);
+  case GET_CONFIG_REQUEST: return to_view(v, p.empty);
+  case GET_CONFIG_REPLY: return to_view(v, p.config);
+  case SET_CONFIG: return to_view(v, p.config);
+  /*
   case PACKET_IN: return to_view(v, p.packet_in);
   case FLOW_REMOVED: return to_view(v, p.flow_removed);
   case PORT_STATUS: return to_view(v, p.port_status);
@@ -208,15 +277,15 @@ from_view(View& v, Message& m) {
   switch(m.type) {
   case HELLO: return from_view(v, p.hello);
   case ERROR: return from_view(v, p.error);
-  /*
-  case ECHO_REQUEST: return from_view(v, p.echo_request);
-  case ECHO_REPLY: return from_view(v, p.echo_reply);
+  case ECHO_REQUEST: return from_view(v, p.echo);
+  case ECHO_REPLY: return from_view(v, p.echo);
   case VENDOR: return from_view(v, p.vendor);
-  case FEATURE_REQUEST: return from_view(v, p.feature_request);
-  case FEATURE_REPLY: return from_view(v, p.feature_reply);
-  case GET_CONFIG_REQUEST: return from_view(v, p.get_config_request);
-  case GET_CONFIG_REPLY: return from_view(v, p.get_config_reply);
-  case SET_CONFIG: return from_view(v, p.set_config);
+  case FEATURE_REQUEST: return from_view(v, p.empty);
+  case FEATURE_REPLY: return from_view(v, p.feature);
+  case GET_CONFIG_REQUEST: return from_view(v, p.empty);
+  case GET_CONFIG_REPLY: return from_view(v, p.config);
+  case SET_CONFIG: return from_view(v, p.config);
+  /*
   case PACKET_IN: return from_view(v, p.packet_in);
   case FLOW_REMOVED: return from_view(v, p.flow_removed);
   case PORT_STATUS: return from_view(v, p.port_status);
