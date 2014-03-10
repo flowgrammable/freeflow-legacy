@@ -12,8 +12,8 @@
 // or implied. See the License for the specific language governing
 // permissions and limitations under the License.
 
-#ifndef FREEFLOW_STRING_HPP
-#define FREEFLOW_STRING_HPP
+#ifndef FREEFLOW_OFP_STRING_HPP
+#define FREEFLOW_OFP_STRING_HPP
 
 #include <cassert>
 #include <cstdint>
@@ -21,6 +21,7 @@
 #include <string>
 
 namespace freeflow {
+namespace ofp {
 
 /// The String class is a statically sized C-string whose contents are
 /// zero-filled. Note that this class does not provide the features typical
@@ -60,6 +61,7 @@ template<std::size_t N>
 template<std::size_t N>
   bool operator!=(const String<N>& a, const String<N>& b);
 
+} // namespace ofp
 } // namespace freeflow
 
 #include "string.ipp"

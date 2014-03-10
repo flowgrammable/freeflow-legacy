@@ -15,8 +15,16 @@
 # ---------------------------------------------------------------------------- #
 # Build
 
-set(src ofp.cpp)
-set(hdr ofp.hpp ofp.ipp)
+set(src string.cpp 
+        sequence.cpp 
+        ofp.cpp)
+
+set(hdr string.hpp
+        string.ipp
+        sequence.hpp
+        sequence.ipp
+        ofp.hpp 
+        ofp.ipp)
 
 add_library(freeflow-ofp ${src})
 add_subdirectory(v1.0)

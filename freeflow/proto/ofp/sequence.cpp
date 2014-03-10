@@ -12,18 +12,4 @@
 // or implied. See the License for the specific language governing
 // permissions and limitations under the License.
 
-#include <freeflow/proto/ofp/string.hpp>
-
-// Test string initialization
-//
-// TODO: This could be a little more comprehensive!
-
-using namespace freeflow::ofp;
-
-int main() { 
-  String<4> s = "ab";
-  assert(s[0] == 'a');
-  assert(s[1] == 'b');
-  assert(s[2] == 0);
-  assert(s[3] == 0);
-}
+#include "sequence.hpp"

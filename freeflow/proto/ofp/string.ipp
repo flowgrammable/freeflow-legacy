@@ -13,6 +13,7 @@
 // permissions and limitations under the License.
 
 namespace freeflow {
+namespace ofp {
 namespace detail {
 
 // Return the string length up to N characters. Note that s must not
@@ -79,4 +80,5 @@ template<std::size_t N>
     return !(a == b); 
   }
 
+} // namespace ofp
 } // namespace freeflow
