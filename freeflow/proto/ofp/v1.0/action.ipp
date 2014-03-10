@@ -16,6 +16,37 @@ namespace freeflow {
 namespace ofp {
 namespace v1_0 {
 
+constexpr std::size_t 
+bytes(const Action_empty&) { return 0; }
+
+constexpr std::size_t 
+bytes(const Action_output&) { return 4; }
+
+constexpr std::size_t 
+bytes(const Action_enqueue&) { return 8; }
+
+constexpr std::size_t 
+bytes(const Action_vlan_vid&) { return 4; }
+
+constexpr std::size_t 
+bytes(const Action_vlan_pcp&) { return 4; }
+
+constexpr std::size_t 
+bytes(const Action_dl_addr&) { return 8; }
+
+constexpr std::size_t 
+bytes(const Action_nw_addr&) { return 4; }
+
+constexpr std::size_t 
+bytes(const Action_nw_tos&) { return 4; }
+
+constexpr std::size_t 
+bytes(const Action_tp_port&) { return 4; }
+
+constexpr std::size_t 
+bytes(const Action_vendor&) { return 4; }
+
+
 } // namespace v1_0
 } // namespace ofp
 } // namespace freeflow

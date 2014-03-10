@@ -18,6 +18,7 @@
 #include <freeflow/sys/error.hpp>
 #include <freeflow/sys/buffer.hpp>
 #include <freeflow/proto/ofp/ofp.hpp>
+#include <freeflow/proto/ofp/v1.0/error.hpp>
 #include <freeflow/proto/ofp/v1.0/port.hpp>
 
 namespace freeflow {
@@ -48,64 +49,50 @@ enum Action_type : Uint16 {
 /// action types. The implementation factors the header out, meaning each
 /// specific action contains only the fields specific to that action.
 struct Action_header {
-  static constexpr std::size_t bytes = 4;
-  
   Action_type type;
   Uint16      length;
 };
 
+/// The empty action represents an action that requires no additional
+/// data.
+struct Action_empty { };
+
 /// Requests packet output. The action requires the switch to send a 
 /// maximum number of bytes to a specified port.
 struct Action_output {
-  static constexpr std::size_t bytes = 4;
-
   Port::Id    port;
   Uint16      max_len;
 };
 
 /// Forwards a packet through a queue on a specified port.
 struct Action_enqueue {
-  static constexpr std::size_t bytes = 8;
-  
   Uint16 port;
-  Uint32 queue_id;
+  Uint32 queue;
 };
 
 /// Sets a packet's VLAN VID to the given value. The value 0xffff indicates
 /// that no VLAN VID is set.
-struct Action_set_vlan_vid {
-  static constexpr std::size_t bytes = 4;
-
-  Uint16 vlan_vid;
+struct Action_vlan_vid {
+  Uint16 value;
 };
 
 /// Sets a packet's VLAN PCP to the given value.
-struct Action_set_vlan_pcp {
-  static constexpr std::size_t bytes = 4;
-
+struct Action_vlan_pcp {
   Uint8 value;
 };
 
-/// Removes a packet's VLAN tag.
-struct Action_strip_vlan {
-  static constexpr std::size_t bytes = 0;
-};
-
 /// Sets a packet's source or target MAC address.
-struct Action_set_dl_src {
-  static constexpr std::size_t bytes = 8;
-  Mac_addr dl_addr;
+struct Action_dl_addr {
+  Mac_addr addr;
 };
 
 // Sets a packet's source or target IP address.
-struct Action_set_nw_src {
-  static constexpr std::size_t bytes = 4;
+struct Action_nw_addr {
   Ipv4_addr addr;
 };
 
 // Sets a packet's ToS.
-struct Action_set_nw_tos {
-  static constexpr std::size_t bytes = 4;
+struct Action_nw_tos {
   Uint8 value;
 };
 
@@ -114,13 +101,47 @@ struct Action_set_nw_tos {
 /// Note that the notion of "port" depends on the transport protocol. 
 /// For TCP and UDP, the port is a 16-bit port number. For ICMP, the 
 /// lower 8 bits can specify an ICMP code.
-struct Action_set_tp_port {
-  Uint16 value;
+struct Action_tp_port {
+  Uint16 port;
 };
 
 struct Action_vendor {
   Uint32 vendor;
 };
+
+// Protocol
+constexpr std::size_t bytes(const Action_empty&);
+constexpr std::size_t bytes(const Action_output&);
+constexpr std::size_t bytes(const Action_enqueue&);
+constexpr std::size_t bytes(const Action_vlan_vid&);
+constexpr std::size_t bytes(const Action_vlan_pcp&);
+constexpr std::size_t bytes(const Action_dl_addr&);
+constexpr std::size_t bytes(const Action_nw_addr&);
+constexpr std::size_t bytes(const Action_nw_tos&);
+constexpr std::size_t bytes(const Action_tp_port&);
+constexpr std::size_t bytes(const Action_vendor&);
+
+Errc to_view(View&, const Action_empty&);
+Errc to_view(View&, const Action_output&);
+Errc to_view(View&, const Action_enqueue&);
+Errc to_view(View&, const Action_vlan_vid&);
+Errc to_view(View&, const Action_vlan_pcp&);
+Errc to_view(View&, const Action_dl_addr&);
+Errc to_view(View&, const Action_nw_addr&);
+Errc to_view(View&, const Action_nw_tos&);
+Errc to_view(View&, const Action_tp_port&);
+Errc to_view(View&, const Action_vendor&);
+
+Errc from_view(View&, Action_empty&);
+Errc from_view(View&, Action_output&);
+Errc from_view(View&, Action_enqueue&);
+Errc from_view(View&, Action_vlan_vid&);
+Errc from_view(View&, Action_vlan_pcp&);
+Errc from_view(View&, Action_dl_addr&);
+Errc from_view(View&, Action_nw_addr&);
+Errc from_view(View&, Action_nw_tos&);
+Errc from_view(View&, Action_tp_port&);
+Errc from_view(View&, Action_vendor&);
 
 } // namespace v1_0
 } // namespace ofp
