@@ -46,6 +46,15 @@ bytes(const Action_tp_port&) { return 4; }
 constexpr std::size_t 
 bytes(const Action_vendor&) { return 4; }
 
+// -------------------------------------------------------------------------- //
+// Action
+
+inline
+Action::Action(Type t)
+  : type(t)
+{ }
+
+
 
 } // namespace v1_0
 } // namespace ofp

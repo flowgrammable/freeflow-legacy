@@ -109,6 +109,28 @@ struct Action_vendor {
   Uint32 vendor;
 };
 
+
+struct Action {
+  using Type = Action_type;
+  union Payload {
+    Action_empty    empty;
+    Action_output   output;
+    Action_enqueue  enqueue;
+    Action_vlan_vid vlan_vid;
+    Action_vlan_pcp vlan_pcp;
+    Action_dl_addr  dl_addr;
+    Action_nw_addr  nw_addr;
+    Action_nw_tos   nw_tos;
+    Action_tp_port  tp_port;
+    Action_vendor   vendor;
+  };
+
+  Action(Type);
+
+  Type    type;
+  Payload payload;
+};
+
 // Protocol
 constexpr std::size_t bytes(const Action_empty&);
 constexpr std::size_t bytes(const Action_output&);
@@ -120,6 +142,7 @@ constexpr std::size_t bytes(const Action_nw_addr&);
 constexpr std::size_t bytes(const Action_nw_tos&);
 constexpr std::size_t bytes(const Action_tp_port&);
 constexpr std::size_t bytes(const Action_vendor&);
+std::size_t bytes(const Action&);
 
 Errc to_view(View&, const Action_empty&);
 Errc to_view(View&, const Action_output&);
@@ -146,5 +169,7 @@ Errc from_view(View&, Action_vendor&);
 } // namespace v1_0
 } // namespace ofp
 } // namespace freeflow
+
+#include "action.ipp"
 
 #endif
