@@ -15,7 +15,6 @@
 set(src fd_utils.cpp
         meta.cpp
         data.cpp
-        string.cpp
         error.cpp
         path.cpp
         resource.cpp
@@ -39,7 +38,6 @@ endif()
 set(hdr fd_utils.hpp
         meta.hpp
         data.hpp
-        string.hpp
         error.hpp
         path.hpp
         resoource.hpp
@@ -65,28 +63,16 @@ add_library(freeflow ${src})
 # --------------------------------------------------------------------------- //
 # Installation
 
-
 install(FILES ${hdr} DESTINATION include/freeflow/sys)
 
 
 # --------------------------------------------------------------------------- //
 # Examples
-
 add_subdirectory(examples)
+
 
 # --------------------------------------------------------------------------- //
 # Testing
-
-# Add a unit test the given target and file name. Note that unit tests
-# must be prefixed sys_${mod}, where ${mod} is the name of the module
-# for which the test is written.
-macro(add_unit_test tgt file)
-  add_executable(${tgt} ${file})
-  target_link_libraries(${tgt} freeflow)
-  add_test(test_${tgt} ${tgt})
-endmacro()
-
 add_subdirectory(data.test)
 add_subdirectory(socket.test)
-add_subdirectory(string.test)
 

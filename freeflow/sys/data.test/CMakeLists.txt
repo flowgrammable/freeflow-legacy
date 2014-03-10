@@ -12,4 +12,6 @@
 # or implied. See the License for the specific language governing
 # permissions and limitations under the License.
 
-add_unit_test(sys_data_order order.cpp)
+set(libs freeflow)
+
+add_unit_test(sys_data_order order.cpp ${libs})

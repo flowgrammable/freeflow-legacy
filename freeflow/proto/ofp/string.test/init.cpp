@@ -12,7 +12,7 @@
 // or implied. See the License for the specific language governing
 // permissions and limitations under the License.
 
-#include <freeflow/sys/string.hpp>
+#include <freeflow/proto/ofp/string.hpp>
 
 // Test string initialization
 //

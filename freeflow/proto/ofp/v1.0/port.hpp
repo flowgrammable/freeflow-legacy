@@ -17,7 +17,6 @@
 
 #include <freeflow/sys/error.hpp>
 #include <freeflow/sys/buffer.hpp>
-#include <freeflow/sys/string.hpp>
 #include <freeflow/proto/ofp/ofp.hpp>
 
 namespace freeflow {

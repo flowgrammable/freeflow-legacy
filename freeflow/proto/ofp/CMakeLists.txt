@@ -22,6 +22,13 @@ add_library(freeflow-ofp ${src})
 add_subdirectory(v1.0)
 add_subdirectory(examples)
 
+
+# ---------------------------------------------------------------------------- #
+# Testing
+
+add_subdirectory(string.test)
+
+
 # ---------------------------------------------------------------------------- #
 # Installation
 
