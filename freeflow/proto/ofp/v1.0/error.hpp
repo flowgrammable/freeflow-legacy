@@ -33,6 +33,8 @@ struct Errc : ofp::Error {
   static constexpr Code VENDOR_OVERFLOW  = 204;
   static constexpr Code FEATURE_OVERFLOW = 205;
   static constexpr Code CONFIG_OVERFLOW  = 206;
+  static constexpr Code PACKET_IN_OVERFLOW    = 207;
+  static constexpr Code FLOW_REMOVED_OVERFLOW = 208;
 
   using ofp::Error::Error;
 };

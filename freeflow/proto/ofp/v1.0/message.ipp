@@ -37,7 +37,13 @@ inline std::size_t
 bytes(const Feature& m) { return 24 + m.ports.size(); }
 
 constexpr std::size_t 
-bytes(const Config& m) { return 4; }
+bytes(const Config&) { return 4; }
+
+inline std::size_t
+bytes(const Packet_in& m) { return 10 + m.data.size(); }
+
+constexpr std::size_t
+bytes(const Flow_removed& m) { return 40 + bytes(m.match); }
 
 // To view
 

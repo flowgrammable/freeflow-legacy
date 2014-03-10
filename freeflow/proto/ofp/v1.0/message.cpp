@@ -78,6 +78,38 @@ to_view(View& v, const Config& m) {
   return {};
 }
 
+Errc
+to_view(View& v, const Packet_in& m) {
+  if (v.remaining() < bytes(m))
+    return Errc::PACKET_IN_OVERFLOW;
+  to_view(v, m.buffer_id);
+  to_view(v, m.total_len);
+  to_view(v, m.in_port);
+  to_view(v, m.reason);
+  pad(v, 1);
+  to_view(v, m.data);
+  return {};
+}
+
+Errc
+to_view(View& v, const Flow_removed& m) {
+  if (v.remaining() < bytes(m))
+    return Errc::FLOW_REMOVED_OVERFLOW;
+  to_view(v, m.match);
+  to_view(v, m.cookie);
+  to_view(v, m.priority);
+  to_view(v, m.reason);
+  pad(v, 1);
+  to_view(v, m.duration_sec);
+  to_view(v, m.duration_nsec);
+  to_view(v, m.idle_timeout);
+  pad(v, 2);
+  to_view(v, m.packet_count);
+  to_view(v, m.byte_count);
+  return {};
+}
+
+// -------------------------------------------------------------------------- //
 // From view
 
 Errc
@@ -133,6 +165,37 @@ from_view(View& v, Config& m) {
     return Errc::CONFIG_OVERFLOW;
   from_view(v, m.flags);
   from_view(v, m.miss_send_len);
+  return {};
+}
+
+Errc
+from_view(View& v, Packet_in& m) {
+  if (v.remaining() < bytes(m))
+    return Errc::PACKET_IN_OVERFLOW;
+  from_view(v, m.buffer_id);
+  from_view(v, m.total_len);
+  from_view(v, m.in_port);
+  from_view(v, m.reason);
+  pad(v, 1);
+  from_view(v, m.data);
+  return {};
+}
+
+Errc
+from_view(View& v, Flow_removed& m) {
+  if (v.remaining() < bytes(m))
+    return Errc::FLOW_REMOVED_OVERFLOW;
+  from_view(v, m.match);
+  from_view(v, m.cookie);
+  from_view(v, m.priority);
+  from_view(v, m.reason);
+  pad(v, 1);
+  from_view(v, m.duration_sec);
+  from_view(v, m.duration_nsec);
+  from_view(v, m.idle_timeout);
+  pad(v, 2);
+  from_view(v, m.packet_count);
+  from_view(v, m.byte_count);
   return {};
 }
 

@@ -13,7 +13,7 @@
 // permissions and limitations under the License.
 
 #ifndef FREEFLOW_OFPV1_0_PORT_HPP
-#define FREEFLOW_OFPV1_0_PORT HPP
+#define FREEFLOW_OFPV1_0_PORT_HPP
 
 #include <freeflow/sys/error.hpp>
 #include <freeflow/sys/buffer.hpp>
@@ -93,7 +93,6 @@ struct Port {
 
 // Protocol
 constexpr std::size_t bytes(const Port&);
-
 Errc to_view(View&, const Port&);
 Errc from_view(View&, Port&);
 

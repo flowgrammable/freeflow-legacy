@@ -20,6 +20,7 @@
 #include <freeflow/proto/ofp/ofp.hpp>
 #include <freeflow/proto/ofp/v1.0/error.hpp>
 #include <freeflow/proto/ofp/v1.0/port.hpp>
+#include <freeflow/proto/ofp/v1.0/match.hpp>
 
 namespace freeflow {
 namespace ofp {
@@ -116,6 +117,8 @@ struct Feature {
   Sequence<Port> ports;
 };
 
+/// A Config message is sent as a response to a configuration request,
+/// or to modify the configuration of the switch.
 struct Config {
   enum Flags : Uint16 {
     FRAG_NORMAL = 0x0000, 
@@ -127,6 +130,43 @@ struct Config {
   Flags  flags;
   Uint16 miss_send_len;
 };
+
+/// A Packet_in message is sent from the switch to the controller to
+/// indicate a miss in the flow tables or because a specific action
+/// has been requested.
+struct Packet_in {
+  enum Reason : Uint8 {
+    NO_MATCH = 0x00,
+    ACTION = 0x01
+  };
+
+  Uint32   buffer_id;
+  Uint16   total_len;
+  Port::Id in_port;
+  Reason   reason;
+  Buffer   data;
+};
+
+/// A Flow_removed message is sent from the switch to the controller to
+/// indicate that an entry has been removed from a flow table.
+struct Flow_removed {
+  enum Reason : Uint8 {
+    IDLE_TIMEOUT = 0x00,
+    HARD_TIMEOUT = 0x01,
+    DELETE       = 0x02,        
+  };
+
+  Match  match;
+  Uint64 cookie;
+  Uint16 priority;
+  Reason reason;
+  Uint32 duration_sec;
+  Uint32 duration_nsec;
+  Uint16 idle_timeout;
+  Uint64 packet_count;
+  Uint64 byte_count;
+};
+
 
 /// The message class embodies a specific kind of OpenFlow message.
 struct Message {
@@ -164,6 +204,8 @@ std::size_t bytes(const Echo&);
 std::size_t bytes(const Vendor&);
 std::size_t bytes(const Feature&);
 constexpr std::size_t bytes(const Config&);
+std::size_t bytes(const Packet_in&);
+constexpr std::size_t bytes(const Flow_removed&);
 std::size_t bytes(const Message&);
 
 Errc to_view(View&, const Empty&);
@@ -173,6 +215,8 @@ Errc to_view(View&, const Echo&);
 Errc to_view(View&, const Vendor&);
 Errc to_view(View&, const Feature&);
 Errc to_view(View&, const Config&);
+Errc to_view(View&, const Packet_in&);
+Errc to_view(View&, const Flow_removed&);
 Errc to_view(View&, const Message& m);
 
 Errc from_view(View&, Empty&);
@@ -182,6 +226,8 @@ Errc from_view(View&, Echo&);
 Errc from_view(View&, Vendor&);
 Errc from_view(View&, Feature&);
 Errc from_view(View&, Config&);
+Errc from_view(View&, Packet_in&);
+Errc from_view(View&, Flow_removed&);
 Errc from_view(View&, Message& m);
 
 } // namespace v1_0

@@ -15,12 +15,14 @@
 # ---------------------------------------------------------------------------- #
 # Build
 
-set(src message.cpp port.cpp action.cpp)
+set(src message.cpp port.cpp match.cpp action.cpp)
 
 set(hdr message.hpp 
         message.ipp
         port.hpp
         port.ipp
+        match.hpp
+        match.ipp
         action.hpp
         action.ipp)
 
