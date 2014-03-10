@@ -167,6 +167,19 @@ struct Flow_removed {
   Uint64 byte_count;
 };
 
+/// The Port_status message is sent from the switch to the controller to
+/// indicate a change to the status of a port.
+struct Port_status {
+  enum Reason : Uint8 {
+    ADD = 0x00, 
+    DELETE = 0x01, 
+    MODIFY = 0x02
+  };
+
+  Reason reason;
+  Port    port;
+};
+
 
 /// The message class embodies a specific kind of OpenFlow message.
 struct Message {
@@ -184,6 +197,7 @@ struct Message {
     Config       config;
     Packet_in    packet_in;
     Flow_removed flow_removed;
+    Port_status  port_status;
   };
 
   Message(Type);
@@ -208,6 +222,7 @@ std::size_t bytes(const Feature&);
 constexpr std::size_t bytes(const Config&);
 std::size_t bytes(const Packet_in&);
 constexpr std::size_t bytes(const Flow_removed&);
+constexpr std::size_t bytes(const Port_status&);
 std::size_t bytes(const Message&);
 
 Errc to_view(View&, const Empty&);
@@ -219,6 +234,7 @@ Errc to_view(View&, const Feature&);
 Errc to_view(View&, const Config&);
 Errc to_view(View&, const Packet_in&);
 Errc to_view(View&, const Flow_removed&);
+Errc to_view(View&, const Port_status&);
 Errc to_view(View&, const Message& m);
 
 Errc from_view(View&, Empty&);
@@ -230,6 +246,7 @@ Errc from_view(View&, Feature&);
 Errc from_view(View&, Config&);
 Errc from_view(View&, Packet_in&);
 Errc from_view(View&, Flow_removed&);
+Errc from_view(View&, Port_status&);
 Errc from_view(View&, Message& m);
 
 } // namespace v1_0

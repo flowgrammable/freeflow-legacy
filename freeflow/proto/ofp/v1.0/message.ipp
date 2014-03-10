@@ -45,6 +45,9 @@ bytes(const Packet_in& m) { return 10 + m.data.size(); }
 constexpr std::size_t
 bytes(const Flow_removed& m) { return 40 + bytes(m.match); }
 
+constexpr std::size_t
+bytes(const Port_status& m) { return 8 + bytes(m.port); }
+
 // To view
 
 inline Errc
