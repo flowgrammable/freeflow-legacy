@@ -175,13 +175,15 @@ struct Message {
     Payload() { }
     ~Payload() { }
     
-    Empty   empty;
-    Hello   hello;
-    Error   error;
-    Echo    echo;
-    Vendor  vendor;
-    Feature feature;
-    Config  config;
+    Empty        empty;
+    Hello        hello;
+    Error        error;
+    Echo         echo;
+    Vendor       vendor;
+    Feature      feature;
+    Config       config;
+    Packet_in    packet_in;
+    Flow_removed flow_removed;
   };
 
   Message(Type);

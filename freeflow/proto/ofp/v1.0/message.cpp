@@ -18,6 +18,7 @@ namespace freeflow {
 namespace ofp {
 namespace v1_0 {
 
+// -------------------------------------------------------------------------- //
 // To view
 
 Errc
@@ -217,9 +218,9 @@ Message::Message(Type t)
   case GET_CONFIG_REQUEST: new (&p.empty) Empty(); break;
   case GET_CONFIG_REPLY: new (&p.config) Config(); break;
   case SET_CONFIG: new (&p.config) Config(); break;
-  /*
   case PACKET_IN: new (&p.packet_in) Packet_in(); break;
   case FLOW_REMOVED: new (&p.flow_removed) Flow_removed(); break;
+  /*
   case PORT_STATUS: new (&p.port_status) Port_status(); break;
   case PACKET_OUT: new (&p.packet_out) Packet_out(); break;
   case FLOW_MOD: new (&p.flow_mod) Flow_mod(); break;
@@ -249,9 +250,9 @@ Message::~Message() {
   case GET_CONFIG_REQUEST: p.empty.~Empty(); break;
   case GET_CONFIG_REPLY: p.config.~Config(); break;
   case SET_CONFIG: p.config.~Config(); break;
-  /*
   case PACKET_IN: p.packet_in.~Packet_in(); break;
   case FLOW_REMOVED: p.flow_removed.~Flow_removed(); break;
+  /*
   case PORT_STATUS: p.port_status.~Port_status(); break;
   case PACKET_OUT: p.packet_out.~Packet_out(); break;
   case FLOW_MOD: p.flow_mod.~Flow_mod(); break;
@@ -282,9 +283,9 @@ bytes(const Message& m) {
   case GET_CONFIG_REQUEST: return bytes(p.empty);
   case GET_CONFIG_REPLY: return bytes(p.config);
   case SET_CONFIG: return bytes(p.config);
-  /*
   case PACKET_IN: return bytes(p.packet_in);
   case FLOW_REMOVED: return bytes(p.flow_removed);
+  /*
   case PORT_STATUS: return bytes(p.port_status);
   case PACKET_OUT: return bytes(p.packet_out);
   case FLOW_MOD: return bytes(p.flow_mod);
@@ -315,9 +316,9 @@ to_view(View& v, const Message& m) {
   case GET_CONFIG_REQUEST: return to_view(v, p.empty);
   case GET_CONFIG_REPLY: return to_view(v, p.config);
   case SET_CONFIG: return to_view(v, p.config);
-  /*
   case PACKET_IN: return to_view(v, p.packet_in);
   case FLOW_REMOVED: return to_view(v, p.flow_removed);
+  /*
   case PORT_STATUS: return to_view(v, p.port_status);
   case PACKET_OUT: return to_view(v, p.packet_out);
   case FLOW_MOD: return to_view(v, p.flow_mod);
@@ -348,9 +349,9 @@ from_view(View& v, Message& m) {
   case GET_CONFIG_REQUEST: return from_view(v, p.empty);
   case GET_CONFIG_REPLY: return from_view(v, p.config);
   case SET_CONFIG: return from_view(v, p.config);
-  /*
   case PACKET_IN: return from_view(v, p.packet_in);
   case FLOW_REMOVED: return from_view(v, p.flow_removed);
+  /*
   case PORT_STATUS: return from_view(v, p.port_status);
   case PACKET_OUT: return from_view(v, p.packet_out);
   case FLOW_MOD: return from_view(v, p.flow_mod);
