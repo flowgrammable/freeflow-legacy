@@ -37,7 +37,6 @@ int main(int argc, char* argv[]) {
 
   // Read a message from each of the paths given in the command
   // line arguments.
-
   for (int i = 1; i < argc; ++i) {
     // Open the ith file for reading. If the file cannot be opened,
     // an exception is thrown.
@@ -78,7 +77,7 @@ int main(int argc, char* argv[]) {
 void
 construct(File& f, const ofp::Header& h) {
   Buffer buf(h.length);
-  if (f.read(buf) < h.length - h.bytes) {
+  if (f.read(buf) < h.length - bytes(h)) {
     std::cerr << "error: failed to read message content from '" 
               << f.path() << "'\n";
     return;

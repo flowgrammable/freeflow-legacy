@@ -46,26 +46,26 @@ template<std::size_t N>
 
 template<std::size_t N>
   inline 
-  String<N>::String(const char* s) { detail::copy_and_zero<N>(s, data_); }
+  String<N>::String(const char* s) { detail::copy_and_zero<N>(s, data); }
 
 template<std::size_t N>
   inline String<N>&
   String<N>::operator=(const char* s) {
-    detail::copy_and_zero<N>(s, data_);
+    detail::copy_and_zero<N>(s, data);
     return *this;
   }
 
 template<std::size_t N>
   inline bool
-  String<N>::empty() const { return !data_[0]; }
+  String<N>::empty() const { return !data[0]; }
 
 template<std::size_t N>
   inline std::size_t
-  String<N>::size() const { return detail::strnlen<N>(data_); }
+  String<N>::size() const { return detail::strnlen<N>(data); }
 
 template<std::size_t N>
   inline std::string
-  String<N>::str() const { return std::string(data_, data_ + size()); }
+  String<N>::str() const { return std::string(data, data + size()); }
 
 // Equality comparison
 template<std::size_t N>
@@ -78,6 +78,29 @@ template<std::size_t N>
   inline bool
   operator!=(const String<N>& a, const String<N>& b) {
     return !(a == b); 
+  }
+
+// Protocol
+
+/// Returns the bytes required by the string.
+template<std::size_t N>
+  constexpr std::size_t 
+  bytes(const String<N>&) { return N; }
+
+/// Writes a string to the view.
+template<std::size_t N>
+  inline Error 
+  to_view(View& v, const String<N>& s) {
+    assert(s.bytes() <= v.remaining());
+    to_view(v, s.array());
+  }
+
+/// Reads a string from the view.
+template<std::size_t N>
+  inline Error 
+  from_view(View& v, String<N>& s) {
+    assert(s.bytes() <= v.remaining());
+    return from_view(v, s.array());
   }
 
 } // namespace ofp

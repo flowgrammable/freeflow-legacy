@@ -24,18 +24,6 @@ Buffer::Buffer(const Byte* first, const Byte* last)
   : std::vector<Byte>(first, last)
 { }
 
-/// \ingroup structure
-/// Returns the number of bytes in the buffer.
-inline std::size_t
-bytes(const Buffer& b) { return b.size(); }
-
-/// \ingroup semantics
-/// Returns true when the contents of the buffer can be accessed.
-/// This function returns true only when the buffer is in a good state.
-constexpr bool
-is_valid(const Buffer& b) { return true; }
-
-
 // -------------------------------------------------------------------------- //
 // View
 

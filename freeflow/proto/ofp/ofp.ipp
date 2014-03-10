@@ -18,6 +18,36 @@ namespace ofp {
 // -------------------------------------------------------------------------- //
 // Primitives
 
+// Bytes
+
+/// Returns the number of bytes required by the integral type. This
+/// is the same as its size.
+template<typename T, typename = Requires<Integral<T>()>>
+  constexpr std::size_t 
+  bytes(T) { return sizeof(T); }
+
+/// Returns the number of bytes in the array. 
+template<typename T, std::size_t N>
+  constexpr std::size_t
+  bytes(const T(&a)[N]) { return bytes(a[0]) * N; }
+
+inline std::size_t
+bytes(const Buffer& b) { return b.size(); }
+
+constexpr std::size_t 
+bytes(const Mac_addr&) { return 6; }
+
+constexpr std::size_t 
+bytes(const Ipv4_addr&) { return 4; }
+
+constexpr std::size_t 
+bytes(const Ipv6_addr&) { return 16; }
+
+constexpr std::size_t 
+bytes(const Header&) { return 8; }
+
+// To view
+
 inline Error
 to_view(View& v, Uint8 n) {
   put(v, n);

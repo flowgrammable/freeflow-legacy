@@ -71,10 +71,6 @@ void write(const Buffer& b, const char* s);
 void write(const Buffer& b, const std::string& s);
 void write(const Buffer& b, std::ofstream& os);
 
-// Protocol
-std::size_t bytes(const Buffer& b);
-constexpr bool valid(const Buffer& b);
-
 // -------------------------------------------------------------------------- //
 // View
 

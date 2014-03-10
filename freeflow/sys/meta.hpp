@@ -24,12 +24,20 @@ namespace freeflow {
 template<bool B, typename T = void>
   using Requires = typename std::enable_if<B, T>::type;
 
+/// True if T is an intgral type, including enumerations.
+template<typename T>
+  constexpr bool Integral() { return std::is_integral<T>::value; }
 
-// True if T is an enum type.
+/// True if T is an enum type.
 template<typename T>
   constexpr bool Enum() { return std::is_enum<T>::value; }
 
-// The underlying integral type of an enum.
+/// True if T is a literal type.
+template<typename T>
+  constexpr bool Literal() { return std::is_literal_type<T>(); }
+
+
+/// The underlying integral type of an enum.
 template<typename T>
   using Underlying_type = typename std::underlying_type<T>::type;
 

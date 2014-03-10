@@ -31,6 +31,7 @@ template<typename T>
     using std::vector<T>::vector;
   };
 
+// Protocol
 template<typename T>
   std::size_t bytes(const Sequence<T>&);
 

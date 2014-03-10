@@ -20,6 +20,9 @@
 #include <cstring>
 #include <string>
 
+#include <freeflow/sys/buffer.hpp>
+#include <freeflow/proto/ofp/error.hpp>
+
 namespace freeflow {
 namespace ofp {
 
@@ -29,13 +32,13 @@ namespace ofp {
 /// characters.
 template<std::size_t N>
   class String {
-    static_assert(N > 0, "N must not be zero");
+    static_assert(N > 0, "N shall not be zero");
   public:
     String() = default;
 
     // Value initialization
-    String(const char* str);
-    String& operator=(const char* str);
+    String(const char*);
+    String& operator=(const char*);
 
     // Observers
     bool empty() const;
@@ -43,15 +46,10 @@ template<std::size_t N>
     std::string str() const;
 
     // Character access
-    char  operator[](int n) const { return data_[n]; }
-    char& operator[](int n)       { return data_[n]; }
+    char  operator[](int n) const { return data[n]; }
+    char& operator[](int n)       { return data[n]; }
 
-    // Returns a pointer to the underlying character data.    
-    char*       data()       { return data_; }
-    const char* data() const { return data_; }
-
-  private:
-    char data_[N];
+    char data[N];
   };
 
 // Equality comparison
@@ -60,6 +58,16 @@ template<std::size_t N>
 
 template<std::size_t N>
   bool operator!=(const String<N>& a, const String<N>& b);
+
+// Protocol
+template<std::size_t N>
+  constexpr std::size_t bytes(const String<N>&);
+
+template<std::size_t N>
+  Error to_view(View&, const String<N>&);
+
+template<std::size_t N>
+  Error from_view(View&, String<N>&);
 
 } // namespace ofp
 } // namespace freeflow

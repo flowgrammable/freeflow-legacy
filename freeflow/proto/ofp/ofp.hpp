@@ -18,29 +18,42 @@
 #include <freeflow/sys/data.hpp>
 #include <freeflow/sys/error.hpp>
 #include <freeflow/sys/buffer.hpp>
+#include <freeflow/proto/ofp/error.hpp>
 #include <freeflow/proto/ofp/string.hpp>
+#include <freeflow/proto/ofp/sequence.hpp>
 
 namespace freeflow {
 namespace ofp {
 
+
 // -------------------------------------------------------------------------- //
-// Common errors
+// Common structures
 
-struct Error : freeflow::Error {
-  /// Reading or writing the header would overflow the buffer.
-  static constexpr Code HEADER_OVERFLOW  = 100;
-  
-  /// Reading or writing the payload would overflow the buffer. 
-  static constexpr Code PAYLOAD_OVERFLOW  = 101;
-
-  /// The protocol version is unsupported.
-  static constexpr Code BAD_VERSION       = 102;
-
-  /// The header length is less than the size of the header.
-  static constexpr Code BAD_HEADER_LENGTH = 104;
-
-  using freeflow::Error::Error;
+/// A MAC address is a 48-bit identifier that uniquely identifies the device.
+struct Mac_addr {
+  Uint8 addr[6];
 };
+
+
+/// An Ipv4 address is a 32-bit identifier.
+struct Ipv4_addr {
+  Uint8 addr[4];
+};
+
+
+// An Ipv6 address is a 128-bit identifier.
+struct Ipv6_addr {
+  Uint8 addr[16];
+};
+
+/// The OpenFlow header is found at the front of every OpenFlow message.
+struct Header {
+  Uint8 version;
+  Uint8 type;
+  Uint16 length;
+  Uint32 xid;
+};
+
 
 // -------------------------------------------------------------------------- //
 // Protocol primitives
@@ -49,74 +62,56 @@ struct Error : freeflow::Error {
 // rules and some structures common to all versions of the OpenFlow
 // protocol.
 
-Error to_view(View& v, Uint8 n);
-Error to_view(View& v, Uint16 n);
-Error to_view(View& v, Uint32 n);
-Error to_view(View& v, Uint64 n);
+// Bytes
 
-template<typename T, typename = Requires<Enum<T>()>>
-  Error to_view(View& v, T value);
+template<typename T, typename = Requires<Integral<T>()>>
+  constexpr std::size_t bytes(T);
 
 template<typename T, std::size_t N>
-  Error to_view(View& v, T(&)[N]);
+  constexpr std::size_t bytes(const T(&)[N]);
+
+std::size_t bytes(const Buffer&);
+constexpr std::size_t bytes(const Mac_addr&);
+constexpr std::size_t bytes(const Ipv4_addr&);
+constexpr std::size_t bytes(const Ipv6_addr&);
+constexpr std::size_t bytes(const Header&);
+
+// To view
+
+Error to_view(View&, Uint8);
+Error to_view(View&, Uint16);
+Error to_view(View&, Uint32);
+Error to_view(View&, Uint64);
+
+template<typename T, typename = Requires<Enum<T>()>>
+  Error to_view(View&, T);
+
+template<typename T, std::size_t N>
+  Error to_view(View&, const T(&)[N]);
 
 Error to_view(View&, const Buffer&);
-
-Error from_view(View& v, Uint8& n);
-Error from_view(View& v, Uint16& n);
-Error from_view(View& v, Uint32& n);
-Error from_view(View& v, Uint64& n);
-
-template<typename T, typename = Requires<Enum<T>()>>
-  Error from_view(View& v, T& value);
-
-template<typename T, std::size_t N>
-  Error from_view(View& v, T(&)[N]);
-
-Error from_view(View&, Buffer&);
-
-
-// -------------------------------------------------------------------------- //
-// Common structures
-
-/// A MAC address is a 48-bit identifier that uniquely identifies the device.
-struct Mac_addr {
-  static constexpr std::size_t bytes = 6;
-  Uint8 addr[6];
-};
-
-/// An Ipv4 address is a 32-bit identifier.
-struct Ipv4_addr {
-  static constexpr std::size_t bytes = 4;
-  Uint8 addr[4];
-};
-
-// An Ipv6 address is a 128-bit identifier.
-struct Ipv6_addr {
-  static constexpr std::size_t bytes = 8;
-  Uint8 addr[16];
-};
-
 Error to_view(View&, const Mac_addr&);
 Error to_view(View&, const Ipv4_addr&);
 Error to_view(View&, const Ipv6_addr&);
+Error to_view(View&, const Header&);
 
+// From view
+
+Error from_view(View&, Uint8&);
+Error from_view(View&, Uint16&);
+Error from_view(View&, Uint32&);
+Error from_view(View&, Uint64&);
+
+template<typename T, typename = Requires<Enum<T>()>>
+  Error from_view(View&, T&);
+
+template<typename T, std::size_t N>
+  Error from_view(View&, T(&)[N]);
+
+Error from_view(View&, Buffer&);
 Error from_view(View&, Mac_addr&);
 Error from_view(View&, Ipv4_addr&);
 Error from_view(View&, Ipv6_addr&);
-
-
-/// The OpenFlow header is found at the front of every OpenFlow message.
-struct Header {
-  static constexpr std::size_t bytes = 8;
-
-  Uint8 version;
-  Uint8 type;
-  Uint16 length;
-  Uint32 xid;
-};
-
-Error to_view(View&, const Header&);
 Error from_view(View&, Header&);
 
 } // namespace ofp
