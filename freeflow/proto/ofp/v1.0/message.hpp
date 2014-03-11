@@ -21,6 +21,7 @@
 #include <freeflow/proto/ofp/v1.0/error.hpp>
 #include <freeflow/proto/ofp/v1.0/port.hpp>
 #include <freeflow/proto/ofp/v1.0/match.hpp>
+#include <freeflow/proto/ofp/v1.0/action.hpp>
 
 namespace freeflow {
 namespace ofp {
@@ -180,6 +181,15 @@ struct Port_status {
   Port    port;
 };
 
+/// A Packet_out message is sent from the controller to the switch in order
+/// to inject a packet into a flow or release a packet from a buffer.
+struct Packet_out {
+  Uint32           buffer_id;
+  Port::Id         port;
+  Uint16           actions_len;
+  Sequence<Action> actions;
+  Buffer           data;
+};
 
 /// The message class embodies a specific kind of OpenFlow message.
 struct Message {
@@ -223,6 +233,7 @@ constexpr std::size_t bytes(const Config&);
 std::size_t bytes(const Packet_in&);
 constexpr std::size_t bytes(const Flow_removed&);
 constexpr std::size_t bytes(const Port_status&);
+std::size_t bytes(const Packet_out&);
 std::size_t bytes(const Message&);
 
 Errc to_view(View&, const Empty&);
@@ -235,6 +246,7 @@ Errc to_view(View&, const Config&);
 Errc to_view(View&, const Packet_in&);
 Errc to_view(View&, const Flow_removed&);
 Errc to_view(View&, const Port_status&);
+Errc to_view(View&, const Packet_out&);
 Errc to_view(View&, const Message& m);
 
 Errc from_view(View&, Empty&);
@@ -247,6 +259,7 @@ Errc from_view(View&, Config&);
 Errc from_view(View&, Packet_in&);
 Errc from_view(View&, Flow_removed&);
 Errc from_view(View&, Port_status&);
+Errc from_view(View&, Packet_out&);
 Errc from_view(View&, Message& m);
 
 } // namespace v1_0

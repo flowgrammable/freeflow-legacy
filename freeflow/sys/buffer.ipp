@@ -56,24 +56,29 @@ View::remaining() const { return last - first; }
 /// Returns true if and only if there are at least n bytes available in
 /// the view for reading or writing.
 inline bool
-View::available(std::size_t n) const { return remaining() >= n; }
+View::available(std::size_t n) const { return n <= remaining(); }
 
+/// Advance the view by n bytes. Behavior is undefined if n is greater 
+/// than the number of bytes remaining.
+inline void
+View::advance(std::size_t n) {
+  assert(available(n));
+  first += n;
+} 
 
-/// \ingroup view_ops
-/// Returns a new view of a buffer containing excatly n bytes. A view
-/// is typically constrained whenever a new length field is encountered
+/// Returns a new, constrained view of the buffer containing excatly n bytes. 
+/// A view is typically constrained whenever a new length field is encountered
 /// in a protocol. This guarantees that interpeting data from the following
 /// bytes does not exceed a boundary.
 ///
 /// Note that behavior is undefined if the the constructed view is not within
 /// the view v.
 inline View
-constrain(const View& v, std::size_t n) {
-  assert(v.last - v.first >= std::ptrdiff_t(n));
-  return View(v.buf, v.first, v.first + n);
+View::constrain(std::size_t n) const {
+  assert(available(n));
+  return View(buf, first, first + n);
 }
 
-/// \ingroup view_ops
 /// Update a view v to the furthest position of a constrained view c
 /// and returns true iff c is an empty view.
 ///

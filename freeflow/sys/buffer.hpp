@@ -97,17 +97,20 @@ public:
   View(Buffer& b, std::size_t n);
   View(Buffer& b, Byte* f, Byte* l);
 
+  // Observers
   std::size_t remaining() const;
   bool available(std::size_t n) const;
+
+  // Mutators
+  void advance(std::size_t n);
+
+  // Constrained views
+  View constrain(std::size_t n) const;
 
   Buffer& buf;
   Byte* first;
   Byte* last;
 };
-
-inline View constrain(const View& v, std::size_t n);
-
-inline bool update(View& v, const View& c);
 
 // Put operations
 template<typename T>

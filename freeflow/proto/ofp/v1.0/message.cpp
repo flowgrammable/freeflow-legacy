@@ -149,10 +149,31 @@ to_view(View& v, const Flow_removed& m) {
 Errc
 to_view(View& v, const Port_status& m) {
   if (v.remaining() < bytes(m))
-    return Errc::PORT_STATUS_OVERFLOW;
+    return Errc::PACKET_OUT_OVERFLOW;
   to_view(v, m.reason);
   pad(v, 7);
   to_view(v, m.port);
+  return {};
+}
+
+Errc
+to_view(View& v, const Packet_out& m) {
+  if (v.remaining() < bytes(m))
+    return Errc::PACKET_OUT_OVERFLOW;
+
+  // Minimum semantic checking
+  if (v.remaining() < m.actions_len)
+    return Errc::PACKET_OUT_OVERFLOW;
+
+  to_view(v, m.buffer_id);
+  to_view(v, m.port);
+  to_view(v, m.actions_len);
+  
+  View c(v.constrain(m.actions_len));
+  // to_view(v, m.actions);
+  v.advance(m.actions_len);
+
+  to_view(v, m.data);
   return {};
 }
 
@@ -286,6 +307,27 @@ from_view(View& v, Port_status& m) {
   from_view(v, m.reason);
   pad(v, 7);
   from_view(v, m.port);
+  return {};
+}
+
+Errc
+from_view(View& v, Packet_out& m) {
+  if (v.remaining() < bytes(m))
+    return Errc::PACKET_OUT_OVERFLOW;
+
+  from_view(v, m.buffer_id);
+  from_view(v, m.port);
+  from_view(v, m.actions_len);
+
+  // Minimum semantic checking
+  if (v.remaining() < m.actions_len)
+    return Errc::PACKET_OUT_OVERFLOW;
+
+  View c(v.constrain(m.actions_len));
+  // from_view(v, m.actions);
+  v.advance(m.actions_len);
+
+  from_view(v, m.data);
   return {};
 }
 
