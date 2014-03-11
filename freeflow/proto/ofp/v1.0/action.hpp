@@ -42,17 +42,6 @@ enum Action_type : Uint16 {
   ACTION_VENDOR       = 0xffff
 };
 
-/// The Action type represents is a structure common to all action types.
-/// It provides the type and length of the header.
-///
-/// Note that OpenFlow specification includes the header as part of all
-/// action types. The implementation factors the header out, meaning each
-/// specific action contains only the fields specific to that action.
-struct Action_header {
-  Action_type type;
-  Uint16      length;
-};
-
 /// The empty action represents an action that requires no additional
 /// data.
 struct Action_empty { };
@@ -110,25 +99,36 @@ struct Action_vendor {
 };
 
 
+/// The Action type represents is a structure common to all action types.
+/// It provides the type and length of the header.
+///
+/// Note that OpenFlow specification includes the header as part of all
+/// action types. The implementation factors the header out, meaning each
+/// specific action contains only the fields specific to that action.
+struct Action_header {
+  Action_type type;
+  Uint16      length;
+};
+
+/// The action payload contains the different kinds of action payload.
+union Action_payload {
+  Action_empty    empty;
+  Action_output   output;
+  Action_enqueue  enqueue;
+  Action_vlan_vid vlan_vid;
+  Action_vlan_pcp vlan_pcp;
+  Action_dl_addr  dl_addr;
+  Action_nw_addr  nw_addr;
+  Action_nw_tos   nw_tos;
+  Action_tp_port  tp_port;
+  Action_vendor   vendor;
+};
+
+/// The Action class contains an action header and the corresponding
+/// payload.
 struct Action {
-  using Type = Action_type;
-  union Payload {
-    Action_empty    empty;
-    Action_output   output;
-    Action_enqueue  enqueue;
-    Action_vlan_vid vlan_vid;
-    Action_vlan_pcp vlan_pcp;
-    Action_dl_addr  dl_addr;
-    Action_nw_addr  nw_addr;
-    Action_nw_tos   nw_tos;
-    Action_tp_port  tp_port;
-    Action_vendor   vendor;
-  };
-
-  Action(Type);
-
-  Type    type;
-  Payload payload;
+  Action_header  header;
+  Action_payload payload;
 };
 
 // Protocol
@@ -142,6 +142,8 @@ constexpr std::size_t bytes(const Action_nw_addr&);
 constexpr std::size_t bytes(const Action_nw_tos&);
 constexpr std::size_t bytes(const Action_tp_port&);
 constexpr std::size_t bytes(const Action_vendor&);
+constexpr std::size_t bytes(const Action_header&);
+std::size_t bytes(const Action_payload&, Action_type);
 std::size_t bytes(const Action&);
 
 Errc to_view(View&, const Action_empty&);
@@ -154,6 +156,8 @@ Errc to_view(View&, const Action_nw_addr&);
 Errc to_view(View&, const Action_nw_tos&);
 Errc to_view(View&, const Action_tp_port&);
 Errc to_view(View&, const Action_vendor&);
+Errc to_view(View&, const Action_payload&, Action_type);
+Errc to_view(View&, const Action&);
 
 Errc from_view(View&, Action_empty&);
 Errc from_view(View&, Action_output&);
@@ -165,6 +169,8 @@ Errc from_view(View&, Action_nw_addr&);
 Errc from_view(View&, Action_nw_tos&);
 Errc from_view(View&, Action_tp_port&);
 Errc from_view(View&, Action_vendor&);
+Errc from_view(View&, Action_payload&, Action_type);
+Errc from_view(View&, Action&);
 
 } // namespace v1_0
 } // namespace ofp

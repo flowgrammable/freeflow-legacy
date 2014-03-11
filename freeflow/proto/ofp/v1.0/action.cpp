@@ -25,22 +25,21 @@ using ofp::from_view;
 // Bytes
 
 std::size_t
-bytes(const Action& m) {
-  const Action::Payload& p = m.payload;
-  switch(m.type) {
-  case ACTION_OUTPUT: return bytes(p.output);
-  case ACTION_ENQUEUE: return bytes(p.enqueue);
-  case ACTION_SET_VLAN_VID: return bytes(p.vlan_vid);
-  case ACTION_SET_VLAN_PCP: return bytes(p.vlan_pcp);
-  case ACTION_STRIP_VLAN: return bytes(p.empty);
-  case ACTION_SET_DL_SRC: return bytes(p.dl_addr);
-  case ACTION_SET_DL_DST: return bytes(p.dl_addr);
-  case ACTION_SET_NW_SRC: return bytes(p.nw_addr);
-  case ACTION_SET_NW_DST: return bytes(p.nw_addr);
-  case ACTION_SET_NW_TOS: return bytes(p.nw_tos);
-  case ACTION_SET_TP_SRC: return bytes(p.tp_port);
-  case ACTION_SET_TP_DST: return bytes(p.tp_port);
-  case ACTION_VENDOR: return bytes(p.vendor);
+bytes(const Action_payload& m, Action_type t) {
+  switch(t) {
+  case ACTION_OUTPUT: return bytes(m.output);
+  case ACTION_ENQUEUE: return bytes(m.enqueue);
+  case ACTION_SET_VLAN_VID: return bytes(m.vlan_vid);
+  case ACTION_SET_VLAN_PCP: return bytes(m.vlan_pcp);
+  case ACTION_STRIP_VLAN: return bytes(m.empty);
+  case ACTION_SET_DL_SRC: return bytes(m.dl_addr);
+  case ACTION_SET_DL_DST: return bytes(m.dl_addr);
+  case ACTION_SET_NW_SRC: return bytes(m.nw_addr);
+  case ACTION_SET_NW_DST: return bytes(m.nw_addr);
+  case ACTION_SET_NW_TOS: return bytes(m.nw_tos);
+  case ACTION_SET_TP_SRC: return bytes(m.tp_port);
+  case ACTION_SET_TP_DST: return bytes(m.tp_port);
+  case ACTION_VENDOR: return bytes(m.vendor);
   default:
     throw Errc::BAD_ACTION_TYPE;
   }
@@ -115,25 +114,30 @@ to_view(View& v, const Action_vendor& m) {
 }
 
 Errc
-to_view(View& v, const Action& m) {
-  const Action::Payload& p = m.payload;
-  switch(m.type) {
-  case ACTION_OUTPUT: return to_view(v, p.output);
-  case ACTION_ENQUEUE: return to_view(v, p.enqueue);
-  case ACTION_SET_VLAN_VID: return to_view(v, p.vlan_vid);
-  case ACTION_SET_VLAN_PCP: return to_view(v, p.vlan_pcp);
-  case ACTION_STRIP_VLAN: return to_view(v, p.empty);
-  case ACTION_SET_DL_SRC: return to_view(v, p.dl_addr);
-  case ACTION_SET_DL_DST: return to_view(v, p.dl_addr);
-  case ACTION_SET_NW_SRC: return to_view(v, p.nw_addr);
-  case ACTION_SET_NW_DST: return to_view(v, p.nw_addr);
-  case ACTION_SET_NW_TOS: return to_view(v, p.nw_tos);
-  case ACTION_SET_TP_SRC: return to_view(v, p.tp_port);
-  case ACTION_SET_TP_DST: return to_view(v, p.tp_port);
-  case ACTION_VENDOR: return to_view(v, p.vendor);
+to_view(View& v, const Action_payload& m, Action_type t) {
+  switch(t) {
+  case ACTION_OUTPUT: return to_view(v, m.output);
+  case ACTION_ENQUEUE: return to_view(v, m.enqueue);
+  case ACTION_SET_VLAN_VID: return to_view(v, m.vlan_vid);
+  case ACTION_SET_VLAN_PCP: return to_view(v, m.vlan_pcp);
+  case ACTION_STRIP_VLAN: return to_view(v, m.empty);
+  case ACTION_SET_DL_SRC: return to_view(v, m.dl_addr);
+  case ACTION_SET_DL_DST: return to_view(v, m.dl_addr);
+  case ACTION_SET_NW_SRC: return to_view(v, m.nw_addr);
+  case ACTION_SET_NW_DST: return to_view(v, m.nw_addr);
+  case ACTION_SET_NW_TOS: return to_view(v, m.nw_tos);
+  case ACTION_SET_TP_SRC: return to_view(v, m.tp_port);
+  case ACTION_SET_TP_DST: return to_view(v, m.tp_port);
+  case ACTION_VENDOR: return to_view(v, m.vendor);
   default:
     throw Errc::BAD_ACTION_TYPE;
   }
+}
+
+
+Errc
+to_view(View& v, const Action& m) {
+  assert(false);
 }
 
 // -------------------------------------------------------------------------- //
@@ -205,25 +209,29 @@ from_view(View& v, Action_vendor& m) {
 }
 
 Errc
-from_view(View& v, Action& m) {
-  Action::Payload& p = m.payload;
-  switch(m.type) {
-  case ACTION_OUTPUT: return from_view(v, p.output);
-  case ACTION_ENQUEUE: return from_view(v, p.enqueue);
-  case ACTION_SET_VLAN_VID: return from_view(v, p.vlan_vid);
-  case ACTION_SET_VLAN_PCP: return from_view(v, p.vlan_pcp);
-  case ACTION_STRIP_VLAN: return from_view(v, p.empty);
-  case ACTION_SET_DL_SRC: return from_view(v, p.dl_addr);
-  case ACTION_SET_DL_DST: return from_view(v, p.dl_addr);
-  case ACTION_SET_NW_SRC: return from_view(v, p.nw_addr);
-  case ACTION_SET_NW_DST: return from_view(v, p.nw_addr);
-  case ACTION_SET_NW_TOS: return from_view(v, p.nw_tos);
-  case ACTION_SET_TP_SRC: return from_view(v, p.tp_port);
-  case ACTION_SET_TP_DST: return from_view(v, p.tp_port);
-  case ACTION_VENDOR: return from_view(v, p.vendor);
+from_view(View& v, Action_payload& m, Action_type t) {
+  switch(t) {
+  case ACTION_OUTPUT: return from_view(v, m.output);
+  case ACTION_ENQUEUE: return from_view(v, m.enqueue);
+  case ACTION_SET_VLAN_VID: return from_view(v, m.vlan_vid);
+  case ACTION_SET_VLAN_PCP: return from_view(v, m.vlan_pcp);
+  case ACTION_STRIP_VLAN: return from_view(v, m.empty);
+  case ACTION_SET_DL_SRC: return from_view(v, m.dl_addr);
+  case ACTION_SET_DL_DST: return from_view(v, m.dl_addr);
+  case ACTION_SET_NW_SRC: return from_view(v, m.nw_addr);
+  case ACTION_SET_NW_DST: return from_view(v, m.nw_addr);
+  case ACTION_SET_NW_TOS: return from_view(v, m.nw_tos);
+  case ACTION_SET_TP_SRC: return from_view(v, m.tp_port);
+  case ACTION_SET_TP_DST: return from_view(v, m.tp_port);
+  case ACTION_VENDOR: return from_view(v, m.vendor);
   default:
     throw Errc::BAD_ACTION_TYPE;
   }
+}
+
+Errc
+from_view(View& v, Action& m) {
+  assert(false);
 }
 
 } // namespace v1_0
