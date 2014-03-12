@@ -20,6 +20,7 @@
 #include <freeflow/proto/ofp/ofp.hpp>
 #include <freeflow/proto/ofp/v1.0/error.hpp>
 #include <freeflow/proto/ofp/v1.0/port.hpp>
+#include <freeflow/proto/ofp/v1.0/queue.hpp>
 #include <freeflow/proto/ofp/v1.0/match.hpp>
 #include <freeflow/proto/ofp/v1.0/action.hpp>
 #include <freeflow/proto/ofp/v1.0/stats.hpp>
@@ -254,6 +255,18 @@ struct Stats_reply {
   Payload payload;
 };
 
+/// A queue-config request is sent from the controller to the switch to 
+/// get configuration information about a queue.
+struct Queue_config_request {
+  Port::Id port;
+};
+
+/// A queue-config reploy is returned from the switch to the controller to
+/// communicate queue configuration.
+struct Queue_config_reply {
+  Port::Id port;
+  Queue_list queues;
+};
 
 /// The message class embodies a specific kind of OpenFlow message.
 struct Message {
@@ -262,21 +275,23 @@ struct Message {
     Payload() { }
     ~Payload() { }
     
-    Empty         empty;
-    Hello         hello;
-    Error         error;
-    Echo          echo;
-    Vendor        vendor;
-    Feature       feature;
-    Config        config;
-    Packet_in     packet_in;
-    Flow_removed  flow_removed;
-    Port_status   port_status;
-    Packet_out    packet_out;
-    Flow_mod      flow_mod;
-    Port_mod      port_mod;
-    Stats_request stats_request;
-    Stats_reply   stats_reply;
+    Empty                empty;
+    Hello                hello;
+    Error                error;
+    Echo                 echo;
+    Vendor               vendor;
+    Feature              feature;
+    Config               config;
+    Packet_in            packet_in;
+    Flow_removed         flow_removed;
+    Port_status          port_status;
+    Packet_out           packet_out;
+    Flow_mod             flow_mod;
+    Port_mod             port_mod;
+    Stats_request        stats_request;
+    Stats_reply          stats_reply;
+    Queue_config_request queue_config_request;
+    Queue_config_reply   queue_config_reply;
   };
 
   Message(Type);
@@ -307,6 +322,8 @@ std::size_t bytes(const Flow_mod&);
 constexpr std::size_t bytes(const Port_mod&);
 std::size_t bytes(const Stats_request&);
 std::size_t bytes(const Stats_reply&);
+std::size_t bytes(const Queue_config_request&);
+std::size_t bytes(const Queue_config_reply&);
 std::size_t bytes(const Message&);
 
 Errc to_view(View&, const Empty&);
@@ -324,6 +341,8 @@ Errc to_view(View&, const Flow_mod&);
 Errc to_view(View&, const Port_mod&);
 Errc to_view(View&, const Stats_request&);
 Errc to_view(View&, const Stats_reply&);
+Errc to_view(View&, const Queue_config_request&);
+Errc to_view(View&, const Queue_config_reply&);
 Errc to_view(View&, const Message&);
 
 Errc from_view(View&, Empty&);
@@ -341,6 +360,8 @@ Errc from_view(View&, Flow_mod&);
 Errc from_view(View&, Port_mod&);
 Errc from_view(View&, Stats_request&);
 Errc from_view(View&, Stats_reply&);
+Errc from_view(View&, Queue_config_request&);
+Errc from_view(View&, Queue_config_reply&);
 Errc from_view(View&, Message&);
 
 } // namespace v1_0

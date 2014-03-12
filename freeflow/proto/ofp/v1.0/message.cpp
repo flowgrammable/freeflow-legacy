@@ -45,10 +45,8 @@ bytes(const Message& m) {
   case STATS_REPLY: return bytes(p.stats_reply);
   case BARRIER_REQUEST: return bytes(p.empty);
   case BARRIER_REPLY: return bytes(p.empty);
-  /*
-  case QUEUE_GET_CONFIG_REQUEST: return bytes(p.queue_get_config_request);
-  case QUEUE_GET_CONFIG_REPLY: return bytes(p.queue_get_config_reply);
-  */
+  case QUEUE_GET_CONFIG_REQUEST: return bytes(p.queue_config_request);
+  case QUEUE_GET_CONFIG_REPLY: return bytes(p.queue_config_reply);
   default:
     throw Errc(Errc::BAD_MESSAGE_TYPE);
   }
@@ -220,6 +218,23 @@ to_view(View& v, const Stats_reply& m) {
   return to_view(v, m.payload, m.header.type);
 }
 
+Errc 
+to_view(View& v, const Queue_config_request& m) {
+  if (remaining(v) < bytes(m))
+    return Errc::QUEUE_CONFIG_REQUEST_OVERFLOW;
+  to_view(v, m.port);
+  return {};
+}
+
+Errc
+to_view(View& v, const Queue_config_reply& m) {
+  if (remaining(v) < bytes(m))
+    return Errc::QUEUE_CONFIG_REPLY_OVERFLOW;
+  to_view(v, m.port);
+  to_view(v, m.queues);
+  return {};
+}
+
 Errc
 to_view(View& v, const Message& m) {
   const Message::Payload& p = m.payload;
@@ -244,10 +259,8 @@ to_view(View& v, const Message& m) {
   case STATS_REPLY: return to_view(v, p.stats_reply);
   case BARRIER_REQUEST: return to_view(v, p.empty);
   case BARRIER_REPLY: return to_view(v, p.empty);
-  /*
-  case QUEUE_GET_CONFIG_REQUEST: return to_view(v, p.queue_get_config_request);
-  case QUEUE_GET_CONFIG_REPLY: return to_view(v, p.queue_get_config_reply);
-  */
+  case QUEUE_GET_CONFIG_REQUEST: return to_view(v, p.queue_config_request);
+  case QUEUE_GET_CONFIG_REPLY: return to_view(v, p.queue_config_reply);
   default:
     return Errc::BAD_MESSAGE_TYPE;
   }
@@ -417,6 +430,23 @@ from_view(View& v, Stats_reply& m) {
   return from_view(v, m.payload, m.header.type);
 }
 
+Errc 
+from_view(View& v, Queue_config_request& m) {
+  if (remaining(v) < bytes(m))
+    return Errc::QUEUE_CONFIG_REQUEST_OVERFLOW;
+  from_view(v, m.port);
+  return {};
+}
+
+Errc
+from_view(View& v, Queue_config_reply& m) {
+  if (remaining(v) < bytes(m))
+    return Errc::QUEUE_CONFIG_REPLY_OVERFLOW;
+  from_view(v, m.port);
+  from_view(v, m.queues);
+  return {};
+}
+
 Errc
 from_view(View& v, Message& m) {
   Message::Payload& p = m.payload;
@@ -441,10 +471,8 @@ from_view(View& v, Message& m) {
   case STATS_REPLY: return from_view(v, p.stats_reply);
   case BARRIER_REQUEST: return from_view(v, p.empty);
   case BARRIER_REPLY: return from_view(v, p.empty);
-  /*
-  case QUEUE_GET_CONFIG_REQUEST: return from_view(v, p.queue_get_config_request);
-  case QUEUE_GET_CONFIG_REPLY: return from_view(v, p.queue_get_config_reply);
-  */
+  case QUEUE_GET_CONFIG_REQUEST: return from_view(v, p.queue_config_request);
+  case QUEUE_GET_CONFIG_REPLY: return from_view(v, p.queue_config_reply);
   default:
     return Errc::BAD_MESSAGE_TYPE;
   }
@@ -478,10 +506,8 @@ Message::Message(Type t)
   case STATS_REPLY: new (&p.stats_reply) Stats_reply(); break;
   case BARRIER_REQUEST: new (&p.empty) Empty(); break;
   case BARRIER_REPLY: new (&p.empty) Empty(); break;
-  /*
-  case QUEUE_GET_CONFIG_REQUEST: new (&p.queue_get_config_request) Queue_get_config_request(); break;
-  case QUEUE_GET_CONFIG_REPLY: new (&p.queue_get_config_reply) Queue_get_config_reply(); break;
-  */
+  case QUEUE_GET_CONFIG_REQUEST: new (&p.queue_config_request) Queue_config_request(); break;
+  case QUEUE_GET_CONFIG_REPLY: new (&p.queue_config_reply) Queue_config_reply(); break;
   default:
     throw Errc(Errc::BAD_MESSAGE_TYPE);
   }
@@ -511,8 +537,8 @@ Message::~Message() {
   case BARRIER_REQUEST: p.empty.~Empty(); break;
   case BARRIER_REPLY: p.empty.~Empty(); break;
   /*
-  case QUEUE_GET_CONFIG_REQUEST: p.queue_get_config_request.~Queue_get_config_request(); break;
-  case QUEUE_GET_CONFIG_REPLY: p.queue_get_config_reply.~Queue_get_config_reply(); break;
+  case QUEUE_GET_CONFIG_REQUEST: p.queue_config_request.~Queue_get_config_request(); break;
+  case QUEUE_GET_CONFIG_REPLY: p.queue_config_reply.~Queue_get_config_reply(); break;
   */
   default:
     throw Errc(Errc::BAD_MESSAGE_TYPE);

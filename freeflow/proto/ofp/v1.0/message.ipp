@@ -80,6 +80,12 @@ bytes(const Stats_reply& m) {
   return bytes(m.header) + bytes(m.payload, m.header.type); 
 }
 
+inline std::size_t
+bytes(const Queue_config_request& m) { return 2; }
+
+inline std::size_t
+bytes(const Queue_config_reply& m) { return 8 + bytes(m.queues); }
+
 // To view
 
 inline Errc

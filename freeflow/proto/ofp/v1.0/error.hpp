@@ -30,6 +30,7 @@ struct Errc : ofp::Error {
   static constexpr Code BAD_MESSAGE_TYPE = 200;
   static constexpr Code BAD_ACTION_TYPE = 300;
   static constexpr Code BAD_STATS_TYPE = 400;
+  static constexpr Code BAD_PROPERTY_TYPE = 500;
 
   static constexpr Code HELLO_OVERFLOW   = 201;
   static constexpr Code ERROR_OVERFLOW   = 202;
@@ -45,6 +46,8 @@ struct Errc : ofp::Error {
   static constexpr Code PORT_MOD_OVERFLOW      = 212;
   static constexpr Code STATS_REQUEST_OVERFLOW = 213;
   static constexpr Code STATS_REPLY_OVERFLOW   = 214;
+  static constexpr Code QUEUE_CONFIG_REQUEST_OVERFLOW = 215;
+  static constexpr Code QUEUE_CONFIG_REPLY_OVERFLOW   = 216;
 
   static constexpr Code ACTION_OVERFLOW = 250;
   static constexpr Code BAD_ACTION_LENGTH = 301;
@@ -54,6 +57,11 @@ struct Errc : ofp::Error {
   static constexpr Code VENDOR_STATS_OVERFLOW = 403;
   static constexpr Code BAD_FLOW_STATS_LENGTH = 410;
   static constexpr Code BAD_QUEUE_STATS_LENGTH = 411;
+
+  static constexpr Code PROPERTY_OVERFLOW = 550;
+  static constexpr Code BAD_PROPERTY_LENGTH = 501;
+  static constexpr Code BAD_QUEUE_LENGTH = 501;
+
 
   using ofp::Error::Error;
 };
