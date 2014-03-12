@@ -91,6 +91,9 @@ struct Port {
   Features   peer;
 };
 
+/// A sequence of ports
+using Port_list = Sequence<Port>;
+
 // Protocol
 constexpr std::size_t bytes(const Port&);
 Errc to_view(View&, const Port&);

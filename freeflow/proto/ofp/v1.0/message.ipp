@@ -16,6 +16,19 @@ namespace freeflow {
 namespace ofp {
 namespace v1_0 {
 
+// -------------------------------------------------------------------------- //
+// Messages
+
+inline
+Stats_reply::Stats_reply()
+  : header(STATS_INVALID)
+{ }
+
+inline
+Stats_reply::~Stats_reply() {
+  destroy(payload, header.type);
+}
+
 // Bytes
 
 constexpr std::size_t
@@ -56,6 +69,16 @@ bytes(const Flow_mod& m) { return 24 + bytes(m.match) + bytes(m.actions); }
 
 constexpr std::size_t
 bytes(const Port_mod& m) { return 24; }
+
+inline std::size_t
+bytes(const Stats_request& m) { 
+  return bytes(m.header) + bytes(m.payload, m.header.type); 
+}
+
+inline std::size_t
+bytes(const Stats_reply& m) { 
+  return bytes(m.header) + bytes(m.payload, m.header.type); 
+}
 
 // To view
 

@@ -22,16 +22,11 @@
 #include <freeflow/proto/ofp/v1.0/port.hpp>
 #include <freeflow/proto/ofp/v1.0/match.hpp>
 #include <freeflow/proto/ofp/v1.0/action.hpp>
+#include <freeflow/proto/ofp/v1.0/stats.hpp>
 
 namespace freeflow {
 namespace ofp {
 namespace v1_0 {
-
-/// A sequence of ports
-using Port_list = Sequence<Port>;
-
-/// A sequence of actions
-using Action_list = Sequence<Action>;
 
 /// The type of supported messages.
 enum Message_type : Uint16 {
@@ -236,6 +231,30 @@ struct Port_mod {
   Port::Features advertised;
 };
 
+/// A stats-request message is sent from the controller to the switch to
+/// request information and statistics about some aspect of a switch.
+struct Stats_request {
+  using Header = Stats_header;
+  using Payload = Stats_request_payload;
+
+  Header header;
+  Payload payload;
+};
+
+/// A stats-response message is returned from the switch to the controller
+/// containing information and statistics.
+struct Stats_reply {
+  using Header = Stats_header;
+  using Payload = Stats_reply_payload;
+
+  Stats_reply();
+  ~Stats_reply();
+
+  Header header;
+  Payload payload;
+};
+
+
 /// The message class embodies a specific kind of OpenFlow message.
 struct Message {
   using Type = Message_type;
@@ -243,19 +262,21 @@ struct Message {
     Payload() { }
     ~Payload() { }
     
-    Empty        empty;
-    Hello        hello;
-    Error        error;
-    Echo         echo;
-    Vendor       vendor;
-    Feature      feature;
-    Config       config;
-    Packet_in    packet_in;
-    Flow_removed flow_removed;
-    Port_status  port_status;
-    Packet_out   packet_out;
-    Flow_mod     flow_mod;
-    Port_mod     port_mod;
+    Empty         empty;
+    Hello         hello;
+    Error         error;
+    Echo          echo;
+    Vendor        vendor;
+    Feature       feature;
+    Config        config;
+    Packet_in     packet_in;
+    Flow_removed  flow_removed;
+    Port_status   port_status;
+    Packet_out    packet_out;
+    Flow_mod      flow_mod;
+    Port_mod      port_mod;
+    Stats_request stats_request;
+    Stats_reply   stats_reply;
   };
 
   Message(Type);
@@ -284,6 +305,8 @@ constexpr std::size_t bytes(const Port_status&);
 std::size_t bytes(const Packet_out&);
 std::size_t bytes(const Flow_mod&);
 constexpr std::size_t bytes(const Port_mod&);
+std::size_t bytes(const Stats_request&);
+std::size_t bytes(const Stats_reply&);
 std::size_t bytes(const Message&);
 
 Errc to_view(View&, const Empty&);
@@ -299,6 +322,8 @@ Errc to_view(View&, const Port_status&);
 Errc to_view(View&, const Packet_out&);
 Errc to_view(View&, const Flow_mod&);
 Errc to_view(View&, const Port_mod&);
+Errc to_view(View&, const Stats_request&);
+Errc to_view(View&, const Stats_reply&);
 Errc to_view(View&, const Message&);
 
 Errc from_view(View&, Empty&);
@@ -314,6 +339,8 @@ Errc from_view(View&, Port_status&);
 Errc from_view(View&, Packet_out&);
 Errc from_view(View&, Flow_mod&);
 Errc from_view(View&, Port_mod&);
+Errc from_view(View&, Stats_request&);
+Errc from_view(View&, Stats_reply&);
 Errc from_view(View&, Message&);
 
 } // namespace v1_0

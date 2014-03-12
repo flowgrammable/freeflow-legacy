@@ -41,14 +41,14 @@ bytes(const Message& m) {
   case PACKET_OUT: return bytes(p.packet_out);
   case FLOW_MOD: return bytes(p.flow_mod);
   case PORT_MOD: return bytes(p.port_mod);
-  /*
   case STATS_REQUEST: return bytes(p.stats_request);
   case STATS_REPLY: return bytes(p.stats_reply);
+  case BARRIER_REQUEST: return bytes(p.empty);
+  case BARRIER_REPLY: return bytes(p.empty);
+  /*
   case QUEUE_GET_CONFIG_REQUEST: return bytes(p.queue_get_config_request);
   case QUEUE_GET_CONFIG_REPLY: return bytes(p.queue_get_config_reply);
   */
-  case BARRIER_REQUEST: return bytes(p.empty);
-  case BARRIER_REPLY: return bytes(p.empty);
   default:
     throw Errc(Errc::BAD_MESSAGE_TYPE);
   }
@@ -205,6 +205,22 @@ to_view(View& v, const Port_mod& m) {
 }
 
 Errc
+to_view(View& v, const Stats_request& m) {
+  if (remaining(v) < bytes(m))
+    return Errc::STATS_REQUEST_OVERFLOW;
+  to_view(v, m.header);
+  return to_view(v, m.payload, m.header.type);
+}
+
+Errc
+to_view(View& v, const Stats_reply& m) {
+  if (remaining(v) < bytes(m))
+    return Errc::STATS_REPLY_OVERFLOW;
+  to_view(v, m.header);
+  return to_view(v, m.payload, m.header.type);
+}
+
+Errc
 to_view(View& v, const Message& m) {
   const Message::Payload& p = m.payload;
   switch(m.type) {
@@ -224,14 +240,14 @@ to_view(View& v, const Message& m) {
   case PACKET_OUT: return to_view(v, p.packet_out);
   case FLOW_MOD: return to_view(v, p.flow_mod);
   case PORT_MOD: return to_view(v, p.port_mod);
-  /*
   case STATS_REQUEST: return to_view(v, p.stats_request);
   case STATS_REPLY: return to_view(v, p.stats_reply);
+  case BARRIER_REQUEST: return to_view(v, p.empty);
+  case BARRIER_REPLY: return to_view(v, p.empty);
+  /*
   case QUEUE_GET_CONFIG_REQUEST: return to_view(v, p.queue_get_config_request);
   case QUEUE_GET_CONFIG_REPLY: return to_view(v, p.queue_get_config_reply);
   */
-  case BARRIER_REQUEST: return to_view(v, p.empty);
-  case BARRIER_REPLY: return to_view(v, p.empty);
   default:
     return Errc::BAD_MESSAGE_TYPE;
   }
@@ -386,6 +402,22 @@ from_view(View& v, Port_mod& m) {
 }
 
 Errc
+from_view(View& v, Stats_request& m) {
+  if (remaining(v) < bytes(m))
+    return Errc::STATS_REQUEST_OVERFLOW;
+  from_view(v, m.header);
+  return from_view(v, m.payload, m.header.type);
+}
+
+Errc
+from_view(View& v, Stats_reply& m) {
+  if (remaining(v) < bytes(m))
+    return Errc::STATS_REPLY_OVERFLOW;
+  from_view(v, m.header);
+  return from_view(v, m.payload, m.header.type);
+}
+
+Errc
 from_view(View& v, Message& m) {
   Message::Payload& p = m.payload;
   switch(m.type) {
@@ -405,14 +437,14 @@ from_view(View& v, Message& m) {
   case PACKET_OUT: return from_view(v, p.packet_out);
   case FLOW_MOD: return from_view(v, p.flow_mod);
   case PORT_MOD: return from_view(v, p.port_mod);
-  /*
   case STATS_REQUEST: return from_view(v, p.stats_request);
   case STATS_REPLY: return from_view(v, p.stats_reply);
+  case BARRIER_REQUEST: return from_view(v, p.empty);
+  case BARRIER_REPLY: return from_view(v, p.empty);
+  /*
   case QUEUE_GET_CONFIG_REQUEST: return from_view(v, p.queue_get_config_request);
   case QUEUE_GET_CONFIG_REPLY: return from_view(v, p.queue_get_config_reply);
   */
-  case BARRIER_REQUEST: return from_view(v, p.empty);
-  case BARRIER_REPLY: return from_view(v, p.empty);
   default:
     return Errc::BAD_MESSAGE_TYPE;
   }
@@ -439,14 +471,14 @@ Message::Message(Type t)
   case PACKET_IN: new (&p.packet_in) Packet_in(); break;
   case FLOW_REMOVED: new (&p.flow_removed) Flow_removed(); break;
   case PORT_STATUS: new (&p.port_status) Port_status(); break;
-  /*
   case PACKET_OUT: new (&p.packet_out) Packet_out(); break;
   case FLOW_MOD: new (&p.flow_mod) Flow_mod(); break;
   case PORT_MOD: new (&p.port_mod) Port_mod(); break;
   case STATS_REQUEST: new (&p.stats_request) Stats_request(); break;
   case STATS_REPLY: new (&p.stats_reply) Stats_reply(); break;
-  case BARRIER_REQUEST: new (&p.barrier_request) Barrier_request(); break;
-  case BARRIER_REPLY: new (&p.barrier_reply) Barrier_reply(); break;
+  case BARRIER_REQUEST: new (&p.empty) Empty(); break;
+  case BARRIER_REPLY: new (&p.empty) Empty(); break;
+  /*
   case QUEUE_GET_CONFIG_REQUEST: new (&p.queue_get_config_request) Queue_get_config_request(); break;
   case QUEUE_GET_CONFIG_REPLY: new (&p.queue_get_config_reply) Queue_get_config_reply(); break;
   */
@@ -471,14 +503,14 @@ Message::~Message() {
   case PACKET_IN: p.packet_in.~Packet_in(); break;
   case FLOW_REMOVED: p.flow_removed.~Flow_removed(); break;
   case PORT_STATUS: p.port_status.~Port_status(); break;
-  /*
   case PACKET_OUT: p.packet_out.~Packet_out(); break;
   case FLOW_MOD: p.flow_mod.~Flow_mod(); break;
   case PORT_MOD: p.port_mod.~Port_mod(); break;
   case STATS_REQUEST: p.stats_request.~Stats_request(); break;
   case STATS_REPLY: p.stats_reply.~Stats_reply(); break;
-  case BARRIER_REQUEST: p.barrier_request.~Barrier_request(); break;
-  case BARRIER_REPLY: p.barrier_reply.~Barrier_reply(); break;
+  case BARRIER_REQUEST: p.empty.~Empty(); break;
+  case BARRIER_REPLY: p.empty.~Empty(); break;
+  /*
   case QUEUE_GET_CONFIG_REQUEST: p.queue_get_config_request.~Queue_get_config_request(); break;
   case QUEUE_GET_CONFIG_REPLY: p.queue_get_config_reply.~Queue_get_config_reply(); break;
   */

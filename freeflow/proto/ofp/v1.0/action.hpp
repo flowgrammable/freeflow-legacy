@@ -131,6 +131,10 @@ struct Action {
   Action_payload payload;
 };
 
+/// A sequence of actions
+using Action_list = Sequence<Action>;
+
+
 // Operations
 std::size_t payload_bytes(const Action_header&);
 std::size_t payload_bytes(const Action&);
