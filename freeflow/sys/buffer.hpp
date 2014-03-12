@@ -125,8 +125,16 @@ struct View_constraint {
   std::size_t length;
 };
 
-/// A Constrained view is an RAII helper class that simplifies the 
-/// procees of constraining and updating views. For example:
+/// A Constrained view is a helper class that simplifies the process 
+/// of constraining and updating views. Constructing a constrained view
+/// creates a new view and associates with the parent view, constrained
+/// to a given length. The view starts at the current position of the
+/// parent and ranges over the specified length.
+///
+/// The constrained view can be contextually converted to bool. If the
+/// new view cannot be constructed (because the parent does not have
+/// enough bytes available), then the constrained view will evaluate to
+/// false. A common use pattern is as follows:
 ///
 ///   if (Constrained_view c = constrain(v, n)) {
 ///     if (Trap err = from_view(c, x))
@@ -134,6 +142,9 @@ struct View_constraint {
 ///   } else {
 ///     return OVERFLOW;
 ///   }
+///
+/// This program returns only in the case that an error as occurred. When
+/// no errors are present, the program continues outside the block.
 class Constrained_view {
 public:
   Constrained_view(View_constraint);

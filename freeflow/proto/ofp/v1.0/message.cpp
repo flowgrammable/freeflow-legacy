@@ -38,8 +38,8 @@ bytes(const Message& m) {
   case PACKET_IN: return bytes(p.packet_in);
   case FLOW_REMOVED: return bytes(p.flow_removed);
   case PORT_STATUS: return bytes(p.port_status);
-  /*
   case PACKET_OUT: return bytes(p.packet_out);
+  /*
   case FLOW_MOD: return bytes(p.flow_mod);
   case PORT_MOD: return bytes(p.port_mod);
   case STATS_REQUEST: return bytes(p.stats_request);
@@ -59,7 +59,7 @@ bytes(const Message& m) {
 
 Errc
 to_view(View& v, const Hello& m) {
-  if (v.remaining() < bytes(m))
+  if (remaining(v) < bytes(m))
     return Errc::HELLO_OVERFLOW;
   to_view(v, m.data);
   return {};
@@ -67,7 +67,7 @@ to_view(View& v, const Hello& m) {
 
 Errc
 to_view(View& v, const Error& m) {
-  if (v.remaining() < bytes(m))
+  if (remaining(v) < bytes(m))
     return Errc::ERROR_OVERFLOW;
   to_view(v, m.type);
   to_view(v, m.code);
@@ -77,7 +77,7 @@ to_view(View& v, const Error& m) {
 
 Errc
 to_view(View& v, const Echo& m) {
-  if (v.remaining() < bytes(m))
+  if (remaining(v) < bytes(m))
     return Errc::HELLO_OVERFLOW;
   to_view(v, m.data);
   return {};
@@ -85,7 +85,7 @@ to_view(View& v, const Echo& m) {
 
 Errc
 to_view(View& v, const Vendor& m) {
-  if (v.remaining() < bytes(m))
+  if (remaining(v) < bytes(m))
     return Errc::VENDOR_OVERFLOW;
   to_view(v, m.vendor_id);
   to_view(v, m.data);
@@ -94,7 +94,7 @@ to_view(View& v, const Vendor& m) {
 
 Errc
 to_view(View& v, const Feature& m) {
-  if (v.remaining() < bytes(m))
+  if (remaining(v) < bytes(m))
     return Errc::FEATURE_OVERFLOW;
   to_view(v, m.datapath_id);
   to_view(v, m.nbuffers);
@@ -108,7 +108,7 @@ to_view(View& v, const Feature& m) {
 
 Errc
 to_view(View& v, const Config& m) {
-  if (v.remaining() < bytes(m))
+  if (remaining(v) < bytes(m))
     return Errc::CONFIG_OVERFLOW;
   to_view(v, m.flags);
   to_view(v, m.miss_send_len);
@@ -117,7 +117,7 @@ to_view(View& v, const Config& m) {
 
 Errc
 to_view(View& v, const Packet_in& m) {
-  if (v.remaining() < bytes(m))
+  if (remaining(v) < bytes(m))
     return Errc::PACKET_IN_OVERFLOW;
   to_view(v, m.buffer_id);
   to_view(v, m.total_len);
@@ -130,7 +130,7 @@ to_view(View& v, const Packet_in& m) {
 
 Errc
 to_view(View& v, const Flow_removed& m) {
-  if (v.remaining() < bytes(m))
+  if (remaining(v) < bytes(m))
     return Errc::FLOW_REMOVED_OVERFLOW;
   to_view(v, m.match);
   to_view(v, m.cookie);
@@ -148,7 +148,7 @@ to_view(View& v, const Flow_removed& m) {
 
 Errc
 to_view(View& v, const Port_status& m) {
-  if (v.remaining() < bytes(m))
+  if (remaining(v) < bytes(m))
     return Errc::PACKET_OUT_OVERFLOW;
   to_view(v, m.reason);
   pad(v, 7);
@@ -158,20 +158,19 @@ to_view(View& v, const Port_status& m) {
 
 Errc
 to_view(View& v, const Packet_out& m) {
-  if (v.remaining() < bytes(m))
-    return Errc::PACKET_OUT_OVERFLOW;
-
-  // Minimum semantic checking
-  if (v.remaining() < m.actions_len)
+  if (remaining(v) < bytes(m))
     return Errc::PACKET_OUT_OVERFLOW;
 
   to_view(v, m.buffer_id);
   to_view(v, m.port);
   to_view(v, m.actions_len);
   
-  View c(v.constrain(m.actions_len));
-  // to_view(v, m.actions);
-  v.advance(m.actions_len);
+  if (Constrained_view c = constrain(v, m.actions_len)) {
+    if (Trap err = to_view(v, m.actions))
+      return err.code();
+  } else {
+    return Errc::PACKET_OUT_OVERFLOW;
+  }
 
   to_view(v, m.data);
   return {};
@@ -194,8 +193,8 @@ to_view(View& v, const Message& m) {
   case PACKET_IN: return to_view(v, p.packet_in);
   case FLOW_REMOVED: return to_view(v, p.flow_removed);
   case PORT_STATUS: return to_view(v, p.port_status);
-  /*
   case PACKET_OUT: return to_view(v, p.packet_out);
+  /*
   case FLOW_MOD: return to_view(v, p.flow_mod);
   case PORT_MOD: return to_view(v, p.port_mod);
   case STATS_REQUEST: return to_view(v, p.stats_request);
@@ -222,7 +221,7 @@ from_view(View& v, Hello& m) {
 
 Errc
 from_view(View& v, Error& m) {
-  if (v.remaining() < bytes(m))
+  if (remaining(v) < bytes(m))
     return Errc::ERROR_OVERFLOW;
   from_view(v, m.type);
   from_view(v, m.code);
@@ -239,7 +238,7 @@ from_view(View& v, Echo& m) {
 
 Errc
 from_view(View& v, Vendor& m) {
-  if (v.remaining() < bytes(m))
+  if (remaining(v) < bytes(m))
     return Errc::VENDOR_OVERFLOW;
   from_view(v, m.vendor_id);
   from_view(v, m.data);
@@ -248,7 +247,7 @@ from_view(View& v, Vendor& m) {
 
 Errc
 from_view(View& v, Feature& m) {
-  if (v.remaining() < bytes(m))
+  if (remaining(v) < bytes(m))
     return Errc::FEATURE_OVERFLOW;
   from_view(v, m.datapath_id);
   from_view(v, m.nbuffers);
@@ -262,7 +261,7 @@ from_view(View& v, Feature& m) {
 
 Errc
 from_view(View& v, Config& m) {
-  if (v.remaining() < bytes(m))
+  if (remaining(v) < bytes(m))
     return Errc::CONFIG_OVERFLOW;
   from_view(v, m.flags);
   from_view(v, m.miss_send_len);
@@ -271,7 +270,7 @@ from_view(View& v, Config& m) {
 
 Errc
 from_view(View& v, Packet_in& m) {
-  if (v.remaining() < bytes(m))
+  if (remaining(v) < bytes(m))
     return Errc::PACKET_IN_OVERFLOW;
   from_view(v, m.buffer_id);
   from_view(v, m.total_len);
@@ -284,7 +283,7 @@ from_view(View& v, Packet_in& m) {
 
 Errc
 from_view(View& v, Flow_removed& m) {
-  if (v.remaining() < bytes(m))
+  if (remaining(v) < bytes(m))
     return Errc::FLOW_REMOVED_OVERFLOW;
   from_view(v, m.match);
   from_view(v, m.cookie);
@@ -302,7 +301,7 @@ from_view(View& v, Flow_removed& m) {
 
 Errc
 from_view(View& v, Port_status& m) {
-  if (v.remaining() < bytes(m))
+  if (remaining(v) < bytes(m))
     return Errc::PORT_STATUS_OVERFLOW;
   from_view(v, m.reason);
   pad(v, 7);
@@ -312,20 +311,19 @@ from_view(View& v, Port_status& m) {
 
 Errc
 from_view(View& v, Packet_out& m) {
-  if (v.remaining() < bytes(m))
+  if (remaining(v) < bytes(m))
     return Errc::PACKET_OUT_OVERFLOW;
 
   from_view(v, m.buffer_id);
   from_view(v, m.port);
   from_view(v, m.actions_len);
 
-  // Minimum semantic checking
-  if (v.remaining() < m.actions_len)
+  if (Constrained_view c = constrain(v, m.actions_len)) {
+    if (Trap err = from_view(v, m.actions))
+      return err.code();
+  } else {
     return Errc::PACKET_OUT_OVERFLOW;
-
-  View c(v.constrain(m.actions_len));
-  // from_view(v, m.actions);
-  v.advance(m.actions_len);
+  }
 
   from_view(v, m.data);
   return {};
@@ -348,8 +346,8 @@ from_view(View& v, Message& m) {
   case PACKET_IN: return from_view(v, p.packet_in);
   case FLOW_REMOVED: return from_view(v, p.flow_removed);
   case PORT_STATUS: return from_view(v, p.port_status);
-  /*
   case PACKET_OUT: return from_view(v, p.packet_out);
+  /*
   case FLOW_MOD: return from_view(v, p.flow_mod);
   case PORT_MOD: return from_view(v, p.port_mod);
   case STATS_REQUEST: return from_view(v, p.stats_request);

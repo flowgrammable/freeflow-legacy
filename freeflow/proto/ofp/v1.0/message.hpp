@@ -208,6 +208,7 @@ struct Message {
     Packet_in    packet_in;
     Flow_removed flow_removed;
     Port_status  port_status;
+    Packet_out   packet_out;
   };
 
   Message(Type);
@@ -247,7 +248,7 @@ Errc to_view(View&, const Packet_in&);
 Errc to_view(View&, const Flow_removed&);
 Errc to_view(View&, const Port_status&);
 Errc to_view(View&, const Packet_out&);
-Errc to_view(View&, const Message& m);
+Errc to_view(View&, const Message&);
 
 Errc from_view(View&, Empty&);
 Errc from_view(View&, Hello&);
