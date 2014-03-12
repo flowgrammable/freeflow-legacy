@@ -27,6 +27,12 @@ namespace freeflow {
 namespace ofp {
 namespace v1_0 {
 
+/// A sequence of ports
+using Port_list = Sequence<Port>;
+
+/// A sequence of actions
+using Action_list = Sequence<Action>;
+
 /// The type of supported messages.
 enum Message_type : Uint16 {
   HELLO                    = 0,
@@ -110,12 +116,12 @@ struct Feature {
     ENQUEUE      = 0x00000800 
   };
 
-  Uint64         datapath_id;
-  Uint32         nbuffers;
-  Uint8          ntables;
-  Capability     capabilities;
-  Action         actions;
-  Sequence<Port> ports;
+  Uint64     datapath_id;
+  Uint32     nbuffers;
+  Uint8      ntables;
+  Capability capabilities;
+  Action     actions;
+  Port_list  ports;
 };
 
 /// A Config message is sent as a response to a configuration request,
@@ -184,11 +190,50 @@ struct Port_status {
 /// A Packet_out message is sent from the controller to the switch in order
 /// to inject a packet into a flow or release a packet from a buffer.
 struct Packet_out {
-  Uint32           buffer_id;
-  Port::Id         port;
-  Uint16           actions_len;
-  Sequence<Action> actions;
-  Buffer           data;
+  Uint32      buffer_id;
+  Port::Id    port;
+  Uint16      actions_len;
+  Action_list actions;
+  Buffer      data;
+};
+
+/// A Flow_mod message is sent from the controller to the switch to modify
+/// an entry in a flow table.
+struct Flow_mod {
+  enum Command : Uint16 {
+    ADD           = 0x0000, 
+    MODIFY        = 0x0001, 
+    MODIFY_STRICT = 0x0002, 
+    DELETE        = 0x0003,
+    DELETE_STRICT = 0x0004
+  };
+
+  enum Flags : Uint16 {
+    SEND_FLOW_REM = 0x0001, 
+    CHECK_OVERLAP = 0x0002, 
+    EMERG         = 0x0003
+  };
+
+  Match       match;
+  Uint64      cookie;
+  Command     command;
+  Uint8       idle_timeout;
+  Uint8       hard_timeout;
+  Uint8       priority;
+  Uint32      buffer_id;
+  Port::Id    out_port;
+  Flags       flags;
+  Action_list actions;
+};
+
+/// A Port_mod message is sent from the controller to the switch to modify
+/// the state of a port.
+struct Port_mod {
+  Port::Id       port;
+  Mac_addr       hw_addr;
+  Port::Config   config;
+  Port::Config   mask;
+  Port::Features advertised;
 };
 
 /// The message class embodies a specific kind of OpenFlow message.
@@ -209,6 +254,8 @@ struct Message {
     Flow_removed flow_removed;
     Port_status  port_status;
     Packet_out   packet_out;
+    Flow_mod     flow_mod;
+    Port_mod     port_mod;
   };
 
   Message(Type);
@@ -235,6 +282,8 @@ std::size_t bytes(const Packet_in&);
 constexpr std::size_t bytes(const Flow_removed&);
 constexpr std::size_t bytes(const Port_status&);
 std::size_t bytes(const Packet_out&);
+std::size_t bytes(const Flow_mod&);
+constexpr std::size_t bytes(const Port_mod&);
 std::size_t bytes(const Message&);
 
 Errc to_view(View&, const Empty&);
@@ -248,6 +297,8 @@ Errc to_view(View&, const Packet_in&);
 Errc to_view(View&, const Flow_removed&);
 Errc to_view(View&, const Port_status&);
 Errc to_view(View&, const Packet_out&);
+Errc to_view(View&, const Flow_mod&);
+Errc to_view(View&, const Port_mod&);
 Errc to_view(View&, const Message&);
 
 Errc from_view(View&, Empty&);
@@ -261,7 +312,9 @@ Errc from_view(View&, Packet_in&);
 Errc from_view(View&, Flow_removed&);
 Errc from_view(View&, Port_status&);
 Errc from_view(View&, Packet_out&);
-Errc from_view(View&, Message& m);
+Errc from_view(View&, Flow_mod&);
+Errc from_view(View&, Port_mod&);
+Errc from_view(View&, Message&);
 
 } // namespace v1_0
 } // namespace ofp

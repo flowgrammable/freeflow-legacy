@@ -39,6 +39,9 @@ struct Errc : ofp::Error {
   static constexpr Code FLOW_REMOVED_OVERFLOW = 208;
   static constexpr Code PORT_STATUS_OVERFLOW  = 209;
   static constexpr Code PACKET_OUT_OVERFLOW   = 210;
+  static constexpr Code FLOW_MOD_OVERFLOW     = 211;
+  static constexpr Code PORT_MOD_OVERFLOW     = 212;
+
 
   static constexpr Code ACTION_OVERFLOW = 250;
 

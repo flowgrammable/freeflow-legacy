@@ -25,6 +25,12 @@ Error::Error() : code_(SUCCESS), data_() { }
 constexpr 
 Error::Error(Code c, Data d) : code_(c), data_(d) { }
 
+/// Allow implicit upcasting from derived types.
+template<typename T, typename X>
+  constexpr
+  Error::Error(T err)
+    : code_(err.code()), data_(err.data()) { }
+
 /// Allows contextual conversion to bool, returning true iff and only
 /// if code != SUCCESS 
 constexpr 

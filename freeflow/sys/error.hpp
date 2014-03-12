@@ -20,6 +20,8 @@
 #include <cstdint>
 #include <stdexcept>
 
+#include <freeflow/sys/meta.hpp>
+
 namespace freeflow {
 
 /// The Error class contains error codes and associated data from various
@@ -60,7 +62,10 @@ public:
   using Data = std::intptr_t;
 
   constexpr Error();
-  constexpr Error(Code c, Data d = 0);
+  constexpr Error(Code, Data = 0);
+
+  template<typename T, typename = Requires<Derived_from<T, Error>()>>
+    constexpr Error(T);
 
   constexpr operator bool() const;
 

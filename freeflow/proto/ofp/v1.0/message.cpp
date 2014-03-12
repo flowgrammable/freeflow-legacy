@@ -39,16 +39,16 @@ bytes(const Message& m) {
   case FLOW_REMOVED: return bytes(p.flow_removed);
   case PORT_STATUS: return bytes(p.port_status);
   case PACKET_OUT: return bytes(p.packet_out);
-  /*
   case FLOW_MOD: return bytes(p.flow_mod);
   case PORT_MOD: return bytes(p.port_mod);
+  /*
   case STATS_REQUEST: return bytes(p.stats_request);
   case STATS_REPLY: return bytes(p.stats_reply);
-  case BARRIER_REQUEST: return bytes(p.barrier_request);
-  case BARRIER_REPLY: return bytes(p.barrier_reply);
   case QUEUE_GET_CONFIG_REQUEST: return bytes(p.queue_get_config_request);
   case QUEUE_GET_CONFIG_REPLY: return bytes(p.queue_get_config_reply);
   */
+  case BARRIER_REQUEST: return bytes(p.empty);
+  case BARRIER_REPLY: return bytes(p.empty);
   default:
     throw Errc(Errc::BAD_MESSAGE_TYPE);
   }
@@ -177,6 +177,34 @@ to_view(View& v, const Packet_out& m) {
 }
 
 Errc
+to_view(View& v, const Flow_mod& m) {
+  if (remaining(v) < bytes(m))
+    return Errc::FLOW_MOD_OVERFLOW;
+  to_view(v, m.match);
+  to_view(v, m.cookie);
+  to_view(v, m.command);
+  to_view(v, m.idle_timeout);
+  to_view(v, m.hard_timeout);
+  to_view(v, m.priority);
+  to_view(v, m.buffer_id);
+  to_view(v, m.out_port);
+  to_view(v, m.flags);
+  return to_view(v, m.actions);
+}
+
+Errc
+to_view(View& v, const Port_mod& m) {
+  if (remaining(v) < bytes(m))
+    return Errc::PORT_MOD_OVERFLOW;
+  to_view(v, m.port);
+  to_view(v, m.hw_addr);
+  to_view(v, m.config);
+  to_view(v, m.mask);
+  to_view(v, m.advertised);
+  return {};
+}
+
+Errc
 to_view(View& v, const Message& m) {
   const Message::Payload& p = m.payload;
   switch(m.type) {
@@ -194,16 +222,16 @@ to_view(View& v, const Message& m) {
   case FLOW_REMOVED: return to_view(v, p.flow_removed);
   case PORT_STATUS: return to_view(v, p.port_status);
   case PACKET_OUT: return to_view(v, p.packet_out);
-  /*
   case FLOW_MOD: return to_view(v, p.flow_mod);
   case PORT_MOD: return to_view(v, p.port_mod);
+  /*
   case STATS_REQUEST: return to_view(v, p.stats_request);
   case STATS_REPLY: return to_view(v, p.stats_reply);
-  case BARRIER_REQUEST: return to_view(v, p.barrier_request);
-  case BARRIER_REPLY: return to_view(v, p.barrier_reply);
   case QUEUE_GET_CONFIG_REQUEST: return to_view(v, p.queue_get_config_request);
   case QUEUE_GET_CONFIG_REPLY: return to_view(v, p.queue_get_config_reply);
   */
+  case BARRIER_REQUEST: return to_view(v, p.empty);
+  case BARRIER_REPLY: return to_view(v, p.empty);
   default:
     return Errc::BAD_MESSAGE_TYPE;
   }
@@ -330,6 +358,34 @@ from_view(View& v, Packet_out& m) {
 }
 
 Errc
+from_view(View& v, Flow_mod& m) {
+  if (remaining(v) < bytes(m))
+    return Errc::FLOW_MOD_OVERFLOW;
+  from_view(v, m.match);
+  from_view(v, m.cookie);
+  from_view(v, m.command);
+  from_view(v, m.idle_timeout);
+  from_view(v, m.hard_timeout);
+  from_view(v, m.priority);
+  from_view(v, m.buffer_id);
+  from_view(v, m.out_port);
+  from_view(v, m.flags);
+  return from_view(v, m.actions);
+}
+
+Errc
+from_view(View& v, Port_mod& m) {
+  if (remaining(v) < bytes(m))
+    return Errc::PORT_MOD_OVERFLOW;
+  from_view(v, m.port);
+  from_view(v, m.hw_addr);
+  from_view(v, m.config);
+  from_view(v, m.mask);
+  from_view(v, m.advertised);
+  return {};
+}
+
+Errc
 from_view(View& v, Message& m) {
   Message::Payload& p = m.payload;
   switch(m.type) {
@@ -347,16 +403,16 @@ from_view(View& v, Message& m) {
   case FLOW_REMOVED: return from_view(v, p.flow_removed);
   case PORT_STATUS: return from_view(v, p.port_status);
   case PACKET_OUT: return from_view(v, p.packet_out);
-  /*
   case FLOW_MOD: return from_view(v, p.flow_mod);
   case PORT_MOD: return from_view(v, p.port_mod);
+  /*
   case STATS_REQUEST: return from_view(v, p.stats_request);
   case STATS_REPLY: return from_view(v, p.stats_reply);
-  case BARRIER_REQUEST: return from_view(v, p.barrier_request);
-  case BARRIER_REPLY: return from_view(v, p.barrier_reply);
   case QUEUE_GET_CONFIG_REQUEST: return from_view(v, p.queue_get_config_request);
   case QUEUE_GET_CONFIG_REPLY: return from_view(v, p.queue_get_config_reply);
   */
+  case BARRIER_REQUEST: return from_view(v, p.empty);
+  case BARRIER_REPLY: return from_view(v, p.empty);
   default:
     return Errc::BAD_MESSAGE_TYPE;
   }

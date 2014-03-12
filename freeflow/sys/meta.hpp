@@ -34,7 +34,11 @@ template<typename T>
 
 /// True if T is a literal type.
 template<typename T>
-  constexpr bool Literal() { return std::is_literal_type<T>(); }
+  constexpr bool Literal() { return std::is_literal_type<T>::value; }
+
+
+template<typename T, typename U>
+  constexpr bool Derived_from() { return std::is_base_of<U, T>::value; }
 
 
 /// The underlying integral type of an enum.
