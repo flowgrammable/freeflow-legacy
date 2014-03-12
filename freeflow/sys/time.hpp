@@ -19,8 +19,18 @@
 
 namespace freeflow {
 
-using TimePoint = std::chrono::high_resolution_clock::time_point;
-using MicroTime = std::chrono::duration<int,std::micro>;
+/// A time point is a unit of time on the system's high-resolution
+/// timer.
+using Time_point = std::chrono::high_resolution_clock::time_point;
+
+// Units of time
+using Seconds      = std::chrono::seconds;
+using Milliseconds = std::chrono::milliseconds;
+using Microseconds = std::chrono::microseconds;
+using Nanoseconds  = std::chrono::nanoseconds;
+
+// Operations
+Time_point now();
 
 } // namespace freeflow
 

@@ -2,18 +2,20 @@
 #include <unistd.h>
 #include <string.h>
 #include <iostream>
-#include "freeflow/sys/scheduler.hpp"
 
-struct Console : public freeflow::Task
-{
+#include <freeflow/sys/scheduler.hpp>
+
+using namespace freeflow;
+
+struct Console : public freeflow::Task {
   Console() : Task(READABLE, 1)
   { }
 
-  void init(const freeflow::TimePoint& tp) {
+  void init(freeflow::Time_point tp) {
     std::cout << ">" << std::flush;
   }
 
-  void read(const freeflow::TimePoint& tp) {
+  void read(freeflow::Time_point tp) {
     char input[256];
     ::memset(input, 0, 256);
     ::read(fileno(stdin), input, 256);
@@ -23,12 +25,11 @@ struct Console : public freeflow::Task
   int fd() const { return fileno(stdin); }
 };
 
-int main() {
-  using namespace freeflow;
+int
+main() {
+  Console c;
 
-  Console console;
-  Scheduler scheduler;
-
-  add_task(scheduler, &console);
-  run(scheduler);
+  Scheduler s;
+  s.add(&c);
+  s();
 }

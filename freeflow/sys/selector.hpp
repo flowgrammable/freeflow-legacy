@@ -24,27 +24,58 @@
 
 namespace freeflow {
 
-/// The selector class provides a simple wrapper over the POSIX pselect
-/// function.
-struct Selector
-{
-  Selector();
+/// The descriptor set class is a helper class for the Selector. It 
+/// maintains a set of file descriptors and caches an underlying bitfield
+/// of that set. Note that the bitfield is only valid after calling
+/// update() method.
+struct Descriptor_set {
+  Descriptor_set() 
+    : max(-1)
+  { FD_ZERO(&fds); }
 
-  fd_set readset;
-  fd_set writeset;
-  std::set<int> read_fds;
-  std::set<int> write_fds;
+  bool test(int fd) const { return FD_ISSET(fd, &fds); }
+
+  void insert(int fd) { 
+    FD_SET(fd, &fds);
+    if (fd > max)
+      max = fd;
+  }
+  
+  // NOTE: Removing a file descriptor does not search for a new maximum 
+  // file descriptor. We probably want a special functionality to
+  // occasionally probe the fd set for a new max value. I don't think
+  // we need to do this very often.
+  void remove(int fd) { 
+    FD_CLR(fd, &fds);
+  }
+
+  fd_set fds;
+  int max;
 };
 
-void add_reader(Selector& s, int fd);
-void add_writer(Selector& s, int fd);
-void del_reader(Selector& s, int fd);
-void del_writer(Selector& s, int fd);
+/// The selector class provides a simple wrapper over the POSIX pselect
+/// function. It maintains lists of resources being selected for reading
+/// and writing.
+class Selector {
+public:
+  // Resource management
+  void add_reader(int fd);
+  void add_writer(int fd);
+  void remove_reader(int fd);
+  void remove_writer(int fd);
 
-bool is_readable(const Selector& s, int fd);
-bool is_writable(const Selector& s, int fd);
+  // Resource queries
+  bool is_readable(int fd) const;
+  bool is_writable(int fd) const;
 
-int select(Selector& sel, const MicroTime& mt);
+  // Select
+  int operator()();
+  int operator()(Microseconds);
+
+private:
+  Descriptor_set readers;
+  Descriptor_set writers;
+};
 
 } // namespace freeflow
 

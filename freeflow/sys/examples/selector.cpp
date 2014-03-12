@@ -4,20 +4,31 @@
 
 #include "freeflow/sys/selector.hpp"
 
-int main(int argc, char** argv) {
+using namespace freeflow;
 
-  using namespace freeflow;
-  Selector sel;
-  add_reader(sel, fileno(stdin));
+int 
+main(int argc, char* argv[]) {
+  
+  // Create a selector and add stdin as a potential reader.
+  // FIXME: Integrate this with Resource interfaces.
+  Selector s;
+  s.add_reader(0); // 0 == fileno(stdin)
 
   while(true) {
     std::cout << ">" << std::flush;
-    select(sel,  MicroTime(1000));
+    
+    // Wait to see if any events are available.
+    Microseconds ms(1000);
+    s(ms);
 
-    if(is_readable(sel, fileno(stdin))) {
-      char input[256];
-      ::memset(input, 0, 256);
-      read(fileno(stdin), input, 256);
+    // TODO: Rewrite this to use the buffer class.
+    if(s.is_readable(0)) {
+      char buf[256];
+      ::memset(buf, 0, 256);
+      int n = ::read(0, buf, 256);
+      if (n == -1)
+        break;
+      std::cout << buf << '\n';
     }
   }
 }

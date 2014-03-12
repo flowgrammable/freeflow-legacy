@@ -17,62 +17,51 @@
 namespace freeflow {
 
 void
-add_task(Scheduler& s, Task* t)
-{
-  s.tasks.insert(std::pair<int,Task*>(t->fd(), t));
+Scheduler::add(Task* t) {
+  tasks.insert({t->fd(), t});
   if(t->type & Task::READABLE)
-    add_reader(s.sel, t->fd());
+    select.add_reader(t->fd());
   if(t->type & Task::WRITABLE)
-    add_writer(s.sel, t->fd());
-  TimePoint now = std::chrono::high_resolution_clock::now();
-  t->init(now);
+    select.add_writer(t->fd());
+  t->init(now());
 }
 
 void
-del_task(Scheduler& s, Task* t)
-{
-  s.tasks.erase(t->fd());
+Scheduler::remove(Task* t) {
+  tasks.erase(t->fd());
   if(t->type & Task::READABLE)
-    del_reader(s.sel, t->fd());
+    select.remove_reader(t->fd());
   if(t->type & Task::WRITABLE)
-    del_writer(s.sel, t->fd());
-  TimePoint now = std::chrono::high_resolution_clock::now();
-  t->fini(now);
+    select.remove_writer(t->fd());
+  t->finish(now());
 }
 
 void
-process_task(Scheduler& s, Task* t, const TimePoint& now)
-{
-  if(is_readable(s.sel, t->fd())) {
-    t->read(now);
-  }
-  if(is_writable(s.sel, t->fd())) {
-    t->write(now);
-  }
-  t->time(now);
+process_task(Scheduler& s, Task* t, const Time_point& p) {
+  if(s.select.is_readable(t->fd()))
+    t->read(p);
+  if(s.select.is_writable(t->fd()))
+    t->write(p);
+  t->time(p);
 }
 
 void
-execute_round(Scheduler& s)
-{
+execute_round(Scheduler& s) {
   // Execute the select
-  select(s.sel, s.timeout);
-  TimePoint now = std::chrono::high_resolution_clock::now();
+  s.select(s.timeout);
 
-  // Build a run queue
-  std::vector<Task*> run_queue;
-  std::make_heap (run_queue.begin(), run_queue.end());    // is this necessary?
-  for(auto task : s.tasks) {
-    run_queue.push_back(task.second);
-    std::push_heap(run_queue.begin(), run_queue.end(), Less);
-  }
+  // Build a priority queue of tasks.
+  std::vector<Task*> q(s.tasks.size());
+  for (auto x : s.tasks)
+    q.push_back(x.second);
+  std::make_heap(q.begin(), q.end(), Less);
   
   // Execute the run queue 
-  while(run_queue.size() > 0) {
-    Task* task = run_queue.front();
-    std::pop_heap(run_queue.begin(), run_queue.end());
-    run_queue.pop_back();
-    process_task(s, task, now);
+  while(not q.empty()) {
+    Task* task = q.front();
+    std::pop_heap(q.begin(), q.end());
+    q.pop_back();
+    process_task(s, task, now());
   }
 }
 

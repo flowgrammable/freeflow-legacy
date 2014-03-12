@@ -22,8 +22,8 @@
 
 namespace freeflow {
 
-struct Task
-{
+// A Task is...
+struct Task {
   static constexpr int CLEAR    = 0;
   static constexpr int READABLE = 1 << 0;
   static constexpr int WRITABLE = 1 << 1;
@@ -37,12 +37,12 @@ struct Task
   bool readable() const;
   bool writable() const;
 
-  virtual void init(const TimePoint& tp) {}
-  virtual void fini(const TimePoint& tp) {}
+  virtual void init(Time_point) { }
+  virtual void finish(Time_point) { }
 
-  virtual void read(const TimePoint& tp)  = 0;
-  virtual void write(const TimePoint& tp) {}
-  virtual void time(const TimePoint& tp)  {}
+  virtual void read(Time_point)  = 0;
+  virtual void write(Time_point) { }
+  virtual void time(Time_point)  { }
 
   virtual int fd() const = 0;
 
@@ -52,20 +52,23 @@ struct Task
 
 bool Less(const Task* lhs, const Task* rhs);
 
-struct Scheduler
-{
-  Scheduler(const MicroTime& mt = MicroTime(100000));
-  std::map<int,Task*> tasks;
-  Selector sel;
-  MicroTime timeout;
+/// The Scheduler...
+struct Scheduler {
+  Scheduler(const Microseconds& mt = Microseconds(100000));
+
+  void add(Task* t);
+  void remove(Task* t);
+  void clear();
+
+  void operator()();
+
+  std::map<int, Task*> tasks;
+  Selector select;
+  Microseconds timeout;
 };
 
-void add_task(Scheduler& sched, Task* t);
-void del_task(Scheduler& sched, Task* t);
-void clr_task(Scheduler& sched);
 
-void run(Scheduler& s);
-void process_task(Scheduler& s, Task* t, const TimePoint& tp);
+void process_task(Scheduler& s, Task* t, const Time_point& tp);
 void execute_round(Scheduler& s);
 
 } // namespace freeflow

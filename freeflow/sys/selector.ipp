@@ -14,88 +14,50 @@
 
 namespace freeflow {
 
-inline
-Selector::Selector()
-{
-  FD_ZERO(&readset);
-  FD_ZERO(&writeset);
-  read_fds.insert(-1);
-  write_fds.insert(-1);
-}
-
-inline int
-max(const Selector& s)
-{
-  int max_read_fd = *s.read_fds.rbegin();
-  int max_write_fd = *s.write_fds.rbegin();
-  return std::max(max_read_fd, max_write_fd) + 1;
-}
+inline void
+Selector::add_reader(int fd) { readers.insert(fd); }
 
 inline void
-add_reader(Selector& s, int fd)
-{
-  s.read_fds.insert(fd);
-}
+Selector::add_writer(int fd) { writers.insert(fd); }
 
 inline void
-add_writer(Selector& s, int fd)
-{
-  s.write_fds.insert(fd);
-}
+Selector::remove_reader(int fd) { readers.remove(fd); }
 
 inline void
-del_reader(Selector& s, int fd)
-{
-  s.read_fds.erase(fd);
-}
-
-inline void
-del_writer(Selector& s, int fd)
-{
-  s.write_fds.erase(fd);
-}
+Selector::remove_writer(int fd) { writers.remove(fd); }
 
 inline bool
-is_readable(const Selector& s, int fd)
-{
-  return FD_ISSET(fd, &s.readset);
-}
+Selector::is_readable(int fd) const { return readers.test(fd); }
 
 inline bool
-is_writable(const Selector& s, int fd)
-{
-  return FD_ISSET(fd, &s.writeset);
-}
-
-void inline
-init_sets(Selector& s)
-{
-  for(auto fd : s.read_fds) {
-    FD_SET(fd, &s.readset);
-  }
-  for(auto fd : s.write_fds) {
-    FD_SET(fd, &s.writeset);
-  }
-}
+Selector::is_writable(int fd) const { return writers.test(fd); }
 
 inline int
-select(Selector& s, const MicroTime& mt)
-{
-  timespec ts, *ts_ptr;
-  ts_ptr = nullptr;
-
-  std::chrono::microseconds usec = std::chrono::duration_cast<std::chrono::microseconds>(mt);
-  if(usec != std::chrono::microseconds(0)) {
-    ts.tv_sec = usec.count() / 1000000;
-    ts.tv_nsec = 1000*(usec.count() % 1000000);
-    ts_ptr = &ts;
-  }
-
-  init_sets(s);
-  int result = ::pselect(max(s), &s.readset, &s.writeset, nullptr, ts_ptr, nullptr);
-  if(result == -1 and errno != EINTR)
+Selector::operator()() {
+  int m = std::max(readers.max, writers.max) + 1;
+  int r = ::pselect(m, &readers.fds, &writers.fds, nullptr, nullptr, nullptr);
+  if(r == -1 and errno != EINTR)
     throw system_error();
-  return result;
+  return r;
+}
+
+// TODO: pselect will update the timespec based on the amount of time
+// elapsed. It would be nice to return this to the user, but I'm not
+// sure what the right interface should be. Maybe this should
+// return pair<int, Microseconds>.
+inline int
+Selector::operator()(Microseconds us) {
+  // TODO: Factor this into the time module.
+  timespec ts;
+  ts.tv_sec = std::chrono::duration_cast<Seconds>(us).count();
+  ts.tv_nsec = 1000 * (us.count() % 1000000);
+
+  int m = std::max(readers.max, writers.max) + 1;
+  int r = ::pselect(m, &readers.fds, &writers.fds, nullptr, &ts, nullptr);
+  if(r == -1 and errno != EINTR)
+    throw system_error();
+
+  return r;
 }
 
 } // namespace freeflow

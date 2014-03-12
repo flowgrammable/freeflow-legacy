@@ -57,27 +57,24 @@ Task::writable() const
 
 
 inline bool
-Less(const Task* lhs, const Task* rhs)
-{
+Less(const Task* lhs, const Task* rhs) {
   return rhs->priority < lhs->priority;
 }
 
 inline
-Scheduler::Scheduler(const MicroTime& mt)
+Scheduler::Scheduler(const Microseconds& mt)
   : timeout(mt)
 { }
 
+/// Clear all tasks.
 inline void
-clr_tasks(Scheduler& s)
-{
-  s.tasks.clear();
-}
+Scheduler::clear() { tasks.clear(); }
 
+/// Run the scheduler until all tasks have completed.
 inline void
-run(Scheduler& s)
-{
-  while(s.tasks.size() > 0)
-    execute_round(s);
+Scheduler::operator()() {
+  while(not tasks.empty())
+    execute_round(*this);
 }
 
 } // namespace freeflow

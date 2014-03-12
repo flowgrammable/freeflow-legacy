@@ -13,6 +13,11 @@
 // permissions and limitations under the License.
 
 namespace freeflow {
+
+/// Returns the current time, measured by the system's high 
+/// resolution clock.
+inline Time_point
+now() { return std::chrono::high_resolution_clock::now(); }
   
 } // namespace freeflow
 
