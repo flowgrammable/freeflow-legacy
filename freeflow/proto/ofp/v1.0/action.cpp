@@ -114,6 +114,17 @@ to_view(View& v, const Action_vendor& m) {
 }
 
 Errc
+to_view(View& v, const Action_header& m) {
+  if (not is_valid(m.type)) // Required semantic check
+    return Errc::BAD_ACTION_TYPE;
+  if (m.length < bytes(m)) // Required semantic check
+    return Errc::BAD_ACTION_LENGTH;
+  to_view(v, m.type);
+  to_view(v, m.length);
+  return {};
+}
+
+Errc
 to_view(View& v, const Action_payload& m, Action_type t) {
   switch(t) {
   case ACTION_OUTPUT: return to_view(v, m.output);
@@ -134,10 +145,22 @@ to_view(View& v, const Action_payload& m, Action_type t) {
   }
 }
 
-
 Errc
 to_view(View& v, const Action& m) {
-  assert(false);
+  if (remaining(v) < bytes(m))
+    return Errc::ACTION_OVERFLOW;
+
+  if (Trap err = to_view(v, m.header))
+    return err.code();
+
+  if (Constrained_view c = constrain(v, payload_bytes(m))) {
+    if (Trap err = to_view(c, m.payload, m.header.type))
+      return err.code();
+  } else {
+    return Errc::ACTION_OVERFLOW;
+  }
+
+  return {};
 }
 
 // -------------------------------------------------------------------------- //
@@ -209,6 +232,17 @@ from_view(View& v, Action_vendor& m) {
 }
 
 Errc
+from_view(View& v, Action_header& m) {
+  from_view(v, m.type);
+  from_view(v, m.length);
+  if (not is_valid(m.type)) // Required semantic check
+    return Errc::BAD_ACTION_TYPE;
+  if (m.length < bytes(m)) // Required semantic check
+    return Errc::BAD_ACTION_LENGTH;
+  return {};
+}
+
+Errc
 from_view(View& v, Action_payload& m, Action_type t) {
   switch(t) {
   case ACTION_OUTPUT: return from_view(v, m.output);
@@ -231,7 +265,20 @@ from_view(View& v, Action_payload& m, Action_type t) {
 
 Errc
 from_view(View& v, Action& m) {
-  assert(false);
+  if (remaining(v) < bytes(m))
+    return Errc::ACTION_OVERFLOW;
+
+  if (Trap err = from_view(v, m.header))
+    return err.code();
+
+  if (Constrained_view c = constrain(v, payload_bytes(m))) {
+    if (Trap err = from_view(c, m.payload, m.header.type))
+      return err.code();
+  } else {
+    return Errc::ACTION_OVERFLOW;
+  }
+
+  return {};
 }
 
 } // namespace v1_0

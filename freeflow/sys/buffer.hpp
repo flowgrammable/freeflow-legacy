@@ -72,7 +72,7 @@ void write(const Buffer& b, const std::string& s);
 void write(const Buffer& b, std::ofstream& os);
 
 // -------------------------------------------------------------------------- //
-// View
+// Views
 
 /// The primary interface for reading from and writing to Buffers.
 ///
@@ -111,6 +111,44 @@ public:
   Byte* first;
   Byte* last;
 };
+
+/// A View_constraint is a helper class used to construct a constrained
+/// view. It maintains information about the request for the constraint.
+struct View_constraint {
+  static constexpr std::size_t invalid = -1;
+
+  View_constraint(View& v, std::size_t n);
+
+  View compose() const;
+
+  View& view;
+  std::size_t length;
+};
+
+/// A Constrained view is an RAII helper class that simplifies the 
+/// procees of constraining and updating views. For example:
+///
+///   if (Constrained_view c = constrain(v, n)) {
+///     if (Trap err = from_view(c, x))
+///       return err.code();
+///   } else {
+///     return OVERFLOW;
+///   }
+class Constrained_view {
+public:
+  Constrained_view(View_constraint);
+  ~Constrained_view();
+
+  operator View&();
+  explicit operator bool() const;
+
+  View_constraint constraint;
+  View view;
+};
+
+// Operations
+std::size_t remaining(const View&);
+View_constraint constrain(View& v, std::size_t n);
 
 // Put operations
 template<typename T>

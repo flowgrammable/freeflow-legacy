@@ -16,6 +16,22 @@ namespace freeflow {
 namespace ofp {
 namespace v1_0 {
 
+// -------------------------------------------------------------------------- //
+// Operations
+
+/// Returns the number of requried to read or write only the payload
+/// following an Action_header object.
+inline std::size_t
+payload_bytes(const Action_header& m) { return m.length - bytes(m); }
+
+/// Returns the number of requried to read or write only the payload
+/// of an Action object.
+inline std::size_t
+payload_bytes(const Action& m) { return payload_bytes(m.header); }
+
+// -------------------------------------------------------------------------- //
+// Bytes
+
 constexpr std::size_t 
 bytes(const Action_empty&) { return 0; }
 
@@ -55,7 +71,13 @@ bytes(const Action& m) {
 }
 
 // -------------------------------------------------------------------------- //
-// Action
+// Validation
+
+inline bool
+is_valid(Action_type t) {
+  return (0x00 <= t and t <= 0x0b) or t == 0xffff;
+}
+
 
 } // namespace v1_0
 } // namespace ofp

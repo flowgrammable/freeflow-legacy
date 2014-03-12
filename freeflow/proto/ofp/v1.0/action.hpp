@@ -27,18 +27,18 @@ namespace v1_0 {
 
 /// The types of actions supported by the protocol
 enum Action_type : Uint16 {
-  ACTION_OUTPUT       = 0x0000, 
-  ACTION_SET_VLAN_VID = 0x0001, 
-  ACTION_SET_VLAN_PCP = 0x0002, 
-  ACTION_STRIP_VLAN   = 0x0003, 
-  ACTION_SET_DL_SRC   = 0x0004, 
-  ACTION_SET_DL_DST   = 0x0005,
-  ACTION_SET_NW_SRC   = 0x0006, 
-  ACTION_SET_NW_DST   = 0x0007, 
-  ACTION_SET_NW_TOS   = 0x0008,
-  ACTION_SET_TP_SRC   = 0x0009, 
-  ACTION_SET_TP_DST   = 0x000a, 
-  ACTION_ENQUEUE      = 0x000b,
+  ACTION_OUTPUT       = 0x00, 
+  ACTION_SET_VLAN_VID = 0x01, 
+  ACTION_SET_VLAN_PCP = 0x02, 
+  ACTION_STRIP_VLAN   = 0x03, 
+  ACTION_SET_DL_SRC   = 0x04, 
+  ACTION_SET_DL_DST   = 0x05,
+  ACTION_SET_NW_SRC   = 0x06, 
+  ACTION_SET_NW_DST   = 0x07, 
+  ACTION_SET_NW_TOS   = 0x08,
+  ACTION_SET_TP_SRC   = 0x09, 
+  ACTION_SET_TP_DST   = 0x0a, 
+  ACTION_ENQUEUE      = 0x0b,
   ACTION_VENDOR       = 0xffff
 };
 
@@ -131,6 +131,10 @@ struct Action {
   Action_payload payload;
 };
 
+// Operations
+std::size_t payload_bytes(const Action_header&);
+std::size_t payload_bytes(const Action&);
+
 // Protocol
 constexpr std::size_t bytes(const Action_empty&);
 constexpr std::size_t bytes(const Action_output&);
@@ -171,6 +175,8 @@ Errc from_view(View&, Action_tp_port&);
 Errc from_view(View&, Action_vendor&);
 Errc from_view(View&, Action_payload&, Action_type);
 Errc from_view(View&, Action&);
+
+bool is_valid(Action_type);
 
 } // namespace v1_0
 } // namespace ofp

@@ -40,7 +40,10 @@ struct Errc : ofp::Error {
   static constexpr Code PORT_STATUS_OVERFLOW  = 209;
   static constexpr Code PACKET_OUT_OVERFLOW   = 210;
 
+  static constexpr Code ACTION_OVERFLOW = 250;
+
   static constexpr Code BAD_ACTION_TYPE = 300;
+  static constexpr Code BAD_ACTION_LENGTH = 301;
 
   using ofp::Error::Error;
 };

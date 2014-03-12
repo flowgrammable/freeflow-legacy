@@ -79,21 +79,51 @@ View::constrain(std::size_t n) const {
   return View(buf, first, first + n);
 }
 
-/// Update a view v to the furthest position of a constrained view c
-/// and returns true iff c is an empty view.
-///
-/// Note that behavior is undefined if the view c is not within the view v.
-inline bool
-update(View& v, const View& c) {
-  // If we didn't fully advance through the constrained, view,
-  // then we cannot update v.
-  if (c.first != c.last)
-    return false;
+/// Returns the number of buytes remaining in the view.
+inline std::size_t
+remaining(const View& v) { return v.remaining(); }
 
-  // Advance to the new view.
-  v.first = c.first;
-  return true;
+// -------------------------------------------------------------------------- //
+// View constraint
+
+inline 
+View_constraint::View_constraint(View& v, std::size_t n) 
+  : view(v), length(v.available(n) ? n : -1)
+{ }
+
+inline View
+View_constraint::compose() const {
+  return View(view.buf, view.first, view.first + length);
 }
+
+/// Returns a view constraint.
+inline View_constraint 
+constrain(View& v, std::size_t n) { return View_constraint(v, n); }
+
+// -------------------------------------------------------------------------- //
+// Constrained view
+
+inline
+Constrained_view::Constrained_view(View_constraint c) 
+  : constraint(c), view(c.compose())
+{ }
+
+inline
+Constrained_view::~Constrained_view() {
+  if (*this)
+    constraint.view.advance(constraint.length);
+}
+
+inline
+Constrained_view::operator View&() { return constraint.view; }
+
+inline
+Constrained_view::operator bool() const { 
+  return constraint.length != std::size_t(-1); 
+}
+
+// -------------------------------------------------------------------------- //
+// Get and put
 
 
 namespace detail {
