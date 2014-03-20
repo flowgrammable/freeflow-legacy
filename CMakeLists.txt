@@ -42,4 +42,5 @@ include(FreeFlowDoc)
 # Build
 
 add_subdirectory(freeflow)
+add_subdirectory(nocontrol)
 

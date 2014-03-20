@@ -17,25 +17,31 @@
 
 namespace freeflow {
 
+const Ipv4_addr Ipv4_addr::any(INADDR_ANY);
+const Ipv4_addr Ipv4_addr::broadcast(INADDR_BROADCAST);
+
+const Ipv6_addr Ipv6_addr::any(in6addr_any);
+const Ipv6_addr Ipv6_addr::loopback(in6addr_loopback);
+
 std::string
 to_string(const Address& a) {
   std::stringstream ss;
-  if(a.family() == Address::IPv4) {
+  if(a.family() == Address::IP4) {
     char name[INET_ADDRSTRLEN];
     ::memset(&name, 0, INET_ADDRSTRLEN);
     const sockaddr_in *v4 = reinterpret_cast<const sockaddr_in*>(&a.storage);
-    inet_ntop(Address::IPv4, &v4->sin_addr, name, sizeof(in_addr));
+    inet_ntop(Address::IP4, &v4->sin_addr, name, sizeof(in_addr));
 
     ss << "ipv4(";
     ss << name;
     ss << ",";
     ss << ntohs(v4->sin_port) ;
     ss << ")";
-  } else if(a.family() == Address::IPv6) {
+  } else if(a.family() == Address::IP6) {
     char name[INET6_ADDRSTRLEN];
     ::memset(&name, 0, INET6_ADDRSTRLEN);
     const sockaddr_in6 *v6 = reinterpret_cast<const sockaddr_in6*>(&a.storage);
-    inet_ntop(Address::IPv6, &v6->sin6_addr, name, sizeof(in6_addr));
+    inet_ntop(Address::IP6, &v6->sin6_addr, name, sizeof(in6_addr));
 
     ss << "ipv6(";
     ss << name;

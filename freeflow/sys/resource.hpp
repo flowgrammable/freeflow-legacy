@@ -17,7 +17,15 @@
 
 #include <unistd.h>
 
+#include <cassert>
+#include <cstddef>
+
+#include <freeflow/sys/error.hpp>
+#include <freeflow/sys/buffer.hpp>
+
 namespace freeflow {
+
+class Buffer;
 
 /// The Resource class is the base class of all POSIX resources that
 /// are interanally represented by a file descriptor.
@@ -39,14 +47,34 @@ public:
   ~Resource();
 
   /// Evaluates to true only when the resource is valid.
-  explicit operator bool() const { return fd_ >= 0; }
+  explicit operator bool() const;
 
   /// Returns the file descriptor.
-  int fd() const { return fd_; }
+  int fd() const;
+
+  // Read
+  std::size_t read(void*, std::size_t);
+  std::size_t read(Buffer&, std::size_t);
+  std::size_t read(Buffer&);
+  
+  // Write
+  std::size_t write(const void*, std::size_t);
+  std::size_t write(const Buffer&, std::size_t);
+  std::size_t write(const Buffer&);
 
 private:
   int fd_;
-}; 
+};
+
+// Operations
+std::size_t read(Resource&, void*, std::size_t);
+std::size_t read(Resource&, Buffer&, std::size_t);
+std::size_t read(Resource&, Buffer&);
+
+std::size_t write(Resource&, const void*, std::size_t);
+std::size_t write(Resource&, const Buffer&, std::size_t);
+std::size_t write(Resource&, const Buffer&);
+
 
 } // namespace resource
 

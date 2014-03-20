@@ -12,6 +12,8 @@
 # or implied. See the License for the specific language governing
 # permissions and limitations under the License.
 
+include_directories(${CMAKE_SOURCE_DIR})
+
 set(src main.cpp)
 set(libs freeflow freeflow-ofp freeflow-ofp-1.0)
 

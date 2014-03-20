@@ -19,6 +19,18 @@ namespace freeflow {
 // -------------------------------------------------------------------------- //
 // Ipv4
 
+inline
+Ipv4_addr::Ipv4_addr(in_addr_t n) {
+  s_addr = n;
+}
+
+inline
+Ipv4_sockaddr::Ipv4_sockaddr(const Ipv4_addr& a, Ip_port p) {
+  sin_family = IP4;
+  sin_port = htons(p);
+  sin_addr = a;
+}
+
 inline Ip_port 
 Ipv4_sockaddr::port() const { return sin_port; }
 
@@ -54,6 +66,20 @@ operator!=(const Ipv4_sockaddr& a, const Ipv4_sockaddr& b) {
 
 // -------------------------------------------------------------------------- //
 // Ipv6
+
+inline
+Ipv6_addr::Ipv6_addr(in6_addr n) {
+  ::memcpy(this, &n, sizeof(in6_addr));
+}
+
+inline
+Ipv6_sockaddr::Ipv6_sockaddr(const Ipv6_addr& a, Ip_port p) {
+  sin6_family = IP6;
+  sin6_port = htons(p);
+  sin6_flowinfo = 0;
+  sin6_addr = a;
+  sin6_scope_id = 0;
+}
 
 inline Ip_port 
 Ipv6_sockaddr::port() const { 
@@ -111,8 +137,8 @@ init_addr(const std::string& str, Address& a) {
 inline void
 init_port(Ip_port p, Address& a) {
   switch (a.family()) {
-  case Address::IPv4: a.as_ipv4().sin_port = p; break;
-  case Address::IPv6: a.as_ipv6().sin6_port = p; break;
+  case Address::IP4: a.as_ipv4().sin_port = p; break;
+  case Address::IP6: a.as_ipv6().sin6_port = p; break;
 
   // FIXME: Throw a more intuitive error?
   default: throw std::runtime_error("unknown address family");
@@ -182,9 +208,9 @@ Address::addr() const {
 /// Returns the size of the underlying address.
 inline socklen_t
 Address::len() const { 
-  if (family() == Address::IPv4)
+  if (family() == Address::IP4)
     return sizeof(Ipv4_sockaddr);
-  else if (family() == Address::IPv6)
+  else if (family() == Address::IP6)
     return sizeof(Ipv6_sockaddr);
   else
     throw std::runtime_error("unknown address family");
@@ -196,9 +222,9 @@ Address::len() const {
 inline bool
 operator==(const Address& a, const Address& b) {
   if (a.storage.ss_family == b.storage.ss_family) {
-    if (a.family() == Address::IPv4)
+    if (a.family() == Address::IP4)
       return a.as_ipv4() == b.as_ipv4();
-    else if (a.family() == Address::IPv6)
+    else if (a.family() == Address::IP6)
       return a.as_ipv6() == b.as_ipv6();
     else
       throw std::runtime_error("unknown address family");
@@ -301,7 +327,7 @@ Socket::Socket(int f, Transport t, const Address& l, const Address& p)
 { }
 
 inline System_error
-Socket::bind(Address a) {
+Socket::bind(const Address& a) {
   local = a;
   return ::bind(fd(), local.addr(), local.len());
 }

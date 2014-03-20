@@ -16,11 +16,13 @@
 #define FREEFLOW_SELECTOR_HPP
 
 #include <unistd.h>
+#include <cassert>
 
 #include <set>
 
 #include "freeflow/sys/error.hpp"
 #include "freeflow/sys/time.hpp"
+#include "freeflow/sys/resource.hpp"
 
 namespace freeflow {
 
@@ -28,53 +30,46 @@ namespace freeflow {
 /// maintains a set of file descriptors and caches an underlying bitfield
 /// of that set. Note that the bitfield is only valid after calling
 /// update() method.
-struct Descriptor_set {
-  Descriptor_set() 
-    : max(-1)
-  { FD_ZERO(&fds); }
+struct Resource_set {
+  explicit Resource_set() { FD_ZERO(&fds); }
 
+  /// Returns tre
+  bool test(const Resource& r) { return test(r.fd()); }
+  
   bool test(int fd) const { return FD_ISSET(fd, &fds); }
 
+  // Insert the reader into the set.
+  void insert(const Resource& r) { insert(r.fd()); }
+
+  // Insert the reader into the set.
   void insert(int fd) { 
+    assert(fd != -1);
     FD_SET(fd, &fds);
-    if (fd > max)
-      max = fd;
   }
   
-  // NOTE: Removing a file descriptor does not search for a new maximum 
-  // file descriptor. We probably want a special functionality to
-  // occasionally probe the fd set for a new max value. I don't think
-  // we need to do this very often.
-  void remove(int fd) { 
-    FD_CLR(fd, &fds);
-  }
+  void remove(int fd) { FD_CLR(fd, &fds); }
+
+  // Remove all files from the set.
+  void clear() { FD_ZERO(&fds); }
 
   fd_set fds;
-  int max;
 };
 
 /// The selector class provides a simple wrapper over the POSIX pselect
-/// function. It maintains lists of resources being selected for reading
-/// and writing.
+/// function. It maintains the sets of file descriptors used to indicate
+/// the resources that are available for reading and writing.
 class Selector {
 public:
-  // Resource management
-  void add_reader(int fd);
-  void add_writer(int fd);
-  void remove_reader(int fd);
-  void remove_writer(int fd);
-
-  // Resource queries
-  bool is_readable(int fd) const;
-  bool is_writable(int fd) const;
+  Selector(int n, Resource_set*, Resource_set* = nullptr, Resource_set* = nullptr);
 
   // Select
   int operator()();
-  int operator()(Microseconds);
 
 private:
-  Descriptor_set readers;
-  Descriptor_set writers;
+  int     max_;
+  fd_set* read_;
+  fd_set* write_;
+  fd_set* error_;
 };
 
 } // namespace freeflow

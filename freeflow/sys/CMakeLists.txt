@@ -24,7 +24,6 @@ set(src fd_utils.cpp
         signal.cpp
         time.cpp
         selector.cpp
-        scheduler.cpp
         syslog.cpp
         pipe.cpp)
 
@@ -47,7 +46,6 @@ set(hdr fd_utils.hpp
         signal.hpp
         time.hpp
         selector.hpp
-        scheduler.hpp
         syslog.hpp
         pipe.hpp)
 

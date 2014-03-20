@@ -14,33 +14,24 @@
 
 namespace freeflow {
 
-inline void
-Selector::add_reader(int fd) { readers.insert(fd); }
+inline
+Selector::Selector(int n, Resource_set* r, Resource_set* w, Resource_set* e)
+  : max_(n), read_(&r->fds), write_(&w->fds), error_(&e->fds) { }
 
-inline void
-Selector::add_writer(int fd) { writers.insert(fd); }
-
-inline void
-Selector::remove_reader(int fd) { readers.remove(fd); }
-
-inline void
-Selector::remove_writer(int fd) { writers.remove(fd); }
-
-inline bool
-Selector::is_readable(int fd) const { return readers.test(fd); }
-
-inline bool
-Selector::is_writable(int fd) const { return writers.test(fd); }
-
+// TODO: Allow selection over some amount of time.
 inline int
 Selector::operator()() {
-  int m = std::max(readers.max, writers.max) + 1;
-  int r = ::pselect(m, &readers.fds, &writers.fds, nullptr, nullptr, nullptr);
-  if(r == -1 and errno != EINTR)
-    throw system_error();
+  int r = ::pselect(max_, read_, write_, error_, nullptr, nullptr);
+  if(r == -1) {
+    if (errno != EINTR)
+      throw system_error();
+    else
+      return 0;
+  }
   return r;
 }
 
+/*
 // TODO: pselect will update the timespec based on the amount of time
 // elapsed. It would be nice to return this to the user, but I'm not
 // sure what the right interface should be. Maybe this should
@@ -59,5 +50,6 @@ Selector::operator()(Microseconds us) {
 
   return r;
 }
+*/
 
 } // namespace freeflow

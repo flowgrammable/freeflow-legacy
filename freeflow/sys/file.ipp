@@ -86,46 +86,4 @@ File::File(const Path& p, Flags f)
 inline const Path&
 File::path() const { return path_; }
 
-inline std::size_t
-File::read(void* buf, std::size_t n) {
-  ssize_t r = ::read(fd(), buf, n);
-  if (r < 0)
-    throw system_error();
-  return r;
-}
-
-inline std::size_t
-File::read(Buffer& buf, std::size_t n) {
-  assert(n <= buf.size());
-  return read(buf.data(), n);
-}
-
-/// Read data from the file into the buffer, returning the number of
-/// bytes actually read.
-inline std::size_t
-File::read(Buffer& buf) {
-  return read(buf.data(), buf.size());
-}
-
-inline std::size_t
-File::write(const void* buf, std::size_t n) {
-  ssize_t r = ::write(fd(), buf, n);
-  if (r < 0)
-    throw system_error();
-  return r;
-}
-
-inline std::size_t
-File::write(const Buffer& buf, const std::size_t n) {
-  assert(n <= buf.size());
-  return write(buf.data(), n);
-}
-
-/// Write data from the buffer to the file, returning the number of
-/// bytes actually written.
-inline std::size_t
-File::write(const Buffer& buf) {
-  return write(buf.data(), buf.size());
-}
-
 } // namespace freeflow

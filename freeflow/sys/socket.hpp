@@ -38,8 +38,9 @@ namespace freeflow {
 /// writability.
 struct Address_info {
   enum Family : sa_family_t {
-    IPv4 = AF_INET, 
-    IPv6 = AF_INET6,
+    IP4 = AF_INET, 
+    IP6 = AF_INET6,
+
 #if defined(BSD)
     RAW  = PF_NDRV,             // This is BSD only 
 #elif defined(LINUX)
@@ -57,14 +58,20 @@ using Ip_port = in_port_t;
 
 /// An Ipv4 host adress.
 struct Ipv4_addr : in_addr, Address_info { 
-  static constexpr Family family = IPv4;
+  static constexpr Family family = IP4;
+
+  Ipv4_addr() = default;
+  explicit Ipv4_addr(in_addr_t n);
+
+  static const Ipv4_addr any;
+  static const Ipv4_addr broadcast;
 };
 
 
 /// An Ipv4 socket address is a host and port. This class provides a
 /// read-only view of the underlying system structure.
 struct Ipv4_sockaddr : sockaddr_in, Address_info {
-  static constexpr Family family = IPv4;
+  static constexpr Family family = IP4;
 
   Ipv4_sockaddr() = default;
   Ipv4_sockaddr(const Ipv4_addr&, Ip_port);
@@ -88,13 +95,19 @@ bool operator!=(const Ipv4_sockaddr& a, const Ipv4_sockaddr& b);
 
 /// In Ipv6 host address.
 struct Ipv6_addr : in6_addr, Address_info {
-  static constexpr Family family = IPv6;
+  static constexpr Family family = IP6;
+
+  Ipv6_addr() = default;
+  explicit Ipv6_addr(in6_addr);
+
+  static const Ipv6_addr any;
+  static const Ipv6_addr loopback;
 };
 
 /// An Ipv6 socket address is a host and port. This class provides a
 /// read-only view of the underlying system structure.
 struct Ipv6_sockaddr : sockaddr_in6, Address_info {
-  static constexpr Family family = IPv6;
+  static constexpr Family family = IP6;
 
   Ipv6_sockaddr() = default;
   Ipv6_sockaddr(const Ipv6_addr&, Ip_port);
@@ -225,8 +238,8 @@ struct Socket : Socket_info, Resource {
   Socket(int, Transport, const Address&, const Address&);
 
   // Socket operations
-  System_error bind(Address a = Address());
-  System_error connect(const Address& a);
+  System_error bind(const Address&);
+  System_error connect(const Address&);
   System_error listen(int backlog = SOMAXCONN);
   Socket accept();
 
