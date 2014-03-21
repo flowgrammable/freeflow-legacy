@@ -20,58 +20,28 @@
 #include <freeflow/sys/socket.hpp>
 #include <freeflow/sys/file.hpp>
 
+#include "handler.hpp"
+
 using namespace std;
 using namespace freeflow;
 
-// Result codes for events.
-// TODO: Find a better name.
-enum Result {
-  CONTINUE = 0,
-  STOP = -1,
-  EXIT = -2
+
+// The handler registry maintains the set of handlers registered
+// for the reactor loop.
+//
+// FIXME: This could also house the wait set: the fd set that describes
+// what the handler is waiting on.
+struct Handler_registry : std::map<int, Handler*> {
+  
+  // Register the handler.
+  void add(Handler* h) { insert({h->fd(), h}); }
+
+  // Remove the hander.
+  void remove(Handler* h) { erase(h->fd()); }
 };
 
-class Handler {
-public:
-  Handler() = delete;
-
-  // Non-copyable
-  Handler(const Handler&) = delete;
-  Handler& operator=(const Handler&) = delete;
-
-  // Move semantics
-  Handler(Handler&& x)
-    : rc_(std::move(x.rc_)) { }
-
-  Handler& operator=(Handler&& x) {
-    rc_ = std::move(x.rc_);
-    return *this;
-  }
-
-  Handler(Resource&& r)
-    : rc_(std::move(r)) { }
-
-  // Returns the underlying resource.
-  Resource& resource() { return rc_; }
-
-  // Returns the underlying file descriptor.
-  int fd() const { return rc_.fd(); }
-
-  // Event operators
-  virtual void open() { }
-  virtual void close() { }
-
-  virtual Result on_read() { return CONTINUE; }
-  virtual Result on_write() { return CONTINUE; }
-  virtual Result on_error() { return CONTINUE; }
-  virtual Result on_time() { return CONTINUE; }
-
-private:
-  Resource rc_;
-  bool done_;
-};
-
-using Handler_map = std::map<int, Handler*>;
+// Gobal handler registry.
+Handler_registry handlers;
 
 
 // Represents a connected switch.
@@ -79,24 +49,29 @@ using Handler_map = std::map<int, Handler*>;
 // TODO: In full generality, this should be a service that sits on
 // an underlying resource. However, we don't really need full
 // generality just yet.
-struct Connection : Handler {
-  using Handler::Handler;
+struct Connection : Resource_handler<Socket> {
+  using Resource_handler<Socket>::Resource_handler;
 
-  // Move semantics
-  Connection(Connection&& x)
-    : Handler(std::move(x)) { }
+  Connection(Socket&& s)
+    : Resource_handler<Socket>(std::move(s)) { }
 
-  Socket& socket() { return static_cast<Socket&>(resource()); }
+  // When the connection is closed, delete the handler.
+  void close() { 
+    std::cout << "dying\n";
+    delete this; 
+  }
 
   // Data is available for reading.
   Result on_read() {
     // Try reading from the buffer. 
     char buf[1024];
-    std::size_t n = socket().read(buf, 1024);
+    std::size_t n = rc().read(buf, 1024);
     if (n == 0)
       return STOP;
-    
+
     buf[n] = 0;
+    std::cout << "read: " << buf << '\n';
+
     return CONTINUE;
   }
 
@@ -107,19 +82,17 @@ struct Connection : Handler {
 
 // This handler is responsible for watching for the end of
 // file from an open file.
-struct Terminator : Handler {
+struct Terminator : Resource_handler<Resource> {
   Terminator(int fd)
-    : Handler(Resource(fd)) { }
+    : Resource_handler<Resource>(fd) { }
 
-  Terminator(File&& f)
-    : Handler(std::move(f)) { }
-
-  File& file() { return static_cast<File&>(resource()); }
+  Terminator(Resource&& f)
+    : Resource_handler<Resource>(std::move(f)) { }
 
   // Red
   Result on_read() {
     char c[1024];
-    if (read(file(), &c, 1024) <= 0)
+    if (read(rc(), &c, 1024) <= 0)
       return EXIT;
     return CONTINUE;
   }
@@ -128,29 +101,31 @@ struct Terminator : Handler {
 
 // The acceptor is responsible for accepting connections when
 // they are available.
-struct Acceptor : Handler {
+struct Acceptor : Resource_handler<Socket> {
   Acceptor(const Address& a)
-    : Handler(Socket(a.family(), Socket::TCP)) 
+    : Resource_handler<Socket>(a.family(), Socket::TCP) 
   {
-    socket().bind(a);
-    socket().listen();
+    rc().bind(a); 
+    rc().listen();
   }
-
-
-  Socket& socket() { return static_cast<Socket&>(resource()); }
 
   // When data is available for reading, accept the connection
   // and spawn a new handler.
   Result on_read() {
-    Socket c = socket().accept();
-    
-    // FIXME: Create a new handler for for socket and register
-    // the connection with the reactor loop.
-
+    // FIXME: The error handling stuff is not good.
+    try {
+      Connection* c = new Connection(rc().accept());
+      handlers.add(c);
+    } catch(System_error&) {
+      perror("error");
+      return EXIT;
+    } catch(std::runtime_error& err) {
+      std::cout << err.what() << '\n';
+      return EXIT;
+    }
     return CONTINUE;
   }
 };
-
 
 
 void
@@ -159,7 +134,7 @@ register_handler(Resource_set& rs, Handler& h) {
 }
 
 void
-register_handlers(Resource_set& rs, const Handler_map& hs) {
+register_handlers(Resource_set& rs, const Handler_registry& hs) {
   for (const auto& x : hs)
     register_handler(rs, *x.second);
 }
@@ -169,21 +144,20 @@ int
 main(int argc, char* argv[]) {
 
   // Configure the switch address.
-  Address addr(Ipv4_addr::any, 9000);
+  Address addr(Ipv4_addr::any, 9001);
 
   Terminator term(0);
   Acceptor acc(addr);
 
   // Register default service handlers.
   // FIXME: nlogn lookup for file descriptors is slow.
-  Handler_map handlers;
-  handlers.insert({term.fd(), &term});
-  handlers.insert({acc.fd(), &acc});
+  handlers.add(&term);
+  handlers.add(&acc);
 
   bool done = false;
   while (not done) {
     int maxfd = (*--handlers.end()).second->fd() + 1;
-    
+
     // Build the wait set.
     //
     // TODO: We should only have to do this if the handler set has
@@ -197,12 +171,10 @@ main(int argc, char* argv[]) {
 
     // Select events.
     Selector s(maxfd, &disp);    
-    int nev = s();
+    s();
 
-    // The close set is the set of handlers whid
+    // Handle events, saving any handlers that self-close.
     Resource_set close;
-
-    // Handle events
     for (const auto& x : handlers) {
       Handler* h = x.second;
       if (disp.test(h->fd())) {
@@ -214,82 +186,20 @@ main(int argc, char* argv[]) {
       }
     }
 
-    // Close any handlers that need to be destroyed.
-    for (int i = 0; i < nev; ++i) {
-      if (close.test(i))
-        handlers[i]->close();
-    }
-  
-  }
 
-  // TODO: Actually clean up resources.
-
-
-  /*
-  // Create the accept socket.
-  Address addr(Ipv4_addr::any, 9001);
-  Socket acc(Socket::IP4, Socket::TCP);
-  acc.bind(addr);
-  acc.listen();
-
-
-
-
-  int maxfd = acc.fd() + 1;
-  while (1) {
-    Resource_set reads;
-    Resource_set writes;
-    
-    // Build the read/write sets
-    reads.insert(0);
-    reads.insert(acc);
-    for (const auto& x : cm)
-      reads.insert(x.second.socket());
-
-    // Select which files are available and which are not.
-    std::cout << maxfd << " -- " << reads.test(0) << '\n';
-    Selector s(maxfd, reads, writes);
-    s();
-
-    // Read from stdin to see if it's been closed.
-    if (reads.test(0)) {
-      char c;
-      if (::read(0, &c, 1) <= 0)
-        break;
+    // Close any handlers that need to be destroyed and
+    // cull them from the registry.
+    for (auto i = handlers.begin(); i != handlers.end();) {
+      Handler* h = i->second;
+      if (close.test(h->fd())) {
+        h->close();
+        i = handlers.erase(i);
+      } else {
+        ++i;
+      }
     }
 
-    // Check the accept first
-    if (reads.test(acc)) {
-      // Accept the connection, and spin up a new service.
-      Socket s = acc.accept();
-      int fd = s.fd();
-      cm.emplace(fd, std::move(s));
-
-      // Update the maximum fd.
-      maxfd = fd + 1;
-    }
-
-    // Iterate over over the connections to see if any can
-    // actually be read.
-    for (auto& x : cm) {
-      Connection& c = x.second;
-      bool erase = false;
-
-      // Maybe cause a read.
-      if (reads.test(c.socket()))
-        erase |= c.read();
-
-      // Maybe cause a write.
-      if (reads.test(c.socket()))
-        erase |= c.write();
-      
-      // Cleanup the handler.
-      if (erase)
-        cm.erase(x.first);
-    }
-  }
-
-  */
+  } // while(not done)
 
   return 0;
 }

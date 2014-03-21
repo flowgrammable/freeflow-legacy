@@ -239,13 +239,9 @@ struct Socket : Socket_info, Resource {
 
   // Socket operations
   System_error bind(const Address&);
+  System_error listen(int = SOMAXCONN);
   System_error connect(const Address&);
-  System_error listen(int backlog = SOMAXCONN);
   Socket accept();
-
-  // Reading and writing
-  std::size_t read(void*, std::size_t);
-  std::size_t write(const void*, std::size_t);
 
   // Receiving
   std::size_t recv(void*, std::size_t, int);
@@ -255,6 +251,18 @@ struct Socket : Socket_info, Resource {
   std::size_t send(const void*, std::size_t, int);
   std::size_t send_to(const void*, std::size_t, const Address&);
 };
+
+// Operations
+System_error bind(Socket&, const Address&);
+System_error listen(Socket&, int = SOMAXCONN);
+System_error connect(Socket&, const Address&);
+Socket accept(Socket&);
+
+std::size_t recv(Socket&, void*, std::size_t, int);
+std::size_t recv_from(Socket&, void*, std::size_t, Address&);
+std::size_t send(Socket&, const void*, std::size_t, int);
+std::size_t send_to(Socket&, const void*, std::size_t, const Address&);
+
 
 // Pretty printing
 std::string to_string(const Socket& s);

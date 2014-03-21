@@ -346,27 +346,11 @@ Socket::listen(int backlog) {
 
 inline Socket
 Socket::accept() {
-  socklen_t n;
+  socklen_t n = local.len();
   int s = ::accept(fd(), peer.addr(), &n);
   if (s < 0)
     throw System_error(s);
   return Socket(s, transport, local, peer);
-}
-
-inline std::size_t
-Socket::read(void* buf, std::size_t n) {
-  ssize_t r = ::read(fd(), buf, n);
-  if (r < 0)
-    throw System_error(r);
-  return r;
-}
-
-inline std::size_t
-Socket::write(const void* buf, std::size_t n) {
-  ssize_t r = ::write(fd(), buf, n);
-  if (r < 0)
-    throw System_error(r);
-  return r;
 }
 
 inline std::size_t
@@ -401,5 +385,42 @@ Socket::send_to(const void* buf, std::size_t n, const Address& a) {
     throw System_error(r);
   return r;
 }
+
+// -------------------------------------------------------------------------- //
+// Operations
+
+inline System_error
+bind(Socket& s, const Address& a) { return s.bind(a); }
+
+inline System_error
+listen(Socket& s, int n) { return s.listen(n); }
+
+inline System_error
+connect(Socket& s, const Address& a) { return s.connect(a); }
+
+inline Socket 
+accept(Socket& s) { return s.accept(); }
+
+inline std::size_t
+recv(Socket& s, void* buf, std::size_t n, int f) { 
+  return s.recv(buf, n, f); 
+}
+
+inline std::size_t
+recv_from(Socket& s, void* buf, std::size_t n, Address& a) {
+  return s.recv_from(buf, n, a);
+}
+
+inline std::size_t
+send(Socket& s, const void* buf, std::size_t n, int f) {
+  return s.send(buf, n, f);
+}
+
+inline std::size_t
+send_to(Socket& s, const void* buf, std::size_t n, const Address& a) { 
+  return s.send_to(buf, n, a);
+}
+
+
 
 } // namespace freeflow
