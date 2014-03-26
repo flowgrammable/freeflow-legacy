@@ -16,15 +16,20 @@
 #define NOCONTROL_CONNECTION_HPP
 
 #include <freeflow/sys/socket.hpp>
+#include <freeflow/proto/ofp/protocol.hpp>
 
 #include <nocontrol/handler.hpp>
 
 namespace nocontrol {
 
-// Represents a connection to a switch. This class acts as a small
-// shim that buffers messages and hands them to a state machine for
-// further processing.
-struct Connection : Resource_handler<ff::Socket> {
+/// Represents a connection to a switch. This class acts as a small
+/// shim that buffers messages and hands them to a state machine for
+/// further processing.
+///
+/// \todo We're required to TLS for switch connections. This
+/// seems like the likely integration point for that work.
+class Connection : public Resource_handler<ff::Socket> {
+public:
   using Resource_handler<ff::Socket>::Resource_handler;
 
   Connection(ff::Socket&& s);
@@ -34,6 +39,12 @@ struct Connection : Resource_handler<ff::Socket> {
 
   Result on_read();
   Result on_write();
+
+private:
+  Result read();
+  Result write();
+
+  ff::ofp::Protocol* proto_;
 };
 
 } // namespace nocontrol

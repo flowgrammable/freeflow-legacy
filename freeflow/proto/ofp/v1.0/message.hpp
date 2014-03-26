@@ -29,8 +29,11 @@ namespace freeflow {
 namespace ofp {
 namespace v1_0 {
 
+/// The version type.
+enum Version_type : Uint8 { VERSION = 1 };
+
 /// The type of supported messages.
-enum Message_type : Uint16 {
+enum Message_type : Uint8 {
   HELLO                    = 0,
   ERROR                    = 1,
   ECHO_REQUEST             = 2,
@@ -269,37 +272,46 @@ struct Queue_config_reply {
 };
 
 /// The message class embodies a specific kind of OpenFlow message.
+union Payload {
+  // This union contains non-trivial members
+  Payload() { }
+  ~Payload() { }
+  
+  Empty                empty;
+  Hello                hello;
+  Error                error;
+  Echo                 echo;
+  Vendor               vendor;
+  Feature              feature;
+  Config               config;
+  Packet_in            packet_in;
+  Flow_removed         flow_removed;
+  Port_status          port_status;
+  Packet_out           packet_out;
+  Flow_mod             flow_mod;
+  Port_mod             port_mod;
+  Stats_request        stats_request;
+  Stats_reply          stats_reply;
+  Queue_config_request queue_config_request;
+  Queue_config_reply   queue_config_reply;
+};
+
+struct Header {
+  Version_type version;
+  Message_type type;
+  Uint16 length;
+  Uint32 xid;
+};
+
+/// A message comprised of an OpenFlow header and its payload.
 struct Message {
-  using Type = Message_type;
-  union Payload {
-    Payload() { }
-    ~Payload() { }
-    
-    Empty                empty;
-    Hello                hello;
-    Error                error;
-    Echo                 echo;
-    Vendor               vendor;
-    Feature              feature;
-    Config               config;
-    Packet_in            packet_in;
-    Flow_removed         flow_removed;
-    Port_status          port_status;
-    Packet_out           packet_out;
-    Flow_mod             flow_mod;
-    Port_mod             port_mod;
-    Stats_request        stats_request;
-    Stats_reply          stats_reply;
-    Queue_config_request queue_config_request;
-    Queue_config_reply   queue_config_reply;
-  };
-
-  Message(Type);
-  ~Message();
-
-  Type    type;
+  Header header;
   Payload payload;
 };
+
+// Operations
+void construct(Payload&, Message_type);
+void destroy(Payload&, Message_type);
 
 // Protocol
 
@@ -324,6 +336,8 @@ std::size_t bytes(const Stats_request&);
 std::size_t bytes(const Stats_reply&);
 std::size_t bytes(const Queue_config_request&);
 std::size_t bytes(const Queue_config_reply&);
+std::size_t bytes(const Payload&, Message_type);
+constexpr std::size_t bytes(const Header&);
 std::size_t bytes(const Message&);
 
 Errc to_view(View&, const Empty&);
@@ -343,6 +357,8 @@ Errc to_view(View&, const Stats_request&);
 Errc to_view(View&, const Stats_reply&);
 Errc to_view(View&, const Queue_config_request&);
 Errc to_view(View&, const Queue_config_reply&);
+Errc to_view(View&, const Payload&, Message_type);
+Errc to_view(View&, const Header&);
 Errc to_view(View&, const Message&);
 
 Errc from_view(View&, Empty&);
@@ -362,7 +378,14 @@ Errc from_view(View&, Stats_request&);
 Errc from_view(View&, Stats_reply&);
 Errc from_view(View&, Queue_config_request&);
 Errc from_view(View&, Queue_config_reply&);
+Errc from_view(View&, Payload&, Message_type);
+Errc from_view(View&, Header&);
 Errc from_view(View&, Message&);
+
+// Validation
+
+constexpr bool is_valid(Version_type);
+constexpr bool is_valid(Message_type);
 
 } // namespace v1_0
 } // namespace ofp

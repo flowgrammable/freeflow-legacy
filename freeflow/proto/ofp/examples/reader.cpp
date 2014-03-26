@@ -99,10 +99,9 @@ void
 construct_v1_0(const File& f, const ofp::Header& h, View& v) {
   using namespace ofp::v1_0;
 
-  // TODO: This should not be in a try block. Also, I need to validate
-  // that h.type is valid within the context of the protocol version.
+  /* FIXME: I've broken this.
   try {
-    Message m(Message::Type(h.type));
+    Message m(Message_type(h.type));
     switch (m.type) {
     case HELLO: std::cout << "Hello\n"; break;
     case ERROR: std::cout << "Error\n"; break;
@@ -114,6 +113,7 @@ construct_v1_0(const File& f, const ofp::Header& h, View& v) {
   } catch(...) {
     std::cerr << "error: unhandled message '" << (int)h.type << "'\n";
   }
+  */
 }
 
 void 

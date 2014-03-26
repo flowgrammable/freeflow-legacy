@@ -158,7 +158,7 @@ union Stats_request_payload {
 
 /// The payload of a stats reply.
 union Stats_reply_payload {
-  // This union contains non-trivial.
+  // This union contains non-trivial members.
   Stats_reply_payload() { }
   ~Stats_reply_payload() { }
 

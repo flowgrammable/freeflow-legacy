@@ -86,6 +86,14 @@ bytes(const Queue_config_request& m) { return 2; }
 inline std::size_t
 bytes(const Queue_config_reply& m) { return 8 + bytes(m.queues); }
 
+constexpr std::size_t
+bytes(const Header& m) { return 8; }
+
+inline std::size_t
+bytes(const Message& m) { 
+  return bytes(m.header) + bytes(m.payload, Message_type(m.header.type)); 
+}
+
 // To view
 
 inline Errc
@@ -96,6 +104,13 @@ to_view(View&, const Empty&) { return {}; }
 inline Errc
 from_view(View&, Empty&) { return {}; }
 
+// Validation
+
+constexpr bool
+is_valid(Version_type t) { return t == 1; }
+
+constexpr bool
+is_valid(Message_type t) { return 0 <= t and t <= QUEUE_GET_CONFIG_REPLY; }
 
 } // namespace v1_0
 } // namespace ofp

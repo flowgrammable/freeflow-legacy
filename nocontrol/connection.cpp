@@ -15,8 +15,11 @@
 #include <iostream>
 
 #include <freeflow/sys/buffer.hpp>
+#include <freeflow/proto/ofp/ofp.hpp>
 
 #include "connection.hpp"
+
+using namespace freeflow;
 
 namespace nocontrol {
 
@@ -24,7 +27,11 @@ namespace nocontrol {
 // we should accept.
 bool
 Connection::open() {
-  return true;
+  proto_ = new ofp::Protocol();
+  
+  // FIXME: Error checking.
+  proto_->open();
+  return write();
 }
 
 // Shutdown the state machine and delete the handler.
@@ -34,20 +41,71 @@ Connection::close() {
   return true; 
 }
 
+
 Result 
 Connection::on_read() {
-  char buf[1024];
-  std::size_t n = rc().read(buf, 1024);
-  if (n == 0)
-    return STOP;
-
-  buf[n] = 0;
-  std::cout << "read: " << buf << '\n';
-
+  // Try to read the next message.
+  Result r1 = read();
+  if (r1 != CONTINUE)
+    return r1;
+  
+  // Notify the protocol of a change.
+  proto_->message();
+  
+  // Try to write the resulting messages.
+  Result r2 = write();
+  if (r2 != CONTINUE)
+    return r2;
+  
   return CONTINUE;
 }
 
 Result
 Connection::on_write() { return CONTINUE; }
 
+// FIXME: This is incredibly brittle, and its slow. First, each message
+// requires 2 reads and 2 allocations (ouch). Second, we may not actually
+// receive everything in each read, meaning we're going to miss data.
+// Third, error handling is totally broken.
+//
+// We can alleviate the read errors by re-incorporating the fd_utils
+// header with the resource header.
+//
+// If we had a recombinant buffers, we could eliminate the need to
+// allocate or issue multiple reads.
+Result
+Connection::read() {
+  // Sample enough to read only the header.
+  // FIXME: I may not read 8 bytes.
+  Buffer buf(8);
+  rc().read(buf);
+
+  // Cheat by reading only the header. If there's a here, we may 
+  // need to stop. We may also need to send an error message.
+  View v(buf);
+  ofp::Header hdr;
+  if (Trap err = from_view(v, hdr))
+    return STOP;
+
+  // Read the remainder of the message. 
+  // FIXME: I may not read hdr.length - 8 bytes.
+  buf.resize(hdr.length);
+  rc().read(buf.data() + 8, hdr.length - 8);
+
+  // Queue the buffer.
+  proto_->read.put_buffer(std::move(buf));
+  return CONTINUE;
+}
+
+Result
+Connection::write() {
+  while (not proto_->write.empty()) {
+    Buffer b;
+    proto_->write.get_buffer(b);
+    rc().write(b);
+  }
+  return CONTINUE;
+}
+
 } // namespace nocontrol
+

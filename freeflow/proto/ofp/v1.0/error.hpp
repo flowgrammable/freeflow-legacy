@@ -26,6 +26,8 @@ namespace v1_0 {
 //
 // TODO: Renumber error codes in some meaningful way.
 struct Errc : ofp::Error {
+  static constexpr Code BAD_VERSION = 100;
+
   /// The message type is unsupported
   static constexpr Code BAD_MESSAGE_TYPE = 200;
   static constexpr Code BAD_ACTION_TYPE = 300;
@@ -48,6 +50,7 @@ struct Errc : ofp::Error {
   static constexpr Code STATS_REPLY_OVERFLOW   = 214;
   static constexpr Code QUEUE_CONFIG_REQUEST_OVERFLOW = 215;
   static constexpr Code QUEUE_CONFIG_REPLY_OVERFLOW   = 216;
+  static constexpr Code MESSAGE_OVERFLOW = 220;
 
   static constexpr Code ACTION_OVERFLOW = 250;
   static constexpr Code BAD_ACTION_LENGTH = 301;
