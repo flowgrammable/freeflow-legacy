@@ -19,6 +19,7 @@
 #include <vector>
 
 #include <freeflow/sys/resource.hpp>
+#include <freeflow/sys/selector.hpp>
 
 #include <nocontrol/config.hpp>
 
@@ -59,6 +60,7 @@ private:
   ff::Resource& r_;
 };
 
+
 /// The resource handler class is an abstract handler associated with
 /// a Resource. The type of that Resource is given as the template
 /// argument, T. It must derive from the Resource class.
@@ -81,7 +83,7 @@ template<typename T>
     template<typename... Args>
       Resource_handler(Args&&... args);
 
-    // Obsrevers
+    // Observers
     T&       rc();
     const T& rc() const;
 
@@ -106,12 +108,16 @@ struct Handler_registry : std::vector<Handler*> {
 
   int max() const;
 
+  // Wait set
+  const ff::Select_set& wait() const;
+
   // Singleton access
   static Handler_registry& instance();
 
 private:
-  int active_;
-  int max_;
+  int            active_;
+  int            max_;
+  ff::Select_set wait_;
 };
 
 } // namespace nocontrol

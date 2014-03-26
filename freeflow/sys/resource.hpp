@@ -76,6 +76,28 @@ std::size_t write(Resource&, const Buffer&, std::size_t);
 std::size_t write(Resource&, const Buffer&);
 
 
+/// The Resource_set class represents the inclusion of resources in
+/// a particular set.
+///
+/// While this is primarily used by the Selector and related reactor
+/// loops, it is still a reasonably important concept to include
+/// in a separate module.
+struct Resource_set {
+  explicit Resource_set();
+
+  bool test(const Resource&) const;
+  bool test(int) const;
+
+  void insert(const Resource&);
+  void insert(int);
+  
+  void remove(const Resource&);
+  void remove(int);
+  void clear();
+
+  fd_set fds;
+};
+
 } // namespace resource
 
 #include <freeflow/sys/resource.ipp>

@@ -118,4 +118,47 @@ write(Resource& rc, const Buffer& buf, std::size_t n) { return rc.write(buf, n);
 inline std::size_t
 write(Resource& rc, const Buffer& buf) { return rc.write(buf); }
 
+// -------------------------------------------------------------------------- //
+// Resource set
+
+inline
+Resource_set::Resource_set() { FD_ZERO(&fds); }
+
+/// Returns true if the resource is in the set.
+inline bool 
+Resource_set::test(const Resource& r) const { return test(r.fd()); }
+
+/// Returns true if the file descriptor is in the set.
+inline bool 
+Resource_set::test(int fd) const { 
+  assert(fd != -1);
+  return FD_ISSET(fd, &fds); 
+}
+
+/// Insert the resource into the set.
+inline void 
+Resource_set::insert(const Resource& r) { insert(r.fd()); }
+
+/// Insert the file descriptor into the set.
+inline void 
+Resource_set::insert(int fd) { 
+  assert(fd != -1);
+  FD_SET(fd, &fds);
+}
+
+/// Remove the resource from the set.
+inline void
+Resource_set::remove(const Resource& r) { remove(r.fd()); }
+
+/// Remove the file descriptor from the set.
+inline void 
+Resource_set::remove(int fd) { 
+  assert(fd != -1);
+  FD_CLR(fd, &fds); 
+}
+
+// Remove all files from the set.
+inline void 
+Resource_set::clear() { FD_ZERO(&fds); }
+
 } // namespace freeflow

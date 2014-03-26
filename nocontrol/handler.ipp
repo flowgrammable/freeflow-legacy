@@ -81,6 +81,9 @@ Handler_registry::Handler_registry()
   : std::vector<Handler*>(FD_SETSIZE, nullptr), active_(0), max_(-1)
 { }
 
+inline const ff::Select_set&
+Handler_registry::wait() const { return wait_; }
+
 inline int
 Handler_registry::max() const { return max_; }
 
@@ -101,11 +104,17 @@ Handler_registry::add(Handler* h) {
   ++active_;
   int m = std::max(h->fd(), max_);
 
+  // Insert the reader into the appropriate set.
+  // TODO: An event mask should specify the event sets
+  // that we're actually interested in. 
+  wait_.read.insert(h->fd());
+
   // Try to open the handler. Changes are committed if this
   // succeeds and rolled back if it fails.
   if (not h->open()) {
     (*this)[h->fd()] = nullptr;
     --active_;
+    wait_.read.remove(h->fd());
     return false;
   } else {
     max_ = m;
@@ -127,6 +136,7 @@ Handler_registry::remove(Handler* h) {
   assert(0 <= h->fd() and h->fd() < FD_SETSIZE);
   (*this)[h->fd()] = nullptr; 
   --active_;
+  wait_.read.remove(h->fd());
   h->close();
   return true;
 }

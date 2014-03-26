@@ -26,33 +26,14 @@
 
 namespace freeflow {
 
-/// The descriptor set class is a helper class for the Selector. It 
-/// maintains a set of file descriptors and caches an underlying bitfield
-/// of that set. Note that the bitfield is only valid after calling
-/// update() method.
-struct Resource_set {
-  explicit Resource_set() { FD_ZERO(&fds); }
-
-  /// Returns tre
-  bool test(const Resource& r) { return test(r.fd()); }
-  
-  bool test(int fd) const { return FD_ISSET(fd, &fds); }
-
-  // Insert the reader into the set.
-  void insert(const Resource& r) { insert(r.fd()); }
-
-  // Insert the reader into the set.
-  void insert(int fd) { 
-    assert(fd != -1);
-    FD_SET(fd, &fds);
-  }
-  
-  void remove(int fd) { FD_CLR(fd, &fds); }
-
-  // Remove all files from the set.
-  void clear() { FD_ZERO(&fds); }
-
-  fd_set fds;
+/// The Select set maintains resource sets for common events. 
+/// This is primarily used by the select function to represent
+/// what resources are waiting in select and and which have
+/// actions pending.
+struct Select_set {
+  Resource_set read;
+  Resource_set write;
+  Resource_set error;
 };
 
 /// The selector class provides a simple wrapper over the POSIX pselect
@@ -60,7 +41,7 @@ struct Resource_set {
 /// the resources that are available for reading and writing.
 class Selector {
 public:
-  Selector(int n, Resource_set*, Resource_set* = nullptr, Resource_set* = nullptr);
+  Selector(int n, Select_set& ss);
 
   // Select
   int operator()();

@@ -69,10 +69,13 @@ notify_read(Handler* h, const Resource_set& read, Resource_set& close) {
 }
 
 bool
-notify_handlers(Handler_registry& r, const Resource_set& read, Resource_set& close) {
+notify_handlers(Handler_registry& r, const Select_set& ss, Resource_set& close) {
   bool exit = false;
   for (Handler* h : r)
-    if (h) exit |= notify_read(h, read, close);
+    if (h) {
+      // TODO: Test the write and error sets also.
+      exit |= notify_read(h, ss.read, close);
+    }
   return exit;
 }
 
@@ -101,18 +104,9 @@ main(int argc, char* argv[]) {
 
   bool done = false;
   while (not done) {
-    // Build the wait set.
-    //
-    // TODO: We should only have to do this if the handler set has
-    // changed or if a handler is registered for a new event.
-    Resource_set wait;
-    register_handlers(wait, handlers);
-
-    // Create the dispatch set. The dispatch set is modified
-    // by select to indicate which files have events.
-    // FIXME: Add resource sets for write and error.
-    Resource_set disp = wait;
-    Selector s(handlers.max() + 1, &disp);    
+    // Select on the registered handlers.
+    Select_set disp = handlers.wait();
+    Selector s(handlers.max() + 1, disp);    
     s();
 
     // Close any handlers that need to removed from the
@@ -122,7 +116,6 @@ main(int argc, char* argv[]) {
     
     // Before exiting, close any outstanding handlers
     close_handlers(handlers, close);
-
   } // while(not done)
 
 

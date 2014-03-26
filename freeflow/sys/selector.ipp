@@ -15,8 +15,8 @@
 namespace freeflow {
 
 inline
-Selector::Selector(int n, Resource_set* r, Resource_set* w, Resource_set* e)
-  : max_(n), read_(&r->fds), write_(&w->fds), error_(&e->fds) { }
+Selector::Selector(int n, Select_set& ss)
+  : max_(n), read_(&ss.read.fds), write_(&ss.write.fds), error_(&ss.error.fds) { }
 
 // TODO: Allow selection over some amount of time.
 inline int
