@@ -12,4 +12,7 @@
 // or implied. See the License for the specific language governing
 // permissions and limitations under the License.
 
-#include "handler.hpp"
+inline
+Connection::Connection(ff::Socket&& s)
+    : Resource_handler<ff::Socket>(std::move(s)) { }
+

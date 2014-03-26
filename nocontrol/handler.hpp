@@ -19,6 +19,8 @@
 
 #include <freeflow/sys/resource.hpp>
 
+#include <nocontrol/config.hpp>
+
 // Result codes for events.
 // TODO: Find a better name.
 enum Result {
@@ -33,7 +35,7 @@ enum Result {
 /// resource, which provides access to an underlying socket descriptor.
 class Handler {
 public:
-  explicit Handler(freeflow::Resource&);
+  explicit Handler(ff::Resource&);
   virtual ~Handler() { }
 
   // Open/close
@@ -51,7 +53,7 @@ public:
   int fd() const;
 
 private:
-  freeflow::Resource& r_;
+  ff::Resource& r_;
 };
 
 /// The resource handler class is an abstract handler associated with

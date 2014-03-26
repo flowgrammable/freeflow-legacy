@@ -17,7 +17,7 @@
 
 // Note that r may not be iniatilized.
 inline
-Handler::Handler(freeflow::Resource& r)
+Handler::Handler(ff::Resource& r)
   : r_(r) { }
 
 inline void 

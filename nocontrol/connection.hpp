@@ -12,4 +12,29 @@
 // or implied. See the License for the specific language governing
 // permissions and limitations under the License.
 
-#include "handler.hpp"
+#ifndef NOCONTROL_CONNECTION_HPP
+#define NOCONTROL_CONNECTION_HPP
+
+#include <freeflow/sys/socket.hpp>
+
+#include <nocontrol/config.hpp>
+#include <nocontrol/handler.hpp>
+
+// Represents a connection to a switch. This class acts as a small
+// shim that buffers messages and hands them to a state machine for
+// further processing.
+struct Connection : Resource_handler<ff::Socket> {
+  using Resource_handler<ff::Socket>::Resource_handler;
+
+  Connection(ff::Socket&& s);
+
+  void open();
+  void close();
+
+  Result on_read();
+  Result on_write();
+};
+
+#include <nocontrol/connection.ipp>
+
+#endif

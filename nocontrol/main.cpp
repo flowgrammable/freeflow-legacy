@@ -20,7 +20,7 @@
 #include <freeflow/sys/socket.hpp>
 #include <freeflow/sys/file.hpp>
 
-#include "handler.hpp"
+#include "connection.hpp"
 
 using namespace std;
 using namespace freeflow;
@@ -44,40 +44,6 @@ struct Handler_registry : std::map<int, Handler*> {
 Handler_registry handlers;
 
 
-// Represents a connected switch.
-//
-// TODO: In full generality, this should be a service that sits on
-// an underlying resource. However, we don't really need full
-// generality just yet.
-struct Connection : Resource_handler<Socket> {
-  using Resource_handler<Socket>::Resource_handler;
-
-  Connection(Socket&& s)
-    : Resource_handler<Socket>(std::move(s)) { }
-
-  // When the connection is closed, delete the handler.
-  void close() { 
-    std::cout << "dying\n";
-    delete this; 
-  }
-
-  // Data is available for reading.
-  Result on_read() {
-    // Try reading from the buffer. 
-    char buf[1024];
-    std::size_t n = rc().read(buf, 1024);
-    if (n == 0)
-      return STOP;
-
-    buf[n] = 0;
-    std::cout << "read: " << buf << '\n';
-
-    return CONTINUE;
-  }
-
-  // Data is available for writing.
-  Result on_write() { return CONTINUE; }
-};
 
 
 // This handler is responsible for watching for the end of
@@ -97,7 +63,6 @@ struct Terminator : Resource_handler<Resource> {
     return CONTINUE;
   }
 };
-
 
 // The acceptor is responsible for accepting connections when
 // they are available.

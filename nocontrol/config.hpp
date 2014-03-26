@@ -12,4 +12,10 @@
 // or implied. See the License for the specific language governing
 // permissions and limitations under the License.
 
-#include "handler.hpp"
+#ifndef NOCONTROL_CONFIG_HPP
+#define NOCONTROL_CONFIG_HPP
+
+// Shorten the freeflow namespace throughout.
+namespace ff = freeflow;
+
+#endif

@@ -12,4 +12,37 @@
 // or implied. See the License for the specific language governing
 // permissions and limitations under the License.
 
-#include "handler.hpp"
+#include <iostream>
+
+#include <freeflow/sys/buffer.hpp>
+
+#include "connection.hpp"
+
+// Create a version negotiation state machine so we know what version
+// we should accept.
+void
+Connection::open() {
+
+}
+
+// Shutdown the state machine and delete the handler.
+void 
+Connection::close() { 
+  delete this; 
+}
+
+Result 
+Connection::on_read() {
+  char buf[1024];
+  std::size_t n = rc().read(buf, 1024);
+  if (n == 0)
+    return STOP;
+
+  buf[n] = 0;
+  std::cout << "read: " << buf << '\n';
+
+  return CONTINUE;
+}
+
+Result
+Connection::on_write() { return CONTINUE; }
