@@ -24,7 +24,7 @@
 
 using namespace std;
 using namespace freeflow;
-
+using namespace nocontrol;
 
 // The handler registry maintains the set of handlers registered
 // for the reactor loop.

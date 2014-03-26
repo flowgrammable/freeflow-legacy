@@ -21,6 +21,8 @@
 
 #include <nocontrol/config.hpp>
 
+namespace nocontrol {
+
 // Result codes for events.
 // TODO: Find a better name.
 enum Result {
@@ -85,6 +87,8 @@ template<typename T>
   private:
     T rc_;
   };
+
+} // namespace nocontrol
 
 #include "handler.ipp"
 

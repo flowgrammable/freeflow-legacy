@@ -12,6 +12,8 @@
 // or implied. See the License for the specific language governing
 // permissions and limitations under the License.
 
+namespace nocontrol {
+
 // -------------------------------------------------------------------------- //
 // Abstract handler
 
@@ -68,3 +70,5 @@ Resource_handler<T>::rc() { return rc_; }
 template<typename T>
 inline const T& 
 Resource_handler<T>::rc() const { return rc_; }
+
+} // namespace nocontrol

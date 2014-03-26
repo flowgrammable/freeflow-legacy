@@ -12,7 +12,10 @@
 // or implied. See the License for the specific language governing
 // permissions and limitations under the License.
 
+namespace nocontrol {
+
 inline
 Connection::Connection(ff::Socket&& s)
     : Resource_handler<ff::Socket>(std::move(s)) { }
 
+} // namespace nocontrol

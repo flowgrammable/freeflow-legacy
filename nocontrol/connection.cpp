@@ -18,6 +18,8 @@
 
 #include "connection.hpp"
 
+namespace nocontrol {
+
 // Create a version negotiation state machine so we know what version
 // we should accept.
 void
@@ -46,3 +48,5 @@ Connection::on_read() {
 
 Result
 Connection::on_write() { return CONTINUE; }
+
+} // namespace nocontrol
