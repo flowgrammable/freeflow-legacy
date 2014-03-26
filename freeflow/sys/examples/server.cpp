@@ -21,9 +21,9 @@ int main(int argc, char** argv) {
   // Select the address family.
   Address::Family net;
   if (argv[1] == ipv4)
-    net = Address::IPv4;
+    net = Address::IP4;
   else if (argv[1] == ipv6)
-    net = Address::IPv6;
+    net = Address::IP6;
 
   // Get the addres and port.
   std::string addr = argv[2];

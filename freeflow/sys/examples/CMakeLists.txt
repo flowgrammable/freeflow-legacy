@@ -23,10 +23,10 @@ add_example(buffer)
 add_example(buffer2)
 add_example(view)
 
-add_example(selector)
 add_example(pipe)
 add_example(signal)
-add_example(scheduler)
+# add_example(selector)
+# add_example(scheduler)
 add_example(server)
 
 if(BSD)
