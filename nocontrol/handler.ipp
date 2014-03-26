@@ -12,6 +12,8 @@
 // or implied. See the License for the specific language governing
 // permissions and limitations under the License.
 
+#include <iostream>
+
 namespace nocontrol {
 
 // -------------------------------------------------------------------------- //
@@ -22,11 +24,11 @@ inline
 Handler::Handler(ff::Resource& r)
   : r_(r) { }
 
-inline void 
-Handler::open() { }
+inline bool 
+Handler::open() { return true; }
 
-inline void 
-Handler::close() { }
+inline bool 
+Handler::close() { return true; }
 
 inline Result
 Handler::on_read() { return CONTINUE; }
@@ -70,5 +72,63 @@ Resource_handler<T>::rc() { return rc_; }
 template<typename T>
 inline const T& 
 Resource_handler<T>::rc() const { return rc_; }
+
+// -------------------------------------------------------------------------- //
+// Registry
+
+inline
+Handler_registry::Handler_registry() 
+  : std::vector<Handler*>(FD_SETSIZE, nullptr), active_(0), max_(-1)
+{ }
+
+inline int
+Handler_registry::max() const { return max_; }
+
+/// Insert a new handler into the registry. The handler is directly mapped
+/// by its file descriptor. Behavior is undefined a handler is already
+/// registerd for that file descriptor. 
+///
+/// The handler's open() method is called when the service is added. If
+/// open() returns false, the handler is not added, and the function
+/// returns false.
+inline bool
+Handler_registry::add(Handler* h) {
+  assert(0 <= h->fd() and h->fd() < FD_SETSIZE);
+  assert((*this)[h->fd()] == nullptr);
+  
+  // Initially insert the handler.
+  (*this)[h->fd()] = h;
+  ++active_;
+  int m = std::max(h->fd(), max_);
+
+  // Try to open the handler. Changes are committed if this
+  // succeeds and rolled back if it fails.
+  if (not h->open()) {
+    (*this)[h->fd()] = nullptr;
+    --active_;
+    return false;
+  } else {
+    max_ = m;
+    return true;
+  }
+}
+
+/// Remove the service hander. The handler's close() method is called
+/// when the handler is removed.
+///
+/// This function always returns true.
+///
+/// \todo: If active falls below some some low water mark, re-scan the
+/// list for a new max value. It's not strictly necessary, since *nixes
+/// recycle fds, but if active is very low and max is very high, then
+/// we're going to have a very sparse list.
+inline bool 
+Handler_registry::remove(Handler* h) {
+  assert(0 <= h->fd() and h->fd() < FD_SETSIZE);
+  (*this)[h->fd()] = nullptr; 
+  --active_;
+  h->close();
+  return true;
+}
 
 } // namespace nocontrol

@@ -20,30 +20,12 @@
 #include <freeflow/sys/socket.hpp>
 #include <freeflow/sys/file.hpp>
 
+#include "acceptor.hpp"
 #include "connection.hpp"
 
 using namespace std;
 using namespace freeflow;
 using namespace nocontrol;
-
-// The handler registry maintains the set of handlers registered
-// for the reactor loop.
-//
-// FIXME: This could also house the wait set: the fd set that describes
-// what the handler is waiting on.
-struct Handler_registry : std::map<int, Handler*> {
-  
-  // Register the handler.
-  void add(Handler* h) { insert({h->fd(), h}); }
-
-  // Remove the hander.
-  void remove(Handler* h) { erase(h->fd()); }
-};
-
-// Gobal handler registry.
-Handler_registry handlers;
-
-
 
 
 // This handler is responsible for watching for the end of
@@ -55,37 +37,12 @@ struct Terminator : Resource_handler<Resource> {
   Terminator(Resource&& f)
     : Resource_handler<Resource>(std::move(f)) { }
 
-  // Red
+  // If there is no more data to read, indicate that we want
+  // to terminate the reactor loop.
   Result on_read() {
     char c[1024];
-    if (read(rc(), &c, 1024) <= 0)
-      return EXIT;
-    return CONTINUE;
-  }
-};
-
-// The acceptor is responsible for accepting connections when
-// they are available.
-struct Acceptor : Resource_handler<Socket> {
-  Acceptor(const Address& a)
-    : Resource_handler<Socket>(a.family(), Socket::TCP) 
-  {
-    rc().bind(a); 
-    rc().listen();
-  }
-
-  // When data is available for reading, accept the connection
-  // and spawn a new handler.
-  Result on_read() {
-    // FIXME: The error handling stuff is not good.
-    try {
-      Connection* c = new Connection(rc().accept());
-      handlers.add(c);
-    } catch(System_error&) {
-      perror("error");
-      return EXIT;
-    } catch(std::runtime_error& err) {
-      std::cout << err.what() << '\n';
+    if (read(rc(), &c, 1024) <= 0) {
+      std::cout << "shutting down\n";
       return EXIT;
     }
     return CONTINUE;
@@ -94,35 +51,56 @@ struct Acceptor : Resource_handler<Socket> {
 
 
 void
-register_handler(Resource_set& rs, Handler& h) {
-  rs.insert(h.fd());
+register_handlers(Resource_set& rs, const Handler_registry& r) {
+  for (Handler* h : r)
+    if (h) rs.insert(h->fd());
+}
+
+bool
+notify_read(Handler* h, const Resource_set& read, Resource_set& close) {
+  if (read.test(h->fd())) {
+    Result r = h->on_read();
+    if (r == STOP)
+      close.insert(h->fd());
+    else if (r == EXIT)
+      return true;
+  }
+  return false;
+}
+
+bool
+notify_handlers(Handler_registry& r, const Resource_set& read, Resource_set& close) {
+  bool exit = false;
+  for (Handler* h : r)
+    if (h) exit |= notify_read(h, read, close);
+  return exit;
 }
 
 void
-register_handlers(Resource_set& rs, const Handler_registry& hs) {
-  for (const auto& x : hs)
-    register_handler(rs, *x.second);
+close_handlers(Handler_registry& r, const Resource_set& close) {
+   for (Handler* h : r) {
+    if (h and close.test(h->fd()))
+      r.remove(h);
+  } 
 }
-
 
 int 
 main(int argc, char* argv[]) {
 
   // Configure the switch address.
   Address addr(Ipv4_addr::any, 9001);
-
-  Terminator term(0);
   Acceptor acc(addr);
 
+  // Listen for ^D on stdin so we can shutdown easily.
+  Terminator term(0);
+
   // Register default service handlers.
-  // FIXME: nlogn lookup for file descriptors is slow.
+  Handler_registry& handlers = Handler_registry::instance();
   handlers.add(&term);
   handlers.add(&acc);
 
   bool done = false;
   while (not done) {
-    int maxfd = (*--handlers.end()).second->fd() + 1;
-
     // Build the wait set.
     //
     // TODO: We should only have to do this if the handler set has
@@ -132,39 +110,28 @@ main(int argc, char* argv[]) {
 
     // Create the dispatch set. The dispatch set is modified
     // by select to indicate which files have events.
+    // FIXME: Add resource sets for write and error.
     Resource_set disp = wait;
-
-    // Select events.
-    Selector s(maxfd, &disp);    
+    Selector s(handlers.max() + 1, &disp);    
     s();
 
-    // Handle events, saving any handlers that self-close.
+    // Close any handlers that need to removed from the
+    // registry and closed.
     Resource_set close;
-    for (const auto& x : handlers) {
-      Handler* h = x.second;
-      if (disp.test(h->fd())) {
-        Result r = h->on_read();
-        if (r == STOP)
-          close.insert(h->fd());
-        else if (r == EXIT)
-          done = true;
-      }
-    }
-
-
-    // Close any handlers that need to be destroyed and
-    // cull them from the registry.
-    for (auto i = handlers.begin(); i != handlers.end();) {
-      Handler* h = i->second;
-      if (close.test(h->fd())) {
-        h->close();
-        i = handlers.erase(i);
-      } else {
-        ++i;
-      }
-    }
+    done = notify_handlers(handlers, disp, close);
+    
+    // Before exiting, close any outstanding handlers
+    close_handlers(handlers, close);
 
   } // while(not done)
+
+
+  // Close all handlers.
+  // FIXME: This should probably run in reverse, but maybe not...
+  for (Handler* h : handlers) {
+    if (h)
+      handlers.remove(h);
+  }
 
   return 0;
 }

@@ -12,14 +12,17 @@
 // or implied. See the License for the specific language governing
 // permissions and limitations under the License.
 
-#include "handler.hpp"
-
 namespace nocontrol {
 
-// Return the global handler registry.
-static Handler_registry reg_;
+/// Create an acceptor on the given address.
+///
+/// \todo Integrate TLS.
+inline
+Acceptor::Acceptor(const ff::Address& a)
+  : Resource_handler<ff::Socket>(a.family(), ff::Socket::TCP) 
+{
+  rc().bind(a); 
+  rc().listen();
+}
 
-Handler_registry&
-Handler_registry::instance() { return reg_; }
-
-} // namespace nocontrol
+} // namesapce nocontrol

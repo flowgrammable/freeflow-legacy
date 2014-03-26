@@ -12,14 +12,26 @@
 // or implied. See the License for the specific language governing
 // permissions and limitations under the License.
 
-#include "handler.hpp"
+#ifndef NOCONTROL_ACCEPTOR_HPP
+#define NOCONTROL_ACCEPTOR_HPP
+
+#include <freeflow/sys/socket.hpp>
+
+#include <nocontrol/handler.hpp>
 
 namespace nocontrol {
 
-// Return the global handler registry.
-static Handler_registry reg_;
+// The acceptor is responsible for accepting connections when
+// they are available.
+struct Acceptor : Resource_handler<ff::Socket> {
+  Acceptor(const ff::Address& a);
 
-Handler_registry&
-Handler_registry::instance() { return reg_; }
+  // Events
+  Result on_read();
+};
 
-} // namespace nocontrol
+} // namesapce nocontrol
+
+#include <nocontrol/acceptor.ipp>
+
+#endif

@@ -12,32 +12,31 @@
 // or implied. See the License for the specific language governing
 // permissions and limitations under the License.
 
-#ifndef NOCONTROL_CONNECTION_HPP
-#define NOCONTROL_CONNECTION_HPP
+#include <freeflow/sys/error.hpp>
 
-#include <freeflow/sys/socket.hpp>
-
-#include <nocontrol/handler.hpp>
+#include "acceptor.hpp"
+#include "connection.hpp"
 
 namespace nocontrol {
 
-// Represents a connection to a switch. This class acts as a small
-// shim that buffers messages and hands them to a state machine for
-// further processing.
-struct Connection : Resource_handler<ff::Socket> {
-  using Resource_handler<ff::Socket>::Resource_handler;
+// When data is available for reading, accept the connection
+// and spawn a new handler.
+Result 
+Acceptor::on_read() {
+  Handler_registry& handlers = Handler_registry::instance();
 
-  Connection(ff::Socket&& s);
+  // FIXME: The error handling stuff is not good.
+  try {
+    Connection* c = new Connection(rc().accept());
+    handlers.add(c);
+  } catch(ff::System_error&) {
+    perror("error");
+    return EXIT;
+  } catch(std::runtime_error& err) {
+    std::cout << err.what() << '\n';
+    return EXIT;
+  }
+  return CONTINUE;
+}
 
-  bool open();
-  bool close();
-
-  Result on_read();
-  Result on_write();
-};
-
-} // namespace nocontrol
-
-#include <nocontrol/connection.ipp>
-
-#endif
+} // namesapce nocontrol

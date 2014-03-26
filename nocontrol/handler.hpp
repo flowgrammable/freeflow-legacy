@@ -16,6 +16,7 @@
 #define NOCONTROL_HANDLER_HPP
 
 #include <utility>
+#include <vector>
 
 #include <freeflow/sys/resource.hpp>
 
@@ -41,8 +42,8 @@ public:
   virtual ~Handler() { }
 
   // Open/close
-  virtual void open();
-  virtual void close();
+  virtual bool open();
+  virtual bool close();
 
   // Event handlers
   virtual Result on_read();
@@ -87,6 +88,31 @@ template<typename T>
   private:
     T rc_;
   };
+
+/// The handler registry maintains the set of handlers registered
+/// for the reactor loop.
+///
+/// \todo This could also house the wait set, the fd set that describes
+/// what the handler is waiting on.
+///
+/// \todo The size is currently limited to fd_setsize, which limits
+/// the number of connections to 1024. That may be too small.
+struct Handler_registry : std::vector<Handler*> {
+  Handler_registry();
+
+  // Registration
+  bool add(Handler* h);
+  bool remove(Handler* h);
+
+  int max() const;
+
+  // Singleton access
+  static Handler_registry& instance();
+
+private:
+  int active_;
+  int max_;
+};
 
 } // namespace nocontrol
 

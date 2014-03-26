@@ -22,15 +22,16 @@ namespace nocontrol {
 
 // Create a version negotiation state machine so we know what version
 // we should accept.
-void
+bool
 Connection::open() {
-
+  return true;
 }
 
 // Shutdown the state machine and delete the handler.
-void 
+bool 
 Connection::close() { 
-  delete this; 
+  delete this;
+  return true; 
 }
 
 Result 

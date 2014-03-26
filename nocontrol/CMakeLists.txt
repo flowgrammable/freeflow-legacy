@@ -14,7 +14,12 @@
 
 include_directories(${CMAKE_SOURCE_DIR})
 
-set(src main.cpp handler.cpp connection.cpp nbi.cpp)
+set(src main.cpp 
+        handler.cpp 
+        connection.cpp 
+        acceptor.cpp 
+        nbi.cpp)
+
 set(libs freeflow freeflow-ofp freeflow-ofp-1.0)
 
 add_executable(nocontrol main.cpp ${src})
