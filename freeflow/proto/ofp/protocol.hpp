@@ -15,9 +15,10 @@
 #ifndef FREEFLOW_OFP_PROTOCOL_HPP
 #define FREEFLOW_OFP_PROTOCOL_HPP
 
-#include <list>
+#include <queue>
 
 #include <freeflow/sys/buffer.hpp>
+#include <freeflow/proto/ofp/ofp.hpp>
 
 namespace freeflow {
 namespace ofp {
@@ -34,30 +35,36 @@ namespace ofp {
 // message interface being the only facility in this namespace.
 //
 // FIXME: Error handling.
-struct Message_queue : std::list<Buffer> {
-  void put_buffer(Buffer&& buf) {
-    push_back(std::move(buf));
-  }
+struct Message_queue : std::queue<Buffer> {
 
-  void get_buffer(Buffer& buf) {
-    buf = std::move(back());
-    pop_back();
-  }
+  // Northbound traffic
+  void put_buffer(Buffer&&);
+  void get_buffer(Buffer&);
 
-  // Put a message into the queue.
-  template<typename M>
-    void put_message(const M& msg) {
-      emplace_back(bytes(msg));
-      View v(back());
-      to_view(v, msg);
-    }
+  // Southbound traffic
+  template<typename H, typename P>
+    void put_message(const H&, const P&);
 
-  template<typename M>
-    void get_message(M& msg) {
-      View v(back());
-      from_view(v, msg);
-      pop_back();
-    }
+  template<typename H>
+    void peek_header(H&);
+
+  template<typename H, typename P>
+    void get_payload(const H&, P&);
+};
+
+
+struct Config {
+  Uint8 version = 0;
+};
+
+
+// The Protocol_handler class represents the base class of
+// state machines for specific versions of the protocol.
+//
+// Technically, this is a decoarator.
+struct Protocol_handler {
+  virtual void to_feature() = 0;
+  virtual void wait_feature() = 0;
 };
 
 /// The Protocol represents phases of a more general protocol.
@@ -70,20 +77,50 @@ struct Message_queue : std::list<Buffer> {
 /// Received messages are written 
 ///
 /// TODO: These all take a time argument.
-struct Protocol {
+class Protocol {
+  using Handler = Protocol_handler;
+
+  enum State {
+    WAIT_HELLO,
+    WAIT_FEATURE,
+  };
+
+public:
   void open();
   void close();
   void message();
   void time();
 
+  // Read/write helper functions
+  template<typename H, typename P>
+    void put_message(const H& h, const P& p);
+
+  template<typename H>
+    void peek_header(H& h);
+
+  template<typename H, typename P>
+    void get_payload(const H&, P& p);
+
   Message_queue read;
   Message_queue write;
 
-  int my_version = 0;   // Maximum supported version
-  int neg_version = -1; // Negotiated protocol version (-1 is unspecified)
+private:
+  void to_hello();
+  void wait_hello();
+  void to_feature();
+  void wait_feature();
+  
+  Handler* negotiate(Uint8);
+
+  Config   config_;
+  Uint8    version_;
+  State    state_;
+  Handler* proto_;
 };
 
 } // ofp
 } // freeflow
+
+#include "protocol.ipp"
 
 #endif

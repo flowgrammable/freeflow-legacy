@@ -41,8 +41,8 @@ public:
   Result on_write();
 
 private:
-  Result read();
-  Result write();
+  bool read();
+  bool write();
 
   ff::ofp::Protocol* proto_;
 };

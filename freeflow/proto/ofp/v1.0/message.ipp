@@ -29,6 +29,11 @@ Stats_reply::~Stats_reply() {
   destroy(payload, header.type);
 }
 
+inline
+Header::Header(Message_type t, Uint16 n, Uint32 x)
+  : version(VERSION), type(t), length(n), xid(x) { }
+
+
 // Bytes
 
 constexpr std::size_t

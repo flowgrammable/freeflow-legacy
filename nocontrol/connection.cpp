@@ -44,24 +44,18 @@ Connection::close() {
 
 Result 
 Connection::on_read() {
-  // Try to read the next message.
-  Result r1 = read();
-  if (r1 != CONTINUE)
-    return r1;
-  
-  // Notify the protocol of a change.
+  if (not read())
+    return STOP;
   proto_->message();
-  
-  // Try to write the resulting messages.
-  Result r2 = write();
-  if (r2 != CONTINUE)
-    return r2;
+  if (not write())
+    return STOP;
   
   return CONTINUE;
 }
 
 Result
 Connection::on_write() { return CONTINUE; }
+
 
 // FIXME: This is incredibly brittle, and its slow. First, each message
 // requires 2 reads and 2 allocations (ouch). Second, we may not actually
@@ -73,7 +67,7 @@ Connection::on_write() { return CONTINUE; }
 //
 // If we had a recombinant buffers, we could eliminate the need to
 // allocate or issue multiple reads.
-Result
+bool
 Connection::read() {
   // Sample enough to read only the header.
   // FIXME: I may not read 8 bytes.
@@ -85,7 +79,7 @@ Connection::read() {
   View v(buf);
   ofp::Header hdr;
   if (Trap err = from_view(v, hdr))
-    return STOP;
+    return false;
 
   // Read the remainder of the message. 
   // FIXME: I may not read hdr.length - 8 bytes.
@@ -94,17 +88,17 @@ Connection::read() {
 
   // Queue the buffer.
   proto_->read.put_buffer(std::move(buf));
-  return CONTINUE;
+  return true;
 }
 
-Result
+bool
 Connection::write() {
   while (not proto_->write.empty()) {
     Buffer b;
     proto_->write.get_buffer(b);
     rc().write(b);
   }
-  return CONTINUE;
+  return true;
 }
 
 } // namespace nocontrol

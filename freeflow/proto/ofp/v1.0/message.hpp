@@ -18,6 +18,7 @@
 #include <freeflow/sys/error.hpp>
 #include <freeflow/sys/buffer.hpp>
 #include <freeflow/proto/ofp/ofp.hpp>
+#include <freeflow/proto/ofp/protocol.hpp>
 #include <freeflow/proto/ofp/v1.0/error.hpp>
 #include <freeflow/proto/ofp/v1.0/port.hpp>
 #include <freeflow/proto/ofp/v1.0/queue.hpp>
@@ -297,6 +298,8 @@ union Payload {
 };
 
 struct Header {
+  Header(Message_type, Uint16, Uint32);
+
   Version_type version;
   Message_type type;
   Uint16 length;
@@ -386,6 +389,39 @@ Errc from_view(View&, Message&);
 
 constexpr bool is_valid(Version_type);
 constexpr bool is_valid(Message_type);
+
+
+// FIXME: This should be in its own module.
+struct Handler : ofp::Protocol_handler {
+  Handler(Protocol& p) 
+    : proto_(p) 
+  { }
+
+  // Read/write helper functions
+  template<typename H, typename P>
+    void put_message(const H& h, const P& p) { proto_.put_message(h, p); }
+
+  template<typename H>
+    void peek_header(H& h) { proto_.peek_header(h); }
+
+  template<typename H, typename P>
+    void get_payload(const H& h, P& p) { proto_.get_payload(h, p); }
+
+
+  // Events and messages
+
+  void to_feature() {
+    Empty p;
+    Header h(FEATURE_REQUEST, bytes(p), 0);
+    put_message(h, p);
+  }
+
+  // FIXME: Implement me.
+  void wait_feature() { }
+
+  Protocol proto_;
+};
+
 
 } // namespace v1_0
 } // namespace ofp
