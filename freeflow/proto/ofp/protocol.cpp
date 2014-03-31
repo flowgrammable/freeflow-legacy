@@ -15,6 +15,7 @@
 #include <algorithm>
 
 #include <freeflow/proto/ofp/v1.0/message.hpp>
+#include <freeflow/proto/ofp/v1.0/protocol.hpp>
 
 #include "protocol.hpp"
 
@@ -45,6 +46,9 @@ void
 Protocol::to_hello() {
   // FIXME: The hello message needs to be the highest version
   // of the protocol supported.
+  //
+  // We could just require the highest version of the protocol
+  // to support version negotiation. 
   v1_0::Hello m;
   v1_0::Header h(v1_0::HELLO, bytes(m), 0);
   write.put_message(h, m);
@@ -73,8 +77,13 @@ Protocol::to_feature() {
 }
 
 void
-Protocol::wait_feature() { 
+Protocol::wait_feature() {
   proto_->wait_feature(); 
+}
+
+void
+Protocol::to_established() {
+  // FIXME: Set up requests for timers.
 }
 
 

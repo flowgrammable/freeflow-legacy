@@ -104,12 +104,13 @@ public:
   Message_queue read;
   Message_queue write;
 
-private:
   void to_hello();
   void wait_hello();
   void to_feature();
   void wait_feature();
-  
+  void to_established();
+
+private:
   Handler* negotiate(Uint8);
 
   Config   config_;

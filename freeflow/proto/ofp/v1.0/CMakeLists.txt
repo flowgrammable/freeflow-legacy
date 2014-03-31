@@ -15,7 +15,13 @@
 # ---------------------------------------------------------------------------- #
 # Build
 
-set(src port.cpp queue.cpp match.cpp action.cpp stats.cpp message.cpp)
+set(src port.cpp 
+        queue.cpp 
+        match.cpp 
+        action.cpp 
+        stats.cpp 
+        message.cpp
+        protocol.cpp)
 
 set(hdr message.hpp 
         message.ipp
@@ -26,7 +32,8 @@ set(hdr message.hpp
         match.hpp
         match.ipp
         action.hpp
-        action.ipp)
+        action.ipp
+        protocol.hpp)
 
 add_library(freeflow-ofp-1.0 ${src})
 
