@@ -14,6 +14,20 @@
 
 namespace freeflow {
 
+constexpr Seconds
+operator"" _s(unsigned long long n) { return Seconds(n); }
+
+constexpr Milliseconds
+operator"" _ms(unsigned long long n) { return Milliseconds(n); }
+
+constexpr Microseconds
+operator"" _us(unsigned long long n) { return Microseconds(n); }
+
+constexpr Nanoseconds
+operator"" _ns(unsigned long long n) { return Nanoseconds(n); }
+
+
+
 /// Returns the current time, measured by the system's high 
 /// resolution clock.
 inline Time_point

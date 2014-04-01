@@ -29,8 +29,15 @@ using Milliseconds = std::chrono::milliseconds;
 using Microseconds = std::chrono::microseconds;
 using Nanoseconds  = std::chrono::nanoseconds;
 
+// User-defined literals.
+constexpr Seconds operator"" _s(unsigned long long n);
+constexpr Milliseconds operator"" _ms(unsigned long long n);
+constexpr Microseconds operator"" _us(unsigned long long n);
+constexpr Nanoseconds operator"" _ns(unsigned long long n);
+
 // Operations
 Time_point now();
+
 
 } // namespace freeflow
 
