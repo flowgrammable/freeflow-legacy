@@ -13,3 +13,19 @@
 // permissions and limitations under the License.
 
 #include "timer_queue.hpp"
+
+namespace nocontrol {
+
+using namespace ff;
+
+// Dispatch any events whose timers have expired.
+void
+Timer_queue::dispatch() {
+  Time_point t = now();
+  while (not empty() and top().time < t) {
+    top().handler->on_time();
+    pop();
+  }
+}
+
+} // namespace nocontrol

@@ -20,25 +20,42 @@
 #include <freeflow/sys/time.hpp>
 
 #include <nocontrol/config.hpp>
+#include <nocontrol/handler.hpp>
 
-namespace nocotnrol {
-
-// Forward declarations
-class Handler;
+namespace nocontrol {
 
 // FIXME: This should be freeflow.
 
 /// A timer is used internally.
 struct Timer {
-  // The time when the timer should trigger.
+  Timer(Handler*, ff::Time_point);
+
+  /// The handler to be notified when a timer triggers.
+  Handler* handler;
+
+  /// The time when the timer should trigger.
   ff::Time_point time;
 };
 
+
 /// The Timer_queue is allows handlers to be scheduled for
-/// timeout events.
+/// timeout events. 
 class Timer_queue {
 public:
   void schedule(Handler*, ff::Time_point);
+  void cancel(Handler*);
+
+  void dispatch();
+
+  // Observers
+  bool empty() const;
+
+private:
+  Timer&       top();
+  const Timer& top() const;
+
+  void push(Handler*, ff::Time_point);
+  void pop();
 
 private:
   std::vector<Timer> heap_;
@@ -46,5 +63,6 @@ private:
 
 } // namespace nocontrol
 
+#include "timer_queue.ipp"
 
 #endif
