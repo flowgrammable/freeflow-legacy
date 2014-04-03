@@ -25,28 +25,28 @@ namespace v1_0 {
 void 
 construct(Payload& m, Message_type t) {
   switch(t) {
-  case HELLO: new (&m.hello) Hello();
-  case ERROR: new (&m.error) Error();
-  case ECHO_REQUEST: new (&m.echo) Echo();
-  case ECHO_REPLY: new (&m.echo) Echo();
-  case VENDOR: new (&m.vendor) Vendor();
-  case FEATURE_REQUEST: new (&m.empty) Empty();
-  case FEATURE_REPLY: new (&m.feature) Feature();
-  case GET_CONFIG_REQUEST: new (&m.empty) Empty();
-  case GET_CONFIG_REPLY: new (&m.config) Config();
-  case SET_CONFIG: new (&m.config) Config();
-  case PACKET_IN: new (&m.packet_in) Packet_in();
-  case FLOW_REMOVED: new (&m.flow_removed) Flow_removed();
-  case PORT_STATUS: new (&m.port_status) Port_status();
-  case PACKET_OUT: new (&m.packet_out) Packet_out();
-  case FLOW_MOD: new (&m.flow_mod) Flow_mod();
-  case PORT_MOD: new (&m.port_mod) Port_mod();
-  case STATS_REQUEST: new (&m.stats_request) Stats_request();
-  case STATS_REPLY: new (&m.stats_reply) Stats_reply();
-  case BARRIER_REQUEST: new (&m.empty) Empty();
-  case BARRIER_REPLY: new (&m.empty) Empty();
-  case QUEUE_GET_CONFIG_REQUEST: new (&m.queue_config_request) Queue_config_request();
-  case QUEUE_GET_CONFIG_REPLY: new (&m.queue_config_reply) Queue_config_reply();
+  case HELLO: new (&m.hello) Hello(); break;
+  case ERROR: new (&m.error) Error(); break;
+  case ECHO_REQUEST: new (&m.echo) Echo(); break;
+  case ECHO_REPLY: new (&m.echo) Echo(); break;
+  case VENDOR: new (&m.vendor) Vendor(); break;
+  case FEATURE_REQUEST: new (&m.empty) Empty(); break;
+  case FEATURE_REPLY: new (&m.feature) Feature(); break;
+  case GET_CONFIG_REQUEST: new (&m.empty) Empty(); break;
+  case GET_CONFIG_REPLY: new (&m.config) Config(); break;
+  case SET_CONFIG: new (&m.config) Config(); break;
+  case PACKET_IN: new (&m.packet_in) Packet_in(); break;
+  case FLOW_REMOVED: new (&m.flow_removed) Flow_removed(); break;
+  case PORT_STATUS: new (&m.port_status) Port_status(); break;
+  case PACKET_OUT: new (&m.packet_out) Packet_out(); break;
+  case FLOW_MOD: new (&m.flow_mod) Flow_mod(); break;
+  case PORT_MOD: new (&m.port_mod) Port_mod(); break;
+  case STATS_REQUEST: new (&m.stats_request) Stats_request(); break;
+  case STATS_REPLY: new (&m.stats_reply) Stats_reply(); break;
+  case BARRIER_REQUEST: new (&m.empty) Empty(); break;
+  case BARRIER_REPLY: new (&m.empty) Empty(); break;
+  case QUEUE_GET_CONFIG_REQUEST: new (&m.queue_config_request) Queue_config_request(); break;
+  case QUEUE_GET_CONFIG_REPLY: new (&m.queue_config_reply) Queue_config_reply(); break;
   default: throw Errc(Errc::BAD_MESSAGE_TYPE);
   }
 }
