@@ -22,6 +22,7 @@
 
 #include "acceptor.hpp"
 #include "connection.hpp"
+#include "timer_queue.hpp"
 
 using namespace std;
 using namespace freeflow;
@@ -104,16 +105,17 @@ main(int argc, char* argv[]) {
 
   bool done = false;
   while (not done) {
-    // Select on the registered handlers.
+    // Select on the registered handlers. Only wait 10 ms for
+    // an event to trigger.
     Select_set disp = handlers.wait();
     Selector s(handlers.max() + 1, disp);    
-    s();
+    s(10_ms);
 
     // Close any handlers that need to removed from the
     // registry and closed.
     Resource_set close;
     done = notify_handlers(handlers, disp, close);
-    
+
     // Before exiting, close any outstanding handlers
     close_handlers(handlers, close);
   } // while(not done)

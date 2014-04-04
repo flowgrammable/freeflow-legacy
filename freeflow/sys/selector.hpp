@@ -20,9 +20,9 @@
 
 #include <set>
 
-#include "freeflow/sys/error.hpp"
-#include "freeflow/sys/time.hpp"
-#include "freeflow/sys/resource.hpp"
+#include <freeflow/sys/error.hpp>
+#include <freeflow/sys/time.hpp>
+#include <freeflow/sys/resource.hpp>
 
 namespace freeflow {
 
@@ -39,12 +39,17 @@ struct Select_set {
 /// The selector class provides a simple wrapper over the POSIX pselect
 /// function. It maintains the sets of file descriptors used to indicate
 /// the resources that are available for reading and writing.
+///
+/// \todo The select function should return the time elapsed since
+/// it was called. It's not clear whether or not reporting the number
+/// of events is meaningful.
 class Selector {
 public:
   Selector(int n, Select_set& ss);
 
   // Select
   int operator()();
+  int operator()(Microseconds ms);
 
 private:
   int     max_;

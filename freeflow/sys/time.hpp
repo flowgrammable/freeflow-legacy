@@ -20,8 +20,11 @@
 namespace freeflow {
 
 /// A time point is a unit of time on the system's high-resolution
-/// timer.
+/// timer. It represents the duration since the epoch.
 using Time_point = std::chrono::high_resolution_clock::time_point;
+
+/// A duration represents a unit of time (e.g., 3 seconds).
+using Duration = std::chrono::high_resolution_clock::duration;
 
 // Units of time
 using Seconds      = std::chrono::seconds;

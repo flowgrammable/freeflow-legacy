@@ -16,28 +16,53 @@
 
 namespace nocontrol {
 
+// -------------------------------------------------------------------------- //
+// Timers
+
+/// A timer is used internally by the timer queue.
+struct Timer_queue::Timer {
+  Timer(Handler*, ff::Time_point);
+
+  /// The handler to be notified when a timer triggers.
+  Handler* handler;
+
+  /// The time when the timer should trigger.
+  ff::Time_point time;
+};
+
+inline
+Timer_queue::Timer::Timer(Handler* h, ff::Time_point t) 
+  : handler(h), time(t) { }
+
 // Defines less than for timers.
-struct Timer_less {
+struct Timer_queue::Timer_less {
   bool 
   operator()(const Timer& a, const Timer& b) const {
     return a.time < b.time;
   }
 };
 
-inline
-Timer::Timer(Handler* h, ff::Time_point t) 
-  : handler(h), time(t) { }
+// -------------------------------------------------------------------------- //
+// Timer queue
 
-// Insert the timer into the queu.
+/// Schedule a timer to trigger in some amount of time from now.
 inline void 
-Timer_queue::schedule(Handler* h, ff::Time_point t) {
-  push(h, t);
+Timer_queue::schedule(Handler* h, ff::Microseconds ms) { 
+  push(h, ff::now() + ms); 
 }
 
+/// Removes all timers associated with the handler.
+///
+/// \todo This is not efficient. It should be more efficient if
+/// the heap allowed updating (i.e., a mutable heap).
 inline
 void 
-Timer_queue::cancel(Handler*) {
-  // FIXME: Not implemented.
+Timer_queue::cancel(Handler* h) {
+  auto i = std::remove_if(heap_.begin(), heap_.end(), [h](const Timer& t) { 
+    return t.handler == h; }
+  );
+  heap_.erase(i, heap_.end());
+  std::sort_heap(heap_.begin(), heap_.end(), Timer_less{});
 }
 
 /// Returns true if the heap contains no timers.
@@ -46,23 +71,21 @@ bool
 Timer_queue::empty() const { return heap_.empty(); }
 
 /// Returns the timer at the top of the non-empty heap.
-inline Timer&
+inline Timer_queue::Timer&
 Timer_queue::top() { return heap_.front(); }
 
-inline const Timer&
+inline const Timer_queue::Timer&
 Timer_queue::top() const { return heap_.front(); }
 
 inline void
 Timer_queue::push(Handler* h, ff::Time_point t) {
-  Timer_less comp;
   heap_.emplace_back(h, t);
-  std::push_heap(heap_.begin(), heap_.end(), comp);
+  std::push_heap(heap_.begin(), heap_.end(), Timer_less{});
 }
 
 inline void
 Timer_queue::pop() {
-  Timer_less comp;
-  std::pop_heap(heap_.begin(), heap_.end(), comp);
+  std::pop_heap(heap_.begin(), heap_.end(), Timer_less{});
   heap_.pop_back();
 }
 

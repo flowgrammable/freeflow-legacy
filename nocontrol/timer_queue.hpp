@@ -24,27 +24,25 @@
 
 namespace nocontrol {
 
-// FIXME: This should be freeflow.
 
-/// A timer is used internally.
-struct Timer {
-  Timer(Handler*, ff::Time_point);
-
-  /// The handler to be notified when a timer triggers.
-  Handler* handler;
-
-  /// The time when the timer should trigger.
-  ff::Time_point time;
-};
-
-
-/// The Timer_queue is allows handlers to be scheduled for
-/// timeout events. 
+/// The Timer_queue is allows handlers to be scheduled for timeout 
+/// events. The timer has microsecond granularity
+///
+/// \todo This should be freeflow.
+///
+/// \todo Return timer ids when scheduling a timer. This allows handlers
+/// to cancel specific timers and not all timers.
+///
+/// \todo Allow repeating timers to be scheduled.
 class Timer_queue {
+  struct Timer;
+  struct Timer_less;
 public:
-  void schedule(Handler*, ff::Time_point);
+  // Scheduling
+  void schedule(Handler*, ff::Microseconds);
   void cancel(Handler*);
 
+  // Dispatch.
   void dispatch();
 
   // Observers

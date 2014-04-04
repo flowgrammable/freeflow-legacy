@@ -18,7 +18,9 @@ namespace nocontrol {
 
 using namespace ff;
 
-// Dispatch any events whose timers have expired.
+/// Check to see if which timers have expired, if any. For each expired
+/// timer, notify its corresponding handler and remove the timer from
+/// the queue.
 void
 Timer_queue::dispatch() {
   Time_point t = now();
