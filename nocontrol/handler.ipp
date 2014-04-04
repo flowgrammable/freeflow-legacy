@@ -25,25 +25,25 @@ Handler::Handler(ff::Resource& r)
   : r_(r) { }
 
 inline bool 
-Handler::open() { return true; }
+Handler::on_open(Reactor&) { return true; }
 
 inline bool 
-Handler::close() { return true; }
+Handler::on_close(Reactor&) { return true; }
 
-inline Result
-Handler::on_read() { return CONTINUE; }
+inline bool
+Handler::on_read(Reactor&) { return true; }
 
-inline Result
-Handler::on_write() { return CONTINUE; }
+inline bool
+Handler::on_write(Reactor&) { return true; }
 
-inline Result
-Handler::on_error() { return CONTINUE; }
+inline bool
+Handler::on_error(Reactor&) { return true; }
 
-inline Result
-Handler::on_time() { return CONTINUE; }
+inline bool
+Handler::on_time(Reactor&) { return true; }
 
-inline Result
-Handler::on_signal() { return CONTINUE; }
+inline bool
+Handler::on_signal(Reactor&) { return true; }
 
 inline int 
 Handler::fd() const { return r_.fd(); }
@@ -95,7 +95,7 @@ Handler_registry::max() const { return max_; }
 /// open() returns false, the handler is not added, and the function
 /// returns false.
 inline bool
-Handler_registry::add(Handler* h) {
+Handler_registry::add(Reactor& r, Handler* h) {
   assert(0 <= h->fd() and h->fd() < FD_SETSIZE);
   assert((*this)[h->fd()] == nullptr);
   
@@ -111,7 +111,7 @@ Handler_registry::add(Handler* h) {
 
   // Try to open the handler. Changes are committed if this
   // succeeds and rolled back if it fails.
-  if (not h->open()) {
+  if (not h->on_open(r)) {
     (*this)[h->fd()] = nullptr;
     --active_;
     wait_.read.remove(h->fd());
@@ -132,12 +132,12 @@ Handler_registry::add(Handler* h) {
 /// recycle fds, but if active is very low and max is very high, then
 /// we're going to have a very sparse list.
 inline bool 
-Handler_registry::remove(Handler* h) {
+Handler_registry::remove(Reactor& r, Handler* h) {
   assert(0 <= h->fd() and h->fd() < FD_SETSIZE);
   (*this)[h->fd()] = nullptr; 
   --active_;
   wait_.read.remove(h->fd());
-  h->close();
+  h->on_close(r);
   return true;
 }
 

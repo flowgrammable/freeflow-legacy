@@ -27,16 +27,20 @@ using Time_point = std::chrono::high_resolution_clock::time_point;
 using Duration = std::chrono::high_resolution_clock::duration;
 
 // Units of time
+using Hours        = std::chrono::hours;
+using Minutes      = std::chrono::minutes;
 using Seconds      = std::chrono::seconds;
 using Milliseconds = std::chrono::milliseconds;
 using Microseconds = std::chrono::microseconds;
 using Nanoseconds  = std::chrono::nanoseconds;
 
 // User-defined literals.
-constexpr Seconds operator"" _s(unsigned long long n);
-constexpr Milliseconds operator"" _ms(unsigned long long n);
-constexpr Microseconds operator"" _us(unsigned long long n);
-constexpr Nanoseconds operator"" _ns(unsigned long long n);
+constexpr Hours operator"" _h(unsigned long long);
+constexpr Minutes operator"" _m(unsigned long long);
+constexpr Seconds operator"" _s(unsigned long long);
+constexpr Milliseconds operator"" _ms(unsigned long long);
+constexpr Microseconds operator"" _us(unsigned long long);
+constexpr Nanoseconds operator"" _ns(unsigned long long);
 
 // Operations
 Time_point now();

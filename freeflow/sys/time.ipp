@@ -14,6 +14,12 @@
 
 namespace freeflow {
 
+constexpr Hours
+operator"" _h(unsigned long long n) { return Hours(n); }
+
+constexpr Minutes
+operator"" _m(unsigned long long n) { return Minutes(n); }
+
 constexpr Seconds
 operator"" _s(unsigned long long n) { return Seconds(n); }
 
@@ -25,8 +31,6 @@ operator"" _us(unsigned long long n) { return Microseconds(n); }
 
 constexpr Nanoseconds
 operator"" _ns(unsigned long long n) { return Nanoseconds(n); }
-
-
 
 /// Returns the current time, measured by the system's high 
 /// resolution clock.

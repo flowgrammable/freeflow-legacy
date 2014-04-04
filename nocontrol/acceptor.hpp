@@ -18,6 +18,7 @@
 #include <freeflow/sys/socket.hpp>
 
 #include <nocontrol/handler.hpp>
+#include <nocontrol/reactor.hpp>
 
 namespace nocontrol {
 
@@ -27,7 +28,7 @@ struct Acceptor : Resource_handler<ff::Socket> {
   Acceptor(const ff::Address& a);
 
   // Events
-  Result on_read();
+  bool on_read(Reactor&);
 };
 
 } // namesapce nocontrol

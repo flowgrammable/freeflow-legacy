@@ -13,13 +13,3 @@
 // permissions and limitations under the License.
 
 #include "handler.hpp"
-
-namespace nocontrol {
-
-// Return the global handler registry.
-static Handler_registry reg_;
-
-Handler_registry&
-Handler_registry::instance() { return reg_; }
-
-} // namespace nocontrol

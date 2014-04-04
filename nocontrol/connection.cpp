@@ -26,7 +26,7 @@ namespace nocontrol {
 // Create a version negotiation state machine so we know what version
 // we should accept.
 bool
-Connection::open() {
+Connection::on_open(Reactor&) {
   proto_ = new ofp::Protocol();
   
   // FIXME: Error checking.
@@ -36,29 +36,26 @@ Connection::open() {
 
 // Shutdown the state machine and delete the handler.
 bool 
-Connection::close() { 
+Connection::on_close(Reactor&) { 
   delete this;
   return true; 
 }
 
-
-Result 
-Connection::on_read() {
+/// When data is available, read as many messages as possibly and send
+/// them to the state machine.
+bool
+Connection::on_read(Reactor&) {
   if (not read())
-    return STOP;
+    return false;
   proto_->message();
   if (not write())
-    return STOP;
-  
-  return CONTINUE;
+    return false;
+  return true;
 }
-
-Result
-Connection::on_write() { return CONTINUE; }
 
 
 // FIXME: This is incredibly brittle, and its slow. First, each message
-// requires 2 reads and 2 allocations (ouch). Second, we may not actually
+// requires twp reads and two allocations. Second, we may not actually
 // receive everything in each read, meaning we're going to miss data.
 // Third, error handling is totally broken.
 //

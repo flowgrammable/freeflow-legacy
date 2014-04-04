@@ -12,31 +12,38 @@
 // or implied. See the License for the specific language governing
 // permissions and limitations under the License.
 
+#include <iostream>
+
 #include <freeflow/sys/error.hpp>
 
 #include "acceptor.hpp"
 #include "connection.hpp"
 
+using namespace ff;
+
 namespace nocontrol {
 
 // When data is available for reading, accept the connection
 // and spawn a new handler.
-Result 
-Acceptor::on_read() {
-  Handler_registry& handlers = Handler_registry::instance();
-
+bool
+Acceptor::on_read(Reactor& r) {
   // FIXME: The error handling stuff is not good.
+  Connection* c;
   try {
-    Connection* c = new Connection(rc().accept());
-    handlers.add(c);
-  } catch(ff::System_error&) {
+    c = new Connection(rc().accept());
+  } catch(System_error&) {
     perror("error");
-    return EXIT;
+    r.stop();
+    return false;
   } catch(std::runtime_error& err) {
     std::cout << err.what() << '\n';
-    return EXIT;
+    r.stop();
+    return false;
   }
-  return CONTINUE;
+
+  // Register the connection.
+  r.add_handler(c);
+  return true;
 }
 
 } // namesapce nocontrol

@@ -12,30 +12,40 @@
 // or implied. See the License for the specific language governing
 // permissions and limitations under the License.
 
-#include <iostream>
+#ifndef NOCONTROL_REACTOR_HPP
+#define NOCONTROL_REACTOR_HPP
 
-#include "timer_queue.hpp"
-
-using namespace ff;
+#include <nocontrol/handler.hpp>
+#include <nocontrol/timer_queue.hpp>
 
 namespace nocontrol {
 
-/// Check to see if which timers have expired, if any. If any timers have
-/// expired, move them to the trigger queue for processing.
-void
-Timer_queue::process() {
-  Time_point t = now();
-  while (not empty() and top().time < t) {
-    trigger_.push_back(top());
-    pop();
-  }
-}
+/// The reactor provides 
+class Reactor {
+public:
+  Reactor();
+  ~Reactor();
 
-void
-Timer_queue::notify(Reactor& r) {
-  for (const Timer& t : trigger_)
-    t.handler->on_time(r);
-  trigger_.clear();
-}
+  // Handlers
+  void add_handler(Handler*);
+  void remove_handler(Handler*);
 
-} // namespace nocontrol
+  // Timers
+  void schedule_timer(Handler*, ff::Microseconds);
+  void cancel_timers(Handler*);
+
+  // Control
+  void run();
+  void stop();
+
+private:
+  bool             running_;
+  Handler_registry handlers_;
+  Timer_queue      timers_;
+};
+
+} // namesapce nocontrol
+
+#include <nocontrol/reactor.ipp>
+
+#endif

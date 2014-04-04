@@ -25,14 +25,7 @@
 
 namespace nocontrol {
 
-// Result codes for events.
-// TODO: Find a better name.
-enum Result {
-  CONTINUE = 0,
-  STOP = -1,
-  EXIT = -2
-};
-
+class Reactor;
 
 /// The Handler class defines the interface required by all specific 
 /// handler instances. An abstract handler is associated with a 
@@ -42,16 +35,14 @@ public:
   explicit Handler(ff::Resource&);
   virtual ~Handler() { }
 
-  // Open/close
-  virtual bool open();
-  virtual bool close();
-
-  // Event handlers
-  virtual Result on_read();
-  virtual Result on_write();
-  virtual Result on_error();
-  virtual Result on_time();
-  virtual Result on_signal();
+  // Events
+  virtual bool on_open(Reactor&);
+  virtual bool on_close(Reactor&);
+  virtual bool on_read(Reactor&);
+  virtual bool on_write(Reactor&);
+  virtual bool on_error(Reactor&);
+  virtual bool on_time(Reactor&);
+  virtual bool on_signal(Reactor&);
 
   // Observers
   int fd() const;
@@ -92,27 +83,28 @@ template<typename T>
   };
 
 /// The handler registry maintains the set of handlers registered
-/// for the reactor loop.
+/// for the reactor loop. The set maintained by the registery is sparse;
+/// iteration over the set may include traversal over null pointers.
 ///
-/// \todo This could also house the wait set, the fd set that describes
-/// what the handler is waiting on.
-///
-/// \todo The size is currently limited to fd_setsize, which limits
+/// \todo The size is currently limited to FD_SETSIZE, which limits
 /// the number of connections to 1024. That may be too small.
+///
+/// \todo Consider a more efficient structure for representing the
+/// set. It would be ideal if iteration required as many increments
+/// as elements in the set. Note that std::set may be too slow.
+///
+/// \todo Find a way to break the coupling with the reactor.
 struct Handler_registry : std::vector<Handler*> {
   Handler_registry();
 
   // Registration
-  bool add(Handler* h);
-  bool remove(Handler* h);
+  bool add(Reactor& r, Handler* h);
+  bool remove(Reactor& r, Handler* h);
 
   int max() const;
 
   // Wait set
   const ff::Select_set& wait() const;
-
-  // Singleton access
-  static Handler_registry& instance();
 
 private:
   int            active_;

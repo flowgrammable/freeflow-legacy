@@ -59,15 +59,14 @@ inline
 void 
 Timer_queue::cancel(Handler* h) {
   auto i = std::remove_if(heap_.begin(), heap_.end(), [h](const Timer& t) { 
-    return t.handler == h; }
-  );
+    return t.handler == h; 
+  });
   heap_.erase(i, heap_.end());
   std::sort_heap(heap_.begin(), heap_.end(), Timer_less{});
 }
 
 /// Returns true if the heap contains no timers.
-inline
-bool
+inline bool
 Timer_queue::empty() const { return heap_.empty(); }
 
 /// Returns the timer at the top of the non-empty heap.

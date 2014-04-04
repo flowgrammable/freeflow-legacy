@@ -34,11 +34,9 @@ public:
 
   Connection(ff::Socket&& s);
 
-  bool open();
-  bool close();
-
-  Result on_read();
-  Result on_write();
+  bool on_open(Reactor&);
+  bool on_close(Reactor&);
+  bool on_read(Reactor&);
 
 private:
   bool read();

@@ -28,9 +28,11 @@ using namespace std;
 using namespace freeflow;
 using namespace nocontrol;
 
-
 // This handler is responsible for watching for the end of
-// file from an open file.
+// file from an open file. 
+//
+// This is primarily intended for debugging purposes. Really, we should
+// be trapping signals and shutting down that way instead.
 struct Terminator : Resource_handler<Resource> {
   Terminator(int fd)
     : Resource_handler<Resource>(fd) { }
@@ -40,53 +42,17 @@ struct Terminator : Resource_handler<Resource> {
 
   // If there is no more data to read, indicate that we want
   // to terminate the reactor loop.
-  Result on_read() {
+  bool on_read(Reactor& r) {
     char c[1024];
     if (read(rc(), &c, 1024) <= 0) {
       std::cout << "shutting down\n";
-      return EXIT;
+      r.stop();
+      return false;
     }
-    return CONTINUE;
+    return true;
   }
 };
 
-
-void
-register_handlers(Resource_set& rs, const Handler_registry& r) {
-  for (Handler* h : r)
-    if (h) rs.insert(h->fd());
-}
-
-bool
-notify_read(Handler* h, const Resource_set& read, Resource_set& close) {
-  if (read.test(h->fd())) {
-    Result r = h->on_read();
-    if (r == STOP)
-      close.insert(h->fd());
-    else if (r == EXIT)
-      return true;
-  }
-  return false;
-}
-
-bool
-notify_handlers(Handler_registry& r, const Select_set& ss, Resource_set& close) {
-  bool exit = false;
-  for (Handler* h : r)
-    if (h) {
-      // TODO: Test the write and error sets also.
-      exit |= notify_read(h, ss.read, close);
-    }
-  return exit;
-}
-
-void
-close_handlers(Handler_registry& r, const Resource_set& close) {
-   for (Handler* h : r) {
-    if (h and close.test(h->fd()))
-      r.remove(h);
-  } 
-}
 
 int 
 main(int argc, char* argv[]) {
@@ -98,35 +64,10 @@ main(int argc, char* argv[]) {
   // Listen for ^D on stdin so we can shutdown easily.
   Terminator term(0);
 
-  // Register default service handlers.
-  Handler_registry& handlers = Handler_registry::instance();
-  handlers.add(&term);
-  handlers.add(&acc);
-
-  bool done = false;
-  while (not done) {
-    // Select on the registered handlers. Only wait 10 ms for
-    // an event to trigger.
-    Select_set disp = handlers.wait();
-    Selector s(handlers.max() + 1, disp);    
-    s(10_ms);
-
-    // Close any handlers that need to removed from the
-    // registry and closed.
-    Resource_set close;
-    done = notify_handlers(handlers, disp, close);
-
-    // Before exiting, close any outstanding handlers
-    close_handlers(handlers, close);
-  } // while(not done)
-
-
-  // Close all handlers.
-  // FIXME: This should probably run in reverse, but maybe not...
-  for (Handler* h : handlers) {
-    if (h)
-      handlers.remove(h);
-  }
+  Reactor r;
+  r.add_handler(&term);
+  r.add_handler(&acc);
+  r.run();
 
   return 0;
 }
