@@ -40,7 +40,7 @@ inline bool
 Handler::on_error(Reactor&) { return true; }
 
 inline bool
-Handler::on_time(Reactor&) { return true; }
+Handler::on_time(Reactor&, int) { return true; }
 
 inline bool
 Handler::on_signal(Reactor&) { return true; }

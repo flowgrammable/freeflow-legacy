@@ -41,7 +41,7 @@ public:
   virtual bool on_read(Reactor&);
   virtual bool on_write(Reactor&);
   virtual bool on_error(Reactor&);
-  virtual bool on_time(Reactor&);
+  virtual bool on_time(Reactor&, int);
   virtual bool on_signal(Reactor&);
 
   // Observers

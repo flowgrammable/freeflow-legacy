@@ -24,21 +24,21 @@ Reactor::add_handler(Handler* h) {
 /// are canceled before removing the handler.
 inline void
 Reactor::remove_handler(Handler* h) { 
-  cancel_timers(h);
+  timers_.cancel(h);
   handlers_.remove(*this, h); 
 }
 
 /// Schedule a timer for the handler. The handler must be registered
 /// with the reactor.
 inline void
-Reactor::schedule_timer(Handler* h, ff::Microseconds us) {
-  timers_.schedule(h, us);
+Reactor::schedule_timer(Handler* h, int id, ff::Microseconds us) {
+  timers_.schedule(h, id, us);
 }
 
 /// Cancel all timers associated with the handler.
 inline void
-Reactor::cancel_timers(Handler* h) {
-  timers_.cancel(h);
+Reactor::cancel_timer(Handler* h, int id) {
+  timers_.cancel(h, id);
 }
 
 /// Stop the reactor from running.

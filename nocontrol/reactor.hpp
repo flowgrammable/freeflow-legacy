@@ -31,8 +31,8 @@ public:
   void remove_handler(Handler*);
 
   // Timers
-  void schedule_timer(Handler*, ff::Microseconds);
-  void cancel_timers(Handler*);
+  void schedule_timer(Handler*, int, ff::Microseconds);
+  void cancel_timer(Handler*, int);
 
   // Control
   void run();

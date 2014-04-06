@@ -28,9 +28,9 @@ namespace nocontrol {
 /// The Timer_queue is allows handlers to be scheduled for timeout 
 /// events. The timer has microsecond granularity.
 ///
-/// The timer queue is run in two phases. First timers are proccessed
-/// to determine which, if any, have triggered. Second, the handlers of
-/// triggered timers are notified. 
+/// A timer is scheduled with a handler and an identifier. The identifier
+/// is an integer value that designates the purpose of the timer for the
+/// application. This value is passed to the handler on notification.
 ///
 /// \todo This should be freeflow.
 ///
@@ -41,15 +41,18 @@ namespace nocontrol {
 class Timer_queue {
   struct Timer;
   struct Timer_less;
+
+  using Timer_list = std::vector<Timer>;
 public:
+  Timer_queue();
+
   // Scheduling
-  void schedule(Handler*, ff::Microseconds);
+  void schedule(Handler*, int, ff::Microseconds);
+  void cancel(Handler*, int);
   void cancel(Handler*);
 
   // Dispatch.
-  void process();
-  void notify(Reactor&);
-
+  void dispatch(Reactor&);
 
   // Observers
   bool empty() const;
@@ -58,12 +61,12 @@ private:
   Timer&       top();
   const Timer& top() const;
 
-  void push(Handler*, ff::Time_point);
+  void push(Handler*, int, ff::Time_point);
   void pop();
 
 private:
-  std::vector<Timer> heap_;    // The actual queue
-  std::vector<Timer> trigger_; // Triggered timers
+  Timer_list heap_;    // The actual queue
+  Timer_list trigger_; // Triggered timers
 };
 
 } // namespace nocontrol

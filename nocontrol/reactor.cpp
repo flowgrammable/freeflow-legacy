@@ -77,8 +77,7 @@ Reactor::run() {
     notify_handlers(*this, handlers_, dispatch, close);
 
     // Trigger any timers that may have expired.
-    timers_.process();
-    timers_.notify(*this);
+    timers_.dispatch(*this);
 
     // Before exiting, close any outstanding handlers
     close_handlers(*this, handlers_, close);

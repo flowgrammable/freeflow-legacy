@@ -21,18 +21,16 @@ namespace nocontrol {
 
 /// A timer is used internally by the timer queue.
 struct Timer_queue::Timer {
-  Timer(Handler*, ff::Time_point);
+  Timer(Handler*, int, ff::Time_point);
 
-  /// The handler to be notified when a timer triggers.
-  Handler* handler;
-
-  /// The time when the timer should trigger.
-  ff::Time_point time;
+  Handler* handler;    // The registered handler
+  int id;              // The timer id
+  ff::Time_point time; // When the timer will trigger
 };
 
 inline
-Timer_queue::Timer::Timer(Handler* h, ff::Time_point t) 
-  : handler(h), time(t) { }
+Timer_queue::Timer::Timer(Handler* h, int id, ff::Time_point t) 
+  : handler(h), id(id), time(t) { }
 
 // Defines less than for timers.
 struct Timer_queue::Timer_less {
@@ -45,24 +43,48 @@ struct Timer_queue::Timer_less {
 // -------------------------------------------------------------------------- //
 // Timer queue
 
-/// Schedule a timer to trigger in some amount of time from now.
-inline void 
-Timer_queue::schedule(Handler* h, ff::Microseconds ms) { 
-  push(h, ff::now() + ms); 
+inline 
+Timer_queue::Timer_queue() 
+  : heap_(), trigger_()
+{
+  heap_.reserve(64);
+  trigger_.reserve(32);
 }
 
-/// Removes all timers associated with the handler.
+/// Schedule a timer to trigger in some amount of time from now. Note that
+/// the handler/id pair not already be in the queue.
+///
+/// \todo Implement a predicate that asserts the precondition.
+inline void 
+Timer_queue::schedule(Handler* h, int id, ff::Microseconds ms) { 
+  push(h, id, ff::now() + ms); 
+}
+
+/// Removes the timer associated with the handler that has the given id.
 ///
 /// \todo This is not efficient. It should be more efficient if
 /// the heap allowed updating (i.e., a mutable heap).
-inline
-void 
-Timer_queue::cancel(Handler* h) {
-  auto i = std::remove_if(heap_.begin(), heap_.end(), [h](const Timer& t) { 
-    return t.handler == h; 
+inline void
+Timer_queue::cancel(Handler* h, int id) {
+  auto i = std::find_if(heap_.begin(), heap_.end(), [h, id](const Timer& t) {
+    return t.handler == h and t.id == id;
   });
-  heap_.erase(i, heap_.end());
-  std::sort_heap(heap_.begin(), heap_.end(), Timer_less{});
+  if (i != heap_.end()) {
+    heap_.erase(i);
+    std::sort_heap(heap_.begin(), heap_.end(), Timer_less{});
+  }
+}
+
+/// Removes all timers associated with the handler.
+inline void
+Timer_queue::cancel(Handler* h) {
+  auto i = std::remove_if(heap_.begin(), heap_.end(), [h](const Timer& t) {
+    return t.handler == h;
+  });
+  if (i != heap_.end()) {
+    heap_.erase(i, heap_.end());
+    std::sort_heap(heap_.begin(), heap_.end(), Timer_less{});
+  }
 }
 
 /// Returns true if the heap contains no timers.
@@ -77,8 +99,8 @@ inline const Timer_queue::Timer&
 Timer_queue::top() const { return heap_.front(); }
 
 inline void
-Timer_queue::push(Handler* h, ff::Time_point t) {
-  heap_.emplace_back(h, t);
+Timer_queue::push(Handler* h, int id, ff::Time_point t) {
+  heap_.emplace_back(h, id, t);
   std::push_heap(heap_.begin(), heap_.end(), Timer_less{});
 }
 

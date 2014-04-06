@@ -20,21 +20,20 @@ using namespace ff;
 
 namespace nocontrol {
 
-/// Check to see if which timers have expired, if any. If any timers have
-/// expired, move them to the trigger queue for processing.
+/// Check to see if which timers have expired, if any. Notify registered
+/// handlers of the triggered timer.
 void
-Timer_queue::process() {
+Timer_queue::dispatch(Reactor& r) {
+  // Move triggered timers to the a different queue.
   Time_point t = now();
   while (not empty() and top().time < t) {
     trigger_.push_back(top());
     pop();
   }
-}
 
-void
-Timer_queue::notify(Reactor& r) {
+  // Notify timers in that queue and clear it.
   for (const Timer& t : trigger_)
-    t.handler->on_time(r);
+    t.handler->on_time(r, t.id);
   trigger_.clear();
 }
 
