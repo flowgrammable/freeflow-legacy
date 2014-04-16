@@ -12,10 +12,10 @@
 # or implied. See the License for the specific language governing
 # permissions and limitations under the License.
 
-# Ensure that the the top-level dir is in the inclue path
-# for all projects built at this level.
-include_directories(${CMAKE_SOURCE_DIR})
+set(src controller.cpp
+        switch.cpp)
 
-add_subdirectory(sys)
-add_subdirectory(nbi)
-add_subdirectory(proto)
+set(hdr controller.hpp
+        switch.hpp)
+
+add_library(freeflow_nbi ${src})
