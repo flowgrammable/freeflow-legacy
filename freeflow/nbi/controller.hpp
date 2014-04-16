@@ -15,6 +15,26 @@
 #ifndef NBI_CONTROLLER_HPP
 #define NBI_CONTROLLER_HPP
 
+#include <unordered_map>
+
+namespace nbi {
+
+struct Switch;
+
+/// The Controller class represents...
+class Controller {
+  using std::unordered_map<std::size_t, Switch*> Switch_map;
+
+  void connect(Switch*);
+  void disconnect(Switch*);
+
+private:
+  Switch_map switches_;
+};
+
+} // namespace nbi
+
+#include "controller.ipp"
 
 #endif
 

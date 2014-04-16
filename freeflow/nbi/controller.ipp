@@ -12,17 +12,9 @@
 // or implied. See the License for the specific language governing
 // permissions and limitations under the License.
 
-#ifndef NBI_SWITCH_HPP
-#define NBI_SWITCH_HPP
-
 namespace nbi {
 
-/// A Switch represents a connected physical packet switching device.
-class Switch {
-
-};
-
-} // namespace
+} // namespace nbi
 
 #endif
 
