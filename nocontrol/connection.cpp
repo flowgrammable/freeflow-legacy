@@ -23,45 +23,6 @@ using namespace freeflow;
 
 namespace nocontrol {
 
-/// Create a version negotiation state machine so we know what version
-/// we should accept.
-///
-/// \todo Error checking.
-bool
-Connection::on_open(Reactor&) {
-  proto_ = new ofp::Protocol();
-  proto_->on_open();
-  return write();
-}
-
-/// Shutdown the state machine and delete the handler.
-bool 
-Connection::on_close(Reactor&) { 
-  proto_->on_close();
-  delete this;
-  return true; 
-}
-
-/// When data is available, read as many messages as possibly and send
-/// them to the state machine.
-///
-/// \todo Error checking.
-bool
-Connection::on_read(Reactor&) {
-  if (not read()) 
-    return false;
-  proto_->on_recv();
-  return write();
-}
-
-/// When a timeout occurs, notify the protocol of the expired timer.
-bool
-Connection::on_time(Reactor& r, int t) {
-  proto_->on_time(t);
-  return write();
-}
-
-
 // Read from the socket to put message data into the read queue.
 //
 // FIXME: This is incredibly brittle, and its slow. First, each message

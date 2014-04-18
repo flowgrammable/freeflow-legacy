@@ -27,6 +27,9 @@
 namespace freeflow {
 namespace ofp {
 
+/// Represents an empty message component. No additional data is provided
+/// beyond a header.
+struct Empty { };
 
 /// The String class is a statically sized C-string whose contents are
 /// zero-filled. Note that this class does not provide the features typical
@@ -90,6 +93,7 @@ struct Ipv6_addr {
   Uint8 addr[16];
 };
 
+
 /// The OpenFlow header is found at the front of every OpenFlow message.
 struct Header {
   Uint8 version;
@@ -107,11 +111,15 @@ struct Header {
 
 // Bytes
 
+std::size_t bytes(const Buffer&);
+
 template<typename T, typename = Requires<Integral<T>()>>
   constexpr std::size_t bytes(T);
 
 template<typename T, std::size_t N>
   constexpr std::size_t bytes(const T(&)[N]);
+
+constexpr std::size_t bytes(const Empty&);
 
 template<std::size_t N>
   constexpr std::size_t bytes(const String<N>&);
@@ -119,7 +127,6 @@ template<std::size_t N>
 template<typename T>
   std::size_t bytes(const Sequence<T>&);
 
-std::size_t bytes(const Buffer&);
 constexpr std::size_t bytes(const Mac_addr&);
 constexpr std::size_t bytes(const Ipv4_addr&);
 constexpr std::size_t bytes(const Ipv6_addr&);
@@ -127,6 +134,7 @@ constexpr std::size_t bytes(const Header&);
 
 // To view
 
+Error to_view(View&, const Empty&);
 Error to_view(View&, Uint8);
 Error to_view(View&, Uint16);
 Error to_view(View&, Uint32);
@@ -137,6 +145,7 @@ template<typename T, typename = Requires<Enum<T>()>>
 
 template<typename T, std::size_t N>
   Error to_view(View&, const T(&)[N]);
+
 
 template<std::size_t N>
   Error to_view(View&, const String<N>&);
@@ -152,6 +161,7 @@ Error to_view(View&, const Header&);
 
 // From view
 
+Error from_view(View&, Empty&);
 Error from_view(View&, Uint8&);
 Error from_view(View&, Uint16&);
 Error from_view(View&, Uint32&);

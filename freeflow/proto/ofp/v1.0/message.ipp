@@ -36,9 +36,6 @@ Header::Header(Message_type t, Uint16 n, Uint32 x)
 
 // Bytes
 
-constexpr std::size_t
-bytes(const Empty&) { return 0; }
-
 inline std::size_t 
 bytes(const Hello& m) { return m.data.size(); }
 
@@ -98,16 +95,6 @@ inline std::size_t
 bytes(const Message& m) { 
   return bytes(m.header) + bytes(m.payload, Message_type(m.header.type)); 
 }
-
-// To view
-
-inline Errc
-to_view(View&, const Empty&) { return {}; }
-
-// From view
-
-inline Errc
-from_view(View&, Empty&) { return {}; }
 
 // Validation
 

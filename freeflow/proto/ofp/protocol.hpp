@@ -19,6 +19,7 @@
 
 #include <freeflow/sys/buffer.hpp>
 #include <freeflow/sys/time.hpp>
+#include <freeflow/sys/reactor.hpp>
 #include <freeflow/proto/ofp/ofp.hpp>
 
 namespace freeflow {
@@ -61,6 +62,9 @@ struct Config {
   /// The highest version of the protocol supported.
   Uint8 version = 0;
 
+  /// Connection timeout for hello message.
+  Seconds hello_timeout = 10_s;
+
   /// Connection timeout for echo messages.
   Seconds echo_timeout = 60_s;
 
@@ -83,6 +87,7 @@ struct Protocol_handler {
   virtual void wait_feature() = 0;
 };
 
+
 /// The Protocol represents phases of a more general protocol.
 /// OpenFlow defines a number of distinct protocols, each exchanging
 /// different messages. Each version of the standard defines a different
@@ -94,22 +99,26 @@ struct Protocol_handler {
 ///
 /// TODO: These all take a time argument.
 class Protocol {
-  using Handler = Protocol_handler;
+  using Version = Protocol_handler;
 
   enum State {
-    WAIT_HELLO,
-    WAIT_FEATURE,
+    CLOSED,
+    HANDSHAKE,
+    HELLO,
+    FEATURE,
   };
 
 public:
-  void on_open();
-  void on_close();
-  void on_recv();
-  void on_time(int);
+  Protocol(Handler*);
+
+  bool on_open(Reactor&);
+  bool on_close(Reactor&);
+  bool on_recv(Reactor&);
+  bool on_time(Reactor&, int);
 
   // Read/write helper functions
-  template<typename H, typename P>
-    void put_message(const H& h, const P& p);
+  template<typename P>
+    void put_message(const P& p);
 
   template<typename H>
     void peek_header(H& h);
@@ -117,22 +126,28 @@ public:
   template<typename H, typename P>
     void get_payload(const H&, P& p);
 
+  // Message queue
   Message_queue read;
   Message_queue write;
 
-  void to_hello();
-  void wait_hello();
+private:
+  Uint32 xid();
+  Version* negotiate(Uint8);
+
+  bool initial_recv(Reactor&);
+  bool initial_time(Reactor&);
   void to_feature();
   void wait_feature();
   void to_established();
 
-private:
-  Handler* negotiate(Uint8);
-
+  Handler* handler_;
   Config   config_;
   Uint8    version_;
   State    state_;
-  Handler* proto_;
+  Version* proto_;
+
+  Uint32   xid_;       // The curent transaction id
+  int      timer_ = 0; // A basic timer
 };
 
 } // ofp

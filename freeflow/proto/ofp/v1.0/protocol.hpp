@@ -43,7 +43,7 @@ struct Handler : ofp::Protocol_handler {
   void wait_feature();
 
 
-  Protocol proto_;
+  Protocol& proto_;
 };
 
 } // namespace v1_0

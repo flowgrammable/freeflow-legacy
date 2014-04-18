@@ -20,26 +20,26 @@ namespace v1_0 {
 
 void 
 Handler::to_feature() {
-  Empty p;
-  Header h(FEATURE_REQUEST, bytes(p), 0);
-  put_message(h, p);
+  // Empty p;
+  // Header h(FEATURE_REQUEST, bytes(p), 0);
+  // put_message(h, p);
 }
 
 void 
 Handler::wait_feature() {
-  Header h;
-  peek_header(h);
+  // Header h;
+  // peek_header(h);
 
-  // FIXME: Error handling.
-  if (h.type != FEATURE_REPLY) {
-    return;
-  }
+  // // FIXME: Error handling.
+  // if (h.type != FEATURE_REPLY) {
+  //   return;
+  // }
   
-  // Get the feature... and do what?
-  Feature m;
-  get_payload(h, m);
+  // // Get the feature... and do what?
+  // Feature m;
+  // get_payload(h, m);
 
-  proto_.to_established();
+  // proto_.to_established();
 }
 
 } // namespace v1_0

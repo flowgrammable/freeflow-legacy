@@ -22,72 +22,80 @@
 namespace freeflow {
 namespace ofp {
 
-void 
-Protocol::on_open() { to_hello(); }
+bool 
+Protocol::on_open(Reactor& r) { 
+  state_ = HANDSHAKE;
 
-void 
-Protocol::on_close() { }
+  // Send the hello message.
+  put_message(v1_0::Hello());
 
-void
-Protocol::on_recv() {
-  if (state_ == WAIT_HELLO)
-    wait_hello();
-  else if (state_ == WAIT_FEATURE)
-    wait_feature();
-  else
-    // Whatever else we do depends on the protocol version.
-    return;
+  // Install a timeout timer.
+  r.schedule_timer(handler_, timer_, config_.hello_timeout);
+
+  return true;
 }
 
-void
-Protocol::on_time(int t) { 
+bool
+Protocol::on_close(Reactor&) {
+  return true;
 }
 
-
-void
-Protocol::to_hello() {
-  // FIXME: The hello message needs to be the highest version
-  // of the protocol supported.
-  //
-  // We could just require the highest version of the protocol
-  // to support version negotiation. 
-  v1_0::Hello m;
-  v1_0::Header h(v1_0::HELLO, bytes(m), 0);
-  write.put_message(h, m);
-
-  state_ = WAIT_HELLO;
+bool
+Protocol::on_recv(Reactor& r) {
+  if (state_ == HANDSHAKE)
+    return initial_recv(r);
+  return true;
 }
 
-// Respond to a message while waiting for a hello message.
-void
-Protocol::wait_hello() {
+bool
+Protocol::on_time(Reactor& r, int t) { 
+  if (state_ == HANDSHAKE)
+    return initial_time(r);
+  return true;
+}
+
+bool
+Protocol::initial_recv(Reactor& r) {
   Header h;
   read.peek_header(h);
 
   // FIXME: Error handling. Also, make sure that HELLO is the same value
   // for each protocol. It could possibly change from version to version.
   if (h.type != v1_0::HELLO)
-    return;
+    return false;
 
-  proto_ = negotiate(h.version);
-  to_feature();
+  // proto_ = negotiate(h.version);
+  // to_feature();
+  return true;
 }
 
-void
-Protocol::to_feature() { 
-  proto_->to_feature(); 
-  state_ = WAIT_FEATURE;
+bool
+Protocol::initial_time(Reactor& r) {
+  // FIXME: We need to shutdown.
+  return true;
 }
 
-void
-Protocol::wait_feature() {
-  proto_->wait_feature(); 
-}
 
-void
-Protocol::to_established() {
-  // FIXME: Set up requests for timers.
-}
+// // open -> hello
+// void
+// Protocol::hello() {
+// }
+
+// void
+// Protocol::to_feature() { 
+//   proto_->to_feature(); 
+//   state_ = WAIT_FEATURE;
+// }
+
+// void
+// Protocol::wait_feature() {
+//   proto_->wait_feature(); 
+// }
+
+// void
+// Protocol::to_established() {
+//   // FIXME: Set up requests for timers.
+// }
 
 
 // Configure the protocol version.
@@ -95,7 +103,7 @@ Protocol::to_established() {
 //
 // FIXME: We have to do some stuff with version bitmaps
 // here... not sure what.
-Protocol::Handler*
+Protocol::Version*
 Protocol::negotiate(Uint8 v) {
   version_ = std::min(config_.version, v);
   switch (version_) {

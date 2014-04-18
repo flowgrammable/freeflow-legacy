@@ -72,10 +72,25 @@ template<typename H, typename P>
     pop();
   }
 
+// -------------------------------------------------------------------------- //
+// Protocol
 
-template<typename H, typename P>
+inline
+Protocol::Protocol(Handler* h)
+  : handler_(h), config_(), version_(config_.version), state_(CLOSED)
+  , proto_(nullptr)
+{ }
+
+
+// FIXME: Super broken!
+template<typename P>
   inline void 
-  Protocol::put_message(const H& h, const P& p) { write.put_message(h, p); }
+  Protocol::put_message(const P& p) {
+    Header h {
+      version_, Uint8(0), Uint16(bytes(h) + bytes(p)), xid()
+    };
+    write.put_message(h, p); 
+  }
 
 template<typename H>
   inline void 
@@ -85,6 +100,13 @@ template<typename H, typename P>
   inline void 
   Protocol::get_payload(const H& h, P& p) { read.get_payload(h, p); }
 
+/// Generate the next xid.
+///
+/// \todo There must be a better strategy than just this. The only real
+/// requirement is that no two requests have the same xid. Otherwise, it
+/// may not matter.
+inline Uint32
+Protocol::xid() { return xid_++; }
 
 } // ofp
 } // freeflow

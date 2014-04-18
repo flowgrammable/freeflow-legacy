@@ -87,6 +87,11 @@ template<std::size_t N>
 // -------------------------------------------------------------------------- //
 // Bytes
 
+/// Returns the number of bytes required by the empty element. This is
+/// always 0.
+constexpr std::size_t
+bytes(const Empty&) { return 0; }
+
 /// Returns the number of bytes required by the integral type. This
 /// is the same as its size.
 template<typename T, typename = Requires<Integral<T>()>>
@@ -130,6 +135,10 @@ bytes(const Header&) { return 8; }
 
 // -------------------------------------------------------------------------- //
 // To view
+
+/// Writes an empty structure to a view.
+inline Error
+to_view(View&, const Empty&) { return {}; }
 
 inline Error
 to_view(View& v, Uint8 n) {
@@ -208,6 +217,10 @@ to_view(View& v, const Ipv6_addr& a) { return to_view(v, a.addr); }
 
 // -------------------------------------------------------------------------- //
 // From view
+
+/// Reads an empty structure from a view.
+inline Error
+from_view(View&, Empty&) { return {}; }
 
 inline Error
 from_view(View& v, Uint8& n) {

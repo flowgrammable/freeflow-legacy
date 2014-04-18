@@ -59,10 +59,6 @@ enum Message_type : Uint8 {
   QUEUE_GET_CONFIG_REPLY   = 21
 };
 
-/// Represents an empty message component. No additional data is provided
-/// beyond a header.
-struct Empty { };
-
 /// The Hello message is sent to negotiate the protocol version.
 ///
 /// TODO: Does this message need to be made version neutral?
@@ -323,7 +319,6 @@ using ofp::to_view;
 using ofp::from_view;
 using ofp::bytes;
 
-constexpr std::size_t bytes(const Empty&);
 std::size_t bytes(const Hello&);
 std::size_t bytes(const Error&);
 std::size_t bytes(const Echo&);
@@ -344,7 +339,6 @@ std::size_t bytes(const Payload&, Message_type);
 constexpr std::size_t bytes(const Header&);
 std::size_t bytes(const Message&);
 
-Errc to_view(View&, const Empty&);
 Errc to_view(View&, const Hello&);
 Errc to_view(View&, const Error&);
 Errc to_view(View&, const Echo&);
@@ -365,7 +359,6 @@ Errc to_view(View&, const Payload&, Message_type);
 Errc to_view(View&, const Header&);
 Errc to_view(View&, const Message&);
 
-Errc from_view(View&, Empty&);
 Errc from_view(View&, Hello&);
 Errc from_view(View&, Error&);
 Errc from_view(View&, Echo&);
