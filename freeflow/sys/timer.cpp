@@ -12,4 +12,26 @@
 // or implied. See the License for the specific language governing
 // permissions and limitations under the License.
 
-#include "handler.hpp"
+#include "timer.hpp"
+#include "reactor.hpp"
+
+namespace freeflow {
+
+/// Check to see if which timers have expired, if any. Notify registered
+/// handlers of the triggered timer.
+void
+Timer_queue::dispatch(Reactor& r) {
+  // Move triggered timers to the a different queue.
+  Time_point t = now();
+  while (not empty() and top().time < t) {
+    trigger_.push_back(top());
+    pop();
+  }
+
+  // Notify timers in that queue and clear it.
+  for (const Timer& t : trigger_)
+    t.handler->on_time(r, t.id);
+  trigger_.clear();
+}
+
+} // namespace freeflow

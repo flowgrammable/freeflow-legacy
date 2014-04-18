@@ -12,15 +12,16 @@
 // or implied. See the License for the specific language governing
 // permissions and limitations under the License.
 
-#ifndef NOCONTROL_REACTOR_HPP
-#define NOCONTROL_REACTOR_HPP
+#ifndef FREEFLOW_REACTOR_HPP
+#define FREEFLOW_REACTOR_HPP
 
-#include <nocontrol/handler.hpp>
-#include <nocontrol/timer_queue.hpp>
+#include <freeflow/sys/handler.hpp>
+#include <freeflow/sys/timer.hpp>
 
-namespace nocontrol {
+namespace freeflow {
 
-/// The reactor provides 
+/// The Reactor class implements an event processor that notifies handlers
+/// of resource events and availability, timer expiration, and signals.
 class Reactor {
 public:
   Reactor();
@@ -31,7 +32,7 @@ public:
   void remove_handler(Handler*);
 
   // Timers
-  void schedule_timer(Handler*, int, ff::Microseconds);
+  void schedule_timer(Handler*, int, Microseconds);
   void cancel_timer(Handler*, int);
 
   // Control
@@ -44,8 +45,8 @@ private:
   Timer_queue      timers_;
 };
 
-} // namesapce nocontrol
+} // namesapce freeflow
 
-#include <nocontrol/reactor.ipp>
+#include <freeflow/sys/reactor.ipp>
 
 #endif

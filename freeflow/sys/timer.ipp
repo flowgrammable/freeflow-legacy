@@ -14,22 +14,22 @@
 
 #include <algorithm>
 
-namespace nocontrol {
+namespace freeflow {
 
 // -------------------------------------------------------------------------- //
 // Timers
 
 /// A timer is used internally by the timer queue.
 struct Timer_queue::Timer {
-  Timer(Handler*, int, ff::Time_point);
+  Timer(Handler*, int, Time_point);
 
   Handler* handler;    // The registered handler
   int id;              // The timer id
-  ff::Time_point time; // When the timer will trigger
+  Time_point time; // When the timer will trigger
 };
 
 inline
-Timer_queue::Timer::Timer(Handler* h, int id, ff::Time_point t) 
+Timer_queue::Timer::Timer(Handler* h, int id, Time_point t) 
   : handler(h), id(id), time(t) { }
 
 // Defines less than for timers.
@@ -56,14 +56,17 @@ Timer_queue::Timer_queue()
 ///
 /// \todo Implement a predicate that asserts the precondition.
 inline void 
-Timer_queue::schedule(Handler* h, int id, ff::Microseconds ms) { 
-  push(h, id, ff::now() + ms); 
+Timer_queue::schedule(Handler* h, int id, Microseconds ms) { 
+  push(h, id, now() + ms); 
 }
 
 /// Removes the timer associated with the handler that has the given id.
 ///
 /// \todo This is not efficient. It should be more efficient if
-/// the heap allowed updating (i.e., a mutable heap).
+/// the heap allowed updating (i.e., a mutable heap). A simpler idea
+/// is to "deactivate" the timer by setting a flag indicating that it
+/// should not trigger. This works well unless the intent is to
+/// reschedule a timer with a known id.
 inline void
 Timer_queue::cancel(Handler* h, int id) {
   auto i = std::find_if(heap_.begin(), heap_.end(), [h, id](const Timer& t) {
@@ -99,7 +102,7 @@ inline const Timer_queue::Timer&
 Timer_queue::top() const { return heap_.front(); }
 
 inline void
-Timer_queue::push(Handler* h, int id, ff::Time_point t) {
+Timer_queue::push(Handler* h, int id, Time_point t) {
   heap_.emplace_back(h, id, t);
   std::push_heap(heap_.begin(), heap_.end(), Timer_less{});
 }
@@ -110,5 +113,5 @@ Timer_queue::pop() {
   heap_.pop_back();
 }
 
-} // namespace nocontrol
+} // namespace freeflow
 

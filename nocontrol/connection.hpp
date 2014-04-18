@@ -16,9 +16,10 @@
 #define NOCONTROL_CONNECTION_HPP
 
 #include <freeflow/sys/socket.hpp>
+#include <freeflow/sys/handler.hpp>
 #include <freeflow/proto/ofp/protocol.hpp>
 
-#include <nocontrol/handler.hpp>
+#include <nocontrol/config.hpp>
 
 namespace nocontrol {
 
@@ -28,16 +29,16 @@ namespace nocontrol {
 ///
 /// \todo We're required to TLS for switch connections. This
 /// seems like the likely integration point for that work.
-class Connection : public Resource_handler<ff::Socket> {
+class Connection : public ff::Resource_handler<ff::Socket> {
 public:
-  using Resource_handler<ff::Socket>::Resource_handler;
+  using ff::Resource_handler<ff::Socket>::Resource_handler;
 
   Connection(ff::Socket&& s);
 
-  bool on_open(Reactor&);
-  bool on_close(Reactor&);
-  bool on_read(Reactor&);
-  bool on_time(Reactor&, int);
+  bool on_open(ff::Reactor&);
+  bool on_close(ff::Reactor&);
+  bool on_read(ff::Reactor&);
+  bool on_time(ff::Reactor&, int);
 
 private:
   bool read();

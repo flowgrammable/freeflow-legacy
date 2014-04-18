@@ -12,8 +12,8 @@
 // or implied. See the License for the specific language governing
 // permissions and limitations under the License.
 
-#ifndef NOCONTROL_HANDLER_HPP
-#define NOCONTROL_HANDLER_HPP
+#ifndef FREEFLOW_HANDLER_HPP
+#define FREEFLOW_HANDLER_HPP
 
 #include <utility>
 #include <vector>
@@ -21,9 +21,7 @@
 #include <freeflow/sys/resource.hpp>
 #include <freeflow/sys/selector.hpp>
 
-#include <nocontrol/config.hpp>
-
-namespace nocontrol {
+namespace freeflow {
 
 class Reactor;
 
@@ -32,7 +30,7 @@ class Reactor;
 /// resource, which provides access to an underlying socket descriptor.
 class Handler {
 public:
-  explicit Handler(ff::Resource&);
+  explicit Handler(Resource&);
   virtual ~Handler() { }
 
   // Events
@@ -48,9 +46,8 @@ public:
   int fd() const;
 
 private:
-  ff::Resource& r_;
+  Resource& r_;
 };
-
 
 /// The resource handler class is an abstract handler associated with
 /// a Resource. The type of that Resource is given as the template
@@ -104,16 +101,16 @@ struct Handler_registry : std::vector<Handler*> {
   int max() const;
 
   // Wait set
-  const ff::Select_set& wait() const;
+  const Select_set& wait() const;
 
 private:
-  int            active_;
-  int            max_;
-  ff::Select_set wait_;
+  int        active_;
+  int        max_;
+  Select_set wait_;
 };
 
 } // namespace nocontrol
 
-#include "handler.ipp"
+#include <freeflow/sys/handler.ipp>
 
 #endif

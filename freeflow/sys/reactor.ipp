@@ -12,7 +12,7 @@
 // or implied. See the License for the specific language governing
 // permissions and limitations under the License.
 
-namespace nocontrol {
+namespace freeflow {
 
 /// Register the handler with the reactor.
 inline void
@@ -31,7 +31,7 @@ Reactor::remove_handler(Handler* h) {
 /// Schedule a timer for the handler. The handler must be registered
 /// with the reactor.
 inline void
-Reactor::schedule_timer(Handler* h, int id, ff::Microseconds us) {
+Reactor::schedule_timer(Handler* h, int id, Microseconds us) {
   timers_.schedule(h, id, us);
 }
 
@@ -45,4 +45,4 @@ Reactor::cancel_timer(Handler* h, int id) {
 inline void
 Reactor::stop() { running_ = false; }
 
-} // namesapce nocontrol
+} // namesapce freeflow

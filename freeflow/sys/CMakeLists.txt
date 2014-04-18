@@ -16,14 +16,17 @@ set(src fd_utils.cpp
         meta.cpp
         data.cpp
         error.cpp
+        time.cpp
+        signal.cpp
         path.cpp
         resource.cpp
         file.cpp
         socket.cpp
-        buffer.cpp
-        signal.cpp
-        time.cpp
+        handler.cpp
+        timer.cpp
         selector.cpp
+        reactor.cpp
+        buffer.cpp
         syslog.cpp
         pipe.cpp)
 
@@ -37,15 +40,18 @@ endif()
 set(hdr fd_utils.hpp
         meta.hpp
         data.hpp
-        error.hpp
-        path.hpp
-        resoource.hpp
-        file.hpp
-        socket.hpp
-        buffer.hpp
+        error.hpp     error.ipp
+        time.hpp      time.ipp
         signal.hpp
-        time.hpp
-        selector.hpp
+        path.hpp
+        resoource.hpp resource.ipp
+        file.hpp      file.ipp
+        socket.hpp    socket.ipp
+        handler.hpp   handler.ipp
+        timer.hpp     timer.ipp
+        selector.hpp  selector.ipp
+        reactor.hpp   reactor.ipp
+        buffer.hpp    buffer.ipp
         syslog.hpp
         pipe.hpp)
 

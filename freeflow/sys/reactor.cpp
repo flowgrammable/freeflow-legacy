@@ -14,9 +14,7 @@
 
 #include "reactor.hpp"
 
-using namespace ff;
-
-namespace nocontrol {
+namespace freeflow {
 namespace {
 using Rset = Resource_set;
 using Sset = Select_set;
@@ -84,4 +82,4 @@ Reactor::run() {
   }
 }
 
-} // namespace nocontrol
+} // namespace freeflow

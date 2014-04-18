@@ -12,18 +12,17 @@
 // or implied. See the License for the specific language governing
 // permissions and limitations under the License.
 
-#ifndef NOCONTROL_TIMER_QUEUE_HPP
-#define NOCONTROL_TIMER_QUEUE_HPP
+#ifndef FREEFLOW_TIMER_HPP
+#define FREEFLOW_TIMER_HPP
 
 #include <vector>
 
 #include <freeflow/sys/time.hpp>
 
-#include <nocontrol/config.hpp>
-#include <nocontrol/handler.hpp>
+namespace freeflow {
 
-namespace nocontrol {
-
+class Handler;
+class Reactor;
 
 /// The Timer_queue is allows handlers to be scheduled for timeout 
 /// events. The timer has microsecond granularity.
@@ -32,22 +31,19 @@ namespace nocontrol {
 /// is an integer value that designates the purpose of the timer for the
 /// application. This value is passed to the handler on notification.
 ///
-/// \todo This should be freeflow.
-///
-/// \todo Return timer ids when scheduling a timer. This allows handlers
-/// to cancel specific timers and not all timers.
+/// \todo Consider returning timer ids when scheduling a timer. This allows 
+/// handlers to cancel specific timers and not all timers. 
 ///
 /// \todo Allow repeating timers to be scheduled.
 class Timer_queue {
   struct Timer;
   struct Timer_less;
-
   using Timer_list = std::vector<Timer>;
 public:
   Timer_queue();
 
   // Scheduling
-  void schedule(Handler*, int, ff::Microseconds);
+  void schedule(Handler*, int, Microseconds);
   void cancel(Handler*, int);
   void cancel(Handler*);
 
@@ -61,7 +57,7 @@ private:
   Timer&       top();
   const Timer& top() const;
 
-  void push(Handler*, int, ff::Time_point);
+  void push(Handler*, int, Time_point);
   void pop();
 
 private:
@@ -69,8 +65,8 @@ private:
   Timer_list trigger_; // Triggered timers
 };
 
-} // namespace nocontrol
+} // namespace freeflow
 
-#include "timer_queue.ipp"
+#include <freeflow/sys/timer.ipp>
 
 #endif

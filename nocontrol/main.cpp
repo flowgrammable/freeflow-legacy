@@ -19,10 +19,10 @@
 #include <freeflow/sys/selector.hpp>
 #include <freeflow/sys/socket.hpp>
 #include <freeflow/sys/file.hpp>
+#include <freeflow/sys/reactor.hpp>
 
 #include "acceptor.hpp"
 #include "connection.hpp"
-#include "timer_queue.hpp"
 
 using namespace std;
 using namespace freeflow;
