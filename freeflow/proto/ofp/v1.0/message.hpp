@@ -117,7 +117,10 @@ struct Features {
 
 struct Feature_request { };
 
-struct Feature_reply : Features {
+struct Feature_reply {
+  using Capability = Features::Capability;
+  using Action = Features::Action;
+
   Uint64     datapath_id;
   Uint32     nbuffers;
   Uint8      ntables;
@@ -126,8 +129,6 @@ struct Feature_reply : Features {
   Port_list  ports;
 };
 
-/// A Config message is sent as a response to a configuration request,
-/// or to modify the configuration of the switch.
 struct Config {
   enum Flags : Uint16 {
     FRAG_NORMAL = 0x0000, 
@@ -135,10 +136,25 @@ struct Config {
     FRAG_REASM  = 0x0002, 
     FRAG_MASK   = 0x0003
   };
+};
 
+
+struct Get_config_request { };
+
+struct Get_config_reply {
+  using Flags = Config::Flags;
+  
   Flags  flags;
   Uint16 miss_send_len;
 };
+
+struct Set_config {
+  using Flags = Config::Flags;
+  
+  Flags  flags;
+  Uint16 miss_send_len;
+};
+
 
 /// A Packet_in message is sent from the switch to the controller to
 /// indicate a miss in the flow tables or because a specific action
@@ -261,6 +277,10 @@ struct Stats_reply {
   Payload payload;
 };
 
+struct Barrier_request { };
+
+struct Barrier_reply { };
+
 /// A queue-config request is sent from the controller to the switch to 
 /// get configuration information about a queue.
 struct Queue_config_request {
@@ -280,14 +300,15 @@ union Payload {
   Payload() { }
   ~Payload() { }
   
-  Empty                empty;
   Hello                hello;
   Error                error;
   Echo                 echo;
   Vendor               vendor;
   Feature_request      feature_req;
   Feature_reply        feature_rep;
-  Config               config;
+  Get_config_request   get_config_req;
+  Get_config_reply     get_config_rep;
+  Set_config           set_config;
   Packet_in            packet_in;
   Flow_removed         flow_removed;
   Port_status          port_status;
@@ -296,6 +317,8 @@ union Payload {
   Port_mod             port_mod;
   Stats_request        stats_request;
   Stats_reply          stats_reply;
+  Barrier_request      barrier_req;
+  Barrier_reply        barrier_rep;
   Queue_config_request queue_config_request;
   Queue_config_reply   queue_config_reply;
 };
@@ -332,7 +355,9 @@ std::size_t bytes(const Echo&);
 std::size_t bytes(const Vendor&);
 std::size_t bytes(const Feature_request&);
 std::size_t bytes(const Feature_reply&);
-constexpr std::size_t bytes(const Config&);
+constexpr std::size_t bytes(const Get_config_request&);
+constexpr std::size_t bytes(const Get_config_reply&);
+constexpr std::size_t bytes(const Set_config&);
 std::size_t bytes(const Packet_in&);
 constexpr std::size_t bytes(const Flow_removed&);
 constexpr std::size_t bytes(const Port_status&);
@@ -341,6 +366,8 @@ std::size_t bytes(const Flow_mod&);
 constexpr std::size_t bytes(const Port_mod&);
 std::size_t bytes(const Stats_request&);
 std::size_t bytes(const Stats_reply&);
+constexpr std::size_t bytes(const Barrier_request&);
+constexpr std::size_t bytes(const Barrier_reply&);
 std::size_t bytes(const Queue_config_request&);
 std::size_t bytes(const Queue_config_reply&);
 std::size_t bytes(const Payload&, Message_type);
@@ -362,6 +389,8 @@ Errc to_view(View&, const Flow_mod&);
 Errc to_view(View&, const Port_mod&);
 Errc to_view(View&, const Stats_request&);
 Errc to_view(View&, const Stats_reply&);
+Errc to_view(View&, const Barrier_request&);
+Errc to_view(View&, const Barrier_reply&);
 Errc to_view(View&, const Queue_config_request&);
 Errc to_view(View&, const Queue_config_reply&);
 Errc to_view(View&, const Payload&, Message_type);
@@ -383,6 +412,8 @@ Errc from_view(View&, Flow_mod&);
 Errc from_view(View&, Port_mod&);
 Errc from_view(View&, Stats_request&);
 Errc from_view(View&, Stats_reply&);
+Errc from_view(View&, Barrier_request&);
+Errc from_view(View&, Barrier_reply&);
 Errc from_view(View&, Queue_config_request&);
 Errc from_view(View&, Queue_config_reply&);
 Errc from_view(View&, Payload&, Message_type);

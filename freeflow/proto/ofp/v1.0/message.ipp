@@ -55,7 +55,13 @@ inline std::size_t
 bytes(const Feature_reply& m) { return 24 + m.ports.size(); }
 
 constexpr std::size_t 
-bytes(const Config&) { return 4; }
+bytes(const Get_config_request&) { return 0; }
+
+constexpr std::size_t 
+bytes(const Get_config_reply&) { return 4; }
+
+constexpr std::size_t 
+bytes(const Set_config&) { return 4; }
 
 inline std::size_t
 bytes(const Packet_in& m) { return 10 + m.data.size(); }
@@ -92,12 +98,47 @@ inline std::size_t
 bytes(const Queue_config_reply& m) { return 8 + bytes(m.queues); }
 
 constexpr std::size_t
+bytes(const Barrier_request& m) { return 0; }
+
+constexpr std::size_t
+bytes(const Barrier_reply& m) { return 0; }
+
+constexpr std::size_t
 bytes(const Header& m) { return 8; }
 
 inline std::size_t
 bytes(const Message& m) { 
   return bytes(m.header) + bytes(m.payload, Message_type(m.header.type)); 
 }
+
+// To view
+
+inline Errc
+to_view(View& v, const Feature_request& m) { return {}; }
+
+inline Errc
+to_view(View& v, const Get_config_request& m) { return {}; }
+
+inline Errc
+to_view(View&, const Barrier_request&) { return {}; }
+
+inline Errc
+to_view(View&, const Barrier_reply&) { return {}; }
+
+// From view
+
+inline Errc
+from_view(View& v, Feature_request& m) { return {}; }
+
+inline Errc
+from_view(View& v, Get_config_request& m) { return {}; }
+
+inline Errc
+from_view(View&, Barrier_request&) { return {}; }
+
+inline Errc
+from_view(View&, Barrier_reply&) { return {}; }
+
 
 // Validation
 

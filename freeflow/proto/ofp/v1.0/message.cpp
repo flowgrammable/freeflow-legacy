@@ -32,9 +32,9 @@ construct(Payload& m, Message_type t) {
   case VENDOR: new (&m.vendor) Vendor(); break;
   case FEATURE_REQUEST: new (&m.feature_req) Feature_request(); break;
   case FEATURE_REPLY: new (&m.feature_rep) Feature_reply(); break;
-  case GET_CONFIG_REQUEST: new (&m.empty) Empty(); break;
-  case GET_CONFIG_REPLY: new (&m.config) Config(); break;
-  case SET_CONFIG: new (&m.config) Config(); break;
+  case GET_CONFIG_REQUEST: new (&m.get_config_req) Get_config_request(); break;
+  case GET_CONFIG_REPLY: new (&m.get_config_rep) Get_config_reply(); break;
+  case SET_CONFIG: new (&m.set_config) Set_config(); break;
   case PACKET_IN: new (&m.packet_in) Packet_in(); break;
   case FLOW_REMOVED: new (&m.flow_removed) Flow_removed(); break;
   case PORT_STATUS: new (&m.port_status) Port_status(); break;
@@ -43,8 +43,8 @@ construct(Payload& m, Message_type t) {
   case PORT_MOD: new (&m.port_mod) Port_mod(); break;
   case STATS_REQUEST: new (&m.stats_request) Stats_request(); break;
   case STATS_REPLY: new (&m.stats_reply) Stats_reply(); break;
-  case BARRIER_REQUEST: new (&m.empty) Empty(); break;
-  case BARRIER_REPLY: new (&m.empty) Empty(); break;
+  case BARRIER_REQUEST: new (&m.barrier_req) Barrier_request(); break;
+  case BARRIER_REPLY: new (&m.barrier_rep) Barrier_reply(); break;
   case QUEUE_GET_CONFIG_REQUEST: new (&m.queue_config_request) Queue_config_request(); break;
   case QUEUE_GET_CONFIG_REPLY: new (&m.queue_config_reply) Queue_config_reply(); break;
   default: throw Errc(Errc::BAD_MESSAGE_TYPE);
@@ -62,9 +62,9 @@ destroy(Payload& m, Message_type t) {
   case VENDOR: m.vendor.~Vendor(); break;
   case FEATURE_REQUEST: m.feature_req.~Feature_request(); break;
   case FEATURE_REPLY: m.feature_rep.~Feature_reply(); break;
-  case GET_CONFIG_REQUEST: m.empty.~Empty(); break;
-  case GET_CONFIG_REPLY: m.config.~Config(); break;
-  case SET_CONFIG: m.config.~Config(); break;
+  case GET_CONFIG_REQUEST: m.get_config_req.~Get_config_request(); break;
+  case GET_CONFIG_REPLY: m.get_config_rep.~Get_config_reply(); break;
+  case SET_CONFIG: m.set_config.~Set_config(); break;
   case PACKET_IN: m.packet_in.~Packet_in(); break;
   case FLOW_REMOVED: m.flow_removed.~Flow_removed(); break;
   case PORT_STATUS: m.port_status.~Port_status(); break;
@@ -73,8 +73,8 @@ destroy(Payload& m, Message_type t) {
   case PORT_MOD: m.port_mod.~Port_mod(); break;
   case STATS_REQUEST: m.stats_request.~Stats_request(); break;
   case STATS_REPLY: m.stats_reply.~Stats_reply(); break;
-  case BARRIER_REQUEST: m.empty.~Empty(); break;
-  case BARRIER_REPLY: m.empty.~Empty(); break;
+  case BARRIER_REQUEST: m.barrier_req.~Barrier_request(); break;
+  case BARRIER_REPLY: m.barrier_rep.~Barrier_reply(); break;
   case QUEUE_GET_CONFIG_REQUEST: m.queue_config_request.~Queue_config_request(); break;
   case QUEUE_GET_CONFIG_REPLY: m.queue_config_reply.~Queue_config_reply(); break;
   default: throw Errc(Errc::BAD_MESSAGE_TYPE);
@@ -95,9 +95,9 @@ bytes(const Payload& m, Message_type t) {
   case VENDOR: return bytes(m.vendor);
   case FEATURE_REQUEST: return bytes(m.feature_req);
   case FEATURE_REPLY: return bytes(m.feature_rep);
-  case GET_CONFIG_REQUEST: return bytes(m.empty);
-  case GET_CONFIG_REPLY: return bytes(m.config);
-  case SET_CONFIG: return bytes(m.config);
+  case GET_CONFIG_REQUEST: return bytes(m.get_config_req);
+  case GET_CONFIG_REPLY: return bytes(m.get_config_rep);
+  case SET_CONFIG: return bytes(m.set_config);
   case PACKET_IN: return bytes(m.packet_in);
   case FLOW_REMOVED: return bytes(m.flow_removed);
   case PORT_STATUS: return bytes(m.port_status);
@@ -106,8 +106,8 @@ bytes(const Payload& m, Message_type t) {
   case PORT_MOD: return bytes(m.port_mod);
   case STATS_REQUEST: return bytes(m.stats_request);
   case STATS_REPLY: return bytes(m.stats_reply);
-  case BARRIER_REQUEST: return bytes(m.empty);
-  case BARRIER_REPLY: return bytes(m.empty);
+  case BARRIER_REQUEST: return bytes(m.barrier_req);
+  case BARRIER_REPLY: return bytes(m.barrier_rep);
   case QUEUE_GET_CONFIG_REQUEST: return bytes(m.queue_config_request);
   case QUEUE_GET_CONFIG_REPLY: return bytes(m.queue_config_reply);
   default:
@@ -154,9 +154,6 @@ to_view(View& v, const Vendor& m) {
 }
 
 Errc
-to_view(View& v, const Feature_request& m) { return {}; }
-
-Errc
 to_view(View& v, const Feature_reply& m) {
   if (remaining(v) < bytes(m))
     return Errc::FEATURE_OVERFLOW;
@@ -171,7 +168,16 @@ to_view(View& v, const Feature_reply& m) {
 }
 
 Errc
-to_view(View& v, const Config& m) {
+to_view(View& v, const Get_config_reply& m) {
+  if (remaining(v) < bytes(m))
+    return Errc::CONFIG_OVERFLOW;
+  to_view(v, m.flags);
+  to_view(v, m.miss_send_len);
+  return {};
+}
+
+Errc
+to_view(View& v, const Set_config& m) {
   if (remaining(v) < bytes(m))
     return Errc::CONFIG_OVERFLOW;
   to_view(v, m.flags);
@@ -326,9 +332,9 @@ to_view(View& v, const Payload& m, Message_type t) {
   case VENDOR: return to_view(v, m.vendor);
   case FEATURE_REQUEST: return to_view(v, m.feature_req);
   case FEATURE_REPLY: return to_view(v, m.feature_rep);
-  case GET_CONFIG_REQUEST: return to_view(v, m.empty);
-  case GET_CONFIG_REPLY: return to_view(v, m.config);
-  case SET_CONFIG: return to_view(v, m.config);
+  case GET_CONFIG_REQUEST: return to_view(v, m.get_config_req);
+  case GET_CONFIG_REPLY: return to_view(v, m.get_config_rep);
+  case SET_CONFIG: return to_view(v, m.set_config);
   case PACKET_IN: return to_view(v, m.packet_in);
   case FLOW_REMOVED: return to_view(v, m.flow_removed);
   case PORT_STATUS: return to_view(v, m.port_status);
@@ -337,8 +343,8 @@ to_view(View& v, const Payload& m, Message_type t) {
   case PORT_MOD: return to_view(v, m.port_mod);
   case STATS_REQUEST: return to_view(v, m.stats_request);
   case STATS_REPLY: return to_view(v, m.stats_reply);
-  case BARRIER_REQUEST: return to_view(v, m.empty);
-  case BARRIER_REPLY: return to_view(v, m.empty);
+  case BARRIER_REQUEST: return to_view(v, m.barrier_req);
+  case BARRIER_REPLY: return to_view(v, m.barrier_rep);
   case QUEUE_GET_CONFIG_REQUEST: return to_view(v, m.queue_config_request);
   case QUEUE_GET_CONFIG_REPLY: return to_view(v, m.queue_config_reply);
   default: return Errc::BAD_MESSAGE_TYPE;
@@ -394,9 +400,6 @@ from_view(View& v, Vendor& m) {
 }
 
 Errc
-from_view(View& v, Feature_request& m) { return {}; }
-
-Errc
 from_view(View& v, Feature_reply& m) {
   if (remaining(v) < bytes(m))
     return Errc::FEATURE_OVERFLOW;
@@ -411,7 +414,16 @@ from_view(View& v, Feature_reply& m) {
 }
 
 Errc
-from_view(View& v, Config& m) {
+from_view(View& v, Get_config_reply& m) {
+  if (remaining(v) < bytes(m))
+    return Errc::CONFIG_OVERFLOW;
+  from_view(v, m.flags);
+  from_view(v, m.miss_send_len);
+  return {};
+}
+
+Errc
+from_view(View& v, Set_config& m) {
   if (remaining(v) < bytes(m))
     return Errc::CONFIG_OVERFLOW;
   from_view(v, m.flags);
@@ -569,9 +581,9 @@ from_view(View& v, Payload& m, Message_type t) {
   case VENDOR: return from_view(v, m.vendor);
   case FEATURE_REQUEST: return from_view(v, m.feature_req);
   case FEATURE_REPLY: return from_view(v, m.feature_rep);
-  case GET_CONFIG_REQUEST: return from_view(v, m.empty);
-  case GET_CONFIG_REPLY: return from_view(v, m.config);
-  case SET_CONFIG: return from_view(v, m.config);
+  case GET_CONFIG_REQUEST: return from_view(v, m.get_config_req);
+  case GET_CONFIG_REPLY: return from_view(v, m.get_config_rep);
+  case SET_CONFIG: return from_view(v, m.set_config);
   case PACKET_IN: return from_view(v, m.packet_in);
   case FLOW_REMOVED: return from_view(v, m.flow_removed);
   case PORT_STATUS: return from_view(v, m.port_status);
@@ -580,8 +592,8 @@ from_view(View& v, Payload& m, Message_type t) {
   case PORT_MOD: return from_view(v, m.port_mod);
   case STATS_REQUEST: return from_view(v, m.stats_request);
   case STATS_REPLY: return from_view(v, m.stats_reply);
-  case BARRIER_REQUEST: return from_view(v, m.empty);
-  case BARRIER_REPLY: return from_view(v, m.empty);
+  case BARRIER_REQUEST: return from_view(v, m.barrier_req);
+  case BARRIER_REPLY: return from_view(v, m.barrier_rep);
   case QUEUE_GET_CONFIG_REQUEST: return from_view(v, m.queue_config_request);
   case QUEUE_GET_CONFIG_REPLY: return from_view(v, m.queue_config_reply);
   default: return Errc::BAD_MESSAGE_TYPE;
