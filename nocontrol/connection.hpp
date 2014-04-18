@@ -37,6 +37,7 @@ public:
   bool on_open(Reactor&);
   bool on_close(Reactor&);
   bool on_read(Reactor&);
+  bool on_time(Reactor&, int);
 
 private:
   bool read();

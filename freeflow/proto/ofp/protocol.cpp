@@ -23,13 +23,13 @@ namespace freeflow {
 namespace ofp {
 
 void 
-Protocol::open() { to_hello(); }
+Protocol::on_open() { to_hello(); }
 
 void 
-Protocol::close() { }
+Protocol::on_close() { }
 
 void
-Protocol::message() {
+Protocol::on_recv() {
   if (state_ == WAIT_HELLO)
     wait_hello();
   else if (state_ == WAIT_FEATURE)
@@ -40,7 +40,9 @@ Protocol::message() {
 }
 
 void
-Protocol::time() { }
+Protocol::on_time(int t) { 
+}
+
 
 void
 Protocol::to_hello() {
@@ -52,6 +54,7 @@ Protocol::to_hello() {
   v1_0::Hello m;
   v1_0::Header h(v1_0::HELLO, bytes(m), 0);
   write.put_message(h, m);
+
   state_ = WAIT_HELLO;
 }
 

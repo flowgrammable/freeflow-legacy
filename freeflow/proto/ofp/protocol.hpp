@@ -18,30 +18,29 @@
 #include <queue>
 
 #include <freeflow/sys/buffer.hpp>
+#include <freeflow/sys/time.hpp>
 #include <freeflow/proto/ofp/ofp.hpp>
 
 namespace freeflow {
 namespace ofp {
 
-// A message queue represents a sequence of buffered messages
-// with each buffer containing a single message. 
-//
-// There are parts of the interface: get and put buffer are used by the
-// lower level to move data to the protocol state machine. The get
-// and put message operations are used by the commications protocol
-// to move data in the reverse direction.
-//
-// TODO: The message queue could be made protocol dependent, with the
-// message interface being the only facility in this namespace.
-//
-// FIXME: Error handling.
+/// A message queue represents a sequence of buffered messages
+/// with each buffer containing a single message. 
+///
+/// There are parts of the interface: get and put buffer are used by the
+/// lower level to move data to the protocol state machine. The get
+/// and put message operations are used by the commications protocol
+/// to move data in the reverse direction.
+///
+/// \todo The message queue could be made protocol dependent, with the
+/// message interface being the only facility in this namespace.
+///
+/// \todo Implement error handling.
 struct Message_queue : std::queue<Buffer> {
 
-  // Northbound traffic
   void put_buffer(Buffer&&);
   void get_buffer(Buffer&);
 
-  // Southbound traffic
   template<typename H, typename P>
     void put_message(const H&, const P&);
 
@@ -53,8 +52,23 @@ struct Message_queue : std::queue<Buffer> {
 };
 
 
+/// The Config class represents that runtime configuration of
+/// OpenFlow support.
+///
+/// \todo This needs to be read from a configuration file and
+/// populated dynamically.
 struct Config {
+  /// The highest version of the protocol supported.
   Uint8 version = 0;
+
+  /// Connection timeout for echo messages.
+  Seconds echo_timeout = 60_s;
+
+  /// The default idle timeout for flows.
+  Seconds idle_timeout = 5_s;
+
+  /// The default hard timeout for flows.
+  Seconds hard_timeout = 10_s;
 };
 
 
@@ -62,6 +76,8 @@ struct Config {
 // state machines for specific versions of the protocol.
 //
 // Technically, this is a decoarator.
+//
+// \todo I'm not sure I actually like this design.
 struct Protocol_handler {
   virtual void to_feature() = 0;
   virtual void wait_feature() = 0;
@@ -86,10 +102,10 @@ class Protocol {
   };
 
 public:
-  void open();
-  void close();
-  void message();
-  void time();
+  void on_open();
+  void on_close();
+  void on_recv();
+  void on_time(int);
 
   // Read/write helper functions
   template<typename H, typename P>

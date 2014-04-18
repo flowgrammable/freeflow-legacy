@@ -23,37 +23,47 @@ using namespace freeflow;
 
 namespace nocontrol {
 
-// Create a version negotiation state machine so we know what version
-// we should accept.
+/// Create a version negotiation state machine so we know what version
+/// we should accept.
+///
+/// \todo Error checking.
 bool
 Connection::on_open(Reactor&) {
   proto_ = new ofp::Protocol();
-  
-  // FIXME: Error checking.
-  proto_->open();
+  proto_->on_open();
   return write();
 }
 
-// Shutdown the state machine and delete the handler.
+/// Shutdown the state machine and delete the handler.
 bool 
 Connection::on_close(Reactor&) { 
+  proto_->on_close();
   delete this;
   return true; 
 }
 
 /// When data is available, read as many messages as possibly and send
 /// them to the state machine.
+///
+/// \todo Error checking.
 bool
 Connection::on_read(Reactor&) {
-  if (not read())
+  if (not read()) 
     return false;
-  proto_->message();
-  if (not write())
-    return false;
-  return true;
+  proto_->on_recv();
+  return write();
+}
+
+/// When a timeout occurs, notify the protocol of the expired timer.
+bool
+Connection::on_time(Reactor& r, int t) {
+  proto_->on_time(t);
+  return write();
 }
 
 
+// Read from the socket to put message data into the read queue.
+//
 // FIXME: This is incredibly brittle, and its slow. First, each message
 // requires twp reads and two allocations. Second, we may not actually
 // receive everything in each read, meaning we're going to miss data.
@@ -88,11 +98,14 @@ Connection::read() {
   return true;
 }
 
+// Write all messages to the socket.
 bool
 Connection::write() {
   while (not proto_->write.empty()) {
     Buffer b;
     proto_->write.get_buffer(b);
+
+    // FIXME: Error handling
     rc().write(b);
   }
   return true;
