@@ -43,7 +43,10 @@ inline std::size_t
 bytes(const Error& m) { return 4 + m.data.size(); }
 
 inline std::size_t 
-bytes(const Echo& m) { return m.data.size(); }
+bytes(const Echo_request& m) { return m.data.size(); }
+
+inline std::size_t
+bytes(const Echo_reply& m) { return m.data.size(); }
 
 inline std::size_t 
 bytes(const Vendor& m) { return 4 + m.data.size(); }
@@ -128,6 +131,12 @@ to_view(View&, const Barrier_reply&) { return {}; }
 // From view
 
 inline Errc
+from_view(View& v, Echo_request& m) { return from_view(v, m.data); }
+
+inline Errc
+from_view(View& v, Echo_reply& m) { return from_view(v, m.data); }
+
+inline Errc
 from_view(View& v, Feature_request& m) { return {}; }
 
 inline Errc
@@ -138,7 +147,6 @@ from_view(View&, Barrier_request&) { return {}; }
 
 inline Errc
 from_view(View&, Barrier_reply&) { return {}; }
-
 
 // Validation
 

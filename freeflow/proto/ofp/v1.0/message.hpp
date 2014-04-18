@@ -63,24 +63,36 @@ enum Message_type : Uint8 {
 ///
 /// TODO: Does this message need to be made version neutral?
 struct Hello {
+  static constexpr Message_type Kind = HELLO;
+  
   Buffer data;
 };
 
 /// The Error message is sent to indicate an error in a previous
 /// communication.
 struct Error {
+  static constexpr Message_type Kind = ERROR;
+  
   Uint16 type;
   Uint16 code;
   Buffer data;
 };
 
-/// The Echo message is used to communicate both echo requests and
-/// replys between the switch and the controller.
-struct Echo {
+struct Echo_request {
+  static constexpr Message_type Kind = ECHO_REQUEST;
+  
+  Buffer data;
+};
+
+struct Echo_reply {
+  static constexpr Message_type Kind = ECHO_REPLY;
+  
   Buffer data;
 };
 
 struct Vendor {
+  static constexpr Message_type Kind = VENDOR;
+
   Uint32 vendor_id;
   Buffer data;
 };
@@ -115,12 +127,16 @@ struct Features {
   };
 };
 
-struct Feature_request { };
+struct Feature_request { 
+  static constexpr Message_type Kind = FEATURE_REQUEST;
+};
 
 struct Feature_reply {
+  static constexpr Message_type Kind = FEATURE_REPLY;
+
   using Capability = Features::Capability;
   using Action = Features::Action;
-
+  
   Uint64     datapath_id;
   Uint32     nbuffers;
   Uint8      ntables;
@@ -138,10 +154,13 @@ struct Config {
   };
 };
 
-
-struct Get_config_request { };
+struct Get_config_request {
+  static constexpr Message_type Kind = GET_CONFIG_REQUEST;
+};
 
 struct Get_config_reply {
+  static constexpr Message_type Kind = GET_CONFIG_REPLY;
+
   using Flags = Config::Flags;
   
   Flags  flags;
@@ -149,6 +168,8 @@ struct Get_config_reply {
 };
 
 struct Set_config {
+  static constexpr Message_type Kind = SET_CONFIG;
+
   using Flags = Config::Flags;
   
   Flags  flags;
@@ -160,6 +181,8 @@ struct Set_config {
 /// indicate a miss in the flow tables or because a specific action
 /// has been requested.
 struct Packet_in {
+  static constexpr Message_type Kind = PACKET_IN;
+
   enum Reason : Uint8 {
     NO_MATCH = 0x00,
     ACTION = 0x01
@@ -175,11 +198,14 @@ struct Packet_in {
 /// A Flow_removed message is sent from the switch to the controller to
 /// indicate that an entry has been removed from a flow table.
 struct Flow_removed {
+  static constexpr Message_type Kind = FLOW_REMOVED;
+  
   enum Reason : Uint8 {
     IDLE_TIMEOUT = 0x00,
     HARD_TIMEOUT = 0x01,
     DELETE       = 0x02,        
   };
+
 
   Match  match;
   Uint64 cookie;
@@ -195,6 +221,8 @@ struct Flow_removed {
 /// The Port_status message is sent from the switch to the controller to
 /// indicate a change to the status of a port.
 struct Port_status {
+  static constexpr Message_type Kind = PORT_STATUS;
+
   enum Reason : Uint8 {
     ADD = 0x00, 
     DELETE = 0x01, 
@@ -208,6 +236,8 @@ struct Port_status {
 /// A Packet_out message is sent from the controller to the switch in order
 /// to inject a packet into a flow or release a packet from a buffer.
 struct Packet_out {
+  static constexpr Message_type Kind = PACKET_OUT;
+
   Uint32      buffer_id;
   Port::Id    port;
   Uint16      actions_len;
@@ -218,6 +248,8 @@ struct Packet_out {
 /// A Flow_mod message is sent from the controller to the switch to modify
 /// an entry in a flow table.
 struct Flow_mod {
+  static constexpr Message_type Kind = FLOW_MOD;
+
   enum Command : Uint16 {
     ADD           = 0x0000, 
     MODIFY        = 0x0001, 
@@ -247,6 +279,8 @@ struct Flow_mod {
 /// A Port_mod message is sent from the controller to the switch to modify
 /// the state of a port.
 struct Port_mod {
+  static constexpr Message_type Kind = PORT_MOD;
+
   Port::Id       port;
   Mac_addr       hw_addr;
   Port::Config   config;
@@ -257,6 +291,8 @@ struct Port_mod {
 /// A stats-request message is sent from the controller to the switch to
 /// request information and statistics about some aspect of a switch.
 struct Stats_request {
+  static constexpr Message_type Kind = STATS_REQUEST;
+
   using Header = Stats_header;
   using Payload = Stats_request_payload;
 
@@ -267,6 +303,8 @@ struct Stats_request {
 /// A stats-response message is returned from the switch to the controller
 /// containing information and statistics.
 struct Stats_reply {
+  static constexpr Message_type Kind = STATS_REPLY;
+
   using Header = Stats_header;
   using Payload = Stats_reply_payload;
 
@@ -277,19 +315,27 @@ struct Stats_reply {
   Payload payload;
 };
 
-struct Barrier_request { };
+struct Barrier_request { 
+  static constexpr Message_type Kind = BARRIER_REQUEST;
+};
 
-struct Barrier_reply { };
+struct Barrier_reply {
+  static constexpr Message_type Kind = BARRIER_REPLY;
+};
 
 /// A queue-config request is sent from the controller to the switch to 
 /// get configuration information about a queue.
 struct Queue_config_request {
+  static constexpr Message_type Kind = QUEUE_GET_CONFIG_REQUEST;
+
   Port::Id port;
 };
 
 /// A queue-config reploy is returned from the switch to the controller to
 /// communicate queue configuration.
 struct Queue_config_reply {
+  static constexpr Message_type Kind = QUEUE_GET_CONFIG_REPLY;
+
   Port::Id port;
   Queue_list queues;
 };
@@ -302,7 +348,8 @@ union Payload {
   
   Hello                hello;
   Error                error;
-  Echo                 echo;
+  Echo_request         echo_req;
+  Echo_reply           echo_rep;
   Vendor               vendor;
   Feature_request      feature_req;
   Feature_reply        feature_rep;
@@ -351,7 +398,8 @@ using ofp::bytes;
 
 std::size_t bytes(const Hello&);
 std::size_t bytes(const Error&);
-std::size_t bytes(const Echo&);
+std::size_t bytes(const Echo_request&);
+std::size_t bytes(const Echo_reply&);
 std::size_t bytes(const Vendor&);
 std::size_t bytes(const Feature_request&);
 std::size_t bytes(const Feature_reply&);
@@ -376,7 +424,8 @@ std::size_t bytes(const Message&);
 
 Errc to_view(View&, const Hello&);
 Errc to_view(View&, const Error&);
-Errc to_view(View&, const Echo&);
+Errc to_view(View&, const Echo_request&);
+Errc to_view(View&, const Echo_reply&);
 Errc to_view(View&, const Vendor&);
 Errc to_view(View&, const Feature_request&);
 Errc to_view(View&, const Feature_reply&);
@@ -399,7 +448,8 @@ Errc to_view(View&, const Message&);
 
 Errc from_view(View&, Hello&);
 Errc from_view(View&, Error&);
-Errc from_view(View&, Echo&);
+Errc from_view(View&, Echo_request&);
+Errc from_view(View&, Echo_reply&);
 Errc from_view(View&, Vendor&);
 Errc from_view(View&, Feature_request&);
 Errc from_view(View&, Feature_reply&);

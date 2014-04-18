@@ -27,8 +27,8 @@ construct(Payload& m, Message_type t) {
   switch(t) {
   case HELLO: new (&m.hello) Hello(); break;
   case ERROR: new (&m.error) Error(); break;
-  case ECHO_REQUEST: new (&m.echo) Echo(); break;
-  case ECHO_REPLY: new (&m.echo) Echo(); break;
+  case ECHO_REQUEST: new (&m.echo_req) Echo_request(); break;
+  case ECHO_REPLY: new (&m.echo_rep) Echo_reply(); break;
   case VENDOR: new (&m.vendor) Vendor(); break;
   case FEATURE_REQUEST: new (&m.feature_req) Feature_request(); break;
   case FEATURE_REPLY: new (&m.feature_rep) Feature_reply(); break;
@@ -57,8 +57,8 @@ destroy(Payload& m, Message_type t) {
   switch(t) {
   case HELLO: m.hello.~Hello(); break;
   case ERROR: m.error.~Error(); break;
-  case ECHO_REQUEST: m.echo.~Echo(); break;
-  case ECHO_REPLY: m.echo.~Echo(); break;
+  case ECHO_REQUEST: m.echo_req.~Echo_request(); break;
+  case ECHO_REPLY: m.echo_rep.~Echo_reply(); break;
   case VENDOR: m.vendor.~Vendor(); break;
   case FEATURE_REQUEST: m.feature_req.~Feature_request(); break;
   case FEATURE_REPLY: m.feature_rep.~Feature_reply(); break;
@@ -90,8 +90,8 @@ bytes(const Payload& m, Message_type t) {
   switch(t) {
   case HELLO: return bytes(m.hello);
   case ERROR: return bytes(m.error);
-  case ECHO_REQUEST: return bytes(m.echo);
-  case ECHO_REPLY: return bytes(m.echo);
+  case ECHO_REQUEST: return bytes(m.echo_req);
+  case ECHO_REPLY: return bytes(m.echo_rep);
   case VENDOR: return bytes(m.vendor);
   case FEATURE_REQUEST: return bytes(m.feature_req);
   case FEATURE_REPLY: return bytes(m.feature_rep);
@@ -137,7 +137,15 @@ to_view(View& v, const Error& m) {
 }
 
 Errc
-to_view(View& v, const Echo& m) {
+to_view(View& v, const Echo_request& m) {
+  if (remaining(v) < bytes(m))
+    return Errc::HELLO_OVERFLOW;
+  to_view(v, m.data);
+  return {};
+}
+
+Errc
+to_view(View& v, const Echo_reply& m) {
   if (remaining(v) < bytes(m))
     return Errc::HELLO_OVERFLOW;
   to_view(v, m.data);
@@ -327,8 +335,8 @@ to_view(View& v, const Payload& m, Message_type t) {
   switch(t) {
   case HELLO: return to_view(v, m.hello);
   case ERROR: return to_view(v, m.error);
-  case ECHO_REQUEST: return to_view(v, m.echo);
-  case ECHO_REPLY: return to_view(v, m.echo);
+  case ECHO_REQUEST: return to_view(v, m.echo_req);
+  case ECHO_REPLY: return to_view(v, m.echo_rep);
   case VENDOR: return to_view(v, m.vendor);
   case FEATURE_REQUEST: return to_view(v, m.feature_req);
   case FEATURE_REPLY: return to_view(v, m.feature_rep);
@@ -379,13 +387,6 @@ from_view(View& v, Error& m) {
     return Errc::ERROR_OVERFLOW;
   from_view(v, m.type);
   from_view(v, m.code);
-  from_view(v, m.data);
-  return {};
-}
-
-Errc
-from_view(View& v, Echo& m) {
-  // No overflow check is needed (the buffer can be 0 bytes).
   from_view(v, m.data);
   return {};
 }
@@ -576,8 +577,8 @@ from_view(View& v, Payload& m, Message_type t) {
   switch(t) {
   case HELLO: return from_view(v, m.hello);
   case ERROR: return from_view(v, m.error);
-  case ECHO_REQUEST: return from_view(v, m.echo);
-  case ECHO_REPLY: return from_view(v, m.echo);
+  case ECHO_REQUEST: return from_view(v, m.echo_req);
+  case ECHO_REPLY: return from_view(v, m.echo_rep);
   case VENDOR: return from_view(v, m.vendor);
   case FEATURE_REQUEST: return from_view(v, m.feature_req);
   case FEATURE_REPLY: return from_view(v, m.feature_rep);
