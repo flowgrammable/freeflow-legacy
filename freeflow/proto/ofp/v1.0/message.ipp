@@ -49,7 +49,10 @@ inline std::size_t
 bytes(const Vendor& m) { return 4 + m.data.size(); }
 
 inline std::size_t 
-bytes(const Feature& m) { return 24 + m.ports.size(); }
+bytes(const Feature_request& m) { return 0; }
+
+inline std::size_t 
+bytes(const Feature_reply& m) { return 24 + m.ports.size(); }
 
 constexpr std::size_t 
 bytes(const Config&) { return 4; }

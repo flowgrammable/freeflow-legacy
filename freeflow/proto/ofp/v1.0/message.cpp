@@ -30,8 +30,8 @@ construct(Payload& m, Message_type t) {
   case ECHO_REQUEST: new (&m.echo) Echo(); break;
   case ECHO_REPLY: new (&m.echo) Echo(); break;
   case VENDOR: new (&m.vendor) Vendor(); break;
-  case FEATURE_REQUEST: new (&m.empty) Empty(); break;
-  case FEATURE_REPLY: new (&m.feature) Feature(); break;
+  case FEATURE_REQUEST: new (&m.feature_req) Feature_request(); break;
+  case FEATURE_REPLY: new (&m.feature_rep) Feature_reply(); break;
   case GET_CONFIG_REQUEST: new (&m.empty) Empty(); break;
   case GET_CONFIG_REPLY: new (&m.config) Config(); break;
   case SET_CONFIG: new (&m.config) Config(); break;
@@ -60,8 +60,8 @@ destroy(Payload& m, Message_type t) {
   case ECHO_REQUEST: m.echo.~Echo(); break;
   case ECHO_REPLY: m.echo.~Echo(); break;
   case VENDOR: m.vendor.~Vendor(); break;
-  case FEATURE_REQUEST: m.empty.~Empty(); break;
-  case FEATURE_REPLY: m.feature.~Feature(); break;
+  case FEATURE_REQUEST: m.feature_req.~Feature_request(); break;
+  case FEATURE_REPLY: m.feature_rep.~Feature_reply(); break;
   case GET_CONFIG_REQUEST: m.empty.~Empty(); break;
   case GET_CONFIG_REPLY: m.config.~Config(); break;
   case SET_CONFIG: m.config.~Config(); break;
@@ -93,8 +93,8 @@ bytes(const Payload& m, Message_type t) {
   case ECHO_REQUEST: return bytes(m.echo);
   case ECHO_REPLY: return bytes(m.echo);
   case VENDOR: return bytes(m.vendor);
-  case FEATURE_REQUEST: return bytes(m.empty);
-  case FEATURE_REPLY: return bytes(m.feature);
+  case FEATURE_REQUEST: return bytes(m.feature_req);
+  case FEATURE_REPLY: return bytes(m.feature_rep);
   case GET_CONFIG_REQUEST: return bytes(m.empty);
   case GET_CONFIG_REPLY: return bytes(m.config);
   case SET_CONFIG: return bytes(m.config);
@@ -154,7 +154,10 @@ to_view(View& v, const Vendor& m) {
 }
 
 Errc
-to_view(View& v, const Feature& m) {
+to_view(View& v, const Feature_request& m) { return {}; }
+
+Errc
+to_view(View& v, const Feature_reply& m) {
   if (remaining(v) < bytes(m))
     return Errc::FEATURE_OVERFLOW;
   to_view(v, m.datapath_id);
@@ -321,8 +324,8 @@ to_view(View& v, const Payload& m, Message_type t) {
   case ECHO_REQUEST: return to_view(v, m.echo);
   case ECHO_REPLY: return to_view(v, m.echo);
   case VENDOR: return to_view(v, m.vendor);
-  case FEATURE_REQUEST: return to_view(v, m.empty);
-  case FEATURE_REPLY: return to_view(v, m.feature);
+  case FEATURE_REQUEST: return to_view(v, m.feature_req);
+  case FEATURE_REPLY: return to_view(v, m.feature_rep);
   case GET_CONFIG_REQUEST: return to_view(v, m.empty);
   case GET_CONFIG_REPLY: return to_view(v, m.config);
   case SET_CONFIG: return to_view(v, m.config);
@@ -391,7 +394,10 @@ from_view(View& v, Vendor& m) {
 }
 
 Errc
-from_view(View& v, Feature& m) {
+from_view(View& v, Feature_request& m) { return {}; }
+
+Errc
+from_view(View& v, Feature_reply& m) {
   if (remaining(v) < bytes(m))
     return Errc::FEATURE_OVERFLOW;
   from_view(v, m.datapath_id);
@@ -561,8 +567,8 @@ from_view(View& v, Payload& m, Message_type t) {
   case ECHO_REQUEST: return from_view(v, m.echo);
   case ECHO_REPLY: return from_view(v, m.echo);
   case VENDOR: return from_view(v, m.vendor);
-  case FEATURE_REQUEST: return from_view(v, m.empty);
-  case FEATURE_REPLY: return from_view(v, m.feature);
+  case FEATURE_REQUEST: return from_view(v, m.feature_req);
+  case FEATURE_REPLY: return from_view(v, m.feature_rep);
   case GET_CONFIG_REQUEST: return from_view(v, m.empty);
   case GET_CONFIG_REPLY: return from_view(v, m.config);
   case SET_CONFIG: return from_view(v, m.config);

@@ -85,7 +85,9 @@ struct Vendor {
   Buffer data;
 };
 
-struct Feature {
+/// The featuress class provides scoping for capabilities and supported
+/// actions.
+struct Features {
   enum Capability : Uint32 {
     FLOW_STATS   = 0x00000001,
     TABLE_STATS  = 0x00000002,
@@ -111,7 +113,11 @@ struct Feature {
     SET_TP_DST   = 0x00000400,
     ENQUEUE      = 0x00000800 
   };
+};
 
+struct Feature_request { };
+
+struct Feature_reply : Features {
   Uint64     datapath_id;
   Uint32     nbuffers;
   Uint8      ntables;
@@ -279,7 +285,8 @@ union Payload {
   Error                error;
   Echo                 echo;
   Vendor               vendor;
-  Feature              feature;
+  Feature_request      feature_req;
+  Feature_reply        feature_rep;
   Config               config;
   Packet_in            packet_in;
   Flow_removed         flow_removed;
@@ -323,7 +330,8 @@ std::size_t bytes(const Hello&);
 std::size_t bytes(const Error&);
 std::size_t bytes(const Echo&);
 std::size_t bytes(const Vendor&);
-std::size_t bytes(const Feature&);
+std::size_t bytes(const Feature_request&);
+std::size_t bytes(const Feature_reply&);
 constexpr std::size_t bytes(const Config&);
 std::size_t bytes(const Packet_in&);
 constexpr std::size_t bytes(const Flow_removed&);
@@ -343,7 +351,8 @@ Errc to_view(View&, const Hello&);
 Errc to_view(View&, const Error&);
 Errc to_view(View&, const Echo&);
 Errc to_view(View&, const Vendor&);
-Errc to_view(View&, const Feature&);
+Errc to_view(View&, const Feature_request&);
+Errc to_view(View&, const Feature_reply&);
 Errc to_view(View&, const Config&);
 Errc to_view(View&, const Packet_in&);
 Errc to_view(View&, const Flow_removed&);
@@ -363,7 +372,8 @@ Errc from_view(View&, Hello&);
 Errc from_view(View&, Error&);
 Errc from_view(View&, Echo&);
 Errc from_view(View&, Vendor&);
-Errc from_view(View&, Feature&);
+Errc from_view(View&, Feature_request&);
+Errc from_view(View&, Feature_reply&);
 Errc from_view(View&, Config&);
 Errc from_view(View&, Packet_in&);
 Errc from_view(View&, Flow_removed&);
