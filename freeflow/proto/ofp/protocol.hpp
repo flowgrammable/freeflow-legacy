@@ -43,13 +43,13 @@ struct Message_queue : std::queue<Buffer> {
   void get_buffer(Buffer&);
 
   template<typename H, typename P>
-    void put_message(const H&, const P&);
+    Error put_message(const H&, const P&);
 
   template<typename H>
-    void peek_header(H&);
+    Error peek_header(H&);
 
   template<typename H, typename P>
-    void get_payload(const H&, P&);
+    Error get_payload(const H&, P&);
 };
 
 
@@ -61,9 +61,6 @@ struct Message_queue : std::queue<Buffer> {
 struct Config {
   /// The highest version of the protocol supported.
   Uint8 version = 0;
-
-  /// Connection timeout for hello message.
-  Seconds hello_timeout = 10_s;
 
   /// Connection timeout for echo messages.
   Seconds echo_timeout = 60_s;
@@ -103,9 +100,9 @@ class Protocol {
 
   enum State {
     CLOSED,
-    HANDSHAKE,
-    HELLO,
-    FEATURE,
+    HELLO,       // Version negotiation
+    FEATURE,     // Feature discovery
+    ESTABLISHED, // Basic processing
   };
 
 public:
@@ -118,13 +115,13 @@ public:
 
   // Read/write helper functions
   template<typename P>
-    void put_message(const P& p);
+    Error put_message(const P& p);
 
   template<typename H>
-    void peek_header(H& h);
+    Error peek_header(H& h);
 
   template<typename H, typename P>
-    void get_payload(const H&, P& p);
+    Error get_payload(const H&, P& p);
 
   // Message queue
   Message_queue read;
@@ -133,12 +130,28 @@ public:
 private:
   Uint32 xid();
   Version* negotiate(Uint8);
+  bool ping(Reactor&);
 
-  bool initial_recv(Reactor&);
-  bool initial_time(Reactor&);
-  void to_feature();
-  void wait_feature();
-  void to_established();
+  // Open state and transitions
+  bool open_to_hello(Reactor&);
+  
+  // Initial state and transitions
+  bool hello_recv(Reactor&);
+  bool hello_time(Reactor&);
+  bool hello_to_feature(Reactor&);
+  bool hello_to_close(Reactor&);
+  
+  // Discover state and transitions
+  bool feature_recv(Reactor&);
+  bool feature_time(Reactor&);
+  bool feature_to_established(Reactor&);
+  bool feature_to_close(Reactor&);
+
+  // Established state and transitions
+  bool established_recv(Reactor&);
+  bool established_recv_echo(Reactor&);
+  bool established_time(Reactor&, int);
+  bool established_to_close(Reactor&);
 
   Handler* handler_;
   Config   config_;
@@ -147,7 +160,8 @@ private:
   Version* proto_;
 
   Uint32   xid_;       // The curent transaction id
-  int      timer_ = 0; // A basic timer
+  int      timer_ = 0; // The timeout timer
+  int      echo_ = 1;  // The ping timer
 };
 
 } // ofp

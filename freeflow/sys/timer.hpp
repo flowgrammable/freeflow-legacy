@@ -44,6 +44,7 @@ public:
 
   // Scheduling
   void schedule(Handler*, int, Microseconds);
+  void reschedule(Handler*, int, Microseconds);
   void cancel(Handler*, int);
   void cancel(Handler*);
 

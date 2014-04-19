@@ -60,6 +60,14 @@ Timer_queue::schedule(Handler* h, int id, Microseconds ms) {
   push(h, id, now() + ms); 
 }
 
+/// Reschedule an existing timer to trigger in some amount of time from
+/// now. Note that the handler/id pair must be in the queue.
+inline void 
+Timer_queue::reschedule(Handler* h, int id, Microseconds ms) { 
+  cancel(h, id);
+  schedule(h, id, ms);
+}
+
 /// Removes the timer associated with the handler that has the given id.
 ///
 /// \todo This is not efficient. It should be more efficient if

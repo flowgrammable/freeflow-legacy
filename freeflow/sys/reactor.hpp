@@ -33,6 +33,7 @@ public:
 
   // Timers
   void schedule_timer(Handler*, int, Microseconds);
+  void reschedule_timer(Handler*, int, Microseconds);
   void cancel_timer(Handler*, int);
 
   // Control

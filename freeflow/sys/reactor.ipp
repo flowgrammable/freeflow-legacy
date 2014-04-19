@@ -35,6 +35,12 @@ Reactor::schedule_timer(Handler* h, int id, Microseconds us) {
   timers_.schedule(h, id, us);
 }
 
+/// Rechedule a timer for the handler. 
+inline void
+Reactor::reschedule_timer(Handler* h, int id, Microseconds us) {
+  timers_.reschedule(h, id, us);
+}
+
 /// Cancel all timers associated with the handler.
 inline void
 Reactor::cancel_timer(Handler* h, int id) {
