@@ -82,7 +82,7 @@ Timer_queue::cancel(Handler* h, int id) {
   });
   if (i != heap_.end()) {
     heap_.erase(i);
-    std::sort_heap(heap_.begin(), heap_.end(), Timer_less{});
+    std::make_heap(heap_.begin(), heap_.end(), Timer_less{});
   }
 }
 
@@ -94,7 +94,7 @@ Timer_queue::cancel(Handler* h) {
   });
   if (i != heap_.end()) {
     heap_.erase(i, heap_.end());
-    std::sort_heap(heap_.begin(), heap_.end(), Timer_less{});
+    std::make_heap(heap_.begin(), heap_.end(), Timer_less{});
   }
 }
 
