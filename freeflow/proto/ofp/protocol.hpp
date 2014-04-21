@@ -20,6 +20,9 @@
 #include <freeflow/sys/buffer.hpp>
 #include <freeflow/sys/time.hpp>
 #include <freeflow/sys/reactor.hpp>
+
+#include <freeflow/nbi/switch.hpp>
+
 #include <freeflow/proto/ofp/ofp.hpp>
 
 namespace freeflow {
@@ -64,7 +67,7 @@ struct Message_queue : std::queue<Buffer> {
 /// populated dynamically.
 struct Config {
   /// The highest version of the protocol supported.
-  Uint8 version = 0;
+  Uint8 current_version = 1;
 
   /// If, after this duration, the controller has not received any 
   /// messages from a connected switch, send an echo request to determine
@@ -170,11 +173,11 @@ private:
   bool established_time(Reactor&, int);
   bool established_to_close(Reactor&);
 
+  // Internal processing facilities
   Handler*    handler_;
-  Config      config_;
-  Uint8       version_;
-  State       state_;
   Version*    proto_;
+  Config      config_;
+  State       state_;
 
   Uint32   xid_;       // The curent transaction id
   int      ctime_ = 0; // The connection timeout timer

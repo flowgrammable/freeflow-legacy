@@ -85,8 +85,8 @@ template<typename H, typename P>
 
 inline
 Protocol::Protocol(Controller* c, Handler* h)
-  : handler_(h), config_(), version_(config_.version), state_(CLOSED)
-  , proto_(nullptr), ctrl_(c), switch_(nullptr)
+  : handler_(h), proto_(nullptr), config_(), state_(CLOSED)
+  , ctrl_(c), switch_(nullptr)
 { }
 
 /// Create a message and put it into the message queue.
@@ -94,7 +94,7 @@ template<typename P>
   inline Error 
   Protocol::put_message(const P& p) {
     Header h {
-      version_, P::Kind, Uint16(bytes(h) + bytes(p)), xid()
+      switch_->protocol_version(), P::Kind, Uint16(bytes(h) + bytes(p)), xid()
     };
     return write.put_message(h, p); 
   }

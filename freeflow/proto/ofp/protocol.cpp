@@ -12,6 +12,8 @@
 // or implied. See the License for the specific language governing
 // permissions and limitations under the License.
 
+#include <algorithm>
+
 #include <freeflow/sys/socket.hpp>
 #include <freeflow/nbi/controller.hpp>
 #include <freeflow/nbi/switch.hpp>
@@ -27,12 +29,17 @@ namespace ofp {
 bool 
 Protocol::on_open(Reactor& r) {
   // Extract the socket from the handler...
-  // FIXME: This isn't pretty.
+  // FIXME: This isn't pretty. It should be.
   using Socket_handler = Resource_handler<Socket>;
   Socket_handler* sock = dynamic_cast<Socket_handler*>(handler_);
 
   // Connect the switch.
+  // This does not correlate to any application-specific events.
+  // It simply creates internal structures needed to manage the
+  // abstraction.
   switch_ = &ctrl_->connect(sock->rc());
+
+
   return open_to_hello(r); 
 }
 
@@ -127,7 +134,7 @@ Protocol::feature_recv(Reactor& r) {
   // FIXME: Check against the negotiated version, not 1.0.
   Header h;
   read.peek_header(h);
-  if (h.version != v1_0::VERSION)
+  if (protocol_version(h) != switch_->protocol_version())
     return false;
   if (h.type != v1_0::FEATURE_REPLY)
     return false;
@@ -209,17 +216,20 @@ Protocol::ping(Reactor& r) {
 
 // Configure the protocol version.
 // Note that version negotiation should not fail.
-//
-// FIXME: We have to do some stuff with version bitmaps
-// here... not sure what.
 Protocol::Version*
 Protocol::negotiate(Uint8 v) {
-  version_ = std::min(config_.version, v);
-  switch (version_) {
+  Uint8 v0 = std::min(config_.current_version, v);
+  Uint8 v1 = protocol_version(v0),
+        ve = protocol_experiment(v1);
+
+  // Set protocol the protocol information on the switch.
+  switch_->set_protocol(v1, ve);
+
+  switch (v) {
   case 0:
     return new v1_0::Handler(*this);
   default:
-    return nullptr; // unreachable
+    return nullptr; // Not supported.
   }
 }
 

@@ -84,6 +84,29 @@ template<std::size_t N>
     return !(a == b); 
   }
 
+
+// -------------------------------------------------------------------------- //
+// Protocol version
+
+/// Returns the protocolo version for the given value by ensuring that
+/// the MSB is cleared.
+inline Uint8
+protocol_version(Uint8 v) { return v & ~Header::Version_mask; }
+
+/// Returns the protocol version in the header. The MSB is guaranteed to
+/// be 0.
+inline Uint8
+protocol_version(const Header& h) { return protocol_version(h.version); }
+
+/// Returns true if the protocol version has the MSB set.
+inline Uint8
+protocol_experiment(Uint8 v) { return v | Header::Version_mask; }
+
+/// Returns true if the protocol version is experimental. This is the case
+/// if and only if the MSB of the header's version is 1.
+inline Uint8
+protocol_experiment(const Header& h) { return protocol_experiment(h.version); }
+
 // -------------------------------------------------------------------------- //
 // Bytes
 

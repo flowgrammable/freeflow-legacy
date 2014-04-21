@@ -15,6 +15,10 @@
 #ifndef FREEFLOW_SWITCH_HPP
 #define FREEFLOW_SWITCH_HPP
 
+#include <cassert>
+
+#include <freeflow/sys/data.hpp>
+
 namespace freeflow {
 
 struct Socket;
@@ -29,12 +33,19 @@ public:
   // Observers
   Controller& controller();
 
+  Uint8 protocol_version() const;
+  Uint8 protocol_experiment() const;
+  void set_protocol(Uint8, Uint8);
+
   // TODO: Provide features for accessing the socket: peer address,
   // socket options, etc.
 
 private:
   Controller& ctrl_;
-  Socket& sock_;
+  Socket&     sock_;
+  
+  Uint8 proto_vsn;  // The negotiated protocol version.
+  Uint8 proto_exp; // True if the protocol is experimental.
 };
 
 } // namespace freeflow

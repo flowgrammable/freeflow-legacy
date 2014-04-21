@@ -96,6 +96,8 @@ struct Ipv6_addr {
 
 /// The OpenFlow header is found at the front of every OpenFlow message.
 struct Header {
+  static constexpr Uint8 Version_mask = 1 << 7;
+
   Uint8 version;
   Uint8 type;
   Uint16 length;
@@ -108,6 +110,12 @@ struct Header {
 // These primitive types and functions establish the basic protocol encoding
 // rules and some structures common to all versions of the OpenFlow
 // protocol.
+
+Uint8 protocol_version(Uint8);
+Uint8 protocol_version(const Header&);
+
+Uint8 protocol_experiment(Uint8);
+Uint8 protocol_experiment(const Header&);
 
 // Bytes
 

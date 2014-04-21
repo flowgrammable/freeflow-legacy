@@ -23,4 +23,22 @@ Switch::Switch(Controller& c, Socket& s)
 inline Controller& 
 Switch::controller() { return ctrl_; }
 
+/// Returns the negotiated protocol version.
+///
+/// \todo Find a more abstract scheme for managing the protocol. Also,
+/// handle experimental variants of the protocol correctly.
+inline Uint8
+Switch::protocol_version() const { return proto_vsn; }
+
+/// Returns true if the version is designated as experimental.
+inline Uint8
+Switch::protocol_experiment() const { return proto_exp; }
+
+/// Sets the protocol and version and experiment flags.
+inline void
+Switch::set_protocol(Uint8 v, Uint8 e) {
+  proto_vsn = v;
+  proto_exp = e;
+}
+
 } // namespace freeflow
