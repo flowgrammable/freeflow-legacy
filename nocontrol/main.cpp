@@ -20,9 +20,11 @@
 #include <freeflow/sys/socket.hpp>
 #include <freeflow/sys/file.hpp>
 #include <freeflow/sys/reactor.hpp>
+#include <freeflow/nbi/controller.hpp>
 
 #include "acceptor.hpp"
 #include "connection.hpp"
+#include "bridge.hpp"
 
 using namespace std;
 using namespace freeflow;
@@ -64,6 +66,19 @@ main(int argc, char* argv[]) {
   // Listen for ^D on stdin so we can shutdown easily.
   Terminator term(0);
 
+  // Create the controller for NBI applications.
+  Controller ctrl;
+
+  // Create the application running on the controller.
+  //
+  // FIXME: How do we know what switches the application should
+  // be deployed on? Certainly not all of them.
+  Bridge app;
+
+  // Run the reactor loop.
+  //
+  // FIXME: Consider moving all of the reactor facilities into
+  // the NBI library.
   Reactor r;
   r.add_handler(&term);
   r.add_handler(&acc);

@@ -12,21 +12,11 @@
 // or implied. See the License for the specific language governing
 // permissions and limitations under the License.
 
-#ifndef NBI_FIELD.HPP
-#define NBI_FIELD.HPP
+#ifndef FREEFLOW_FIELD_HPP
+#define FREEFLOW_FIELD_HPP
 
-namespace nbi {
+namespace freeflow {
 
-	// Destination MAC address 
-	Class ether_dest {
-
-	}
-
-	// Source MAC address 
-	Class ether_src {
-
-	}	
-
-} // end namespace
+} // namespace freeflow
 
 #endif

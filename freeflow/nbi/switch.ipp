@@ -12,27 +12,15 @@
 // or implied. See the License for the specific language governing
 // permissions and limitations under the License.
 
-#ifndef FREEFLOW_SWITCH_HPP
-#define FREEFLOW_SWITCH_HPP
-
 namespace freeflow {
 
-class Controller;
+/// Initialize the switch object for the given controller.
+inline
+Switch::Switch(Controller& c)
+  : ctrl_(&c) { }
 
-/// A Switch represents a connected physical packet switching device.
-class Switch {
-public:
-  Switch(Controller&);
-
-  Controller& controller();
-
-private:
-  Controller* ctrl_;
-};
+/// Return the controller associated with the swithc.
+inline Controller& 
+Switch::controller() { return *ctrl_; }
 
 } // namespace freeflow
-
-#include <freeflow/nbi/switch.ipp>
-
-#endif
-

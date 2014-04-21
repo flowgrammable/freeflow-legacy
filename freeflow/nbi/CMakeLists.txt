@@ -13,9 +13,14 @@
 # permissions and limitations under the License.
 
 set(src controller.cpp
-        switch.cpp)
+        switch.cpp
+        application.cpp)
 
 set(hdr controller.hpp
-        switch.hpp)
+        controller.ipp
+        switch.hpp
+        switch.ipp
+        application.hpp
+        application.ipp)
 
-add_library(freeflow_nbi ${src})
+add_library(freeflow-nbi ${src})

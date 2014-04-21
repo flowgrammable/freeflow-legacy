@@ -12,12 +12,12 @@
 // or implied. See the License for the specific language governing
 // permissions and limitations under the License.
 
-#ifndef NBI_CONTROLLER_HPP
-#define NBI_CONTROLLER_HPP
+#ifndef FREEFLOW_CONTROLLER_HPP
+#define FREEFLOW_CONTROLLER_HPP
 
 #include <unordered_map>
 
-namespace nbi {
+namespace freeflow {
 
 struct Switch;
 
@@ -32,7 +32,7 @@ private:
   Switch_map switches_;
 };
 
-} // namespace nbi
+} // namespace freeflow
 
 #include "controller.ipp"
 

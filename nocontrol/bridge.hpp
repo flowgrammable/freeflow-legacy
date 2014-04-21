@@ -1,4 +1,4 @@
-// Copyright (c) 2013-2014 Flowgrammable, LLC.
+// Copyright (c) 2013-2014 Flowgrammable.org
 // 
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,27 +12,22 @@
 // or implied. See the License for the specific language governing
 // permissions and limitations under the License.
 
-#ifndef FREEFLOW_SWITCH_HPP
-#define FREEFLOW_SWITCH_HPP
+#ifndef NOCONTROL_BRIDGE_HPP
+#define NOCONTROL_BRIDGE_HPP
 
-namespace freeflow {
+#include <freeflow/nbi/application.hpp>
+#include <freeflow/nbi/switch.hpp>
 
-class Controller;
+#include <nocontrol/config.hpp>
 
-/// A Switch represents a connected physical packet switching device.
-class Switch {
+namespace nocontrol {
+
+class Bridge : ff::Application {
 public:
-  Switch(Controller&);
-
-  Controller& controller();
-
-private:
-  Controller* ctrl_;
+  void start(ff::Switch&);
+  void stop(ff::Switch&);
 };
 
-} // namespace freeflow
-
-#include <freeflow/nbi/switch.ipp>
+} // namespace nocontrol
 
 #endif
-

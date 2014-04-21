@@ -12,27 +12,5 @@
 // or implied. See the License for the specific language governing
 // permissions and limitations under the License.
 
-#ifndef FREEFLOW_SWITCH_HPP
-#define FREEFLOW_SWITCH_HPP
-
-namespace freeflow {
-
-class Controller;
-
-/// A Switch represents a connected physical packet switching device.
-class Switch {
-public:
-  Switch(Controller&);
-
-  Controller& controller();
-
-private:
-  Controller* ctrl_;
-};
-
-} // namespace freeflow
-
-#include <freeflow/nbi/switch.ipp>
-
-#endif
+#include "application.hpp"
 
