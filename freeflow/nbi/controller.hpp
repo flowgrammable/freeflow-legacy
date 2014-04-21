@@ -25,8 +25,8 @@ struct Switch;
 class Controller {
   using Switch_map = std::unordered_map<std::size_t, Switch*>;
 
-  void connect(Switch*);
-  void disconnect(Switch*);
+  Switch& connect();
+  void disconnect(Switch&);
 
 private:
   Switch_map switches_;

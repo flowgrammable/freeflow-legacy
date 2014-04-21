@@ -23,8 +23,8 @@ struct Connection::Write_on_exit {
 };
 
 inline
-Connection::Connection(ff::Socket&& s)
-  : Resource_handler<ff::Socket>(std::move(s)) { }
+Connection::Connection(ff::Controller& c, ff::Socket&& s)
+  : Resource_handler<ff::Socket>(std::move(s)), ctrl_(&c) { }
 
 /// Create a version negotiation state machine so we know what version
 /// we should accept.
@@ -33,7 +33,7 @@ Connection::Connection(ff::Socket&& s)
 inline bool
 Connection::on_open(ff::Reactor& r) {
   Write_on_exit g(*this);
-  proto_ = new ff::ofp::Protocol(this);
+  proto_ = new ff::ofp::Protocol(ctrl_, this);
   return proto_->on_open(r);
 }
 

@@ -18,6 +18,7 @@
 #include <freeflow/sys/socket.hpp>
 #include <freeflow/sys/handler.hpp>
 #include <freeflow/sys/reactor.hpp>
+#include <freeflow/nbi/controller.hpp>
 
 #include <nocontrol/config.hpp>
 
@@ -25,11 +26,15 @@ namespace nocontrol {
 
 // The acceptor is responsible for accepting connections when
 // they are available.
-struct Acceptor : ff::Resource_handler<ff::Socket> {
-  Acceptor(const ff::Address& a);
+class Acceptor : public ff::Resource_handler<ff::Socket> {
+public:
+  Acceptor(ff::Controller&, const ff::Address&);
 
   // Events
   bool on_read(ff::Reactor&);
+
+private:
+  ff::Controller& ctrl_;
 };
 
 } // namesapce nocontrol

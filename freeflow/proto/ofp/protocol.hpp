@@ -20,6 +20,7 @@
 #include <freeflow/sys/buffer.hpp>
 #include <freeflow/sys/time.hpp>
 #include <freeflow/sys/reactor.hpp>
+#include <freeflow/nbi/controller.hpp>
 #include <freeflow/proto/ofp/ofp.hpp>
 
 namespace freeflow {
@@ -113,7 +114,7 @@ class Protocol {
   };
 
 public:
-  Protocol(Handler*);
+  Protocol(Controller*, Handler*);
 
   bool on_open(Reactor&);
   bool on_close(Reactor&);
@@ -160,11 +161,12 @@ private:
   bool established_time(Reactor&, int);
   bool established_to_close(Reactor&);
 
-  Handler* handler_;
-  Config   config_;
-  Uint8    version_;
-  State    state_;
-  Version* proto_;
+  Controller* ctrl_;
+  Handler*    handler_;
+  Config      config_;
+  Uint8       version_;
+  State       state_;
+  Version*    proto_;
 
   Uint32   xid_;       // The curent transaction id
   int      ctime_ = 0; // The connection timeout timer

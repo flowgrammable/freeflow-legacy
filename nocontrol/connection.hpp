@@ -34,7 +34,7 @@ class Connection : public ff::Resource_handler<ff::Socket> {
 public:
   using ff::Resource_handler<ff::Socket>::Resource_handler;
 
-  Connection(ff::Socket&& s);
+  Connection(ff::Controller&, ff::Socket&&);
 
   bool on_open(ff::Reactor&);
   bool on_close(ff::Reactor&);
@@ -45,6 +45,7 @@ private:
   bool read();
   bool write();
 
+  ff::Controller* ctrl_;
   ff::ofp::Protocol* proto_;
 };
 

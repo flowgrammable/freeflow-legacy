@@ -84,9 +84,9 @@ template<typename H, typename P>
 // Protocol
 
 inline
-Protocol::Protocol(Handler* h)
-  : handler_(h), config_(), version_(config_.version), state_(CLOSED)
-  , proto_(nullptr)
+Protocol::Protocol(Controller* c, Handler* h)
+  : ctrl_(c), handler_(h), config_(), version_(config_.version)
+  , state_(CLOSED), proto_(nullptr)
 { }
 
 /// Create a message and put it into the message queue.

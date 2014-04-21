@@ -18,8 +18,8 @@ namespace nocontrol {
 ///
 /// \todo Integrate TLS.
 inline
-Acceptor::Acceptor(const ff::Address& a)
-  : ff::Resource_handler<ff::Socket>(a.family(), ff::Socket::TCP) 
+Acceptor::Acceptor(ff::Controller& c, const ff::Address& a)
+  : ff::Resource_handler<ff::Socket>(a.family(), ff::Socket::TCP), ctrl_(c)
 {
   rc().bind(a); 
   rc().listen();

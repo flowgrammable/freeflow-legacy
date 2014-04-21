@@ -59,15 +59,15 @@ struct Terminator : Resource_handler<Resource> {
 int 
 main(int argc, char* argv[]) {
 
+  // Create the controller for NBI applications.
+  Controller ctrl;
+
   // Configure the switch address.
   Address addr(Ipv4_addr::any, 9001);
-  Acceptor acc(addr);
+  Acceptor acc(ctrl, addr);
 
   // Listen for ^D on stdin so we can shutdown easily.
   Terminator term(0);
-
-  // Create the controller for NBI applications.
-  Controller ctrl;
 
   // Create the application running on the controller.
   //

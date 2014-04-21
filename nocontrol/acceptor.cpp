@@ -30,7 +30,7 @@ Acceptor::on_read(Reactor& r) {
   // FIXME: The error handling stuff is not good.
   Connection* c;
   try {
-    c = new Connection(rc().accept());
+    c = new Connection(ctrl_, rc().accept());
   } catch(System_error&) {
     perror("error");
     r.stop();
