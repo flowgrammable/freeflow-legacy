@@ -12,7 +12,9 @@
 // or implied. See the License for the specific language governing
 // permissions and limitations under the License.
 
-#include <algorithm>
+#include <freeflow/sys/socket.hpp>
+#include <freeflow/nbi/controller.hpp>
+#include <freeflow/nbi/switch.hpp>
 
 #include <freeflow/proto/ofp/v1.0/message.hpp>
 #include <freeflow/proto/ofp/v1.0/protocol.hpp>
@@ -23,10 +25,23 @@ namespace freeflow {
 namespace ofp {
 
 bool 
-Protocol::on_open(Reactor& r) { return open_to_hello(r); }
+Protocol::on_open(Reactor& r) {
+  // Extract the socket from the handler...
+  // FIXME: This isn't pretty.
+  using Socket_handler = Resource_handler<Socket>;
+  Socket_handler* sock = dynamic_cast<Socket_handler*>(handler_);
+
+  // Connect the switch.
+  switch_ = &ctrl_->connect(sock->rc());
+  return open_to_hello(r); 
+}
 
 bool
-Protocol::on_close(Reactor&) { return true; }
+Protocol::on_close(Reactor&) { 
+  // Disconnect the switch.
+  ctrl_->disconnect(*switch_);
+  return true; 
+}
 
 bool
 Protocol::on_recv(Reactor& r) {

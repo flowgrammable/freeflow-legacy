@@ -13,3 +13,22 @@
 // permissions and limitations under the License.
 
 #include "controller.hpp"
+#include "switch.hpp"
+
+namespace freeflow {
+
+/// Register the switch.
+Switch&
+Controller::connect(Socket& s) {
+  auto i = switches_.emplace(new Switch(*this, s));
+  return **i.first;
+}
+
+/// Remove the switch from the set.
+void
+Controller::disconnect(Switch& s) {
+  switches_.erase(&s);
+  delete &s;
+}
+
+} // namespace freeflow

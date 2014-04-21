@@ -16,11 +16,11 @@ namespace freeflow {
 
 /// Initialize the switch object for the given controller.
 inline
-Switch::Switch(Controller& c)
-  : ctrl_(&c) { }
+Switch::Switch(Controller& c, Socket& s)
+  : ctrl_(c), sock_(s) { }
 
 /// Return the controller associated with the swithc.
 inline Controller& 
-Switch::controller() { return *ctrl_; }
+Switch::controller() { return ctrl_; }
 
 } // namespace freeflow

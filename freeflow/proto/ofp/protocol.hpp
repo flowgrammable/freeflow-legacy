@@ -20,10 +20,13 @@
 #include <freeflow/sys/buffer.hpp>
 #include <freeflow/sys/time.hpp>
 #include <freeflow/sys/reactor.hpp>
-#include <freeflow/nbi/controller.hpp>
 #include <freeflow/proto/ofp/ofp.hpp>
 
 namespace freeflow {
+
+class Controller;
+class Switch;
+
 namespace ofp {
 
 /// A message queue represents a sequence of buffered messages
@@ -116,12 +119,18 @@ class Protocol {
 public:
   Protocol(Controller*, Handler*);
 
+  // Network events
   bool on_open(Reactor&);
   bool on_close(Reactor&);
   bool on_recv(Reactor&);
   bool on_time(Reactor&, int);
 
+  // Application requests
+
+
   // Read/write helper functions
+  //
+  // FIXME: Should be private?
   template<typename P>
     Error put_message(const P& p);
 
@@ -161,7 +170,6 @@ private:
   bool established_time(Reactor&, int);
   bool established_to_close(Reactor&);
 
-  Controller* ctrl_;
   Handler*    handler_;
   Config      config_;
   Uint8       version_;
@@ -171,6 +179,10 @@ private:
   Uint32   xid_;       // The curent transaction id
   int      ctime_ = 0; // The connection timeout timer
   int      mtime_ = 1; // The message timeout timer
+
+  // NBI features
+  Controller* ctrl_;    // The controller hosting the state machine
+  Switch*     switch_;  // The connected switch
 };
 
 } // ofp

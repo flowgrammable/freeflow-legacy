@@ -17,17 +17,24 @@
 
 namespace freeflow {
 
+struct Socket;
 class Controller;
 
 /// A Switch represents a connected physical packet switching device.
+///
 class Switch {
 public:
-  Switch(Controller&);
+  Switch(Controller&, Socket& s);
 
+  // Observers
   Controller& controller();
 
+  // TODO: Provide features for accessing the socket: peer address,
+  // socket options, etc.
+
 private:
-  Controller* ctrl_;
+  Controller& ctrl_;
+  Socket& sock_;
 };
 
 } // namespace freeflow

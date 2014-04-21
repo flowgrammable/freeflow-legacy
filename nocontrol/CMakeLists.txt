@@ -19,7 +19,7 @@ set(src main.cpp
         acceptor.cpp 
         bridge.cpp)
 
-set(libs freeflow freeflow-nbi freeflow-ofp freeflow-ofp-1.0)
+set(libs freeflow freeflow-ofp freeflow-ofp-1.0 freeflow-nbi)
 
 add_executable(nocontrol main.cpp ${src})
 target_link_libraries(nocontrol ${libs})

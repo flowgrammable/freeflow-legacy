@@ -15,7 +15,9 @@
 #ifndef FREEFLOW_CONTROLLER_HPP
 #define FREEFLOW_CONTROLLER_HPP
 
-#include <unordered_map>
+#include <unordered_set>
+
+#include <freeflow/sys/socket.hpp>
 
 namespace freeflow {
 
@@ -23,13 +25,14 @@ struct Switch;
 
 /// The Controller class represents...
 class Controller {
-  using Switch_map = std::unordered_map<std::size_t, Switch*>;
+  using Switch_set = std::unordered_set<Switch*>;
 
-  Switch& connect();
+public:
+  Switch& connect(Socket&);
   void disconnect(Switch&);
 
 private:
-  Switch_map switches_;
+  Switch_set switches_;
 };
 
 } // namespace freeflow
