@@ -23,7 +23,7 @@ struct Switch;
 
 /// The Controller class represents...
 class Controller {
-  using std::unordered_map<std::size_t, Switch*> Switch_map;
+  using Switch_map = std::unordered_map<std::size_t, Switch*>;
 
   void connect(Switch*);
   void disconnect(Switch*);
