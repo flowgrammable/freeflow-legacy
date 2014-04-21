@@ -59,7 +59,7 @@ Protocol::open_to_hello(Reactor& r) {
   put_message(v1_0::Hello{});
 
   // Install a timeout timer.
-  r.schedule_timer(handler_, timer_, config_.echo_timeout);
+  r.schedule_timer(handler_, ctime_, config_.connection_timeout);
 
   return true;
 }
@@ -94,8 +94,8 @@ Protocol::hello_to_feature(Reactor& r) {
   // FIXME: Send a more appropriate message version.
   put_message(v1_0::Feature_request{});
 
-  // Update the timer.
-  r.reschedule_timer(handler_, timer_, config_.echo_timeout);
+  // Reschedule the timeout.
+  r.reschedule_timer(handler_, ctime_, config_.connection_timeout);
 
   return true;
 }
@@ -105,23 +105,27 @@ Protocol::hello_to_close(Reactor& r) { return false; }
 
 bool
 Protocol::feature_recv(Reactor& r) {
+  // Reschedule the ping timer. 
+  r.reschedule_timer(handler_, mtime_, config_.message_timeout);
+
+  // Determine the kind of message.
+  // FIXME: Check against the negotiated version, not 1.0.
   Header h;
   read.peek_header(h);
-
-  // FIXME: Check against the negotiated version, not 1.0.
   if (h.version != v1_0::VERSION)
     return false;
   if (h.type != v1_0::FEATURE_REPLY)
     return false;
 
-  // FXIME: Read the right message! Also... do something with this.
-  // but what?
+  // FXIME: Actually interpret the payload.
   v1_0::Feature_reply p;
   get_payload(h, p);
 
   return feature_to_established(r);
 }
 
+/// Receiving a timeout in the feature state results
+/// in shutdown.
 bool
 Protocol::feature_time(Reactor& r) { return feature_to_close(r); }
 
@@ -131,16 +135,12 @@ bool
 Protocol::feature_to_established(Reactor& r) {
   state_ = ESTABLISHED;
 
+  // Cancel the timeout timer.
+  r.cancel_timer(handler_, ctime_);
 
-  // Go ahead and send the first ping now.
-  v1_0::Echo_request m;
-  put_message(m);
-
-  // Schedule the echo timer.
-  r.schedule_timer(handler_, echo_, config_.echo_timeout);
-
-  // Cancel the timeout timer for now.
-  r.cancel_timer(handler_, timer_);
+  // Set the message timer to send a ping if we haven't heard
+  // from the switch in a while.
+  r.schedule_timer(handler_, mtime_, config_.message_timeout);
 
   return true;
 }
@@ -150,12 +150,14 @@ Protocol::feature_to_close(Reactor& r) { return false; }
 
 bool
 Protocol::established_recv(Reactor& r) {
+  // Read and dispatch the message.
+  //
+  // FIXME: Dispatch according to version first.
   Header h;
   read.peek_header(h);
-
-  // FIXME: Dispatch according to version first.
   switch (h.type) {
   case v1_0::ECHO_REPLY: return established_recv_echo(r);
+  default: return true;
   }
   return true;
 }
@@ -164,18 +166,17 @@ Protocol::established_recv(Reactor& r) {
 /// next ping message.
 bool
 Protocol::established_recv_echo(Reactor& r) {
-  r.cancel_timer(handler_, echo_);
-  r.reschedule_timer(handler_, echo_, config_.echo_timeout / 2);
+  r.cancel_timer(handler_, ctime_);
   return true;
 }
 
-// FIXME: There are lots of potential timers here.
+/// Act on a timer.
 bool
 Protocol::established_time(Reactor& r, int t) {
-  if (t == timer_)
+  if (t == ctime_)
     return established_to_close(r);
-  if (t == echo_)
-    ping(r);
+  if (t == mtime_)
+    return ping(r);
   return true;
 }
 
@@ -187,7 +188,7 @@ bool
 Protocol::ping(Reactor& r) {
   v1_0::Echo_request m;
   put_message(m);
-  r.schedule_timer(handler_, timer_, config_.echo_timeout);
+  r.schedule_timer(handler_, ctime_, config_.connection_timeout);
   return true;
 }
 

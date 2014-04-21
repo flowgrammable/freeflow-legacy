@@ -62,8 +62,15 @@ struct Config {
   /// The highest version of the protocol supported.
   Uint8 version = 0;
 
-  /// Connection timeout for echo messages.
-  Seconds echo_timeout = 60_s;
+  /// If, after this duration, the controller has not received any 
+  /// messages from a connected switch, send an echo request to determine
+  /// if the connection is still live.
+  Seconds message_timeout = 10_s;
+
+  /// The amount of time to wait before determining that a switch
+  /// is no longer connected. This duration governs timeout policies
+  /// for both handshake messages and echo requests.
+  Seconds connection_timeout = 60_s;
 
   /// The default idle timeout for flows.
   Seconds idle_timeout = 5_s;
@@ -160,8 +167,8 @@ private:
   Version* proto_;
 
   Uint32   xid_;       // The curent transaction id
-  int      timer_ = 0; // The timeout timer
-  int      echo_ = 1;  // The ping timer
+  int      ctime_ = 0; // The connection timeout timer
+  int      mtime_ = 1; // The message timeout timer
 };
 
 } // ofp
