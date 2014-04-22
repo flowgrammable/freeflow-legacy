@@ -34,11 +34,23 @@ Switch::protocol_version() const { return proto_vsn; }
 inline Uint8
 Switch::protocol_experiment() const { return proto_exp; }
 
-/// Sets the protocol and version and experiment flags.
+/// Sets the protocol and version and experiment flags. Hosted applications
+/// are notified of the version discovery.
 inline void
 Switch::set_protocol(Uint8 v, Uint8 e) {
   proto_vsn = v;
   proto_exp = e;
+  app_->version_known(*this);
+}
+
+/// Indicate that the switch is ready to begin operation. The features-known
+/// event is sent to loaded applications. Those applications may or may not 
+/// be started, depending on configuration.
+inline void
+Switch::ready() {
+  app_->features_known(*this);
+
+  // TODO: Auto-start applications?
 }
 
 /// Bind given application to the switch.

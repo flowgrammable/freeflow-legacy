@@ -33,9 +33,8 @@ Protocol::on_open(Reactor& r) {
   using Socket_handler = Resource_handler<Socket>;
   Socket_handler* sock = dynamic_cast<Socket_handler*>(handler_);
 
-  // Connect the switch.
-  // This does not correlate to any application-specific events. It 
-  // simply creates internal structures needed to manage the abstraction.
+  // Connect the switch, sending a bind event to any associated
+  // applications.
   switch_ = &ctrl_->connect(sock->rc());
 
   return open_to_hello(r); 
@@ -137,9 +136,12 @@ Protocol::feature_recv(Reactor& r) {
   if (h.type != v1_0::FEATURE_REPLY)
     return false;
 
-  // FXIME: Actually interpret the payload.
+  // FXIME: Actually update the switch with features and capabilities
+  // read from the reply.
   v1_0::Feature_reply p;
   get_payload(h, p);
+
+  switch_->ready();
 
   return feature_to_established(r);
 }

@@ -35,19 +35,21 @@ public:
   // Observers
   Controller& controller();
 
+  // Transport
+  // FIXME: Get socket address and other information.s
+
+  // Protocol
   Uint8 protocol_version() const;
   Uint8 protocol_experiment() const;
   void set_protocol(Uint8, Uint8);
 
-  // TODO: Provide features for accessing the socket: peer address,
-  // socket options, etc.
-
+  // Features
+  void ready();
   
   // Application control
   void bind(Application*);
   void unbind(Application*);
   void unbind();
-
 
 private:
   Controller&  ctrl_;
