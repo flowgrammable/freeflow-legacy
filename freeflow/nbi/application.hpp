@@ -35,6 +35,10 @@ public:
   virtual void load(Controller&);
   virtual void unload(Controller&);
 
+  // Transport events
+  virtual void bind(Switch&);
+  virtual void unbind(Switch&);
+
   // Discovery events
   virtual void version_known(Switch&);
   virtual void features_known(Switch&);

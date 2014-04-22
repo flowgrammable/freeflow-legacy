@@ -18,21 +18,33 @@
 #include <unordered_set>
 
 #include <freeflow/sys/socket.hpp>
+#include <freeflow/nbi/application.hpp>
 
 namespace freeflow {
 
 struct Switch;
 
 /// The Controller class represents...
+///
+/// \todo The application currently hosts a single application. Obviously
+/// it should host more.
 class Controller {
   using Switch_set = std::unordered_set<Switch*>;
 
 public:
+
+  // Application management.
+  template<typename T> void load();
+  template<typename T> void unload();
+
+  // Switch management
   Switch& connect(Socket&);
   void disconnect(Switch&);
 
 private:
-  Switch_set switches_;
+  Application* app_;      // The hosted applicatoin.
+  Switch_set   switches_;
+
 };
 
 } // namespace freeflow

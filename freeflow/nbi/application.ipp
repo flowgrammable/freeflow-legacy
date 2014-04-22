@@ -22,6 +22,16 @@ Application::load(Controller&) { }
 inline void
 Application::unload(Controller&) { }
 
+/// The bind event is sent whenever the application is bound to a switch.
+/// This happens immediately after the switch connects to the controller.
+inline void
+Application::bind(Switch&) { }
+
+/// The unbind event is sent just before the controller disconnects from
+/// the switch.
+inline void
+Application::unbind(Switch&) { }
+
 /// The version known event is sent after the protocol and version
 /// have been negotiated and before the the start event is sent.
 inline void
@@ -72,7 +82,6 @@ Application::table_status(Switch&, const Table&) { }
 /// \todo Document me.
 inline void
 Application::role_status(Switch&, const Role&) { }
-
 
 } // namespace freeflow
 

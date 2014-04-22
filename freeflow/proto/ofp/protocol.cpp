@@ -34,11 +34,9 @@ Protocol::on_open(Reactor& r) {
   Socket_handler* sock = dynamic_cast<Socket_handler*>(handler_);
 
   // Connect the switch.
-  // This does not correlate to any application-specific events.
-  // It simply creates internal structures needed to manage the
-  // abstraction.
+  // This does not correlate to any application-specific events. It 
+  // simply creates internal structures needed to manage the abstraction.
   switch_ = &ctrl_->connect(sock->rc());
-
 
   return open_to_hello(r); 
 }

@@ -14,5 +14,23 @@
 
 namespace freeflow {
 
+/// Load an application of the given type.
+template<typename T>
+  inline void 
+  Controller::load() {
+    app_ = new T();
+    app_->load(*this);
+  }
+
+/// Unload the application of the given type.
+template<typename T>
+  inline void
+  Controller::unload() {
+    assert(dynamic_cast<T*>(app_));
+    app_->unload(*this);
+    delete app_;
+    app_ = nullptr;
+  }
+
 } // namespace freeflow
 
