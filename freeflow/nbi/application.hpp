@@ -32,10 +32,18 @@ public:
   virtual ~Application() { }
 
   // Application events
+  virtual void load(Controller&);
+  virtual void unload(Controller&);
+
+  // Discovery events
+  virtual void version_known(Switch&);
+  virtual void features_known(Switch&);
+
+  // Startup events
   virtual void start(Switch&);
   virtual void stop(Switch&);
 
-  // OpenFlow events
+  // Datapath events
   virtual void packet_in(Switch&, const Packet&);
   virtual void flow_removed(Switch&, const Flow&);
   virtual void port_status(Switch&, const Port&);

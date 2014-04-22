@@ -14,6 +14,24 @@
 
 namespace freeflow {
 
+/// The load event is sent when the controller instantiates the application.
+inline void
+Application::load(Controller&) { }
+
+/// The unload event is sent when the controller tears down the application.
+inline void
+Application::unload(Controller&) { }
+
+/// The version known event is sent after the protocol and version
+/// have been negotiated and before the the start event is sent.
+inline void
+Application::version_known(Switch&) { }
+
+/// The features known event is sent after feature discovery has
+/// completed and before the start event is sent.
+inline void
+Application::features_known(Switch&) { }
+
 /// The start event is sent when an application is first instantiated
 /// on the given switch. The start event intended to be point at which
 /// an application establishes all necessary resources to function.
