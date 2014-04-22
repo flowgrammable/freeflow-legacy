@@ -18,6 +18,7 @@
 #include <cassert>
 
 #include <freeflow/sys/data.hpp>
+#include <freeflow/nbi/application.hpp>
 
 namespace freeflow {
 
@@ -26,6 +27,7 @@ class Controller;
 
 /// A Switch represents a connected physical packet switching device.
 ///
+/// \todo Allow the switch to run multiple applications.
 class Switch {
 public:
   Switch(Controller&, Socket& s);
@@ -40,9 +42,17 @@ public:
   // TODO: Provide features for accessing the socket: peer address,
   // socket options, etc.
 
+  
+  // Application control
+  void bind(Application*);
+  void unbind(Application*);
+  void unbind();
+
+
 private:
-  Controller& ctrl_;
-  Socket&     sock_;
+  Controller&  ctrl_;
+  Socket&      sock_;
+  Application* app_; // The hosted application.
   
   Uint8 proto_vsn;  // The negotiated protocol version.
   Uint8 proto_exp; // True if the protocol is experimental.

@@ -17,16 +17,24 @@
 
 namespace freeflow {
 
-/// Register the switch.
+/// Register the switch and invoke its bind event.
 Switch&
-Controller::connect(Socket& s) {
-  auto i = switches_.emplace(new Switch(*this, s));
+Controller::connect(Socket& sock) {
+  auto i = switches_.emplace(new Switch(*this, sock));
+  Switch& s = **i.first;
+
+  // TODO: Find the set applications to bind to the connected switch.
+  // We need to consult some configuration table to determine this.
+  // For now, I'm assuming that all applications bind to every switch.
+  s.bind(app_);
+
   return **i.first;
 }
 
 /// Remove the switch from the set.
 void
 Controller::disconnect(Switch& s) {
+  s.unbind();
   switches_.erase(&s);
   delete &s;
 }

@@ -41,4 +41,25 @@ Switch::set_protocol(Uint8 v, Uint8 e) {
   proto_exp = e;
 }
 
+/// Bind given application to the switch.
+inline void
+Switch::bind(Application* app) {
+  app_ = app;
+  app_->bind(*this);
+}
+
+/// Unbind the given application from the switch.
+inline void
+Switch::unbind(Application* app) {
+  assert(app_ == app);
+  app_->unbind(*this);
+  app_ = nullptr;
+}
+
+/// Unbind all applications from the switch.
+///
+/// \todo Actually unbind multiple applications.
+inline void
+Switch::unbind() { unbind(app_); }
+
 } // namespace freeflow
