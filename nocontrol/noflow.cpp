@@ -12,14 +12,49 @@
 // or implied. See the License for the specific language governing
 // permissions and limitations under the License.
 
-#include "bridge.hpp"
+#include <iostream>
+
+#include "noflow.hpp"
+
+using namespace freeflow;
 
 namespace nocontrol {
 
 bool
-Bridge::start(ff::Switch&) { return true; }
+Noflow::load(Controller&) {
+  stop_ = BIND;
+  std::cout << "loading noflow\n";
+  return true;
+}
 
 bool
-Bridge::stop(ff::Switch&) { return true; }
+Noflow::unload(Controller&) {
+  std::cout << "unloading noflow\n";
+  return true;
+}
+
+bool
+Noflow::bind(Switch& s) {
+  std::cout << "bind to switch\n";
+  return stop_ != BIND;
+}
+
+bool
+Noflow::unbind(Switch& s) {
+  std::cout << "unbind from switch\n";
+  return true;
+}
+
+bool
+Noflow::version_known(Switch& s) {
+  std::cout << "version negotiated\n";
+  return stop_ != VERSION;
+}
+
+bool
+Noflow::features_known(Switch& s) {
+  std::cout << "features discovered\n";
+  return false;
+}
 
 } // namespace nocontrol

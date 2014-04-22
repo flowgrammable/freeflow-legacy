@@ -35,29 +35,32 @@ inline Uint8
 Switch::protocol_experiment() const { return proto_exp; }
 
 /// Sets the protocol and version and experiment flags. Hosted applications
-/// are notified of the version discovery.
-inline void
+/// are notified of the version discovery. Returns true if the protocol
+/// is configured correctly.
+inline bool
 Switch::set_protocol(Uint8 v, Uint8 e) {
   proto_vsn = v;
   proto_exp = e;
-  app_->version_known(*this);
+  return app_->version_known(*this);
 }
 
 /// Indicate that the switch is ready to begin operation. The features-known
 /// event is sent to loaded applications. Those applications may or may not 
 /// be started, depending on configuration.
-inline void
+inline bool
 Switch::ready() {
-  app_->features_known(*this);
+  if (not app_->features_known(*this))
+    return false;
 
   // TODO: Auto-start applications?
+  return true;
 }
 
 /// Bind given application to the switch.
-inline void
+inline bool
 Switch::bind(Application* app) {
   app_ = app;
-  app_->bind(*this);
+  return app_->bind(*this);
 }
 
 /// Unbind the given application from the switch.

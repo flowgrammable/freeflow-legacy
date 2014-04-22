@@ -24,6 +24,7 @@
 
 #include "acceptor.hpp"
 #include "connection.hpp"
+#include "noflow.hpp"
 #include "bridge.hpp"
 
 using namespace std;
@@ -62,6 +63,9 @@ main(int argc, char* argv[]) {
   // Create the controller for NBI applications.
   Controller ctrl;
 
+  // Load default applications.
+  ctrl.load<Noflow>();
+
   // Configure the switch address.
   Address addr(Ipv4_addr::any, 9001);
   Acceptor acc(ctrl, addr);
@@ -69,11 +73,6 @@ main(int argc, char* argv[]) {
   // Listen for ^D on stdin so we can shutdown easily.
   Terminator term(0);
 
-  // Create the application running on the controller.
-  //
-  // FIXME: How do we know what switches the application should
-  // be deployed on? Certainly not all of them.
-  Bridge app;
 
   // Run the reactor loop.
   //
@@ -83,6 +82,9 @@ main(int argc, char* argv[]) {
   r.add_handler(&term);
   r.add_handler(&acc);
   r.run();
+
+  // FIXME: This should be part of the controller's destructor.
+  ctrl.unload<Bridge>();
 
   return 0;
 }

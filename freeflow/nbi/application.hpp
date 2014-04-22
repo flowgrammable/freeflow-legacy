@@ -32,27 +32,27 @@ public:
   virtual ~Application() { }
 
   // Application events
-  virtual void load(Controller&);
-  virtual void unload(Controller&);
+  virtual bool load(Controller&);
+  virtual bool unload(Controller&);
 
   // Transport events
-  virtual void bind(Switch&);
-  virtual void unbind(Switch&);
+  virtual bool bind(Switch&);
+  virtual bool unbind(Switch&);
 
   // Discovery events
-  virtual void version_known(Switch&);
-  virtual void features_known(Switch&);
+  virtual bool version_known(Switch&);
+  virtual bool features_known(Switch&);
 
   // Startup events
-  virtual void start(Switch&);
-  virtual void stop(Switch&);
+  virtual bool start(Switch&);
+  virtual bool stop(Switch&);
 
   // Datapath events
-  virtual void packet_in(Switch&, const Packet&);
-  virtual void flow_removed(Switch&, const Flow&);
-  virtual void port_status(Switch&, const Port&);
-  virtual void table_status(Switch&, const Table&);
-  virtual void role_status(Switch&, const Role&);
+  virtual bool packet_in(Switch&, const Packet&);
+  virtual bool flow_removed(Switch&, const Flow&);
+  virtual bool port_status(Switch&, const Port&);
+  virtual bool table_status(Switch&, const Table&);
+  virtual bool role_status(Switch&, const Role&);
 };
 
 } // namespace freeflow

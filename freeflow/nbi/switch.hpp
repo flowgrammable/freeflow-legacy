@@ -41,13 +41,13 @@ public:
   // Protocol
   Uint8 protocol_version() const;
   Uint8 protocol_experiment() const;
-  void set_protocol(Uint8, Uint8);
+  bool set_protocol(Uint8, Uint8);
 
   // Features
-  void ready();
+  bool ready();
   
   // Application control
-  void bind(Application*);
+  bool bind(Application*);
   void unbind(Application*);
   void unbind();
 

@@ -14,22 +14,30 @@
 
 namespace freeflow {
 
-/// Load an application of the given type.
+/// Load an application of the given type, returning true when the
+/// application loads successfully. If the application does not load,
+/// it is not installed.
 template<typename T>
-  inline void 
+  inline bool 
   Controller::load() {
     app_ = new T();
-    app_->load(*this);
+    if (not app_->load(*this)) {
+      delete app_;
+      app_ = nullptr;
+      return false;
+    }
+    return true;
   }
 
 /// Unload the application of the given type.
 template<typename T>
-  inline void
+  inline bool
   Controller::unload() {
     assert(dynamic_cast<T*>(app_));
     app_->unload(*this);
     delete app_;
     app_ = nullptr;
+    return true;
   }
 
 } // namespace freeflow

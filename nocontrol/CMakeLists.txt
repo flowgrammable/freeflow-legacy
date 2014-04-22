@@ -17,6 +17,7 @@ include_directories(${CMAKE_SOURCE_DIR})
 set(src main.cpp 
         connection.cpp 
         acceptor.cpp 
+        noflow.cpp
         bridge.cpp)
 
 set(libs freeflow freeflow-ofp freeflow-ofp-1.0 freeflow-nbi)

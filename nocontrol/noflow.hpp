@@ -12,14 +12,34 @@
 // or implied. See the License for the specific language governing
 // permissions and limitations under the License.
 
-#include "bridge.hpp"
+#ifndef NOCONTROL_NOFLOW_HPP
+#define NOCONTROL_NOWFLOW_HPP
+
+#include <freeflow/nbi/application.hpp>
+#include <freeflow/nbi/controller.hpp>
+#include <freeflow/nbi/switch.hpp>
+
+#include <nocontrol/config.hpp>
 
 namespace nocontrol {
 
-bool
-Bridge::start(ff::Switch&) { return true; }
+/// The noflow 
+class Noflow : public ff::Application {
+  enum Stop { BIND, VERSION, FEATURE };
+public:
+  bool load(ff::Controller&);
+  bool unload(ff::Controller&);
 
-bool
-Bridge::stop(ff::Switch&) { return true; }
+  bool bind(ff::Switch&);
+  bool unbind(ff::Switch&);
+
+  bool version_known(ff::Switch&);
+  bool features_known(ff::Switch&);
+
+private:
+  Stop stop_ = BIND; // The stopping point.
+};
 
 } // namespace nocontrol
+
+#endif

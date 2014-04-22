@@ -34,8 +34,8 @@ class Controller {
 public:
 
   // Application management.
-  template<typename T> void load();
-  template<typename T> void unload();
+  template<typename T> bool load();
+  template<typename T> bool unload();
 
   // Switch management
   Switch& connect(Socket&);
