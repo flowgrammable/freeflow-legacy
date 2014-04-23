@@ -36,7 +36,8 @@ Noflow::unload(Controller&) {
 bool
 Noflow::bind(Switch& s) {
   std::cout << "bind to switch\n";
-  return stop_ != BIND;
+  s.disconnect();
+  return true;
 }
 
 bool

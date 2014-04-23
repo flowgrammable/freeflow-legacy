@@ -77,4 +77,7 @@ Switch::unbind(Application* app) {
 inline void
 Switch::unbind() { unbind(app_); }
 
+inline void
+Switch::disconnect() { }
+
 } // namespace freeflow

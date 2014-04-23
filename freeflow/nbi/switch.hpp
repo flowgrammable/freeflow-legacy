@@ -51,10 +51,16 @@ public:
   void unbind(Application*);
   void unbind();
 
+  // Requests
+  void disconnect();
+
 private:
   Controller&  ctrl_;
   Socket&      sock_;
-  Application* app_; // The hosted application.
+  
+  // The hosted application.
+  // TODO: Should be applications.
+  Application* app_; 
   
   Uint8 proto_vsn;  // The negotiated protocol version.
   Uint8 proto_exp; // True if the protocol is experimental.

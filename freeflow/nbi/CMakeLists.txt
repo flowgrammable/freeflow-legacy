@@ -14,13 +14,16 @@
 
 set(src controller.cpp
         switch.cpp
-        application.cpp)
+        application.cpp
+        request.cpp)
 
 set(hdr controller.hpp
         controller.ipp
         switch.hpp
         switch.ipp
         application.hpp
-        application.ipp)
+        application.ipp
+        request.hpp
+        request.ipp)
 
 add_library(freeflow-nbi ${src})
