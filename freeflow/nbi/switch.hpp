@@ -45,7 +45,7 @@ public:
   void set_protocol(Uint8, Uint8);
 
   // Features
-  void ready();
+  void configured();
   
   // Application control
   void bind(Application*);
@@ -54,6 +54,9 @@ public:
 
   // Requests
   void disconnect();
+  void terminate();
+
+  Request_queue& requests();
 
 private:
   Controller&   ctrl_;

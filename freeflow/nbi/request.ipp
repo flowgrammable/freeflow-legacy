@@ -24,7 +24,7 @@ Request_data::Request_data(const Terminate_request& x)
 
 template<typename T>
   inline
-  Request::Request(const T& x)
-    : type(x.Kind), data(x) { }
+  Request::Request(Application* a, const T& x)
+    : app(a), type(x.Kind), data(x) { }
 
 } // namespace freeflow

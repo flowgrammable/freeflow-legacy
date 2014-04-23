@@ -29,6 +29,8 @@ Application::bind(Switch&) { }
 
 /// The unbind event is sent just before the controller disconnects from
 /// the switch.
+///
+/// No switch requests may be when processing this event.
 inline void
 Application::unbind(Switch&) { }
 

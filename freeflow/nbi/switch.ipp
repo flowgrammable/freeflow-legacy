@@ -48,7 +48,7 @@ Switch::set_protocol(Uint8 v, Uint8 e) {
 /// event is sent to loaded applications. Those applications may or may not 
 /// be started, depending on configuration.
 inline void
-Switch::ready() {
+Switch::configured() {
   app_->features_known(*this);
 
   // TODO: Auto-start applications? Should the controller have a special
@@ -77,9 +77,27 @@ inline void
 Switch::unbind() { unbind(app_); }
 
 /// Request that the switch be disconnected.
+///
+/// \todo Verify that the application has permission to close the
+/// connection.
 inline void
 Switch::disconnect() {
-  reqs_.emplace(Disconnect_request{});
+  // FIXME: Invent a framework that maintains the current application
+  // when dispatching events. That way, the requesting application does't
+  // have to keep passing itself back to the controller when sending
+  // events.
+  reqs_.emplace(app_, Disconnect_request{});
 }
+
+/// Request that the application be terminated on this switch.
+inline void
+Switch::terminate() {
+  reqs_.emplace(app_, Terminate_request{});
+}
+
+/// Returns a reference to the request queue, allowing a protocol
+/// implementation to service any application requsts.
+inline Request_queue&
+Switch::requests() { return reqs_; }
 
 } // namespace freeflow

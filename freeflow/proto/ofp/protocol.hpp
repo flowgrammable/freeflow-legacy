@@ -22,6 +22,7 @@
 #include <freeflow/sys/reactor.hpp>
 
 #include <freeflow/nbi/switch.hpp>
+#include <freeflow/nbi/request.hpp>
 
 #include <freeflow/proto/ofp/ofp.hpp>
 
@@ -172,6 +173,13 @@ private:
   bool established_recv_echo(Reactor&);
   bool established_time(Reactor&, int);
   bool established_to_close(Reactor&);
+
+  // Request processing
+  bool service(Reactor&);
+  bool service(Reactor&, const Request&);
+  bool on_disconnect(Reactor&, const Request&);
+  bool on_terminate(Reactor&, const Request&);
+
 
   // Internal processing facilities
   Handler*    handler_;

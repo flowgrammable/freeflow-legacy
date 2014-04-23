@@ -37,12 +37,17 @@ Protocol::on_open(Reactor& r) {
   // applications.
   switch_ = &ctrl_->connect(sock->rc());
 
+  // Service any events resulting from the connect.
+  if (not service(r))
+    return false;
+
   return open_to_hello(r); 
 }
 
+/// When the connection is shutdown, release any switch-related
+/// resources in the controller.
 bool
 Protocol::on_close(Reactor&) { 
-  // Disconnect the switch.
   ctrl_->disconnect(*switch_);
   return true; 
 }
@@ -96,8 +101,12 @@ Protocol::hello_recv(Reactor& r) {
   proto_ = negotiate(h.version);
   if (not proto_)
     return hello_to_close(r);
-  else
-    return hello_to_feature(r);
+
+  // Service any events resulting from version negotiation.
+  if (not service(r))
+    return false;
+
+  return hello_to_feature(r);
 }
 
 /// A timeout in the hello state results in shutdown.
@@ -137,11 +146,17 @@ Protocol::feature_recv(Reactor& r) {
     return false;
 
   // FXIME: Actually update the switch with features and capabilities
-  // read from the reply.
+  // read from the reply. There should be a sequence of calls to the
+  // switch to initialize its configuration.
   v1_0::Feature_reply p;
   get_payload(h, p);
 
-  switch_->ready();
+  // Inidate that the switch is done being configured.
+  switch_->configured();
+
+  // Service any requests resulting from feature discovery.
+  if (not service(r))
+    return false;
 
   return feature_to_established(r);
 }
@@ -215,7 +230,8 @@ Protocol::ping(Reactor& r) {
 }
 
 // Configure the protocol version.
-// Note that version negotiation should not fail.
+// Note that version negotiation should never fail, assuming that we've
+// actually impletemeted the full set of protocols.
 Protocol::Version*
 Protocol::negotiate(Uint8 v) {
   Uint8 v0 = std::min(config_.current_version, v);
@@ -233,6 +249,48 @@ Protocol::negotiate(Uint8 v) {
   }
 }
 
+// Service any outstanding requests by sending a corresponding message.
+//
+// This function returns false only in the case that a disconnect request
+// has been sent. Note that all other requests will be serviced before
+// the connection is closed.
+bool
+Protocol::service(Reactor& r) {
+  bool result = true;
+  Request_queue& reqs = switch_->requests();
+  while (not reqs.empty()) {
+    Request req = reqs.front();
+    reqs.pop();
+    result &= service(r, req);
+  }
+  return result;
+}
+
+/// Dispatch an appropriate response to the request. This function
+/// only returns false if a disconnection event is serviced.
+bool
+Protocol::service(Reactor& r, const Request& req) {
+  switch (req.type) {
+  case Request::DISCONNECT: return on_disconnect(r, req);
+  case Request::TERMINATE: return on_terminate(r, req);
+  default: return true;
+  }
+}
+
+/// Disconnect the switch. This returns false, causing the reactor to
+/// close the connection.
+bool
+Protocol::on_disconnect(Reactor& r, const Request&) { 
+  return false; 
+}
+
+/// Terminate the application on this switch. Note that the application
+/// will continue to be loaded, just not running on the switch.
+bool
+Protocol::on_terminate(Reactor& r, const Request& req) {
+  switch_->unbind(req.app);
+  return true;
+}
 
 } // namespace ofp
 } // namespace freeflow

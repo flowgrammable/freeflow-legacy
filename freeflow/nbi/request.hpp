@@ -19,6 +19,8 @@
 
 namespace freeflow {
 
+class Application;
+
 /// Enumerates the types of application requests.
 enum class Request_type {
   DISCONNECT,
@@ -56,10 +58,11 @@ struct Request {
   using Data = Request_data;
 
   template<typename T>
-    Request(const T&);
+    Request(Application*, const T&);
 
-  Type type;
-  Data data;
+  Application* app;   // The requesting pplication
+  Type         type;  // The request type
+  Data         data;  // Additional request data
 };
 
 /// The request queue stores requests from the application.
