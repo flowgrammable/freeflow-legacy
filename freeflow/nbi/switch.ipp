@@ -77,7 +77,10 @@ Switch::unbind(Application* app) {
 inline void
 Switch::unbind() { unbind(app_); }
 
+/// Request that the switch be disconnected.
 inline void
-Switch::disconnect() { }
+Switch::disconnect() {
+  reqs_.emplace(Disconnect_request{});
+}
 
 } // namespace freeflow

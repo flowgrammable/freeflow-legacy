@@ -14,4 +14,17 @@
 
 namespace freeflow {
 
+inline
+Request_data::Request_data(const Disconnect_request& x)
+  : disconnect(x) { }
+
+inline
+Request_data::Request_data(const Terminate_request& x)
+  : terminate(x) { }
+
+template<typename T>
+  inline
+  Request::Request(const T& x)
+    : type(x.Kind), data(x) { }
+
 } // namespace freeflow

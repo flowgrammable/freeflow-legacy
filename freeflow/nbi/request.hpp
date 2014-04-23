@@ -19,24 +19,44 @@
 
 namespace freeflow {
 
+/// Enumerates the types of application requests.
+enum class Request_type {
+  DISCONNECT,
+  TERMINATE
+};
+
 /// Represents a request to disconnect the switch.
-struct Disconnect_request { };
+struct Disconnect_request { 
+  static constexpr Request_type Kind = Request_type::DISCONNECT;
+};
 
 /// Represents a request to terminate the application.
-struct Terminate_request { };
+struct Terminate_request { 
+  static constexpr Request_type Kind = Request_type::TERMINATE;
+};
+
+
+/// The request value is a union of different request types.
+union Request_data {
+  Request_data(const Disconnect_request&);
+  Request_data(const Terminate_request&);
+
+  Disconnect_request disconnect;
+  Terminate_request terminate;
+};
+
 
 /// The Request class represents a request from an application to
 /// the controller.
 struct Request {
-  enum Type {
-    DISCONNECT,
-    TERMINATE
-  };
+  using Type = Request_type;
+  static constexpr Type DISCONNECT = Type::DISCONNECT;
+  static constexpr Type TERMINATE = Type::TERMINATE;
 
-  union Data {
-    Disconnect_request disconnect;
-    Terminate_request terminate;
-  };
+  using Data = Request_data;
+
+  template<typename T>
+    Request(const T&);
 
   Type type;
   Data data;

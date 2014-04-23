@@ -19,6 +19,7 @@
 
 #include <freeflow/sys/data.hpp>
 #include <freeflow/nbi/application.hpp>
+#include <freeflow/nbi/request.hpp>
 
 namespace freeflow {
 
@@ -36,7 +37,7 @@ public:
   Controller& controller();
 
   // Transport
-  // FIXME: Get socket address and other information.s
+  // FIXME: Get socket address and other information.
 
   // Protocol
   Uint8 protocol_version() const;
@@ -55,14 +56,16 @@ public:
   void disconnect();
 
 private:
-  Controller&  ctrl_;
-  Socket&      sock_;
+  Controller&   ctrl_;
+  Socket&       sock_;
+  Request_queue reqs_;
   
   // The hosted application.
   // TODO: Should be applications.
   Application* app_; 
   
-  Uint8 proto_vsn;  // The negotiated protocol version.
+  // TODO: Allow different protocols to be supported.
+  Uint8 proto_vsn; // The negotiated protocol version.
   Uint8 proto_exp; // True if the protocol is experimental.
 };
 
