@@ -84,7 +84,7 @@ main(int argc, char* argv[]) {
   r.run();
 
   // FIXME: This should be part of the controller's destructor.
-  ctrl.unload<Bridge>();
+  ctrl.unload<Noflow>();
 
   return 0;
 }
