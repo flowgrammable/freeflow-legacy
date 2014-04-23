@@ -20,42 +20,27 @@ using namespace freeflow;
 
 namespace nocontrol {
 
-bool
-Noflow::load(Controller&) {
-  stop_ = BIND;
-  std::cout << "loading noflow\n";
-  return true;
-}
+/// \todo Dynamically configure the application so that it can terminate
+/// on different phases.
+void
+Noflow::load(Controller&) { stop_ = ON_BIND; }
 
-bool
-Noflow::unload(Controller&) {
-  std::cout << "unloading noflow\n";
-  return true;
-}
-
-bool
+void
 Noflow::bind(Switch& s) {
-  std::cout << "bind to switch\n";
-  s.disconnect();
-  return true;
+  if (stop_ == ON_BIND)
+    s.disconnect();
 }
 
-bool
-Noflow::unbind(Switch& s) {
-  std::cout << "unbind from switch\n";
-  return true;
-}
-
-bool
+void
 Noflow::version_known(Switch& s) {
-  std::cout << "version negotiated\n";
-  return stop_ != VERSION;
+  if (stop_ == ON_VERSION)
+    s.disconnect();
 }
 
-bool
+void
 Noflow::features_known(Switch& s) {
-  std::cout << "features discovered\n";
-  return false;
+  // The application never operates beyond this point.
+  s.disconnect();
 }
 
 } // namespace nocontrol

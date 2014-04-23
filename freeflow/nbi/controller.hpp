@@ -34,17 +34,16 @@ class Controller {
 public:
 
   // Application management.
-  template<typename T> bool load();
-  template<typename T> bool unload();
+  template<typename T> void load();
+  template<typename T> void unload();
 
   // Switch management
   Switch& connect(Socket&);
   void disconnect(Switch&);
 
 private:
-  Application* app_;      // The hosted applicatoin.
+  Application* app_;      // The hosted application.
   Switch_set   switches_;
-
 };
 
 } // namespace freeflow

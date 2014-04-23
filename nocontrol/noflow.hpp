@@ -25,19 +25,15 @@ namespace nocontrol {
 
 /// The noflow 
 class Noflow : public ff::Application {
-  enum Stop { BIND, VERSION, FEATURE };
+  enum Stop { ON_BIND, ON_VERSION, ON_FEATURE };
 public:
-  bool load(ff::Controller&);
-  bool unload(ff::Controller&);
-
-  bool bind(ff::Switch&);
-  bool unbind(ff::Switch&);
-
-  bool version_known(ff::Switch&);
-  bool features_known(ff::Switch&);
+  void load(ff::Controller&);
+  void bind(ff::Switch&);
+  void version_known(ff::Switch&);
+  void features_known(ff::Switch&);
 
 private:
-  Stop stop_ = BIND; // The stopping point.
+  Stop stop_ = ON_BIND; // The stopping point.
 };
 
 } // namespace nocontrol

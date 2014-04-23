@@ -16,10 +16,10 @@
 
 namespace nocontrol {
 
-bool
-Bridge::start(ff::Switch&) { return true; }
+void
+Bridge::start(ff::Switch&) { }
 
-bool
-Bridge::stop(ff::Switch&) { return true; }
+void
+Bridge::stop(ff::Switch&) { }
 
 } // namespace nocontrol

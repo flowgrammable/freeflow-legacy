@@ -24,8 +24,8 @@ namespace nocontrol {
 
 class Bridge : ff::Application {
 public:
-  bool start(ff::Switch&);
-  bool stop(ff::Switch&);
+  void start(ff::Switch&);
+  void stop(ff::Switch&);
 };
 
 } // namespace nocontrol
