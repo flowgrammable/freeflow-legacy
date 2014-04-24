@@ -1,0 +1,158 @@
+// Copyright (c) 2013-2014 Flowgrammable, LLC.
+// 
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at:
+// 
+// http://www.apache.org/licenses/LICENSE-2.0
+// 
+// Unless required by applicable law or agreed to in writing,
+// software distributed under the License is distributed on an "AS IS"
+// BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+// or implied. See the License for the specific language governing
+// permissions and limitations under the License.
+
+#ifndef FREEFLOW_JSON_HPP
+#define FREEFLOW_JSON_HPP
+
+#include <string>
+#include <map>
+#include <vector>
+
+#include <freeflow/sys/data.hpp>
+#include <freeflow/sys/resource.hpp>
+
+namespace freeflow {
+namespace json {
+
+class Value;
+
+
+/// Represents the type of the null literal in JSON.
+struct Null { };
+
+/// Represents the type of the true and false literals in JSON.
+using Bool = bool;
+
+/// Represents the type of an integer value in JSON. Note that JSON the
+/// specification does not distinguish between integers and real numbers,
+/// but we make that distinction here.
+using Int = Int64;
+
+/// Represents the type of a real value in JSON. Note that JSON the
+/// specification does not distinguish between integers and real numbers,
+/// but we make that distinction here.
+using Real = double;
+
+/// Represents the type of a string value in JSON. This string 
+/// representation is limited to 8-bit characters (they may be UTF-8)
+/// encoded.
+///
+/// \todo This type does not provide an interpretation of escape characters.
+/// It should. This is to say that when parsing, if we encounter a '\t',
+/// that sequence should be replaced by a tab character.
+using String = std::string;
+
+/// Represents an array of values.
+using Array = std::vector<Value>;
+
+/// Represents a set of key-value pairs. Note that the set is sorted.
+///
+/// We use a sorted representation only because a std::unordered_map cannot
+/// be declared with a mapped type that is incomplete.
+using Object = std::map<String, Value>;
+
+
+/// The value class represents an abstract JSON value. It is one of the
+/// types specified above.
+///
+/// \todo The set of values can be readily extended with new literal types.
+/// For example, it might be useful to include ipv4 and ipv6 addresses,
+/// hex literals, or binary literals as new kinds of values.
+class Value {
+public:
+  enum Type {
+      NIL,
+      BOOL,
+      INT,
+      REAL,
+      STRING,
+      ARRAY,
+      OBJECT
+  };
+
+  union Data {
+    Data() : n() { }
+    Data(Null n) : n(n) { }
+    Data(Bool b) : b(b) { }
+    Data(Int z) : z(z) { }
+    Data(Real r) : r(r) { }
+    Data(String&& s) : s(std::move(s)) { }
+    Data(const String& s) : s(s) { }
+    Data(Array&& a) : a(std::move(a)) { }
+    Data(const Array& a) : a(a) { }
+    Data(Object&& o) : o(std::move(o)) { }
+    Data(const Object& o) : o(o) { }
+    ~Data() { }
+
+    Null   n;
+    Bool   b;
+    Int    z;
+    Real   r;
+    String s;
+    Array  a;
+    Object o;
+  };
+
+  Value();
+
+  // Move semantics
+  Value(Value&&);
+  Value& operator=(Value&&) = delete;
+
+  // Copy semantics
+  Value(const Value&);
+  Value& operator=(const Value&) = delete;
+
+  // Value construction
+  Value(Null);
+  Value(Bool);
+  Value(Int);
+  Value(Real);
+  Value(String&&);
+  Value(const String&);
+  Value(Array&&);
+  Value(const Array&);
+  Value(Object&&);
+  Value(const Object&);
+
+  ~Value();
+
+  Type type() const;
+
+  const Null& as_null() const;
+  const Bool& as_bool() const;
+  const Int& as_int() const;
+  const Real& as_real() const;
+  const String& as_string() const;
+  const Array& as_array() const;
+  const Object& as_object() const;
+
+private:
+  template<typename T>
+    const T& check(Type, const T&) const;
+
+  Type type_;
+  Data data_;
+};
+
+Value parse(Resource&);
+Value parse(const std::string&);
+void write(Resource& r, const Value&);
+
+} // namespace json
+} // namespace freeflow
+
+#include <freeflow/sys/json.ipp>
+
+#endif
