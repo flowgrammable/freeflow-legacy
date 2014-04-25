@@ -20,13 +20,14 @@
 #include <vector>
 
 #include <freeflow/sys/data.hpp>
-#include <freeflow/sys/resource.hpp>
 
 namespace freeflow {
+
+class File;
+
 namespace json {
 
 class Value;
-
 
 /// Represents the type of the null literal in JSON.
 struct Null { };
@@ -146,9 +147,9 @@ private:
   Data data_;
 };
 
-Value parse(Resource&);
+Value parse(File&);
 Value parse(const std::string&);
-void write(Resource& r, const Value&);
+void write(File& r, const Value&);
 
 } // namespace json
 } // namespace freeflow

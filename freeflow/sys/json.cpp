@@ -12,8 +12,10 @@
 // or implied. See the License for the specific language governing
 // permissions and limitations under the License.
 
+#include <iostream>
+
 #include <freeflow/sys/json.hpp>
-#include <freeflow/sys/buffer.hpp>
+#include <freeflow/sys/file.hpp>
 
 namespace freeflow {
 namespace json {
@@ -25,12 +27,17 @@ parse(const char* first, const char* last) {
 }
 }
 
-/// Parse a 
 Value
-parse(Resource& rc) {
-  // Read the resource into a string and then parse the buffer.
-  std::string str;
-  return parse(str);
+parse(File& f) {
+  // Read the entire file into memory and then parse it.
+  // FIXME: If the parser were stream-based, we could a) avoid a single
+  // alloc/read, and b) make this work for resources, not just files.
+  std::size_t n = f.size();
+  char* buf = new char[n];
+  f.read(buf, n);
+  Value v = parse(buf, buf + n);
+  delete buf;
+  return v;
 }
 
 Value

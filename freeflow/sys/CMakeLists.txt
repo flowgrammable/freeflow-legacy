@@ -81,4 +81,5 @@ add_subdirectory(examples)
 # Testing
 add_subdirectory(data.test)
 add_subdirectory(socket.test)
+add_subdirectory(json.test)
 

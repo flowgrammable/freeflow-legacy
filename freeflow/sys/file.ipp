@@ -86,4 +86,13 @@ File::File(const Path& p, Flags f)
 inline const Path&
 File::path() const { return path_; }
 
+/// Returns the number of bytes in the file.
+inline std::size_t
+File::size() const {
+  std::size_t n = ::lseek(fd(), 0, SEEK_SET);
+  std::size_t r = ::lseek(fd(), 0, SEEK_END);
+  ::lseek(fd(), n, SEEK_SET);
+  return r;
+}
+
 } // namespace freeflow
