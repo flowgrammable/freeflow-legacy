@@ -44,6 +44,7 @@ Status::Status(const Resource& r) {
 /// Construct information about file designated by the given path.
 /// If p designates a symbolic link, the status describes the link,
 /// and not the linked file.
+inline
 Link_status::Link_status(const char* p) {
   if (::lstat(p, this))
     throw system_error();
@@ -52,6 +53,7 @@ Link_status::Link_status(const char* p) {
 /// Construct information about file designated by the given path.
 /// If p designates a symbolic link, the status describes the link,
 /// and not the linked file.
+inline
 Link_status::Link_status(const Path& p)
   : Link_status(p.c_str()) { }
 
