@@ -17,6 +17,14 @@
 namespace freeflow {
 namespace json {
 
+/// Returns true if the string is quoted.
+inline bool
+String::is_quoted() const {
+  if (not empty())
+    return (*this)[0] == '"';
+}
+
+
 inline
 Value::Value()
   : type_(NIL), data_() { }
@@ -107,32 +115,123 @@ inline Value::Type
 Value::type() const { return type_; }
 
 template<typename T>
+  inline T&
+  Value::check(Type t, T& x) {
+    assert(type_ == t);
+    return x;
+  }
+
+template<typename T>
   inline const T&
   Value::check(Type t, const T& x) const {
     assert(type_ == t);
     return x;
   }
 
+inline Null&
+Value::as_null(){ return check(NIL, data_.n); }
+
 inline const Null&
 Value::as_null() const { return check(NIL, data_.n); }
+
+inline Bool&
+Value::as_bool() { return check(BOOL, data_.b); }
 
 inline const Bool&
 Value::as_bool() const { return check(BOOL, data_.b); }
 
+inline Int&
+Value::as_int() { return check(INT, data_.z); }
+
 inline const Int&
 Value::as_int() const { return check(INT, data_.z); }
+
+inline Real&
+Value::as_real() { return check(REAL, data_.r); }
 
 inline const Real&
 Value::as_real() const { return check(REAL, data_.r); }
 
+inline String&
+Value::as_string() { return check(STRING, data_.s); }
+
 inline const String&
 Value::as_string() const { return check(STRING, data_.s); }
+
+inline Array&
+Value::as_array() { return check(ARRAY, data_.a); }
 
 inline const Array&
 Value::as_array() const { return check(ARRAY, data_.a); }
 
+inline Object&
+Value::as_object() { return check(OBJECT, data_.o); }
+
 inline const Object&
 Value::as_object() const { return check(OBJECT, data_.o); }
+
+// TODO: Implement a pretty printer for JSON. It would be nice
+// if we could integrate use the same pretty printing context
+// for messages, resources, and JSON.
+
+template<typename C, typename T>
+  inline std::basic_ostream<C, T>&
+  operator<<(std::basic_ostream<C, T>& os, const Pair& p) {
+    return os << p.first << ':' << p.second;
+  }
+
+namespace {
+template<typename C, typename T, typename X>
+  inline void
+  print_composite(std::basic_ostream<C, T>& os, const X& x) {
+    for (auto i = x.begin(); i != x.end(); ++i) {
+      os << *i;
+       if (std::next(i) != x.end())
+        os << ',';
+    }
+  }
+
+template<typename C, typename T>
+  inline std::basic_ostream<C, T>&
+  print(std::basic_ostream<C, T>& os, const Array& a) {
+    os << '['; 
+    print_composite(os, a);
+    os  << ']';
+    return os;
+  }
+
+template<typename C, typename T>
+  inline std::basic_ostream<C, T>&
+  print(std::basic_ostream<C, T>& os, const Object& a) {
+    os << '{'; 
+    print_composite(os, a);
+    os  << '}';
+    return os;
+  }
+} // namespace
+
+template<typename C, typename T>
+  inline std::basic_ostream<C, T>&
+  operator<<(std::basic_ostream<C, T>& os, const Value& v) {
+    switch (v.type()) {
+    case Value::NIL:
+      return os << "null";
+    case Value::BOOL:
+      return os << (v.as_bool() ? "true" : "false");
+    case Value::INT:
+      return os << v.as_int();
+    case Value::REAL:
+      return os << v.as_real();
+    case Value::STRING:
+      return os << v.as_string();
+    case Value::ARRAY:
+      return print(os, v.as_array());
+    case Value::OBJECT:
+      return print(os, v.as_object());
+    }
+    return os;
+  }
+
 
 } // namespace json
 } // namespace freeflow

@@ -15,18 +15,20 @@
 #ifndef FREEFLOW_JSON_HPP
 #define FREEFLOW_JSON_HPP
 
+#include <iosfwd>
 #include <string>
 #include <map>
 #include <vector>
 
 #include <freeflow/sys/data.hpp>
-#include <freeflow/sys/resource.hpp>
 
 namespace freeflow {
+
+class File;
+
 namespace json {
 
 class Value;
-
 
 /// Represents the type of the null literal in JSON.
 struct Null { };
@@ -51,7 +53,11 @@ using Real = double;
 /// \todo This type does not provide an interpretation of escape characters.
 /// It should. This is to say that when parsing, if we encounter a '\t',
 /// that sequence should be replaced by a tab character.
-using String = std::string;
+struct String : std::string {
+  using std::string::string;
+
+  bool is_quoted() const;
+};
 
 /// Represents an array of values.
 using Array = std::vector<Value>;
@@ -61,6 +67,11 @@ using Array = std::vector<Value>;
 /// We use a sorted representation only because a std::unordered_map cannot
 /// be declared with a mapped type that is incomplete.
 using Object = std::map<String, Value>;
+
+/// A Key-value pair is a sub-object of an Object. This is not a JSON
+/// value, it is provided only for the convenience of working with
+/// Objects.
+using Pair = std::pair<String, Value>;
 
 
 /// The value class represents an abstract JSON value. It is one of the
@@ -130,25 +141,44 @@ public:
 
   Type type() const;
 
+  Null&       as_null();
   const Null& as_null() const;
+  
+  Bool&       as_bool();
   const Bool& as_bool() const;
+  
+  Int&       as_int();
   const Int& as_int() const;
+  
+  Real&       as_real();
   const Real& as_real() const;
+  
+  String&       as_string();
   const String& as_string() const;
+  
+  Array&       as_array();
   const Array& as_array() const;
+  
+  Object&       as_object();
   const Object& as_object() const;
 
 private:
-  template<typename T>
-    const T& check(Type, const T&) const;
+  template<typename T> T&       check(Type, T&);
+  template<typename T> const T& check(Type, const T&) const;
 
   Type type_;
   Data data_;
 };
 
-Value parse(Resource&);
+Value parse(File&);
 Value parse(const std::string&);
-void write(Resource& r, const Value&);
+
+void write(File& r, const Value&);
+
+// Streaming
+template<typename C, typename T>
+  std::basic_ostream<C, T>&
+  operator<<(const std::basic_ostream<C, T>&, const Value&);
 
 } // namespace json
 } // namespace freeflow

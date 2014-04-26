@@ -113,6 +113,9 @@ public:
   // Observers
   const Path& path() const;
 
+  // File operations
+  std::size_t size() const;
+
 private:
   Path path_;
 };
