@@ -12,8 +12,8 @@
 // or implied. See the License for the specific language governing
 // permissions and limitations under the License.
 
-#ifndef FREEFLOW_OFPV1_3_0_HPP
-#define FREEFLOW_OFPV1_3_0_HPP
+#ifndef FREEFLOW_OFPV1_2_HPP
+#define FREEFLOW_OFPV1_2_HPP
 
 #include <freeflow/sys/error.hpp>
 #include <freeflow/sys/buffer.hpp>
@@ -22,10 +22,10 @@
 
 namespace freeflow {
 namespace ofp {
-namespace v1_3_0 {
+namespace v1_2 {
 
 /// The version type.
-enum Version_type : Uint8 { VERSION = 4 };
+enum Version_type : Uint8 { VERSION = 3 };
 
 /// The types of supported messages.
 enum Message_type : Uint8 {
@@ -47,18 +47,14 @@ enum Message_type : Uint8 {
   GROUP_MOD                = 15,
   PORT_MOD                 = 16,
   TABLE_MOD                = 17,
-  MULTIPART_REQUEST        = 18,
-  MULTIPART_REPLY          = 19,
+  STATS_REQUEST            = 18,
+  STATS_REPLY              = 19,
   BARRIER_REQUEST          = 20,
   BARRIER_REPLY            = 21,
   QUEUE_GET_CONFIG_REQUEST = 22,
   QUEUE_GET_CONFIG_REPLY   = 23,
   ROLE_REQUEST             = 24,
-  ROLE_REPLY               = 25,
-  GET_ASYNC_REQUEST        = 26,
-  GET_ASYNC_REPLY          = 27,
-  SET_ASYNC                = 28,
-  METER_MOD                = 29
+  ROLE_REPLY               = 25
 };
 
 // -------------------------------------------------------------------------- //
@@ -99,7 +95,7 @@ using ofp::bytes;
 // Validation
 // --is_valid functions here--
 
-} // namespace v1_3_0
+} // namespace v1_2
 } // namespace ofp
 } // namespace freeflow
 
