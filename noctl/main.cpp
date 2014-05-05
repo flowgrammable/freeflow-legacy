@@ -12,17 +12,13 @@
 // or implied. See the License for the specific language governing
 // permissions and limitations under the License.
 
-namespace nocontrol {
+#include <iostream>
 
-/// Create an acceptor on the given address.
-///
-/// \todo Integrate TLS.
-inline
-Acceptor::Acceptor(ff::Controller& c, const ff::Address& a)
-  : ff::Resource_handler<ff::Socket>(a.family(), ff::Socket::TCP), ctrl_(c)
-{
-  rc().bind(a); 
-  rc().listen();
+#include <freeflow/sys/socket.hpp>
+
+using namespace std;
+using namespace freeflow;
+
+int 
+main(int argc, char* argv[]) {
 }
-
-} // namesapce nocontrol

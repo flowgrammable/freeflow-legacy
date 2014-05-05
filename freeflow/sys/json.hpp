@@ -25,6 +25,7 @@
 namespace freeflow {
 
 class File;
+class Buffer;
 
 namespace json {
 
@@ -170,7 +171,10 @@ private:
   Data data_;
 };
 
+// JSON parsing.
 Value parse(File&);
+Value parse(Buffer&);
+Value parse(Buffer&, std::size_t);
 Value parse(const std::string&);
 
 void write(File& r, const Value&);

@@ -19,6 +19,7 @@
 
 #include <freeflow/sys/json.hpp>
 #include <freeflow/sys/file.hpp>
+#include <freeflow/sys/buffer.hpp>
 
 namespace freeflow {
 namespace json {
@@ -238,6 +239,20 @@ parse(File& f) {
   Value v = parse_value(p, p + n);
   delete buf;
   return v;
+}
+
+/// Parse JSON data from the given buffer.
+Value
+parse(Buffer& buf) {
+  const char* first = reinterpret_cast<const char*>(&buf[0]);
+  return parse_value(first, first + buf.size());
+}
+
+/// Parse JSON data from the given buffer.
+Value
+parse(Buffer& buf, int n) {
+  const char* first = reinterpret_cast<const char*>(&buf[0]);
+  return parse_value(first, first + n);
 }
 
 Value

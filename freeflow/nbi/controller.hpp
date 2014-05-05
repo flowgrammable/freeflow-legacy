@@ -32,7 +32,6 @@ class Controller {
   using Switch_set = std::unordered_set<Switch*>;
 
 public:
-
   // Application management.
   template<typename T> void load();
   template<typename T> void unload();

@@ -43,4 +43,5 @@ include(FreeFlowDoc)
 
 add_subdirectory(freeflow)
 add_subdirectory(nocontrol)
+add_subdirectory(noctl)
 

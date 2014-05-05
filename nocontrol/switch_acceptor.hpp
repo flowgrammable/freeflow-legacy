@@ -12,8 +12,8 @@
 // or implied. See the License for the specific language governing
 // permissions and limitations under the License.
 
-#ifndef NOCONTROL_ACCEPTOR_HPP
-#define NOCONTROL_ACCEPTOR_HPP
+#ifndef NOCONTROL_SWITCH_ACCEPTOR_HPP
+#define NOCONTROL_SWITCH_ACCEPTOR_HPP
 
 #include <freeflow/sys/socket.hpp>
 #include <freeflow/sys/handler.hpp>
@@ -26,9 +26,9 @@ namespace nocontrol {
 
 // The acceptor is responsible for accepting connections when
 // they are available.
-class Acceptor : public ff::Resource_handler<ff::Socket> {
+class Switch_acceptor : public ff::Resource_handler<ff::Socket> {
 public:
-  Acceptor(ff::Controller&, const ff::Address&);
+  Switch_acceptor(ff::Controller&, const ff::Address&);
 
   // Events
   bool on_read(ff::Reactor&);
@@ -39,6 +39,6 @@ private:
 
 } // namesapce nocontrol
 
-#include <nocontrol/acceptor.ipp>
+#include <nocontrol/switch_acceptor.ipp>
 
 #endif

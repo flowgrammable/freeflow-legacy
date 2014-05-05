@@ -22,7 +22,8 @@
 #include <freeflow/sys/reactor.hpp>
 #include <freeflow/nbi/controller.hpp>
 
-#include "acceptor.hpp"
+#include "switch_acceptor.hpp"
+#include "control_acceptor.hpp"
 #include "connection.hpp"
 #include "noflow.hpp"
 #include "bridge.hpp"
@@ -57,22 +58,32 @@ struct Terminator : Resource_handler<Resource> {
 };
 
 
+// Stores configuration information for the controller.
+// FIXME: This needs to move into nbi.
+struct Controller_config {
+  Address ctrl_addr {Ipv4_addr::any, 9000};
+  Address mgmt_addr {Ipv4_addr::any, 9001};
+};
+
 int 
 main(int argc, char* argv[]) {
 
-  // Create the controller for NBI applications.
+  // FIXME: Write a command-line argument parser and make sure
+  // that this won't crash (it currently will).
+
+  // Create and configure the controller for NBI applications.
   Controller ctrl;
+  Controller_config conf;
 
   // Load default applications.
   ctrl.load<Noflow>();
 
-  // Configure the switch address.
-  Address addr(Ipv4_addr::any, 9001);
-  Acceptor acc(ctrl, addr);
+  // Configure the conntroller adress.
+  Switch_acceptor ctrl_acc(ctrl, conf.ctrl_addr);
+  Control_acceptor mgmt_acc(ctrl, conf.mgmt_addr);
 
   // Listen for ^D on stdin so we can shutdown easily.
   Terminator term(0);
-
 
   // Run the reactor loop.
   //
@@ -80,7 +91,8 @@ main(int argc, char* argv[]) {
   // the NBI library.
   Reactor r;
   r.add_handler(&term);
-  r.add_handler(&acc);
+  r.add_handler(&ctrl_acc);
+  r.add_handler(&mgmt_acc);
   r.run();
 
   // FIXME: This should be part of the controller's destructor.
