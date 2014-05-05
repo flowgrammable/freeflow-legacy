@@ -52,7 +52,7 @@ Error::data() const { return data_; }
 /// the POSIX error code as the result type.
 inline
 System_error::System_error(int r) 
-  : Error(SYSTEM_ERROR, errno) { }
+  : Error(r < 0 ? SYSTEM_ERROR : SUCCESS, errno) { }
 
 
 // -------------------------------------------------------------------------- //

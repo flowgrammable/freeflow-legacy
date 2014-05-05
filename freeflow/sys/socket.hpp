@@ -157,6 +157,10 @@ struct Address : Address_info {
   sockaddr*       addr();
   const sockaddr* addr() const;
 
+  // Returns the underlying internet address.
+  void*       inet_addr();
+  const void* inet_addr() const;
+
   // Returns the size of the address object.
   socklen_t len() const;
 

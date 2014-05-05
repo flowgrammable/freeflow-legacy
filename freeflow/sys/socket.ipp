@@ -12,8 +12,6 @@
 // or implied. See the License for the specific language governing
 // permissions and limitations under the License.
 
-#include <iostream>
-
 namespace freeflow {
 
 // -------------------------------------------------------------------------- //
@@ -124,7 +122,7 @@ namespace {
 // populates the underlyinh object by passing it as a sockaddr pointer.
 inline void
 init_addr(const std::string& str, Address& a) {
-  int result = inet_pton(a.family(), str.c_str(), a.addr());
+  int result = inet_pton(a.family(), str.c_str(), a.inet_addr());
   if (result <= 0) {
     if (result == 0)
       throw std::runtime_error("invalid address string");
@@ -136,13 +134,12 @@ init_addr(const std::string& str, Address& a) {
 // Assign the port to the given address. 
 inline void
 init_port(Ip_port p, Address& a) {
-  switch (a.family()) {
-  case Address::IP4: a.as_ipv4().sin_port = p; break;
-  case Address::IP6: a.as_ipv6().sin6_port = p; break;
-
-  // FIXME: Throw a more intuitive error?
-  default: throw std::runtime_error("unknown address family");
-  }
+  if (a.family() == Address::IP4)
+    a.as_ipv4().sin_port = htons(p);
+  else if (a.family() == Address::IP6)
+    a.as_ipv6().sin6_port = htons(p); 
+  else
+    throw std::runtime_error("unknown address family");
 }
 
 } // namespace
@@ -203,6 +200,16 @@ Address::addr() {
 inline const sockaddr*
 Address::addr() const { 
   return reinterpret_cast<const sockaddr*>(&storage); 
+}
+
+inline void*
+Address::inet_addr() {
+  if (family() == Address::IP4)
+    return &as_ipv4().addr();
+  else if (family() == Address::IP6)
+    return &as_ipv6().addr();
+  else
+    throw std::runtime_error("unknown address family");
 }
 
 /// Returns the size of the underlying address.
@@ -420,7 +427,5 @@ inline std::size_t
 send_to(Socket& s, const void* buf, std::size_t n, const Address& a) { 
   return s.send_to(buf, n, a);
 }
-
-
 
 } // namespace freeflow
