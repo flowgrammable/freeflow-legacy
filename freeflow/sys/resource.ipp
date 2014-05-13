@@ -97,6 +97,43 @@ Resource::write(const Buffer& buf) {
   return write(buf.data(), buf.size());
 }
 
+/// Return the status flags of the resource. 
+inline int
+Resource::get_status() const {
+  int flags = ::fcntl(fd(), F_GETFL, 0);
+  if (flags == -1)
+    throw system_error();
+  return flags;  
+}
+
+/// Set the status flags for the resource.
+inline void
+Resource::set_status(int flags) {
+  if (::fcntl(fd(), F_SETFL, flags) == -1)
+    throw system_error();
+}
+
+/// Returns true if certain resource operations block. Examples include
+/// reads and writs on files, and accepts, conncets, receives, and sends
+/// on sockets.
+inline bool
+Resource::is_blocking() const { return get_status() & O_NONBLOCK; }
+
+/// Cause certain resource operations to block.
+///
+/// \see is_blocking
+inline void
+Resource::set_blocking() { set_status(get_status() ^ O_NONBLOCK); }
+
+/// Cause certain resource operations to return immediately instead of
+/// blocking. Potentially blocking operations return a system error of
+/// EAGAIN or EWOULDBLOCK.
+///
+/// \see is_blocking.
+inline void
+Resource::set_nonblocking() { set_status(get_status() | O_NONBLOCK); }
+
+
 // -------------------------------------------------------------------------- //
 // Operations
 

@@ -16,6 +16,7 @@
 #define RESOURCE_HPP
 
 #include <unistd.h>
+#include <fcntl.h>
 
 #include <cassert>
 #include <cstddef>
@@ -61,6 +62,15 @@ public:
   std::size_t write(const void*, std::size_t);
   std::size_t write(const Buffer&, std::size_t);
   std::size_t write(const Buffer&);
+
+  // Status flags
+  int get_status() const;
+  void set_status(int);
+  
+  // Blocking status
+  bool is_blocking() const;
+  void set_blocking();
+  void set_nonblocking();
 
 private:
   int fd_;
