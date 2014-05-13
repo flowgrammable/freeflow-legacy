@@ -28,7 +28,6 @@ namespace nocontrol {
 // and spawn a new handler.
 bool
 Control_acceptor::on_read(Reactor& r) {
-  std::cout << "HERE\n";
   try {
     // Accept the connection.
     Socket s = rc().accept();
@@ -39,8 +38,15 @@ Control_acceptor::on_read(Reactor& r) {
     // FIXME: This should be streamed or maybe something else.
     constexpr std::size_t N = 4096;
     Buffer buf(N);
-    int n = read(s, buf);
-    if (n == 0)
+    System_result r = read(s, buf);
+    if (r.failed()) {
+      std::cerr << "failed to read from client\n";
+      return true; 
+    }
+    
+    // If we didn't ready any data, the socket is closed.
+    // Note that we're guaranteed completion.
+    if (r.value() == 0)
       return true;
 
     // Decode the JSON value.

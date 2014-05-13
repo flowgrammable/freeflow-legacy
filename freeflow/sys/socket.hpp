@@ -255,9 +255,9 @@ struct Socket : Socket_info, Resource {
   Socket(int, Transport, const Address&, const Address&);
 
   // Socket operations
-  System_error bind(const Address&);
-  System_error listen(int = SOMAXCONN);
-  System_error connect(const Address&);
+  System_result bind(const Address&);
+  System_result listen(int = SOMAXCONN);
+  System_result connect(const Address&);
   Socket accept();
 
   // Receiving
@@ -270,14 +270,14 @@ struct Socket : Socket_info, Resource {
 };
 
 // Operations
-System_error bind(Socket&, const Address&);
-System_error listen(Socket&, int = SOMAXCONN);
-System_error connect(Socket&, const Address&);
+System_result bind(Socket&, const Address&);
+System_result listen(Socket&, int = SOMAXCONN);
+System_result connect(Socket&, const Address&);
 Socket accept(Socket&);
 
-std::size_t recv(Socket&, void*, std::size_t, int);
+std::size_t recv(Socket&, void*, std::size_t, int = 0);
 std::size_t recv_from(Socket&, void*, std::size_t, Address&);
-std::size_t send(Socket&, const void*, std::size_t, int);
+std::size_t send(Socket&, const void*, std::size_t, int = 0);
 std::size_t send_to(Socket&, const void*, std::size_t, const Address&);
 
 

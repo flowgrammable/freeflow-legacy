@@ -12,8 +12,8 @@
 // or implied. See the License for the specific language governing
 // permissions and limitations under the License.
 
-#ifndef RESOURCE_HPP
-#define RESOURCE_HPP
+#ifndef FREEFLOW_RESOURCE_HPP
+#define FREEFLOW_RESOURCE_HPP
 
 #include <unistd.h>
 #include <fcntl.h>
@@ -24,12 +24,86 @@
 #include <freeflow/sys/error.hpp>
 #include <freeflow/sys/buffer.hpp>
 
+
 namespace freeflow {
 
 class Buffer;
 
+/// A System result indicates the result status of an operation. An 
+/// operation can complete in one of four states: the operation can fail,
+/// it can succeed, the result can be deferred (will be available in the
+/// future), or it can be interrupted (and should be retried).
+///
+/// Note
+///
+/// \todo This should really be a template, indicating the availability
+/// of an arbitrary return type...
+class System_result {
+public:
+  enum Status { FAILED, COMPLETED, DEFERRED, INTERRUPTED };
+  using Value_type = std::size_t;
+  using Error_type = Error;
+
+  // Copy semantics
+  System_result(const System_result&);
+  System_result& operator=(const System_result&);
+
+  explicit System_result(Status);
+  explicit System_result(Status, Error_type);
+  explicit System_result(Status, Value_type);
+  System_result(ssize_t n);
+
+  // Status tests
+  bool failed() const;
+  bool completed() const;
+  bool deferred() const;
+  bool interrupted() const;
+
+  // Accessors
+  Status status() const;
+  Error_type error() const;
+  Value_type value() const;
+
+  // Tests
+  bool has_value(Value_type) const;
+
+  // Conversion
+  explicit operator bool() const;
+  operator Trap() const;
+
+  // Creators
+  // TODO: Write other creators.
+  static System_result fail(int);
+  static System_result defer();
+  static System_result defer(int);
+  static System_result complete(std::size_t n);
+
+private:
+  void copy_value(const System_result&);
+  void init_value(ssize_t);
+
+private:
+  Status status_;  // The operation result status
+  union Data {
+    Data();
+    Error_type error;  // An error code.
+    Value_type value;  // An integer value.
+  } data_;
+};
+
+// Equality
+bool operator==(const System_result&, const System_result&);
+bool operator!=(const System_result&, const System_result&);
+
+// Ordering
+bool operator<(const System_result&, const System_result&);
+bool operator>(const System_result&, const System_result&);
+bool operator<=(const System_result&, const System_result&);
+bool operator>=(const System_result&, const System_result&);
+
+
 /// The Resource class is the base class of all POSIX resources that
-/// are interanally represented by a file descriptor.
+/// are internally represented by a file descriptor.
 class Resource {
 public:
   Resource();
@@ -54,14 +128,14 @@ public:
   int fd() const;
 
   // Read
-  std::size_t read(void*, std::size_t);
-  std::size_t read(Buffer&, std::size_t);
-  std::size_t read(Buffer&);
+  System_result read(void*, std::size_t);
+  System_result read(Buffer&, std::size_t);
+  System_result read(Buffer&);
   
   // Write
-  std::size_t write(const void*, std::size_t);
-  std::size_t write(const Buffer&, std::size_t);
-  std::size_t write(const Buffer&);
+  System_result write(const void*, std::size_t);
+  System_result write(const Buffer&, std::size_t);
+  System_result write(const Buffer&);
 
   // Status flags
   int get_status() const;
@@ -77,13 +151,13 @@ private:
 };
 
 // Operations
-std::size_t read(Resource&, void*, std::size_t);
-std::size_t read(Resource&, Buffer&, std::size_t);
-std::size_t read(Resource&, Buffer&);
+System_result read(Resource&, void*, std::size_t);
+System_result read(Resource&, Buffer&, std::size_t);
+System_result read(Resource&, Buffer&);
 
-std::size_t write(Resource&, const void*, std::size_t);
-std::size_t write(Resource&, const Buffer&, std::size_t);
-std::size_t write(Resource&, const Buffer&);
+System_result write(Resource&, const void*, std::size_t);
+System_result write(Resource&, const Buffer&, std::size_t);
+System_result write(Resource&, const Buffer&);
 
 // Flags
 bool is_blocking(const Resource&);

@@ -12,9 +12,191 @@
 // or implied. See the License for the specific language governing
 // permissions and limitations under the License.
 
-#include "resource.hpp"
-
 namespace freeflow {
+
+// -------------------------------------------------------------------------- //
+// System result
+
+namespace resource_impl {
+// Translate the POSIX result into a system result type.
+inline System_result::Status
+type(ssize_t n) {
+  if (n < 0) {
+    if (errno == EINPROGRESS)
+      return System_result::DEFERRED;
+    else if (errno == EINTR)
+      return System_result::INTERRUPTED;
+    else
+      return System_result::FAILED;
+  }
+  return System_result::COMPLETED;
+}
+} // naemspace resource_impl
+
+inline
+System_result::Data::Data() : error() { }
+
+inline
+System_result::System_result(const System_result& x)
+  : status_(x.status_)
+{
+  copy_value(x);
+}
+
+inline System_result&
+System_result::operator=(const System_result& x) {
+  status_ = x.status_;
+  copy_value(x);
+  return *this;
+}
+
+/// Used to put 
+inline
+System_result::System_result(Status s)
+  : status_(s), data_() { }
+
+inline
+System_result::System_result(Status s, Error_type e)
+  : status_(s) { data_.error = e; }
+
+inline
+System_result::System_result(Status s, Value_type x)
+  : status_(s) { data_.value = x; }
+
+inline
+System_result::System_result(ssize_t n)
+  : status_(resource_impl::type(n))
+{
+  init_value(n);
+}
+
+/// Returns true if the operation failed. Reading any outputs, including
+/// the value of this result, will result in undefined behavior.
+inline bool
+System_result::failed() const { return status_ == FAILED; }
+
+/// Returns true if the operation completed, and the value all outputs
+/// are available.
+inline bool
+System_result::completed() const { return status_ == COMPLETED; }
+
+/// Returns true if the completion of the operation is deferred until
+/// later. Reading any outputs of the operation will result in undefined
+/// behavior, except that they may be reused as arguments to the operation.
+inline bool
+System_result::deferred() const { return status_ == DEFERRED; }
+
+/// Returns true if the completion of the operation is deferred until
+/// later. Reading any outputs of the operation will result in undefined
+/// behavior, except that they may be reused as arguments to the operation.
+///
+/// Note that interrupted operations are expected to be retried.
+inline bool
+System_result::interrupted() const { return status_ == INTERRUPTED; }
+
+inline System_result::Status
+System_result::status() const { return status_; }
+
+/// Returns the available value of the operation. Behavior is undefined
+/// if the result is an error or is unavailable.
+inline System_result::Value_type
+System_result::value() const { 
+  assert(completed());
+  return data_.value; 
+}
+
+/// Returns the error value of the result. If the operation was completed,
+/// deferred, or interrupted, this returns success.
+inline System_result::Error_type
+System_result::error() const {
+  if (failed())
+    return data_.error;
+  else
+    return Error();
+}
+
+/// Returns true if the operation completed with a value equal to
+/// that given.
+inline bool
+System_result::has_value(Value_type x) const {
+  return completed() and data_.value == x;
+}
+
+/// Returns true if the operation completed.
+inline
+System_result::operator bool() const { return completed(); }
+
+/// Returns a trapped error code.
+inline
+System_result::operator Trap() const { return error(); }
+
+/// Create a failed result with the given error code.
+inline System_result
+System_result::fail(int n) { return System_result(FAILED, System_error(n)); }
+
+/// Create a deferred result.
+inline System_result
+System_result::defer() { return System_result(DEFERRED); }
+
+/// Create a deferred result with the given error code.
+inline System_result
+System_result::defer(int n) { return System_result(DEFERRED, System_error(n)); }
+
+/// Create a completed result with the given value.
+inline System_result
+System_result::complete(std::size_t n) { return System_result(COMPLETED, n); }
+
+inline void
+System_result::copy_value(const System_result& x) {
+  if (failed())
+    data_.error = x.data_.error;
+  else if (completed())
+    data_.value = x.data_.value;
+}
+
+inline void
+System_result::init_value(ssize_t n) { 
+  if (failed())
+    data_.error = System_error(errno);
+  else if (completed())
+    data_.value = n;
+}
+
+/// Returns true if two results have the same value.
+inline bool
+operator==(const System_result& a, const System_result& b) {
+  return a.value() == b.value();
+}
+
+inline bool
+operator!=(const System_result& a, const System_result& b) {
+  return a.value() != b.value();
+}
+
+/// Returns true if the result a compares less than the result b.
+inline bool
+operator<(const System_result& a, const System_result& b) {
+  return a.value() < b.value();
+}
+
+inline bool
+operator>(const System_result& a, const System_result& b) {
+  return a.value() > b.value();
+}
+
+inline bool
+operator<=(const System_result& a, const System_result& b) {
+  return a.value() <= b.value();
+}
+
+inline bool
+operator>=(const System_result& a, const System_result& b) {
+  return a.value() >= b.value();
+}
+
+// -------------------------------------------------------------------------- //
+// Resource
+
 
 /// Initialize the resource in an invalid state.
 inline
@@ -55,15 +237,22 @@ Resource::operator bool() const { return fd_ >= 0; }
 inline int
 Resource::fd() const { return fd_; }
 
-inline std::size_t
-Resource::read(void* buf, std::size_t n) {
-  ssize_t r = ::read(fd(), buf, n);
-  if (r < 0)
-    throw system_error();
-  return r;
+/// Read n bytes into the buffer. Behavior is undefined if n is greater than
+/// or equal to the number of bytes allocated to buf.
+///
+/// The operation will be retried if interrupted by a signal.
+inline System_result
+Resource::read(void* buf, std::size_t n) { 
+  while (true) {
+    System_result r = ::read(fd(), buf, n); 
+    if (r.interrupted())
+      continue;
+    return r;
+  }
 }
 
-inline std::size_t
+/// Read n bytes into the given buffer.
+inline System_result
 Resource::read(Buffer& buf, std::size_t n) {
   assert(n <= buf.size());
   return read(buf.data(), n);
@@ -71,20 +260,25 @@ Resource::read(Buffer& buf, std::size_t n) {
 
 /// Read data from the file into the buffer, returning the number of
 /// bytes actually read.
-inline std::size_t
-Resource::read(Buffer& buf) {
-  return read(buf.data(), buf.size());
+inline System_result
+Resource::read(Buffer& buf) { return read(buf.data(), buf.size()); }
+
+/// Write n bytes from the given buffer. Behavior is undefined if n is
+/// greater than or equal to the numbe of bytes allocated to buf.
+///
+/// The operation will be retried if interrupted by a signal.
+inline System_result
+Resource::write(const void* buf, std::size_t n) { 
+  while (true) {
+    System_result r = ::write(fd(), buf, n);
+    if (r.interrupted())
+      continue;
+    return r;
+  }
 }
 
-inline std::size_t
-Resource::write(const void* buf, std::size_t n) {
-  ssize_t r = ::write(fd(), buf, n);
-  if (r < 0)
-    throw system_error();
-  return r;
-}
-
-inline std::size_t
+/// Write n bytes from the given buffer.
+inline System_result
 Resource::write(const Buffer& buf, const std::size_t n) {
   assert(n <= buf.size());
   return write(buf.data(), n);
@@ -92,24 +286,23 @@ Resource::write(const Buffer& buf, const std::size_t n) {
 
 /// Write data from the buffer to the file, returning the number of
 /// bytes actually written.
-inline std::size_t
-Resource::write(const Buffer& buf) {
-  return write(buf.data(), buf.size());
-}
+inline System_result
+Resource::write(const Buffer& buf) { return write(buf.data(), buf.size()); }
 
 /// Return the status flags of the resource. 
 inline int
 Resource::get_status() const {
-  int flags = ::fcntl(fd(), F_GETFL, 0);
-  if (flags == -1)
+  System_result r = ::fcntl(fd(), F_GETFL, 0);
+  if (r.failed())
     throw system_error();
-  return flags;  
+  return r.value();  
 }
 
 /// Set the status flags for the resource.
 inline void
 Resource::set_status(int flags) {
-  if (::fcntl(fd(), F_SETFL, flags) == -1)
+  System_result r = ::fcntl(fd(), F_SETFL, flags);
+  if (r.failed())
     throw system_error();
 }
 
@@ -137,22 +330,22 @@ Resource::set_nonblocking() { set_status(get_status() | O_NONBLOCK); }
 // -------------------------------------------------------------------------- //
 // Operations
 
-inline std::size_t
+inline System_result
 read(Resource& rc, void* buf, std::size_t n) { return rc.read(buf, n); }
 
-inline std::size_t
+inline System_result
 read(Resource& rc, Buffer& buf, std::size_t n) { return rc.read(buf, n); }
 
-inline std::size_t
+inline System_result
 read(Resource& rc, Buffer& buf) { return rc.read(buf); }
 
-inline std::size_t
+inline System_result
 write(Resource& rc, const void* buf, std::size_t n) { return rc.write(buf, n); }
 
-inline std::size_t
+inline System_result
 write(Resource& rc, const Buffer& buf, std::size_t n) { return rc.write(buf, n); }
 
-inline std::size_t
+inline System_result
 write(Resource& rc, const Buffer& buf) { return rc.write(buf); }
 
 inline bool

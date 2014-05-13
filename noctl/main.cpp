@@ -70,11 +70,18 @@ raw(int arg, int argc, char* argv[]) {
   try {
     Config conf;
     Socket s(Socket::IP4, Socket::TCP);
-    System_error err = connect(s, conf.ctrl_addr);
-    std::cout << "HERE: " << err.code() << '\n';
 
-    int n = s.write(buf.c_str(), buf.size());
-    std::cerr << "sent " << n << " bytes\n";
+    // Connect to nocontrol.
+    System_result rc = connect(s, conf.ctrl_addr);
+    if (rc.failed())
+      std::cerr << "error: could not connect\n";
+    
+    // Write JSON to the socket.
+    System_result rw  = s.write(buf.c_str(), buf.size());
+    if (rw.completed())
+      std::cerr << "sent " << rw.value() << " bytes\n";
+    else
+      std::cout << "did not send data\n";
   } catch (...) {
     std::cerr << "error: could not send command\n";
     return  -1;

@@ -356,19 +356,26 @@ Socket::Socket(int f, Transport t, const Address& l, const Address& p)
   : Socket_info(t, l, p), Resource(f)
 { }
 
-inline System_error
+inline System_result
 Socket::bind(const Address& a) {
   local = a;
   return ::bind(fd(), local.addr(), local.len());
 }
 
-inline System_error
+inline System_result
 Socket::connect(const Address& a) {
   peer = a;
-  return ::connect(fd(), peer.addr(), peer.len());
+  int r = ::connect(fd(), peer.addr(), peer.len());
+  if (r < 0) {
+    if (errno == EINPROGRESS)
+      return System_result::defer(errno);
+    else
+      return System_result::fail(errno);
+  }
+  return System_result::complete(r);
 }
 
-inline System_error
+inline System_result
 Socket::listen(int backlog) {
   backlog = backlog;
   return ::listen(fd(), backlog);
@@ -419,13 +426,13 @@ Socket::send_to(const void* buf, std::size_t n, const Address& a) {
 // -------------------------------------------------------------------------- //
 // Operations
 
-inline System_error
+inline System_result
 bind(Socket& s, const Address& a) { return s.bind(a); }
 
-inline System_error
+inline System_result
 listen(Socket& s, int n) { return s.listen(n); }
 
-inline System_error
+inline System_result
 connect(Socket& s, const Address& a) { return s.connect(a); }
 
 inline Socket 
