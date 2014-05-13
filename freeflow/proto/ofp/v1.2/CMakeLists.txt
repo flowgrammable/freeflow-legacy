@@ -15,31 +15,15 @@
 # ---------------------------------------------------------------------------- #
 # Build
 
-set(src ofp.cpp protocol.cpp)
+set(src message.cpp)
 
-set(hdr error.hpp
-        ofp.hpp 
-        ofp.ipp
-        protocol.hpp
-        protocol.ipp)
+set(hdr message.hpp 
+        message.ipp)
 
-add_library(freeflow-ofp ${src})
-
-add_subdirectory(v1.0)
-add_subdirectory(v1.1)
-add_subdirectory(v1.2)
-add_subdirectory(v1.3.0)
-add_subdirectory(examples)
-
-
-# ---------------------------------------------------------------------------- #
-# Testing
-
-add_subdirectory(ofp.test)
-
+add_library(freeflow-ofp-1.2 ${src})
 
 # ---------------------------------------------------------------------------- #
 # Installation
 
-install(FILES ${hdr} DESTINATION include/freeflow/proto/ofp)
+install(FILES ${hdr} DESTINATION include/freeflow/proto/ofp/v1.2)
 
