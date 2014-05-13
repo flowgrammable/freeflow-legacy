@@ -12,16 +12,50 @@
 // or implied. See the License for the specific language governing
 // permissions and limitations under the License.
 
+#include <iostream>
 #include <sstream>
+
 #include "socket.hpp"
 
 namespace freeflow {
 
-const Ipv4_addr Ipv4_addr::any(INADDR_ANY);
-const Ipv4_addr Ipv4_addr::broadcast(INADDR_BROADCAST);
+const Ipv4_addr Ipv4_addr::any(htonl(INADDR_ANY));
+const Ipv4_addr Ipv4_addr::broadcast(htonl(INADDR_BROADCAST));
+const Ipv4_addr Ipv4_addr::loopback(htonl(INADDR_LOOPBACK));
 
 const Ipv6_addr Ipv6_addr::any(in6addr_any);
 const Ipv6_addr Ipv6_addr::loopback(in6addr_loopback);
+
+/// Write the IPv4 address to the given stream. The failbit is set if
+/// the address cannot be rendered.
+///
+/// \todo Under what circumstances could the address be invalid?
+std::ostream&
+operator<<(std::ostream& os, const Ipv4_addr& a) {
+  constexpr socklen_t N = 16; // 4*3 digits + 3 separators + padding
+  char buf[N];
+  if (not inet_ntop(Address_info::IP4, &a, buf, N))
+    os.setstate(std::ios::failbit);
+  else
+    os << buf;
+  return os;
+}
+
+/// Write the IPv6 address to the given stream. The failbit is set if
+/// the address cannot be rendered.
+///
+/// \todo Under what circumstances could the address be invalid?
+std::ostream&
+operator<<(std::ostream& os, const Ipv6_addr& a) {
+  constexpr socklen_t N = 48; // 8*4 digits + 7 separators + padding
+  char buf[N];
+  if (not inet_ntop(Address_info::IP6, &a, buf, N))
+    os.setstate(std::ios::failbit);
+  else
+    os << buf;
+  return os;
+}
+
 
 std::string
 to_string(const Address& a) {

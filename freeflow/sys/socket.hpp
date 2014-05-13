@@ -21,6 +21,7 @@
 #include <arpa/inet.h>
 
 #include <cstring>
+#include <iosfwd>
 #include <type_traits>
 
 #include <freeflow/sys/error.hpp>
@@ -52,9 +53,8 @@ struct Address_info {
 /// The type of an Internet port.
 using Ip_port = in_port_t;
 
-// =====
+// -------------------------------------------------------------------------- //
 // Ipv4
-// =====
 
 /// An Ipv4 host adress.
 struct Ipv4_addr : in_addr, Address_info { 
@@ -65,8 +65,15 @@ struct Ipv4_addr : in_addr, Address_info {
 
   static const Ipv4_addr any;
   static const Ipv4_addr broadcast;
+  static const Ipv4_addr loopback;
 };
 
+// Equality comparison
+bool operator==(const Ipv4_addr& a, const Ipv4_addr& b);
+bool operator!=(const Ipv4_addr& a, const Ipv4_addr& b);
+
+// Streaming
+std::ostream& operator<<(std::ostream& os, const Ipv4_addr& a);
 
 /// An Ipv4 socket address is a host and port. This class provides a
 /// read-only view of the underlying system structure.
@@ -83,15 +90,13 @@ struct Ipv4_sockaddr : sockaddr_in, Address_info {
   const Ipv4_addr& addr() const;
 };
 
-bool operator==(const Ipv4_addr& a, const Ipv4_addr& b);
-bool operator!=(const Ipv4_addr& a, const Ipv4_addr& b);
-
+// Equality comparison
 bool operator==(const Ipv4_sockaddr& a, const Ipv4_sockaddr& b);
 bool operator!=(const Ipv4_sockaddr& a, const Ipv4_sockaddr& b);
 
-// =====
+
+// -------------------------------------------------------------------------- //
 // Ipv6
-// =====
 
 /// In Ipv6 host address.
 struct Ipv6_addr : in6_addr, Address_info {
@@ -103,6 +108,14 @@ struct Ipv6_addr : in6_addr, Address_info {
   static const Ipv6_addr any;
   static const Ipv6_addr loopback;
 };
+
+// Equality comparison
+bool operator==(const Ipv6_addr& a, const Ipv6_addr& b);
+bool operator!=(const Ipv6_addr& a, const Ipv6_addr& b);
+
+// Streaming
+std::ostream& operator<<(std::ostream& os, const Ipv6_addr& a);
+
 
 /// An Ipv6 socket address is a host and port. This class provides a
 /// read-only view of the underlying system structure.
@@ -119,9 +132,7 @@ struct Ipv6_sockaddr : sockaddr_in6, Address_info {
   const Ipv6_addr& addr() const;
 };
 
-bool operator==(const Ipv6_addr& a, const Ipv6_addr& b);
-bool operator!=(const Ipv6_addr& a, const Ipv6_addr& b);
-
+// Equality comparison
 bool operator==(const Ipv6_sockaddr& a, const Ipv6_sockaddr& b);
 bool operator!=(const Ipv6_sockaddr& a, const Ipv6_sockaddr& b);
 
@@ -160,6 +171,8 @@ struct Address : Address_info {
   // Returns the underlying internet address.
   void*       inet_addr();
   const void* inet_addr() const;
+
+  Ip_port port() const;
 
   // Returns the size of the address object.
   socklen_t len() const;

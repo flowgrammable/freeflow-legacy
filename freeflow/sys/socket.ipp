@@ -22,6 +22,16 @@ Ipv4_addr::Ipv4_addr(in_addr_t n) {
   s_addr = n;
 }
 
+inline bool 
+operator==(const Ipv4_addr& a, const Ipv4_addr& b) {
+  return a.s_addr == b.s_addr;
+}
+
+inline bool 
+operator!=(const Ipv4_addr& a, const Ipv4_addr& b) {
+  return a.s_addr != b.s_addr;
+}
+
 inline
 Ipv4_sockaddr::Ipv4_sockaddr(const Ipv4_addr& a, Ip_port p) {
   sin_family = IP4;
@@ -42,15 +52,6 @@ Ipv4_sockaddr::addr() const {
   return static_cast<const Ipv4_addr&>(sin_addr); 
 }
 
-inline bool 
-operator==(const Ipv4_addr& a, const Ipv4_addr& b) {
-  return a.s_addr == b.s_addr;
-}
-
-inline bool 
-operator!=(const Ipv4_addr& a, const Ipv4_addr& b) {
-  return a.s_addr != b.s_addr;
-}
 
 inline bool 
 operator==(const Ipv4_sockaddr& a, const Ipv4_sockaddr& b) {
@@ -62,12 +63,22 @@ operator!=(const Ipv4_sockaddr& a, const Ipv4_sockaddr& b) {
   return not(a == b);
 }
 
+
 // -------------------------------------------------------------------------- //
 // Ipv6
 
 inline
 Ipv6_addr::Ipv6_addr(in6_addr n) {
   ::memcpy(this, &n, sizeof(in6_addr));
+}
+
+inline bool 
+operator==(const Ipv6_addr& a, const Ipv6_addr& b) {
+  return not memcmp(a.s6_addr, b.s6_addr, sizeof(Ipv6_addr));
+}
+
+inline bool operator!=(const Ipv6_addr& a, const Ipv6_addr& b) {
+  return not(a == b);
 }
 
 inline
@@ -92,15 +103,6 @@ Ipv6_sockaddr::addr() {
 inline const Ipv6_addr& 
 Ipv6_sockaddr::addr() const {
   return static_cast<const Ipv6_addr&>(sin6_addr);
-}
-
-inline bool 
-operator==(const Ipv6_addr& a, const Ipv6_addr& b) {
-  return not memcmp(a.s6_addr, b.s6_addr, sizeof(Ipv6_addr));
-}
-
-inline bool operator!=(const Ipv6_addr& a, const Ipv6_addr& b) {
-  return not(a == b);
 }
 
 inline bool 
@@ -202,12 +204,33 @@ Address::addr() const {
   return reinterpret_cast<const sockaddr*>(&storage); 
 }
 
+/// If the address is an internet address, this returns a pointer to the 
+// underlying address definition. Otherwise, an exception is thrown.
 inline void*
 Address::inet_addr() {
   if (family() == Address::IP4)
     return &as_ipv4().addr();
   else if (family() == Address::IP6)
     return &as_ipv6().addr();
+  else
+    throw std::runtime_error("unknown address family");
+}
+
+/// If the address is an internet address, this returns a pointer to the 
+// underlying address definition. Otherwise, an exception is thrown.
+inline const void*
+Address::inet_addr() const { 
+  return const_cast<Address*>(this)->inet_addr(); 
+}
+
+/// If the address is an internet address, this returns the port of the
+/// underlying socket address. Otherwise, an exception is thrown.
+inline Ip_port
+Address::port() const {
+  if (family() == Address::IP4)
+    return as_ipv4().port();
+  else if (family() == Address::IP6)
+    return as_ipv6().port();
   else
     throw std::runtime_error("unknown address family");
 }
