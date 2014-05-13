@@ -23,6 +23,11 @@ namespace freeflow {
 /// The handler's open() method is called when the service is added. If
 /// open() returns false, the handler is not added, and the function
 /// returns false.
+///
+/// \todo Currently, a handler is registered for both read and write
+/// events. This is dumb (and a performance bug). A handler is usually 
+/// interestd either in read events or in write events, but rarely both. 
+/// Use a mask to select the events of interest.
 bool
 Handler_registry::add(Reactor& r, Handler* h) {
   assert(0 <= h->fd() and h->fd() < FD_SETSIZE);
@@ -37,6 +42,7 @@ Handler_registry::add(Reactor& r, Handler* h) {
   // TODO: An event mask should specify the event sets
   // that we're actually interested in. 
   wait_.read.insert(h->fd());
+  wait_.write.insert(h->fd());
 
   // Try to open the handler. Changes are committed if this
   // succeeds and rolled back if it fails.
@@ -66,6 +72,7 @@ Handler_registry::remove(Reactor& r, Handler* h) {
   (*this)[h->fd()] = nullptr; 
   --active_;
   wait_.read.remove(h->fd());
+  wait_.write.remove(h->fd());
   h->on_close(r);
   return true;
 }

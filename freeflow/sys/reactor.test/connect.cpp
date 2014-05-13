@@ -23,20 +23,26 @@ struct Connection : Resource_handler<Socket> {
     {
       set_nonblocking(rc());
       System_result res = connect(rc(), a);
-      std::cout << errno << ' ' << EAGAIN << '\n';
+      if (res.failed())
+        throw std::runtime_error("connection");
     }
 
   // Print a connection message and exit.
-  bool on_read(Reactor& r) {
-    std::cout << "* connected!\n";
-    return true;
-  }
-
-
+  //
+  // FIXME: Stop responding to write events after being accepted.
+  // We don't need to keep calling this function.
   bool on_write(Reactor& r) {
-    std::cout << "???\n";
+    // FIXME: Actually check that connection has succeeded.
+    
+    // Emit a message about connection.
+    if (not connected) {
+      std::cout << "* connected!\n";
+      connected = true;
+    }
     return true;
   }
+
+  bool connected = false;
 };
 
 // Read from standard input and send through the connection.
@@ -53,6 +59,7 @@ struct Reader : Resource_handler<Resource> {
     if (res.completed()) {
       std::size_t n = res.value();
       if (n == 0) {
+        std::cout << "* terminating\n";
         r.stop();
         return false;
       }

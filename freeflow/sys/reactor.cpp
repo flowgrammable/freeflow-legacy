@@ -23,19 +23,31 @@ using Hreg = Handler_registry;
 // Notify the handler if it has a read event. If the handler indicates
 // closure, add it to the close set. If the handler indicates
 void
-notify_read(Reactor& r, Handler* h, const Rset& read, Rset& close) {
-  if (read.test(h->fd()))
+notify_read(Reactor& r, Handler* h, const Rset& rs, Rset& close) {
+  if (rs.test(h->fd()))
     if (not h->on_read(r))
       close.insert(h->fd());
 }
 
+// Notify the handler if it has a write event. If the handler indicates
+// closure, add it to the close set. If the handler indicates
+void
+notify_write(Reactor& r, Handler* h, const Rset& rs, Rset& close) {
+  if (rs.test(h->fd()))
+    if (not h->on_write(r))
+      close.insert(h->fd());
+}
+
+
 // Notify handlers of events.
-// TODO: Test the write and error sets also.
+// TODO: Test error sets also.
 void
 notify_handlers(Reactor& r, Hreg& hr, const Sset& ss, Rset& close) {
   for (Handler* h : hr)
-    if (h)
+    if (h) {
       notify_read(r, h, ss.read, close);
+      notify_write(r, h, ss.write, close);
+    }
 }
 
 /// If the handler is is in the close set, remove it from the
@@ -54,8 +66,7 @@ Reactor::Reactor() { }
 
 Reactor::~Reactor() {
   for (Handler* h : handlers_) {
-    if (h)
-      remove_handler(h);
+    if (h) remove_handler(h);
   }
 }
 
