@@ -155,6 +155,15 @@ write(Resource& rc, const Buffer& buf, std::size_t n) { return rc.write(buf, n);
 inline std::size_t
 write(Resource& rc, const Buffer& buf) { return rc.write(buf); }
 
+inline bool
+is_blocking(const Resource& rc) { return rc.is_blocking(); }
+
+inline void
+set_blocking(Resource& rc) { return rc.set_blocking(); }
+
+inline void
+set_nonblocking(Resource& rc) { return rc.set_nonblocking(); }
+
 // -------------------------------------------------------------------------- //
 // Resource set
 

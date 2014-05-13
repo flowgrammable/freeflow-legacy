@@ -85,6 +85,12 @@ std::size_t write(Resource&, const void*, std::size_t);
 std::size_t write(Resource&, const Buffer&, std::size_t);
 std::size_t write(Resource&, const Buffer&);
 
+// Flags
+bool is_blocking(const Resource&);
+void set_blocking(Resource&);
+void set_nonblocking(Resource&);
+
+
 /// The Resource_set class represents the inclusion of resources in
 /// a particular set.
 ///
