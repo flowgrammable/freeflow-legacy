@@ -17,7 +17,6 @@
 #include <freeflow/sys/socket.hpp>
 #include <freeflow/sys/reactor.hpp>
 
-using namespace std;
 using namespace freeflow;
 
 struct Echo_server : Resource_handler<Socket> {
