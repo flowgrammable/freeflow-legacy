@@ -24,106 +24,55 @@ using namespace std;
 using namespace freeflow;
 
 
-struct Config {
-  Address ctrl_addr {Address::IP4, "127.0.0.1", 9001};
+// Holds a command-line flag. The flag is set when --flag_true is passed, and
+// reset when --flag_false is passed. When used in CommandParser, the name
+// and value act as a key-value pair. Upon construction, value will be set to
+// the default value of the flag.
+//
+// Example usage:
+//
+// Flag("auto connect","auto-connect","no-auto-connect",true, "Whether to
+//   automatically connect to the network");
+//
+// If the user typed "run --auto-connect", value for "auto connect" would
+// be true, whereas is they typed "run --no-auto-connect", it would be false
+struct Flag {
+  string name;
+  string flag_true;
+  string flag_false;
+  bool value;
+  string help_text;
+  
+  Flag(string n,string f_true,string f_false,bool default_val,string help = "") :
+    name(n), flag_true(f_true), flag_false(f_false), value(default_val),
+    help_text(help){}
 };
 
-enum Command {
-  VERSION_CMD,
-  HELP_CMD,
-  RAW_CMD
-};
 
-// Print version information.
-int 
-version() {
-  std::cout << "noctl v0.1\n";
-  std::cout << "Copyright (c) 2013-2014 Flowgrammable.org\n";
+
+int main(){
   return 0;
 }
 
-int 
-help() {
-  std::cout << "noctl [prog-opts] command [cmd-opts] [cmd-args]\n";
-  return 0;
-}
 
-int
-raw(int arg, int argc, char* argv[]) {
-  if (arg == argc) {
-    std::cerr << "usage: noctl raw <json-file>\n";
-    return -1;
-  }
 
-  string buf;
-  try {
-    // Read the json-file into a buffer.
-    ifstream f(argv[arg]);
-    istreambuf_iterator<char> iter(f);
-    istreambuf_iterator<char> end;
-    buf = string(iter, end);
-  } catch (...) {
-    std::cerr << "error: could not read file\n";
-    return -1;
-  }
 
-  try {
-    Config conf;
-    Socket s(Socket::IP4, Socket::TCP);
 
-    // Connect to nocontrol.
-    System_result rc = connect(s, conf.ctrl_addr);
-    if (rc.failed())
-      std::cerr << "error: could not connect\n";
-    
-    // Write JSON to the socket.
-    System_result rw  = s.write(buf.c_str(), buf.size());
-    if (rw.completed())
-      std::cerr << "sent " << rw.value() << " bytes\n";
-    else
-      std::cout << "did not send data\n";
-  } catch (...) {
-    std::cerr << "error: could not send command\n";
-    return  -1;
-  }
 
-  return 0;
-}
 
-int 
-main(int argc, char* argv[]) {
-  // Parse command line arguments.
-  //
-  // FIXME: This is totally broken. Parsing options occurs in 3
-  // pases. First, the program options (applies to all commands),
-  // the the command, then the command options and arguments (which 
-  // actually depend on the command). Note that only one command
-  // is permitted.
-  Command cmd = HELP_CMD;
-  int arg = 1;
-  for (; arg < argc; ++arg) {
-    string s = argv[arg++];
-    if (s == "version") {
-      cmd = VERSION_CMD; 
-      break;
-    } else if (s == "help") {
-      cmd = HELP_CMD;
-      break;
-    } else if (s == "raw") {
-      cmd = RAW_CMD;
-      break; 
-    } else {
-      std::cerr << "error: unknown command\n";
-      help();
-      return -1;
-    }
-  }
 
-  switch (cmd) {
-  case VERSION_CMD: return version();
-  case HELP_CMD: return help();
-  case RAW_CMD: return raw(arg, argc, argv);
-  }
 
-}
+
+
+
+
+
+
+
+
+
+
+
+
+
 
