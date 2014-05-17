@@ -22,28 +22,53 @@ namespace freeflow {
 
 /// The Reactor class implements an event processor that notifies handlers
 /// of resource events and availability, timer expiration, and signals.
+///
+/// \todo: This should probably be renamed Select_reactor and more tightly
+/// coupled with the handler registry. 
 class Reactor {
 public:
   Reactor();
   ~Reactor();
 
-  // Handlers
-  void add_handler(Handler*);
-  void remove_handler(Handler*);
+  // Handler registration
+  void add_handler(Event_handler*);
+  void remove_handler(Event_handler*);
+
+  template<typename T, typename... Args> 
+    T* new_handler(Args&&...);
+
+  // Event subscription
+  void subscribe_events(Event_handler*, Event_mask);
+  void unsubscribe_events(Event_handler*, Event_mask);
 
   // Timers
-  void schedule_timer(Handler*, int, Microseconds);
-  void reschedule_timer(Handler*, int, Microseconds);
-  void cancel_timer(Handler*, int);
+  void schedule_timer(Event_handler*, int, Microseconds);
+  void reschedule_timer(Event_handler*, int, Microseconds);
+  void cancel_timer(Event_handler*, int);
 
   // Control
   void run();
   void stop();
 
 private:
+  void notify_select(const Select_set&, Resource_set&);
+  void notify_timers(Resource_set&);
+  void close_handlers(const Resource_set&);
+
+private:
+  /// The running flag is true until the reactor has stopped.
   bool             running_;
+  
+  /// Maintains the list of handlers regstered to the reactor.
   Handler_registry handlers_;
+  
+  /// The timer queue provides an ordering of timers.
   Timer_queue      timers_;
+  
+  /// The timer list maintains timers that have triggered since an
+  /// expiration time. These are kept to prevent unnecessary
+  /// reallocations of elements in the list.
+  Timer_list       expired_;  // List of triggered timers
 };
 
 } // namesapce freeflow

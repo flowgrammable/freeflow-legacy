@@ -19,11 +19,11 @@
 
 using namespace freeflow;
 
-struct Echo_server : Resource_handler<Socket> {
-  Echo_server(Socket&& s)
-    : Resource_handler<Socket>(std::move(s)) { }
+struct Echo_server : Socket_handler {
+  Echo_server(Reactor& r, Socket&& s)
+    : Socket_handler(r, READ_EVENTS, std::move(s)) { }
 
-  bool on_read(Reactor& r) {
+  bool on_read() {
     char buf[1024];
     System_result res = read(rc(), buf, 1024);
     if (res.failed()) {
@@ -38,16 +38,11 @@ struct Echo_server : Resource_handler<Socket> {
       return true;
     }
   }
-
-  bool on_close(Reactor&) {
-    delete this;
-    return true;
-  }
 };
 
-struct My_acceptor : Resource_handler<Socket> {
-  My_acceptor(Address& a)
-    : Resource_handler<Socket>(Socket::IP4, Socket::TCP) 
+struct My_acceptor : Socket_handler {
+  My_acceptor(Reactor& r, const Address& a)
+    : Socket_handler(r, READ_EVENTS, Socket::IP4, Socket::TCP) 
   { 
     if (Trap err = bind(rc(), a))
       throw System_error(err.code());
@@ -59,16 +54,18 @@ struct My_acceptor : Resource_handler<Socket> {
   bool on_read(Reactor& r) {
     Socket s = accept(rc());
     std::cout << "* accepted connection\n";
-    r.add_handler(new Echo_server(std::move(s)));
+
+    r.new_handler<Echo_server>(std::move(s));
+
     return true;
   }
 };
 
 int main() {
-  Address addr(Ipv4_addr::loopback, 9876);
-  My_acceptor c(addr);
-
   Reactor r;
+
+  My_acceptor c(r, Address(Ipv4_addr::loopback, 9876));
+
   r.add_handler(&c);
   r.run();
 }
