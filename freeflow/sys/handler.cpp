@@ -34,6 +34,9 @@ Handler_registry::add(Event_handler* h) {
   
   // Update internal tables based on the handlers initial subscription.
   on_subscribe(h);
+
+  // Notify the handler that it is now active.
+  h->on_open();
 }
 
 /// Remove the service hander. The handler's close() method is called
@@ -48,6 +51,9 @@ Handler_registry::add(Event_handler* h) {
 void
 Handler_registry::remove(Event_handler* h) {
   assert(0 <= h->fd() and h->fd() < FD_SETSIZE);
+
+  // Notify the handler that it will soon be inactive.
+  h->on_close();
   
   // Update internal tables based on the handler's current subscriptions,
   // but do not modfiy the handler.

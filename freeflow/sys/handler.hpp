@@ -58,6 +58,7 @@ public:
   virtual ~Event_handler() { }
 
   // Events
+  virtual bool on_open();
   virtual bool on_close();
   virtual bool on_read();
   virtual bool on_write();

@@ -59,8 +59,8 @@ template<typename T, typename... Args>
 /// ownership of the handler.
 inline void
 Reactor::new_handler(Event_handler* h) {
-  handlers_.add(h);
   h->set_flags(HANDLER_IS_OWNED);
+  handlers_.add(h);
 }
 
 /// Subscribe a handler to the specified events.

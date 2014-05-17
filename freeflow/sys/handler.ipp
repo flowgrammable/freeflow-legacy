@@ -24,6 +24,11 @@ inline
 Event_handler::Event_handler(Reactor& r,int fd, Event_mask m)
   : react_(r),  events_(m), fd_(fd) { }
 
+/// The on_close event is sewnt when the event handler is first added
+/// to the ractor and becomes active.
+inline bool
+Event_handler::on_open() { return true; }
+
 /// The on_close event is sent when the event handler is removed
 /// from the reactor.
 inline bool 
