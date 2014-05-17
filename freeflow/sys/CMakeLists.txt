@@ -27,6 +27,7 @@ set(src fd_utils.cpp
         selector.cpp
         reactor.cpp
         acceptor.cpp
+        connector.cpp
         buffer.cpp
         syslog.cpp
         pipe.cpp
@@ -54,6 +55,7 @@ set(hdr fd_utils.hpp
         selector.hpp  selector.ipp
         reactor.hpp   reactor.ipp
         acceptor.hpp  acceptor.ipp
+        connector.hpp connector.ipp
         buffer.hpp    buffer.ipp
         syslog.hpp
         pipe.hpp
