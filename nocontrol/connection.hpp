@@ -29,17 +29,15 @@ namespace nocontrol {
 ///
 /// \todo We're required to TLS for switch connections. This
 /// seems like the likely integration point for that work.
-class Connection : public ff::Resource_handler<ff::Socket> {
+class Connection : public ff::Socket_handler {
   struct Write_on_exit;
 public:
-  using ff::Resource_handler<ff::Socket>::Resource_handler;
+  Connection(ff::Reactor&, ff::Controller&, ff::Socket&&);
 
-  Connection(ff::Controller&, ff::Socket&&);
-
-  bool on_open(ff::Reactor&);
-  bool on_close(ff::Reactor&);
-  bool on_read(ff::Reactor&);
-  bool on_time(ff::Reactor&, int);
+  bool on_open();
+  bool on_close();
+  bool on_read();
+  bool on_time(int);
 
 private:
   bool read();

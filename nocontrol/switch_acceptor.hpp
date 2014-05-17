@@ -26,12 +26,12 @@ namespace nocontrol {
 
 // The acceptor is responsible for accepting connections when
 // they are available.
-class Switch_acceptor : public ff::Resource_handler<ff::Socket> {
+class Switch_acceptor : public ff::Socket_handler {
 public:
-  Switch_acceptor(ff::Controller&, const ff::Address&);
+  Switch_acceptor(ff::Reactor&, ff::Controller&, const ff::Address&);
 
   // Events
-  bool on_read(ff::Reactor&);
+  bool on_read();
 
 private:
   ff::Controller& ctrl_;

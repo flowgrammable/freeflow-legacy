@@ -23,25 +23,27 @@ struct Connection::Write_on_exit {
 };
 
 inline
-Connection::Connection(ff::Controller& c, ff::Socket&& s)
-  : Resource_handler<ff::Socket>(std::move(s)), ctrl_(&c) { }
+Connection::Connection(ff::Reactor& r, ff::Controller& c, ff::Socket&& s)
+  : ff::Socket_handler(r, ff::READ_EVENTS | ff::TIME_EVENTS, std::move(s))
+  , ctrl_(&c) 
+{ }
 
 /// Create a version negotiation state machine so we know what version
 /// we should accept.
 ///
 /// \todo Error checking.
 inline bool
-Connection::on_open(ff::Reactor& r) {
+Connection::on_open() {
   Write_on_exit g(*this);
   proto_ = new ff::ofp::Protocol(ctrl_, this);
-  return proto_->on_open(r);
+  return proto_->on_open(reactor());
 }
 
 /// Shutdown the state machine and delete the handler.
 inline bool 
-Connection::on_close(ff::Reactor& r) {
+Connection::on_close() {
   Write_on_exit g(*this);
-  proto_->on_close(r);
+  proto_->on_close(reactor());
   delete this;
   return true; 
 }
@@ -51,18 +53,18 @@ Connection::on_close(ff::Reactor& r) {
 ///
 /// \todo Error checking.
 inline bool
-Connection::on_read(ff::Reactor& r) {
+Connection::on_read() {
   Write_on_exit g(*this);
   if (not read()) 
     return false;
-  return proto_->on_recv(r);
+  return proto_->on_recv(reactor());
 }
 
 /// When a timeout occurs, notify the protocol of the expired timer.
 inline bool
-Connection::on_time(ff::Reactor& r, int t) {
+Connection::on_time(int t) {
   Write_on_exit g(*this);
-  return proto_->on_time(r, t);
+  return proto_->on_time(reactor(), t);
 }
 
 } // namespace nocontrol

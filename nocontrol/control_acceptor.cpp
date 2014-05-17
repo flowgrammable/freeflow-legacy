@@ -27,7 +27,7 @@ namespace nocontrol {
 // When data is available for reading, accept the connection
 // and spawn a new handler.
 bool
-Control_acceptor::on_read(Reactor& r) {
+Control_acceptor::on_read() {
   try {
     // Accept the connection.
     Socket s = rc().accept();

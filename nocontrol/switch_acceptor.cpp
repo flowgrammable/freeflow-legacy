@@ -26,25 +26,24 @@ namespace nocontrol {
 // When data is available for reading, accept the connection
 // and spawn a new handler.
 bool
-Switch_acceptor::on_read(Reactor& r) {
-  // FIXME: The error handling stuff is not good.
-  //
-  // Note that even in case of errors, the acceptor never self-terminates.
-  Connection* c;
+Switch_acceptor::on_read() {
+  // FIXME: The error handling stuff is not good. Note that even in case 
+  // of errors, the acceptor never self-terminates.
+  Socket s;
   try {
-    c = new Connection(ctrl_, rc().accept());
+    s = rc().accept();
   } catch(System_error&) {
     perror("error");
-    r.stop();
+    reactor().stop();
     return true;
   } catch(std::runtime_error& err) {
     std::cout << err.what() << '\n';
-    r.stop();
+    reactor().stop();
     return true;
   }
 
-  // Register the connection.
-  r.add_handler(c);
+  // Create the new service handler.
+  reactor().new_handler<Connection>(ctrl_, std::move(s));
   return true;
 }
 

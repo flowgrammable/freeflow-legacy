@@ -240,7 +240,7 @@ struct Socket_info : Address_info {
 /// \todo Add support for socket options.
 struct Socket : Socket_info, Resource {
   // Not default constructible.
-  Socket() = delete;
+  Socket();
 
   // Not copyable.
   Socket(const Socket&) = delete;

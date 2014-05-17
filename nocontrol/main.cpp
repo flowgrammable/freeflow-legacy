@@ -37,20 +37,17 @@ using namespace nocontrol;
 //
 // This is primarily intended for debugging purposes. Really, we should
 // be trapping signals and shutting down that way instead.
-struct Terminator : Resource_handler<Resource> {
-  Terminator(int fd)
-    : Resource_handler<Resource>(fd) { }
-
-  Terminator(Resource&& f)
-    : Resource_handler<Resource>(std::move(f)) { }
+struct Terminator : Resource_handler {
+  Terminator(Reactor& r, int fd)
+    : Resource_handler(r, READ_EVENTS, fd) { }
 
   // If there is no more data to read, indicate that we want
   // to terminate the reactor loop.
-  bool on_read(Reactor& r) {
+  bool on_read() {
     char c[1024];
     if (read(rc(), &c, 1024) <= 0) {
       std::cout << "shutting down\n";
-      r.stop();
+      reactor().stop();
       return false;
     }
     return true;
@@ -68,6 +65,8 @@ struct Controller_config {
 int 
 main(int argc, char* argv[]) {
 
+  Reactor r;
+
   // FIXME: Write a command-line argument parser and make sure
   // that this won't crash (it currently will).
 
@@ -79,20 +78,14 @@ main(int argc, char* argv[]) {
   ctrl.load<Noflow>();
 
   // Configure the conntroller adress.
-  Switch_acceptor ctrl_acc(ctrl, conf.ctrl_addr);
-  Control_acceptor mgmt_acc(ctrl, conf.mgmt_addr);
-
-  // Listen for ^D on stdin so we can shutdown easily.
-  Terminator term(0);
-
-  // Run the reactor loop.
-  //
-  // FIXME: Consider moving all of the reactor facilities into
-  // the NBI library.
-  Reactor r;
+  Switch_acceptor ctrl_acc(r, ctrl, conf.ctrl_addr);
+  Control_acceptor mgmt_acc(r, ctrl, conf.mgmt_addr);
+  Terminator term(r, 0);
   r.add_handler(&term);
   r.add_handler(&ctrl_acc);
   r.add_handler(&mgmt_acc);
+
+  // Run the reactor loop.
   r.run();
 
   // FIXME: This should be part of the controller's destructor.
