@@ -37,6 +37,8 @@ public:
   template<typename T, typename... Args> 
     T* new_handler(Args&&...);
 
+  void new_handler(Event_handler*);
+
   // Event subscription
   void subscribe_events(Event_handler*, Event_mask);
   void unsubscribe_events(Event_handler*, Event_mask);

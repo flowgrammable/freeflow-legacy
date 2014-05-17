@@ -14,18 +14,8 @@
 
 namespace nocontrol {
 
-/// Create an acceptor on the given address.
-///
-/// \todo Integrate TLS.
 inline
-Control_acceptor::Control_acceptor(ff::Reactor& r, 
-                                   ff::Controller& c, 
-                                   const ff::Address& a)
-  : ff::Socket_handler(r, ff::READ_EVENTS, a.family(), ff::Socket::TCP)
-  , ctrl_(c)
-{
-  rc().bind(a); 
-  rc().listen();
-}
+Control_factory::Control_factory(ff::Controller& c)
+  : ctrl(c) { }
 
 } // namesapce nocontrol

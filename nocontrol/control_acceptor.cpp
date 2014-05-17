@@ -24,31 +24,35 @@ using namespace ff;
 
 namespace nocontrol {
 
-// When data is available for reading, accept the connection
-// and spawn a new handler.
-bool
-Control_acceptor::on_read() {
-  try {
-    // Accept the connection.
-    Socket s = rc().accept();
+// Don't create a new handler for the connection. Instead,
+// just read off the data and do something with it.
+//
+// FIXME: Lots and lots of work is needed here. This should probably
+// spin up a management connection, even though this is really a
+// stateless protool. That protocol would simply override the on_open
+// function so that it performed all these tasks and the removed itself
+// from the reactor. Seems legit.
+ff::Event_handler* 
+Control_factory::operator()(Reactor& r, Socket&& s) {
+  Socket sock = std::move(s);
+  
+  // Read 4K worth of data. If we don't read anything allow the
+  // socket to close.
+  //
+  // FIXME: This should be streamed or maybe something else.
+  constexpr std::size_t N = 4096;
+  Buffer buf(N);
+  System_result res = read(sock, buf);
 
-    // Read 4K worth of data. If we don't read anything allow the
-    // socket to close.
-    //
-    // FIXME: This should be streamed or maybe something else.
-    constexpr std::size_t N = 4096;
-    Buffer buf(N);
-    System_result r = read(s, buf);
-    if (r.failed()) {
-      std::cerr << "failed to read from client\n";
-      return true; 
-    }
-    
-    // If we didn't ready any data, the socket is closed.
-    // Note that we're guaranteed completion.
-    if (r.value() == 0)
-      return true;
-
+  // Check for failures.
+  if (res.failed()) {
+    std::cerr << "failed to read from client\n";
+    return nullptr; 
+  }
+  
+  // If we didn't ready any data, the socket is closed.
+  // Note that we're guaranteed completion.
+  if (res.value() != 0) {
     // Decode the JSON value.
     // FIXME: This is a potentially slow operation that could
     // impact server performance.
@@ -57,14 +61,9 @@ Control_acceptor::on_read() {
     // FIXME: Actually do something with the parsed value
     // besides printing it!.
     std::cout << v << '\n';
-
-  } catch(...) {
-    // FIXME: Improve this.
-    std::cerr << "error accepting connection\n";
   }
 
-  // This never terminates...
-  return true;
+  return nullptr;
 }
 
 } // namesapce nocontrol

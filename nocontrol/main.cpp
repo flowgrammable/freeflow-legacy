@@ -55,6 +55,7 @@ struct Terminator : Resource_handler {
 };
 
 
+
 // Stores configuration information for the controller.
 // FIXME: This needs to move into nbi.
 struct Controller_config {
@@ -78,8 +79,9 @@ main(int argc, char* argv[]) {
   ctrl.load<Noflow>();
 
   // Configure the conntroller adress.
-  Switch_acceptor ctrl_acc(r, ctrl, conf.ctrl_addr);
-  Control_acceptor mgmt_acc(r, ctrl, conf.mgmt_addr);
+  static constexpr ff::Socket::Transport TCP = ff::Socket::TCP;
+  Switch_acceptor ctrl_acc(r, conf.ctrl_addr, TCP, ctrl);
+  Control_acceptor mgmt_acc(r, conf.mgmt_addr, TCP, ctrl);
   Terminator term(r, 0);
   r.add_handler(&term);
   r.add_handler(&ctrl_acc);

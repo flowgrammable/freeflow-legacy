@@ -51,10 +51,17 @@ template<typename T, typename... Args>
   inline T*
   Reactor::new_handler(Args&&... args) {
     T* h = new T(*this, std::forward<Args>(args)...);
-    handlers_.add(h);
-    h->set_flags(HANDLER_IS_OWNED);
+    new_handler(h);
     return h;
   }
+
+/// Register the new handler with the reactor. The reactor assumes
+/// ownership of the handler.
+inline void
+Reactor::new_handler(Event_handler* h) {
+  handlers_.add(h);
+  h->set_flags(HANDLER_IS_OWNED);
+}
 
 /// Subscribe a handler to the specified events.
 inline void

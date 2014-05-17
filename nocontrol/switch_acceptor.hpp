@@ -15,27 +15,28 @@
 #ifndef NOCONTROL_SWITCH_ACCEPTOR_HPP
 #define NOCONTROL_SWITCH_ACCEPTOR_HPP
 
-#include <freeflow/sys/socket.hpp>
-#include <freeflow/sys/handler.hpp>
-#include <freeflow/sys/reactor.hpp>
+#include <freeflow/sys/acceptor.hpp>
 #include <freeflow/nbi/controller.hpp>
 
 #include <nocontrol/config.hpp>
+#include <nocontrol/connection.hpp>
 
 namespace nocontrol {
 
-// The acceptor is responsible for accepting connections when
-// they are available.
-class Switch_acceptor : public ff::Socket_handler {
-public:
-  Switch_acceptor(ff::Reactor&, ff::Controller&, const ff::Address&);
+/// The Switch_acceptor is responsible for creating new service handlers
+/// for connected switches.
+struct Switch_factory {
+  Switch_factory(ff::Controller&);
+  
+  Connection* operator()(ff::Reactor&, ff::Socket&&);
 
-  // Events
-  bool on_read();
-
-private:
-  ff::Controller& ctrl_;
+  ff::Controller& ctrl;
 };
+
+/// The Switch_acceptor is responsible for accepting connections from
+/// switches and constructing service handlers to manage the OpenFlow
+/// protocol.
+using Switch_acceptor = ff::Acceptor<Connection, Switch_factory>;
 
 } // namesapce nocontrol
 
