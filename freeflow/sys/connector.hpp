@@ -20,32 +20,26 @@
 
 namespace freeflow {
 
-/// \todo This is identical to Default_acceptor. Unify these classes.
-template<typename Svc>
-  struct Default_connector {
-    Svc* operator()(Reactor&, Socket&&) const;
-  };
-
 /// The Connector class is an instance of the connector design pattern.
 /// Its purpose is to decouple the connection processor from the protocol 
 /// or service implementation. When a connection is made, the connecting
 /// socket is transferred to a new service handler, and the connector
 /// is terminated.
-///
-/// The Con parameter provides the actual constructor for the connected 
-/// service. This allows users to inject additional information into the 
-/// created service when the connection is accepted.
-template<typename Svc, typename Con = Default_connector<Svc>>
+template<typename Handler>
   class Connector : public Socket_handler {
   public:
-    template<typename... Args>
-      Connector(Reactor&, const Address&, Socket::Transport, Args&&...);
+    using Transport = Socket::Transport;
+
+    Connector(Reactor&);
+
+    // Connection
+    void connect(const Address&, Transport, Event_handler*);
 
     // Events
     bool on_write();
 
   private:
-    Con factory_;
+    Handler* eh_;
   };
 
 } // namespace freeflow

@@ -86,5 +86,6 @@ add_subdirectory(examples)
 add_subdirectory(data.test)
 add_subdirectory(socket.test)
 add_subdirectory(reactor.test)
+add_subdirectory(acceptor.test)
 add_subdirectory(json.test)
 

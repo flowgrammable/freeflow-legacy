@@ -14,45 +14,51 @@
 
 namespace freeflow {
 
-/// The default accept factor creates a new service that wraps the
-/// accepted socket.
-template<typename S>
-  inline S*
-  Default_connector<S>::operator()(Reactor& r, Socket&& s) const {
-    return new S(r, std::move(s));
+/// \todo Improve error handling.
+template<typename H>
+  inline
+  Connector<H>::Connector(Reactor& r)
+    : Socket_handler(r, WRITE_EVENTS) , eh_(nullptr)
+  { }
+
+/// Initiate an asynchronous connection. When connection occurs, transfer
+/// event handling responsibility to the given handler. 
+///
+/// \todo Allow multiple asyncrhonous connections to be initiated at
+/// the same time? To do that, this would basically have to maintain
+/// a set of sub-event handlers, each binding the created socket
+/// to the corresponding event handler.
+///
+/// \todo Improve error handling.
+template<typename H>
+  inline void
+  Connector<H>::connect(const Address& a, Transport t, Event_handler* h) {
+    assert(not rc());
+    assert(not eh_);
+    
+    // Initialize the socket. This will throw if there is an error.
+    rc() = Socket(a.family(), t);
+    rc().set_nonblocking();
+
+    // Initiate the asynchronous connection.
+    System_result res = rc().connect();
+    if (res.failed())
+      throw std::runtime_error(strerror(errno));
   }
 
-/// \todo Improve error handling.
-template<typename S, typename A>
-  template<typename... Args>
-    inline
-    Connector<S, A>::Connector(Reactor& r, 
-                               const Address& a,
-                               Socket::Transport t,
-                               Args&&... args)
-      : Socket_handler(r, WRITE_EVENTS, a.family(), t)
-      , factory_(std::forward<Args>(args)...) 
-    {
-      rc.set_nonblocking();
-      System_result res = connect(rc(), a);
-      if (res.failed())
-        throw std::runtime_error("connection");
-    }
-
-/// Called when the connection has completed or failed. This creates
-/// a new service, transferring the connected to socket to the
-/// newly created service. The connector is removed from its reactor,
-/// preventing any new messages from arriving.
-template<typename S, typename A>
+/// Called when the connection has completed or failed. 
+template<typename H>
   inline bool 
-  Connector<S, A>::on_write() {
-    // Create the new srive 
-    S* h = factory_(reactor(), std::move(rc()));
-    if (h)
-      reactor().new_handler(h);
+  Connector<H>::on_write() {
+    // FIXME: Actually check that the connection succeeded!
 
-    // This handler is no longer active after connection.
-    reactor().remove_handler(this);
+    // Transfer control of the connector the given service.
+    eh_->rc() = std::move(rc());
+    eh_->open();
+
+    // Reset the connector.
+    // FIXME: Is this sufficent for reset?
+    eh_ = nullptr;
     return true;
   }
 

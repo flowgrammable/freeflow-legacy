@@ -34,8 +34,10 @@ template<typename S, typename A>
       : Socket_handler(r, READ_EVENTS, a.family(), t)
       , acceptor_(std::forward<Args>(args)...) 
     {
-      rc().bind(a); 
-      rc().listen();
+      if (Trap err = rc().bind(a))
+        throw System_error(err.code());
+      if (Trap err = rc().listen())
+        throw System_error(err.code());
     }
 
 /// Called when a connection is available. This invokes the acceptor
