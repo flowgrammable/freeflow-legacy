@@ -25,7 +25,7 @@ namespace freeflow {
 /// or service implementation. When a connection is made, the connecting
 /// socket is transferred to a new service handler, and the connector
 /// is terminated.
-template<typename Handler>
+template<typename Service>
   class Connector : public Socket_handler {
   public:
     using Transport = Socket::Transport;
@@ -33,13 +33,15 @@ template<typename Handler>
     Connector(Reactor&);
 
     // Connection
-    void connect(const Address&, Transport, Event_handler*);
+    void connect(Service*, const Address&, Transport);
+    void connect_now(Service*, const Address&, Transport);
 
     // Events
+    bool on_close() { return true; }
     bool on_write();
 
   private:
-    Handler* eh_;
+    Service* eh_;
   };
 
 } // namespace freeflow

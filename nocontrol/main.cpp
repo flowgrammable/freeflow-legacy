@@ -54,8 +54,6 @@ struct Terminator : Resource_handler {
   }
 };
 
-
-
 // Stores configuration information for the controller.
 // FIXME: This needs to move into nbi.
 struct Controller_config {
@@ -80,14 +78,23 @@ main(int argc, char* argv[]) {
 
   // Configure the conntroller adress.
   static constexpr ff::Socket::Transport TCP = ff::Socket::TCP;
-  Switch_acceptor ctrl_acc(r, conf.ctrl_addr, TCP, ctrl);
-  Control_acceptor mgmt_acc(r, conf.mgmt_addr, TCP, ctrl);
-  Terminator term(r, 0);
-  r.add_handler(&term);
-  r.add_handler(&ctrl_acc);
-  r.add_handler(&mgmt_acc);
+  
+  // Accept switch connections.
+  // FIXME: There will be many "acceptors" in the controller.
+  Switch_acceptor sa(r, ctrl);
+  sa.listen(conf.ctrl_addr, TCP); 
+  
+  // Accept management connections.
+  Control_acceptor ma(r, ctrl);
+  ma.listen(conf.mgmt_addr, TCP);
 
-  // Run the reactor loop.
+  // Acdept shell input.
+  Terminator term(r, 0);
+  
+  // Add handlers and run the reactor loop.
+  r.add_handler(&term);
+  r.add_handler(&sa);
+  r.add_handler(&ma);
   r.run();
 
   // FIXME: This should be part of the controller's destructor.

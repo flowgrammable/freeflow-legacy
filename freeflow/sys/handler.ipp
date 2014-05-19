@@ -127,13 +127,26 @@ template<typename T>
       , Event_handler(r, this->rc_.fd(), m)
     { }
 
+/// Assign the handler by replacing its resource with x. This is
+/// useful in applications where the resource is not initialized on
+/// construction (e.g., as with the acceptor and connector).
+///
+/// \todo This is gross and requires fd_ to be a protected member in
+/// order to avoid an unwanted mutator. Can this be made less ugly?
 template<typename T>
-inline T&
-Basic_event_handler<T>::rc() { return this->rc_; }
+  inline void
+  Basic_event_handler<T>::assign(T&& x) {
+    this->rc_ = std::move(x);
+    this->fd_ = this->rc_.fd();
+  }  
 
 template<typename T>
-inline const T& 
-Basic_event_handler<T>::rc() const { return this->rc_; }
+  inline T&
+  Basic_event_handler<T>::rc() { return this->rc_; }
+
+template<typename T>
+  inline const T& 
+  Basic_event_handler<T>::rc() const { return this->rc_; }
 
 // -------------------------------------------------------------------------- //
 // Registry

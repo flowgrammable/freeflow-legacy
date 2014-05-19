@@ -28,7 +28,7 @@ Handler_registry::add(Event_handler* h) {
   assert(0 <= h->fd() and h->fd() < FD_SETSIZE);
   assert(reg_[h->fd()] == nullptr);
   
-  // Insert the handler.
+  // Insert the handler and recompute the max fd.
   reg_[h->fd()] = h;
   max_ = std::max(h->fd(), max_);
   
@@ -50,7 +50,7 @@ Handler_registry::add(Event_handler* h) {
 /// we're going to have a very sparse list.
 void
 Handler_registry::remove(Event_handler* h) {
-  assert(0 <= h->fd() and h->fd() < FD_SETSIZE);
+  assert(reg_[h->fd()] == h);
 
   // Notify the handler that it will soon be inactive.
   h->on_close();
@@ -60,7 +60,7 @@ Handler_registry::remove(Event_handler* h) {
   on_unsubscribe(h);
   
   // Remove the handler.
-  reg_[h->fd()] = {};
+  reg_[h->fd()] = nullptr;
 }
 
 /// Update the handler's event mask by registering it to receive

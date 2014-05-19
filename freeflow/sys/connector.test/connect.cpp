@@ -13,29 +13,45 @@
 // permissions and limitations under the License.
 
 #include <freeflow/sys/socket.hpp>
+#include <freeflow/sys/connector.hpp>
 #include <freeflow/sys/reactor.hpp>
 
 using namespace freeflow;
 
+// The echo client is extremely thin...
+struct Echo_client : Socket_handler {
+
+  Echo_client(Reactor& r)
+    : Socket_handler(r, NO_EVENTS) { }
+
+  bool on_open() {
+    std::cout << "* init client\n";
+    return true;
+  }
+
+  bool on_close() {
+    std::cout << "* end client\n";
+    return true;
+  }
+};
+
 // Read from standard input and send through the connection.
-struct Reader : Resource_handler {
-  Reader(Reactor& r, Echo_client& c)
+struct Input_reader : Resource_handler {
+  Input_reader(Reactor& r, Echo_client& c)
     : Resource_handler(r, READ_EVENTS, 0), conn(c) { }
 
   // If there is no more data to read, indicate that we want
   // to terminate the reactor loop. Note that the read should
   // never be deferred.
-  bool on_read(Reactor& r) {
+  bool on_read() {
     char buf[1024];
     System_result res = read(rc(), buf, 1024);
     if (res.completed()) {
       std::size_t n = res.value();
       if (n == 0) {
-        std::cout << "* terminating\n";
-        r.stop();
-        return false;
-      }
-      else {
+        reactor().stop();
+        return true;
+      } else {
         buf[n] = 0;
         send(conn.rc(), &buf[0], n);
       }
@@ -49,18 +65,23 @@ struct Reader : Resource_handler {
   Echo_client& conn;
 };
 
-using Echo_conector = Connector<Echo_client>;
+using My_connector = Connector<Echo_client>;
 
 int main() {
-
   Reactor r;
 
-  // Create and add the service handlers.
-  Echo_connector conn(r);
-  Reader read(r, conn);
-  r.add_handler(&conn);
-  r.add_handler(&read);
+  // The echo client maintains the client socket.
+  Echo_client client(r);
 
-  // Run the event loop.  
+  // // The reader accepts terminal input.
+  Input_reader reader(r, client);
+
+  // Establishes the asynchronous connection.
+  My_connector conn(r);
+  conn.connect(&client, Address(Ipv4_addr::loopback, 9876), Socket::TCP);
+
+  // Add the reader and run the event loop.
+  r.add_handler(&reader);
   r.run();
+  r.shutdown();
 }

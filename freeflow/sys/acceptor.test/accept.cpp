@@ -24,6 +24,16 @@ struct Echo_server : Socket_handler {
   Echo_server(Reactor& r, Socket&& s)
     : Socket_handler(r, READ_EVENTS, std::move(s)) { }
 
+  bool on_open() {
+    std::cout << "* service established\n";
+    return true;
+  }
+
+  bool on_close() {
+    std::cout << "* service terminated\n";
+    return true;
+  }
+
   bool on_read() {
     char buf[1024];
     System_result res = read(rc(), buf, 1024);
@@ -31,7 +41,6 @@ struct Echo_server : Socket_handler {
       std::cout << "* error reading socket\n";
       return false;
     } else if (res.value() == 0) {
-      std::cout << "* connection closed\n";
       return false;
     } else {
       buf[res.value()] = 0;
@@ -43,12 +52,15 @@ struct Echo_server : Socket_handler {
 
 using My_acceptor = Acceptor<Echo_server>;
 
-
 int main() {
   Reactor r;
 
-  My_acceptor c(r, Address(Ipv4_addr::loopback, 9876), Socket::TCP);
+  // Initialize the acceptr.
+  My_acceptor c(r);
+  c.listen(Address(Ipv4_addr::loopback, 9876), Socket::TCP);
 
+  // Run the reactor loop.
   r.add_handler(&c);
   r.run();
+  r.shutdown();
 }

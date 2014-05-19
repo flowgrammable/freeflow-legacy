@@ -21,13 +21,6 @@ Reactor::Reactor()
   expired_.reserve(32);
 }
 
-inline
-Reactor::~Reactor() {
-  for (Event_handler* h : handlers_) {
-    if (h) remove_handler(h);
-  }
-}
-
 /// Register the handler with the reactor.
 inline void
 Reactor::add_handler(Event_handler* h) { 
@@ -97,5 +90,19 @@ Reactor::cancel_timer(Event_handler* h, int id) {
 /// Stop the reactor from running.
 inline void
 Reactor::stop() { running_ = false; }
+
+/// Remove all event handlers from the reactor after it has stopped.
+///
+/// \todo Two-stage finalization is necessary because event handlers at
+/// the same scope as the reactor can be destroyed before they are removed
+/// (and signalled). That's bad... It would be better if we didn't have these
+/// dependencies, but that means the reactor always owns the event handlers.
+/// That may be good, it may not.
+inline void
+Reactor::shutdown() {
+  for (Event_handler* h : handlers_)
+    if (h) remove_handler(h);
+}
+
 
 } // namesapce freeflow

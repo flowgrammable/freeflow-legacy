@@ -48,14 +48,16 @@ struct My_acceptor : Socket_handler {
       throw System_error(err.code());
     if (Trap err = listen(rc()))
       throw System_error(err.code());
+
+    std::cout << "INIT: " << is_subscribed(READ_EVENTS) << '\n';
   }
 
   // Acccept a connection and spin up a new service.
-  bool on_read(Reactor& r) {
+  bool on_read() {
     Socket s = accept(rc());
     std::cout << "* accepted connection\n";
 
-    r.new_handler<Echo_server>(std::move(s));
+    reactor().new_handler<Echo_server>(std::move(s));
 
     return true;
   }
@@ -63,9 +65,8 @@ struct My_acceptor : Socket_handler {
 
 int main() {
   Reactor r;
-
   My_acceptor c(r, Address(Ipv4_addr::loopback, 9876));
-
   r.add_handler(&c);
   r.run();
+  r.shutdown();
 }

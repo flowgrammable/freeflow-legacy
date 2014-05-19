@@ -104,8 +104,6 @@ Reactor::close_handlers(const Resource_set& close) {
   }
 }
 
-
-
 /// Run the reactor's event loop until stoppage is indicated.
 void
 Reactor::run() {

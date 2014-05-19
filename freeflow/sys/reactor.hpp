@@ -28,7 +28,6 @@ namespace freeflow {
 class Reactor {
 public:
   Reactor();
-  ~Reactor();
 
   // Handler registration
   void add_handler(Event_handler*);
@@ -51,6 +50,7 @@ public:
   // Control
   void run();
   void stop();
+  void shutdown();
 
 private:
   void notify_select(const Select_set&, Resource_set&);

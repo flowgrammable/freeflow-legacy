@@ -18,27 +18,34 @@ namespace freeflow {
 /// accepted socket.
 template<typename S>
   inline S*
-  Default_acceptor<S>::operator()(Reactor& r, Socket&& s) const {
+  Default_accept_factory<S>::operator()(Reactor& r, Socket&& s) const {
     return new S(r, std::move(s));
   }
 
-/// \todo Provide a more reasonable backlog? Something configured
-/// perhaps? This could be information supplied by the Acc policy.
-template<typename S, typename A>
+/// Initialize the acceptor to work with the given reactor. The 
+/// additional arguments are forwraded to the accept factory.
+template<typename S, typename F>
   template<typename... Args>
     inline
-    Acceptor<S, A>::Acceptor(Reactor& r, 
-                             const Address& a,
-                             Socket::Transport t,
-                             Args&&... args)
-      : Socket_handler(r, READ_EVENTS, a.family(), t)
-      , acceptor_(std::forward<Args>(args)...) 
-    {
-      if (Trap err = rc().bind(a))
-        throw System_error(err.code());
-      if (Trap err = rc().listen())
-        throw System_error(err.code());
-    }
+    Acceptor<S, F>::Acceptor(Reactor& r, Args&&... args)
+      : Socket_handler(r, READ_EVENTS), factory_(std::forward<Args>(args)...)
+    { }
+
+/// Start listening for connections on the given address.
+///
+/// \todo Improve error handling.
+template<typename S, typename F>
+  inline void
+  Acceptor<S, F>::listen(const Address& a, Transport t, int backlog) {
+    // Re-initialize the socket.
+    assign(Socket(a.family(), t));
+
+    // Bind to the given address and listen for connections.
+    if (Trap err = rc().bind(a))
+      throw System_error(err.code());
+    if (Trap err = rc().listen(backlog))
+      throw System_error(err.code());
+  }
 
 /// Called when a connection is available. This invokes the acceptor
 /// factory to create a new event handler, which is registerd with
@@ -46,11 +53,11 @@ template<typename S, typename A>
 ///
 /// \todo Error handling. If there's a socket error, we may have to
 /// close and reopen the socket.
-template<typename S, typename A>
+template<typename S, typename F>
   inline bool 
-  Acceptor<S, A>::on_read() {
+  Acceptor<S, F>::on_read() {
     Socket s = accept(rc());
-    S* h = acceptor_(reactor(), std::move(s));
+    S* h = factory_(reactor(), std::move(s));
     if (h)
       reactor().new_handler(h);
     return true;
