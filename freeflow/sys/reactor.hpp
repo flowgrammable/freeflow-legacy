@@ -23,8 +23,8 @@ namespace freeflow {
 /// The Reactor class implements an event processor that notifies handlers
 /// of resource events and availability, timer expiration, and signals.
 ///
-/// \todo: This should probably be renamed Select_reactor and more tightly
-/// coupled with the handler registry. 
+/// \todo This should probably be renamed Select_reactor and more tightly
+/// coupled with the handler registry.
 class Reactor {
 public:
   Reactor();

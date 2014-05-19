@@ -41,9 +41,7 @@ static constexpr Event_mask ALL_EVENTS    = -1u;
 /// Handler flags are managed by the reactor for the purpose of internal
 /// book keeping.
 using Handler_flags = unsigned;
-static constexpr Handler_flags HANDLER_IS_OWNED     = 1u << 0;
-static constexpr Handler_flags HANDLER_IS_ACCEPTOR  = 1u << 1;
-static constexpr Handler_flags HANDLER_IS_CONNECTOR = 1u << 2;
+static constexpr Handler_flags HANDLER_IS_OWNED = 1u << 0;
 
 
 /// The Event_handler class defines the interface required by all specific 
@@ -54,8 +52,9 @@ static constexpr Handler_flags HANDLER_IS_CONNECTOR = 1u << 2;
 /// subscribed.
 class Event_handler {
 public:
-  explicit Event_handler(Reactor&, int, Event_mask);
-  virtual ~Event_handler() { }
+  explicit Event_handler();
+  Event_handler(Reactor&, int, Event_mask);
+  virtual ~Event_handler();
 
   // Events
   virtual bool on_open();

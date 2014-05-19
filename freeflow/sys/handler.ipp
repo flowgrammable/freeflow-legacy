@@ -19,10 +19,12 @@ namespace freeflow {
 // -------------------------------------------------------------------------- //
 // Abstract handler
 
-// Note that r may not be iniatilized.
 inline
 Event_handler::Event_handler(Reactor& r,int fd, Event_mask m)
-  : react_(r),  events_(m), fd_(fd) { }
+  : react_(r),  flags_(0), events_(m), fd_(fd) { }
+
+inline
+Event_handler::~Event_handler() { }
 
 /// The on_close event is sewnt when the event handler is first added
 /// to the ractor and becomes active.

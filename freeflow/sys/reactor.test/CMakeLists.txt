@@ -19,3 +19,6 @@ target_link_libraries(sys_reactor_accept ${libs})
 
 add_executable(sys_reactor_connect connect.cpp)
 target_link_libraries(sys_reactor_connect ${libs})
+
+add_executable(sys_reactor_timer timer.cpp)
+target_link_libraries(sys_reactor_timer ${libs})
