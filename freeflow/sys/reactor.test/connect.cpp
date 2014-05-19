@@ -87,5 +87,4 @@ int main() {
 
   // Run the event loop.  
   r.run();
-  r.shutdown();
 }

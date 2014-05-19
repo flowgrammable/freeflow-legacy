@@ -83,5 +83,4 @@ int main() {
   // Add the reader and run the event loop.
   r.add_handler(&reader);
   r.run();
-  r.shutdown();
 }

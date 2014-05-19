@@ -62,5 +62,4 @@ int main() {
   // Run the reactor loop.
   r.add_handler(&c);
   r.run();
-  r.shutdown();
 }

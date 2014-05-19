@@ -50,5 +50,4 @@ int main() {
   Printer p(r);
   r.add_handler(&p);
   r.run();
-  r.shutdown();
 }

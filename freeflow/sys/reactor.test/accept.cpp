@@ -68,5 +68,4 @@ int main() {
   My_acceptor c(r, Address(Ipv4_addr::loopback, 9876));
   r.add_handler(&c);
   r.run();
-  r.shutdown();
 }

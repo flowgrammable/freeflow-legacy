@@ -32,6 +32,7 @@ public:
   // Handler registration
   void add_handler(Event_handler*);
   void remove_handler(Event_handler*);
+  void remove_handlers();
 
   template<typename T, typename... Args> 
     T* new_handler(Args&&...);
@@ -50,7 +51,6 @@ public:
   // Control
   void run();
   void stop();
-  void shutdown();
 
 private:
   void notify_select(const Select_set&, Resource_set&);

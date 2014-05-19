@@ -124,6 +124,9 @@ Reactor::run() {
     // Close any outstanding handlers
     close_handlers(close);
   }
+
+  // Remove all outstanding handlers.
+  remove_handlers();
 }
 
 } // namespace freeflow
