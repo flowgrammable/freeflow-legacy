@@ -107,26 +107,29 @@ Reactor::close_handlers(const Resource_set& close) {
 /// Run the reactor's event loop until stoppage is indicated.
 void
 Reactor::run() {
+  // FIXME: This granularity of time slice is probably not right.
   running_ = true;
-  while (running_) {
-    // Select on the registered handlers. Only wait 10 ms for
-    // an event to trigger.
-    Select_set dispatch = handlers_.wait();
-    Selector s(handlers_.max() + 1, dispatch);    
-    s(10_ms);
-
-    // Close any handlers that need to removed from the
-    // registry and closed.
-    Resource_set close;
-    notify_select(dispatch, close);
-    notify_timers(close);
-
-    // Close any outstanding handlers
-    close_handlers(close);
-  }
-
-  // Remove all outstanding handlers.
+  while (running_)
+    run(10_ms);
   remove_handlers();
+}
+
+void
+Reactor::run(Microseconds us) {
+  // Select on the registered handlers. Only wait 10 ms for
+  // an event to trigger.
+  Select_set dispatch = handlers_.wait();
+  Selector s(handlers_.max() + 1, dispatch);    
+  s(us);
+
+  // Close any handlers that need to removed from the
+  // registry and closed.
+  Resource_set close;
+  notify_select(dispatch, close);
+  notify_timers(close);
+
+  // Close any outstanding handlers
+  close_handlers(close);
 }
 
 } // namespace freeflow

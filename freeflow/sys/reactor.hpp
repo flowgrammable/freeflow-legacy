@@ -50,6 +50,7 @@ public:
 
   // Control
   void run();
+  void run(Microseconds);
   void stop();
 
 private:
