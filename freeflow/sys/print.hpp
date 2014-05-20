@@ -27,12 +27,14 @@ class Print {
   template<typename C, typename T, typename X>
   std::basic_ostream<C, T>& 
   pprint_object(std::basic_ostream& os, const X& a) {
+    /*for (auto it = std::begin(os); it != std::end(os); ++it){
 
+    }*/
 
   }
 
 // Print array
-  template<typname C, typename T>
+  template<typname C, typename T, typename X>
   std::basic_ostream<C, T>&
   pprint_array(std::basic_ostream& os, const X& a) {
     
