@@ -24,16 +24,17 @@ class Print {
   static std::string leading_spaces = "";
 
 // Print object
-  template<typename C, typename T>
+  template<typename C, typename T, typename X>
   std::basic_ostream<C, T>& 
-  pprint_object(std::basic_ostream& os, const T& a) {
+  pprint_object(std::basic_ostream& os, const X& a) {
+
 
   }
 
 // Print array
   template<typname C, typename T>
   std::basic_ostream<C, T>&
-  pprint_array(std::basic_ostream& os, const T& a) {
+  pprint_array(std::basic_ostream& os, const X& a) {
     
   }
 
