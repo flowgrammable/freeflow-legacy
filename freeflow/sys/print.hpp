@@ -15,36 +15,54 @@
 #ifndef FREEFLOW_PRINT_HPP
 #define FREEFLOW_PRINT_HPP
 
+#include <iosfwd>
+#include <string>
+
+#include <freeflow/sys/json.hpp>
+
 namespace freeflow {
 
-// Pretty print json document
+/// The Printer class provides facilities to suppor the pretty-printing
+/// of values in freeflow and its applications. The pretty printer is
+/// designed to print JSON-structured documents. The "terminal" printed
+/// elements are the set of value types supported by the JSON library.
+/// Support is also provided for objects and array.
+///
+/// To make the Printer adaptable to non-json data types, operations
+/// are provided to crate object and array enclosures.
+///
+/// \todo Should this be put into the JSON namespace and then aliased
+/// into freeflow?
+class Printer {
+public:
+  Printer(std::ostream& os)
+    : os_(os), indent_(0) { }
 
-class Print {
-  static int indent_count = 0;
-  static std::string leading_spaces = "";
+  void print(json::Null);
+  void print(json::Bool);
+  void print(json::Int);
+  void print(json::Real);
+  void print(const json::String&);
+  void print(const json::Pair&);
+  void print(const json::String&, const json::Value&);
+  void print(const json::Object&);
+  void print(const json::Array&);
 
-// Print object
-  template<typename C, typename T, typename X>
-  std::basic_ostream<C, T>& 
-  pprint_object(std::basic_ostream& os, const X& a) {
-    /*for (auto it = std::begin(os); it != std::end(os); ++it){
+  // Object formatting
+  void start_object();
+  void end_object();
 
-    }*/
+  // Array formatting
+  void start_array();
+  void end_array();
 
-  }
-
-// Print array
-  template<typname C, typename T, typename X>
-  std::basic_ostream<C, T>&
-  pprint_array(std::basic_ostream& os, const X& a) {
-    
-  }
-
+  std::ostream& os_;     // The underlying stream     
+  int           indent_; // The current indent level
+  std::string   tab_;    // A string contaning the current "tab".
  };
 
-
-
-
 } // namespace
+
+#include "print.ipp"
 
 #endif
