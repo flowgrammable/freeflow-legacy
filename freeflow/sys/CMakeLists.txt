@@ -31,7 +31,8 @@ set(src fd_utils.cpp
         buffer.cpp
         syslog.cpp
         pipe.cpp
-        json.cpp)
+        json.cpp
+        library.cpp)
 
 if(BSD)
   LIST(APPEND src kqueue.cpp)
