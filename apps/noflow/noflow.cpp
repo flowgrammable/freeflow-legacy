@@ -20,6 +20,9 @@ using namespace freeflow;
 
 namespace nocontrol {
 
+/// The application factory.
+static Factory factory;
+
 /// \todo Dynamically configure the application so that it can terminate
 /// on different phases.
 void
@@ -44,3 +47,6 @@ Noflow::features_known(Switch& s) {
 }
 
 } // namespace nocontrol
+
+extern "C" void* 
+factory() { return &nocontrol::factory; }

@@ -24,4 +24,4 @@ set(hdr domain.hpp      domain.ipp
         application.hpp application.ipp
         request.hpp     request.ipp)
 
-add_library(freeflow-sdn ${src})
+add_library(freeflow-sdn SHARED ${src})

@@ -22,6 +22,9 @@
 #include <nocontrol/config.hpp>
 
 namespace nocontrol {
+  
+class Factory;
+class Noflow;
 
 /// The noflow 
 class Noflow : public ff::Application {
@@ -36,6 +39,12 @@ private:
   Stop stop_ = ON_BIND; // The stopping point.
 };
 
+
+/// Create instances of the noflow application.
+class Factory : ff::Application_factory {
+  Noflow* make();
+};
+  
 } // namespace nocontrol
 
 #endif

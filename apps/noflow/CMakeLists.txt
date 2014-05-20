@@ -20,6 +20,7 @@ include_directories(${CMAKE_SOURCE_DIR})
 set(src noflow.cpp)
 
 add_library(noflow SHARED ${src})
+target_link_libraries(noflow freeflow freeflow-sdn)
 
 
 

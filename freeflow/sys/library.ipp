@@ -21,6 +21,7 @@ namespace freeflow {
 /// The library is loaded so that its symbols are local,
 /// meaning that no other libraries can be resolved against
 /// them.
+inline
 Library::Library(const std::string& p) 
   : path_(p), handle_(dlopen(p.c_str(), RTLD_LOCAL | RTLD_NOW))
 {
@@ -29,6 +30,7 @@ Library::Library(const std::string& p)
 }
 
 /// Destroy the objectd, unloading the underlying library.
+inline
 Library::~Library() { 
   dlclose(handle_);
 }

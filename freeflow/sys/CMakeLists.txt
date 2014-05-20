@@ -69,7 +69,8 @@ elseif(LINUX)
   LIST(APPEND hdr ${epoll.hpp})
 endif()
 
-add_library(freeflow ${src})
+add_library(freeflow SHARED ${src})
+target_link_libraries(freeflow ${CMAKE_DL_LIBS})
 
 
 # --------------------------------------------------------------------------- //
