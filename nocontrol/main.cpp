@@ -15,17 +15,18 @@
 #include <iostream>
 #include <map>
 #include <typeinfo>
+#include <dlfcn.h>
 
 #include <freeflow/sys/selector.hpp>
 #include <freeflow/sys/socket.hpp>
 #include <freeflow/sys/file.hpp>
 #include <freeflow/sys/reactor.hpp>
 #include <freeflow/nbi/controller.hpp>
+#include <apps/noflow/noflow.hpp>
 
 #include "switch_acceptor.hpp"
 #include "control_acceptor.hpp"
 #include "connection.hpp"
-#include "noflow.hpp"
 #include "bridge.hpp"
 
 using namespace std;
@@ -76,7 +77,7 @@ main(int argc, char* argv[]) {
   Controller_config conf;
 
   // Load default applications.
-  ctrl.load<Noflow>();
+  /*ctrl.load<Noflow>();
 
   // Configure the conntroller adress.
   static constexpr ff::Socket::Transport TCP = ff::Socket::TCP;
@@ -91,7 +92,7 @@ main(int argc, char* argv[]) {
   r.run();
 
   // FIXME: This should be part of the controller's destructor.
-  ctrl.unload<Noflow>();
+  ctrl.unload<Noflow>();*/
 
   return 0;
 }
