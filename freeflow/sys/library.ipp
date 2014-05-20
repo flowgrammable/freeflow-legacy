@@ -14,4 +14,23 @@
 
 namespace freeflow {
 
+/// Initalize on object by loading the library indicated by
+/// the specified path. If the library cannot be opened,
+/// an exception is thrown.
+///
+/// The library is loaded so that its symbols are local,
+/// meaning that no other libraries can be resolved against
+/// them.
+Library::Library(const std::string& p) 
+  : path_(p), handle_(dlopen(p.c_str(), RTLD_LOCAL | RTLD_NOW))
+{
+  if (not handle_) 
+    throw std::runtime_error(dlerror());
+}
+
+/// Destroy the objectd, unloading the underlying library.
+Library::~Library() { 
+  dlclose(handle_);
+}
+  
 } // namespace freeflow

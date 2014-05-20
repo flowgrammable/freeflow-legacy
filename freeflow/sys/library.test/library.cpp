@@ -12,36 +12,14 @@
 // or implied. See the License for the specific language governing
 // permissions and limitations under the License.
 
-#ifndef FREEFLOW_LIBRARY_HPP
-#define FREEFLOW_LIBRARY_HPP
+#include <iostream>
 
-#include <dlfcn.h>
+#include <freeflow/sys/library.hpp>
 
-#include <stdexcept>
+using namespace freeflow;
 
-#include <freeflow/sys/path.hpp>
 
-namespace freeflow {
+int main() {
+  Library l1("./apps/noflow/libnoflow.so");
+}
 
-/// The Library class...
-class Library {
-public:  
-  Library(const Path&);
-  ~Library();
-  
-  // Symbols
-  void* symbol() const;
-  
-  // Accessors
-  const Path& path() const;
-  
-private:  
-  Path  path_;   // Path to the loaded library
-  void* handle_; // The underlying library
-};
-
-} // namespace freeflow
-
-#include "library.ipp"
-
-#endif

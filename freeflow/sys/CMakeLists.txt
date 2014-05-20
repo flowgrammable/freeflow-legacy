@@ -60,7 +60,8 @@ set(hdr fd_utils.hpp
         buffer.hpp    buffer.ipp
         syslog.hpp
         pipe.hpp
-        json.hpp      json.ipp)
+        json.hpp      json.ipp
+        library.hpp   library.ipp)
 
 if(BSD)
   LIST(APPEND hdr ${kqueue.hpp})
@@ -89,5 +90,6 @@ add_subdirectory(socket.test)
 add_subdirectory(reactor.test)
 add_subdirectory(acceptor.test)
 add_subdirectory(connector.test)
+add_subdirectory(library.test)
 add_subdirectory(json.test)
 
