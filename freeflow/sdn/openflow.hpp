@@ -12,19 +12,29 @@
 // or implied. See the License for the specific language governing
 // permissions and limitations under the License.
 
+#ifndef FREEFLOW_OPENFLOW_HPP
+#define FREEFLOW_OPENFLOW_HPP
+
+#include <freeflow/sdn/listener.hpp>
+
 namespace freeflow {
 
-inline
-Domain::Domain(const std::string& n)
-  : name_(n) { }
+/// The Ofp_switch class represents a connected OpenFlow switch and
+/// is responsible for transacting various versions of the OpenFlow
+/// protocol.
+class Ofp_switch : Socket_handler {
 
-inline const std::string&
-Domain::name() const { return name_; }
+};
 
-inline std::size_t
-Domain::Hash::operator()(const Domain& d) const {
-  std::hash<std::string> h;
-  return h(d.name());
-}
+/// The Ofp_listener accepts sockets on a particular port and creates
+/// connection instances.
+class Ofp_listener : Listener_base<Ofp_switch> {
+  Ofp_listener(const Address&, Socket::Transport, int);
+};
 
 } // namespace freeflow
+
+#include <freeflow/sdn/openflow.ipp>
+
+#endif
+

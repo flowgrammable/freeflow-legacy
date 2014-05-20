@@ -25,7 +25,7 @@
 
 namespace freeflow {
 
-struct Controller_port;
+class Listener;
 
 /// The Domain class represents a logical grouping of resources, for
 /// example: an entire network, regional subsets of a networks, or
@@ -38,7 +38,7 @@ struct Controller_port;
 /// a set of configurabl control ports, sockets to which a switch
 /// can connect.
 class Domain {
-  using Port_list = std::vector<Controller_port*>;
+  using Listener_list = std::vector<Listener*>;
 public:
   struct Hash;
 
@@ -48,12 +48,12 @@ public:
   const std::string& name() const;
 
   // Port management
-  Controller_port* open_port(const Address& a, Socket::Transport, int);
-  void close_port(Controller_port*);
+  Listener* add_listener(const Address& a, Socket::Transport, int);
+  void remove_listener(Listener*);
 
 private:
-  std::string name_;
-  Port_list port_;
+  std::string   name_;
+  Listener_list port_;
 };
 
 
@@ -78,6 +78,8 @@ class Domain_manager : public Domain_map
 };
 
 } // namespace freeflow
+
+#include <freeflow/sdn/domain.ipp>
 
 #endif
 

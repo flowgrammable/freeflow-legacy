@@ -15,16 +15,26 @@
 namespace freeflow {
 
 inline
-Domain::Domain(const std::string& n)
-  : name_(n) { }
+Listener::~Listener() { }
 
-inline const std::string&
-Domain::name() const { return name_; }
+Socket::Transport
+Listener::transport() const { return sock->transport; }
 
-inline std::size_t
-Domain::Hash::operator()(const Domain& d) const {
-  std::hash<std::string> h;
-  return h(d.name());
-}
+inline const Address& 
+Listener::addr() const { return sock->local; }
+
+
+/// Create the listener 
+template<typename S>
+  inline
+  Listener_base::Listener_base(Reactor& r, 
+                               const Address& a, 
+                               Socket::Transport t, 
+                               int bl)
+    : Acceptor<S>(r)
+  {
+    this->listen(a, t, bl);
+    this->sock_ = &rc();
+  }
 
 } // namespace freeflow

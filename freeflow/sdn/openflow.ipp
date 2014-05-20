@@ -14,17 +14,9 @@
 
 namespace freeflow {
 
+/// The Ofp_listener accepts sockets on a particular port and creates
 inline
-Domain::Domain(const std::string& n)
-  : name_(n) { }
-
-inline const std::string&
-Domain::name() const { return name_; }
-
-inline std::size_t
-Domain::Hash::operator()(const Domain& d) const {
-  std::hash<std::string> h;
-  return h(d.name());
-}
+Ofp_listener::Ofp_listener(const Address& a, Socket::Transport t, int bl)
+  : Listener_base<Ofp_switch>(a, t, bl) { }
 
 } // namespace freeflow

@@ -12,19 +12,5 @@
 // or implied. See the License for the specific language governing
 // permissions and limitations under the License.
 
-namespace freeflow {
+#include "listener.hpp"
 
-inline
-Domain::Domain(const std::string& n)
-  : name_(n) { }
-
-inline const std::string&
-Domain::name() const { return name_; }
-
-inline std::size_t
-Domain::Hash::operator()(const Domain& d) const {
-  std::hash<std::string> h;
-  return h(d.name());
-}
-
-} // namespace freeflow
