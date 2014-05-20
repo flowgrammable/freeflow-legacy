@@ -36,11 +36,13 @@ CLI_parser_exception::CLI_parser_exception(string err) {
 struct CLI_parser_rule {
   string format;
   
-  bool match(string & str,vector<pair<string,string> > args);
+  bool match(string & str,vector<pair<string,string> > & args);
   
   CLI_parser_rule(string rule);
 };
 
+// Constructor for CLI_parser_rule
+// Currently, it just checks to make sure that all square brackets are closed
 CLI_parser_rule::CLI_parser_rule(string rule) : format(rule) {
   // Make sure all square brackets are closed
   bool in_bracket = false;
@@ -71,24 +73,30 @@ CLI_parser_rule::CLI_parser_rule(string rule) : format(rule) {
   }
 }
 
-bool CLI_parser_rule::match(string & str,vector<pair<string,string> > args) {
-  int pos_f = 0;
-  int pos_s = 0;
-  string name;
-  string var_value;
-  bool var = false;
+// Performs basic, greedy "pattern matching" between a rule and a string.
+//
+// If it matches the pattern, it returns true and populates args with
+// pairs of variable names and their values. Otherwise, it returns
+// false and clears args.
+bool CLI_parser_rule::match(string & str,vector<pair<string,string> > & args) {
+  int pos_f = 0;        // Position in the formate string (i.e. rule)
+  int pos_s = 0;        // Position in the string to be matched
+  string var_name;      // Name of the current variable
+  string var_value;     // Value of the current variable
+  bool var = false;     // Whether we're currently matching a variable
   
   
   while (pos_s < (int)str.length()) {
     if (!var) {
       if (format[pos_f] == '[') {
         pos_f++;
-        name = "";
+        var_name = "";
         var_value = "";
         var = true;
         
         bool matched = false;
         
+        // Extract the name of the variable
         while (pos_f < (int)format.length()) {
           if (format[pos_f] == ']') {
             matched = true;
@@ -96,34 +104,32 @@ bool CLI_parser_rule::match(string & str,vector<pair<string,string> > args) {
             break;
           }
           else{
-            name += format[pos_f++];
+            var_name += format[pos_f++];
           }
         }
         
+        // Should never happen because this is checked for in the constructor
         if (!matched) {
-          throw "CLI_parser_rule Error: unmatched bracket in rule "+format;
+          throw CLI_parser_exception("Impossible unmatched bracket in: "+format);
         }
-        
-        cout << "Next: " << format[pos_f] << endl;
-        
-        //pos_f++;
       }
     }
     
     if (var) {
-      //if(pos_f+1 < format.length()){
+        // Peek ahead and see if the current character matches the current
+        // format character. If so, assume we're done matching the variable
+        // (this works because the algorithm is greedy)
         if (str[pos_s] == format[pos_f]) {
           var = false;
-          cout << "Var " << name << " = " << var_value << endl;
-          args.push_back(pair<string,string>(name,var_value));
+          args.push_back(pair<string,string>(var_name,var_value));
         }
         else {
           var_value += str[pos_s++];
         }
-      //}
     }
     else {
       if (format[pos_f] != str[pos_s]) {
+        args.clear();
         return false;
       }
       
@@ -133,11 +139,14 @@ bool CLI_parser_rule::match(string & str,vector<pair<string,string> > args) {
   }
   
   if (var){
-    cout << "Var " << name << " = " << var_value << endl;
-    args.push_back(pair<string,string>(name,var_value));
+    args.push_back(pair<string,string>(var_name,var_value));
   }
   
-  if (pos_f < (int)format.length()) return false;
+  if (pos_f < (int)format.length()) {
+    args.clear();
+    return false;
+  }
+  
   else return true;
 }
 
@@ -191,7 +200,7 @@ void CLI_parser::set_arg_pos(int pos) {
 int main(int argc,char *argv[]){
   CLI_parser parser;
   
-  CLI_parser_rule("--[flag]=[value");
+  CLI_parser_rule("--[flag]=[value]");
   
   parser.parse(argc,argv);
   
