@@ -15,13 +15,36 @@
 #ifndef FREEFLOW_LIBRARY_HPP
 #define FREEFLOW_LIBRARY_HPP
 
+#include <iostream>
+#include <dlfcn.h>
+#include <string>
 
 namespace freeflow {
 
+/*
+struct Plugin {
+	void* handle; // handle for the dynamically loaded library
+};
 
+struct Plugin_loader {
+	void open(std::string lib_name);
+	void close(Plugin lib);
+};
+*/
+struct Library {
+	std::string lib_name;
+	void Library();
+	void ~Library();
+	void* handle;
+};
 
-} // namespace freeflow 
-
+void Library::open() {
+	handle = dlopen("./apps/noflow/libnoflow.so", RTLD_LAZY);
+  if (!handle) {
+    std::cerr << "Cannot open library: " << dlerror() << '\n';
+  }
+}
 #include "library.ipp"
 
+} // namespace freeflow
 #endif
