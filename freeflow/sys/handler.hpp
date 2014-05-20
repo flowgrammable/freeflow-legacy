@@ -52,7 +52,6 @@ static constexpr Handler_flags HANDLER_IS_OWNED = 1u << 0;
 /// subscribed.
 class Event_handler {
 public:
-  explicit Event_handler();
   Event_handler(Reactor&, int, Event_mask);
   virtual ~Event_handler();
 
@@ -85,6 +84,7 @@ private:
   Reactor&      react_;  // The attached reactor
   Handler_flags flags_;  // Internal bookkeeping
   Event_mask    events_; // Subscribed events
+protected:
   int           fd_;     // Underlying file descriptor
 };
 
@@ -122,6 +122,9 @@ template<typename T>
     // Resource initialization
     template<typename... Args>
       Basic_event_handler(Reactor&, Event_mask, Args&&... args);
+
+    // Assignment
+    void assign(T&&);
 
     // Accessors
     T&       rc();

@@ -57,7 +57,7 @@ public:
 
 } // namespace freeflow
 
-#include <freeflow/nbi/application.ipp>
+#include <freeflow/sdn/application.ipp>
 
 #endif
 

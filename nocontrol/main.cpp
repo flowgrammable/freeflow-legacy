@@ -21,8 +21,9 @@
 #include <freeflow/sys/socket.hpp>
 #include <freeflow/sys/file.hpp>
 #include <freeflow/sys/reactor.hpp>
-#include <freeflow/nbi/controller.hpp>
+#include <freeflow/sdn/controller.hpp>
 #include <apps/noflow/noflow.hpp>
+
 
 #include "switch_acceptor.hpp"
 #include "control_acceptor.hpp"
@@ -55,10 +56,8 @@ struct Terminator : Resource_handler {
   }
 };
 
-
-
 // Stores configuration information for the controller.
-// FIXME: This needs to move into nbi.
+// FIXME: Move this into the SDN library.
 struct Controller_config {
   Address ctrl_addr {Ipv4_addr::any, 9000};
   Address mgmt_addr {Ipv4_addr::any, 9001};
@@ -81,14 +80,23 @@ main(int argc, char* argv[]) {
 
   // Configure the conntroller adress.
   static constexpr ff::Socket::Transport TCP = ff::Socket::TCP;
-  Switch_acceptor ctrl_acc(r, conf.ctrl_addr, TCP, ctrl);
-  Control_acceptor mgmt_acc(r, conf.mgmt_addr, TCP, ctrl);
-  Terminator term(r, 0);
-  r.add_handler(&term);
-  r.add_handler(&ctrl_acc);
-  r.add_handler(&mgmt_acc);
+  
+  // Accept switch connections.
+  // FIXME: There will be many "acceptors" in the controller.
+  Switch_acceptor sa(r, ctrl);
+  sa.listen(conf.ctrl_addr, TCP); 
+  
+  // Accept management connections.
+  Control_acceptor ma(r, ctrl);
+  ma.listen(conf.mgmt_addr, TCP);
 
-  // Run the reactor loop.
+  // Acdept shell input.
+  Terminator term(r, 0);
+  
+  // Add handlers and run the reactor loop.
+  r.add_handler(&term);
+  r.add_handler(&sa);
+  r.add_handler(&ma);
   r.run();
 
   // FIXME: This should be part of the controller's destructor.

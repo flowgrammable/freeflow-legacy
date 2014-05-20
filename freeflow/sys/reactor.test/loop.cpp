@@ -14,33 +14,21 @@
 
 #include <iostream>
 
-#include "noflow.hpp"
+#include <freeflow/sys/reactor.hpp>
 
 using namespace freeflow;
 
-namespace nocontrol {
+// The purpose of this test is simply to ensure that a custom event 
+// loop can be constructed using the reactor. This test just runs
+// the reactor 10 times for 250ms each time. 
+//
+// TODO: Actually handle some events!
 
-/// \todo Dynamically configure the application so that it can terminate
-/// on different phases.
-void
-Noflow::load(Controller&) { stop_ = ON_BIND; }
+int main() {
+  Reactor r;
 
-void
-Noflow::bind(Switch& s) {
-  if (stop_ == ON_BIND)
-    s.disconnect();
+  for (int i = 0; i < 10; ++i) {
+    std::cout << "* running\n";
+    r.run(250_ms);
+  }
 }
-
-void
-Noflow::version_known(Switch& s) {
-  if (stop_ == ON_VERSION)
-    s.disconnect();
-}
-
-void
-Noflow::features_known(Switch& s) {
-  // The application never operates beyond this point.
-  s.disconnect();
-}
-
-} // namespace nocontrol

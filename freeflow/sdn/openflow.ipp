@@ -1,4 +1,4 @@
-// Copyright (c) 2013-2014 Flowgrammable.org
+// Copyright (c) 2013-2014 Flowgrammable, LLC.
 // 
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,22 +12,11 @@
 // or implied. See the License for the specific language governing
 // permissions and limitations under the License.
 
-#ifndef NOCONTROL_BRIDGE_HPP
-#define NOCONTROL_BRIDGE_HPP
+namespace freeflow {
 
-#include <freeflow/sdn/application.hpp>
-#include <freeflow/sdn/switch.hpp>
+/// The Ofp_listener accepts sockets on a particular port and creates
+inline
+Ofp_listener::Ofp_listener(const Address& a, Socket::Transport t, int bl)
+  : Listener_base<Ofp_switch>(a, t, bl) { }
 
-#include <nocontrol/config.hpp>
-
-namespace nocontrol {
-
-class Bridge : ff::Application {
-public:
-  void start(ff::Switch&);
-  void stop(ff::Switch&);
-};
-
-} // namespace nocontrol
-
-#endif
+} // namespace freeflow

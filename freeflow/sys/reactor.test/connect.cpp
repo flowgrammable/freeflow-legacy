@@ -31,12 +31,12 @@ struct Connection : Socket_handler {
   //
   // FIXME: Stop responding to write events after being accepted.
   // We don't need to keep calling this function.
-  bool on_write(Reactor& r) {
+  bool on_write() {
     // FIXME: Actually check that connection has succeeded.
     std::cout << "* connected\"n";
 
     // Don't receive write events any more.
-    r.unsubscribe_events(this, WRITE_EVENTS);
+    reactor().unsubscribe_events(this, WRITE_EVENTS);
     return true;    
   }
 
@@ -51,14 +51,14 @@ struct Reader : Resource_handler {
   // If there is no more data to read, indicate that we want
   // to terminate the reactor loop. Note that the read should
   // never be deferred.
-  bool on_read(Reactor& r) {
+  bool on_read() {
     char buf[1024];
     System_result res = read(rc(), buf, 1024);
     if (res.completed()) {
       std::size_t n = res.value();
       if (n == 0) {
         std::cout << "* terminating\n";
-        r.stop();
+        reactor().stop();
         return false;
       }
       else {

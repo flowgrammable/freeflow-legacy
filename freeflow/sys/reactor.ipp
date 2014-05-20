@@ -21,13 +21,6 @@ Reactor::Reactor()
   expired_.reserve(32);
 }
 
-inline
-Reactor::~Reactor() {
-  for (Event_handler* h : handlers_) {
-    if (h) remove_handler(h);
-  }
-}
-
 /// Register the handler with the reactor.
 inline void
 Reactor::add_handler(Event_handler* h) { 
@@ -42,6 +35,13 @@ Reactor::remove_handler(Event_handler* h) {
   handlers_.remove(h); 
   if (h->has_flags(HANDLER_IS_OWNED))
     delete h;
+}
+
+/// Remove all event handlers from the reactor after it has stopped.
+inline void
+Reactor::remove_handlers() {
+  for (Event_handler* h : handlers_)
+    if (h) remove_handler(h);
 }
 
 /// Dynamically create a new handler of type T, constructed with the
@@ -97,5 +97,6 @@ Reactor::cancel_timer(Event_handler* h, int id) {
 /// Stop the reactor from running.
 inline void
 Reactor::stop() { running_ = false; }
+
 
 } // namesapce freeflow

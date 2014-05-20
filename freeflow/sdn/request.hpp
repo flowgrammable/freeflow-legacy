@@ -70,7 +70,7 @@ using Request_queue = std::queue<Request>;
 
 } // namespace freeflow
 
-#include <freeflow/nbi/request.ipp>
+#include <freeflow/sdn/request.ipp>
 
 #endif
 

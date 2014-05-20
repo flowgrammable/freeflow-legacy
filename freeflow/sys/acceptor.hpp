@@ -20,30 +20,38 @@
 
 namespace freeflow {
 
-template<typename Svc>
-  struct Default_acceptor {
-    Svc* operator()(Reactor&, Socket&&) const;
+template<typename Service>
+  struct Default_accept_factory {
+    Service* operator()(Reactor&, Socket&&) const;
   };
 
 /// The acceptor class is an instance of the acceptor design pattern.
 /// Its purpose is to decouple the acceptance of connections from the
 /// protocol or service implementation. When a connection is accepted,
-/// a new service of type Svc is constructed.
+/// a new service of type Service is constructed. 
 ///
-/// The Acc parameter provides the actual constructor for the
+/// Note that the event handlers of accepted connection are managed
+/// by the reactor.
+///
+/// The Factory parameter provides the actual constructor for the
 /// accepted service. This allows users to inject additional informatoin
 /// into the created service when the connection is accepted.
-template<typename Svc, typename Acc = Default_acceptor<Svc>>
+template<typename Service, typename Factory = Default_accept_factory<Service>>
   class Acceptor : public Socket_handler {
   public:
+    using Transport = Socket::Transport;
+    
     template<typename... Args>
-      Acceptor(Reactor&, const Address&, Socket::Transport, Args&&...);
+      explicit Acceptor(Reactor&,  Args&&...);
+
+    // Listen
+    void listen(const Address&, Transport, int = SOMAXCONN);
 
     // Events
     bool on_read();
 
   private:
-    Acc acceptor_;
+    Factory factory_;
   };
 
 } // namespace freeflow
