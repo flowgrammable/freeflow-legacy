@@ -12,18 +12,16 @@
 # or implied. See the License for the specific language governing
 # permissions and limitations under the License.
 
-set(src controller.cpp
+set(src domain.cpp
+        controller.cpp
         switch.cpp
         application.cpp
         request.cpp)
 
-set(hdr controller.hpp
-        controller.ipp
-        switch.hpp
-        switch.ipp
-        application.hpp
-        application.ipp
-        request.hpp
-        request.ipp)
+set(hdr domain.hpp      domain.ipp
+        controller.hpp  controller.ipp
+        switch.hpp      switch.ipp
+        application.hpp application.ipp
+        request.hpp     request.ipp)
 
 add_library(freeflow-sdn ${src})
