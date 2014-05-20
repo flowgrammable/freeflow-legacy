@@ -21,4 +21,10 @@ Domain:::Domain(const std::string& n)
 inline const std::string&
 Domain::name() const { return name_; }
 
+inline std::size_t
+Domain::Hash::operator()(const Domain& d) const {
+  std::hash<std::string> h;
+  return h(d.name());
+}
+
 } // namespace freeflow
