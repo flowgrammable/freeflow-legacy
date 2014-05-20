@@ -25,6 +25,8 @@
 using namespace std;
 using namespace freeflow;
 
+// Very simple CLI exception handling class
+// TODO: redirect output to stderr
 struct CLI_parser_exception {
   CLI_parser_exception(string err);
 };
@@ -33,6 +35,7 @@ CLI_parser_exception::CLI_parser_exception(string err) {
   cout << "CLI parser exception: " << err << endl;
 }
 
+// A rule which control how the parser parses command line arguments
 struct CLI_parser_rule {
   string format;
   
@@ -78,7 +81,8 @@ CLI_parser_rule::CLI_parser_rule(string rule) : format(rule) {
 // If it matches the pattern, it returns true and populates args with
 // pairs of variable names and their values. Otherwise, it returns
 // false and clears args.
-bool CLI_parser_rule::match(string & str,vector<pair<string,string> > & args) {
+bool
+CLI_parser_rule::match(string & str,vector<pair<string,string> > & args) {
   int pos_f = 0;        // Position in the formate string (i.e. rule)
   int pos_s = 0;        // Position in the string to be matched
   string var_name;      // Name of the current variable
@@ -164,7 +168,10 @@ struct CLI_parser {
   
 };
 
-void CLI_parser::parse(int argc,char *argv[]) {
+// Actual parsing function
+// TODO: implement actual parsing
+void
+CLI_parser::parse(int argc,char *argv[]) {
   // Probably a good idea to clear the args vector if this is called more than once
   args.clear();
   
@@ -176,7 +183,8 @@ void CLI_parser::parse(int argc,char *argv[]) {
 }
 
 // Gets the current argument
-string & CLI_parser::get_arg() {
+string &
+CLI_parser::get_arg() {
   assert(arg_pos < (int)args.size());
   
   return args[arg_pos];
@@ -184,12 +192,14 @@ string & CLI_parser::get_arg() {
 
 // Advances to the next argument
 // Returns whether there is another argument
-bool CLI_parser::next_arg() {
+bool
+CLI_parser::next_arg() {
   return ++arg_pos < (int)args.size();
 }
 
 // Sets the position of the current argument
-void CLI_parser::set_arg_pos(int pos) {
+void
+CLI_parser::set_arg_pos(int pos) {
   if (pos < (int)args.size())
     arg_pos = pos;
   else
@@ -197,7 +207,8 @@ void CLI_parser::set_arg_pos(int pos) {
 }
 
 
-int main(int argc,char *argv[]){
+int
+main(int argc,char *argv[]) {
   CLI_parser parser;
   
   CLI_parser_rule("--[flag]=[value]");
