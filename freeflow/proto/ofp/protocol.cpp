@@ -15,8 +15,7 @@
 #include <algorithm>
 
 #include <freeflow/sys/socket.hpp>
-#include <freeflow/nbi/controller.hpp>
-#include <freeflow/nbi/switch.hpp>
+#include <freeflow/sdn/controller.hpp>
 
 #include <freeflow/proto/ofp/v1.0/message.hpp>
 #include <freeflow/proto/ofp/v1.0/protocol.hpp>

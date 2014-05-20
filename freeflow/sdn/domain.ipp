@@ -1,4 +1,4 @@
-// Copyright (c) 2013-2014 Flowgrammable.org
+// Copyright (c) 2013-2014 Flowgrammable, LLC.
 // 
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,22 +12,19 @@
 // or implied. See the License for the specific language governing
 // permissions and limitations under the License.
 
-#ifndef NOCONTROL_BRIDGE_HPP
-#define NOCONTROL_BRIDGE_HPP
+namespace freeflow {
 
-#include <freeflow/sdn/application.hpp>
-#include <freeflow/sdn/switch.hpp>
+inline
+Domain::Domain(const std::string& n)
+  : name_(n) { }
 
-#include <nocontrol/config.hpp>
+inline const std::string&
+Domain::name() const { return name_; }
 
-namespace nocontrol {
+inline std::size_t
+Domain::Hash::operator()(const Domain& d) const {
+  std::hash<std::string> h;
+  return h(d.name());
+}
 
-class Bridge : ff::Application {
-public:
-  void start(ff::Switch&);
-  void stop(ff::Switch&);
-};
-
-} // namespace nocontrol
-
-#endif
+} // namespace freeflow

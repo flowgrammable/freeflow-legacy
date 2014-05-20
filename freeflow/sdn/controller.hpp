@@ -18,7 +18,7 @@
 #include <unordered_set>
 
 #include <freeflow/sys/socket.hpp>
-#include <freeflow/nbi/application.hpp>
+#include <freeflow/sdn/application.hpp>
 
 namespace freeflow {
 
@@ -47,7 +47,7 @@ private:
 
 } // namespace freeflow
 
-#include "controller.ipp"
+#include <freeflow/sdn/controller.ipp>
 
 #endif
 

@@ -21,7 +21,7 @@ set(src main.cpp
         noflow.cpp
         bridge.cpp)
 
-set(libs freeflow freeflow-ofp freeflow-ofp-1.0 freeflow-nbi)
+set(libs freeflow freeflow-ofp freeflow-ofp-1.0 freeflow-sdn)
 
 add_executable(nocontrol ${src})
 target_link_libraries(nocontrol ${libs})

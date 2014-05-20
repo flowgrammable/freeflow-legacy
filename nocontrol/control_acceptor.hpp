@@ -16,7 +16,7 @@
 #define NOCONTROL_CONTROL_ACCEPTOR_HPP
 
 #include <freeflow/sys/acceptor.hpp>
-#include <freeflow/nbi/controller.hpp>
+#include <freeflow/sdn/controller.hpp>
 
 #include <nocontrol/config.hpp>
 

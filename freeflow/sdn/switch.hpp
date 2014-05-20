@@ -18,8 +18,8 @@
 #include <cassert>
 
 #include <freeflow/sys/data.hpp>
-#include <freeflow/nbi/application.hpp>
-#include <freeflow/nbi/request.hpp>
+#include <freeflow/sdn/application.hpp>
+#include <freeflow/sdn/request.hpp>
 
 namespace freeflow {
 
@@ -74,7 +74,7 @@ private:
 
 } // namespace freeflow
 
-#include <freeflow/nbi/switch.ipp>
+#include <freeflow/sdn/switch.ipp>
 
 #endif
 

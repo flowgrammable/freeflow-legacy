@@ -21,8 +21,8 @@
 #include <freeflow/sys/time.hpp>
 #include <freeflow/sys/reactor.hpp>
 
-#include <freeflow/nbi/switch.hpp>
-#include <freeflow/nbi/request.hpp>
+#include <freeflow/sdn/switch.hpp>
+#include <freeflow/sdn/request.hpp>
 
 #include <freeflow/proto/ofp/ofp.hpp>
 
