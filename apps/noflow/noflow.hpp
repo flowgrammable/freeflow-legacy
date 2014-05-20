@@ -43,6 +43,7 @@ private:
 /// Create instances of the noflow application.
 class Factory : ff::Application_factory {
   Noflow* make();
+  void destroy(Noflow*);
 };
   
 } // namespace nocontrol

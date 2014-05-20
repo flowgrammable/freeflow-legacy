@@ -34,6 +34,7 @@ class Application;
 /// application libraries.
 class Application_factory {
   virtual Application* make() = 0;
+//   virtual void destroy(Application*) = 0;
 };
 
 /// The Application_library class represents a dynamically loaded

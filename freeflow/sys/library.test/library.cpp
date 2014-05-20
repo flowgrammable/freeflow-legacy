@@ -21,5 +21,8 @@ using namespace freeflow;
 
 int main() {
   Library l1("./apps/noflow/libnoflow.so");
+  
+  //test loading a second of the same application
+  Library L2("./apps/noflow/libnoflow.so"); 
 }
 

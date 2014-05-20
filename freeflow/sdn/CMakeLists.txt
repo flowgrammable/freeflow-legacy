@@ -25,3 +25,5 @@ set(hdr domain.hpp      domain.ipp
         request.hpp     request.ipp)
 
 add_library(freeflow-sdn SHARED ${src})
+
+add_subdirectory(application.test)

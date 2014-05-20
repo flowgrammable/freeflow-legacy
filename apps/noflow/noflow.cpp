@@ -19,6 +19,16 @@
 using namespace freeflow;
 
 namespace nocontrol {
+  
+Noflow* 
+Factory::make() {
+  return new Noflow;
+}
+
+void 
+Factory::destroy(Noflow* n) {
+  delete(n);
+}
 
 /// The application factory.
 static Factory factory;
