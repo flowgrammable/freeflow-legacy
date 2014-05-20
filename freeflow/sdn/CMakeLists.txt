@@ -26,4 +26,4 @@ set(hdr controller.hpp
         request.hpp
         request.ipp)
 
-add_library(freeflow-nbi ${src})
+add_library(freeflow-sdn ${src})

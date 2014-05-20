@@ -20,7 +20,7 @@
 #include <freeflow/sys/socket.hpp>
 #include <freeflow/sys/file.hpp>
 #include <freeflow/sys/reactor.hpp>
-#include <freeflow/nbi/controller.hpp>
+#include <freeflow/sdn/controller.hpp>
 
 #include "switch_acceptor.hpp"
 #include "control_acceptor.hpp"
@@ -55,7 +55,7 @@ struct Terminator : Resource_handler {
 };
 
 // Stores configuration information for the controller.
-// FIXME: This needs to move into nbi.
+// FIXME: Move this into the SDN library.
 struct Controller_config {
   Address ctrl_addr {Ipv4_addr::any, 9000};
   Address mgmt_addr {Ipv4_addr::any, 9001};

@@ -15,8 +15,8 @@
 #ifndef NOCONTROL_BRIDGE_HPP
 #define NOCONTROL_BRIDGE_HPP
 
-#include <freeflow/nbi/application.hpp>
-#include <freeflow/nbi/switch.hpp>
+#include <freeflow/sdn/application.hpp>
+#include <freeflow/sdn/switch.hpp>
 
 #include <nocontrol/config.hpp>
 
