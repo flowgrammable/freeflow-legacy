@@ -12,5 +12,39 @@
 // or implied. See the License for the specific language governing
 // permissions and limitations under the License.
 
-#include "print.hpp"
+#include <iostream>
+#include <string>
+
+#include <freeflow/sys/print.hpp>
+#include <freeflow/sys/json.hpp>
+
+namespace freeflow {
+
+// Print primitive data types.
+void Printer::print(json::Null n) {
+	os_ << n;
+}	
+
+void Printer::print(json::Bool b) {
+	os_ << b;
+}
+
+void Printer::print(json::Int i) {
+	os_ << i;
+}
+
+void Printer::print(json::Real r) {
+	os_ << r;
+}
+
+void Printer::print(const json::String& s){
+	os_ << s;
+}
+
+
+void Printer::start_object() {
+	
+}
+
+} // freeflow
 
