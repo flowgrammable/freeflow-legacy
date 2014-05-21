@@ -57,7 +57,7 @@ int main() {
 
   // Initialize the acceptr.
   My_acceptor c(r);
-  c.listen(Address(Ipv4_addr::loopback, 9876), Socket::TCP);
+  c.listen(Address(Ipv4_addr::any, 9876), Socket::TCP);
 
   // Run the reactor loop.
   r.add_handler(&c);
