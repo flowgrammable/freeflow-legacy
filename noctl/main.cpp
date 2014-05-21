@@ -62,9 +62,9 @@ parse_flag(const std::string& arg) {
   // past the '='. If the value is empty, return as if it were "null".
   string value = arg.substr(n + 1);
   if (value.empty())
-    return {name, "null"};
+    return {std::move(name), "null"};
   else
-    return {name, value};
+    return {std::move(name), std::move(value)};
 }
 
 // Parses the command line inputs into flags and positional arguments
