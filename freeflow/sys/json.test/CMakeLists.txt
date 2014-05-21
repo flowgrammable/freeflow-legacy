@@ -17,4 +17,4 @@ set(libs freeflow)
 add_executable(json_reader reader.cpp)
 target_link_libraries(json_reader ${libs})
 
-# add_unit_test(json_reader reader.cpp ${libs})
+add_unit_test(json_decls decls.cpp ${libs})

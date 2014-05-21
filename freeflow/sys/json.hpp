@@ -57,6 +57,9 @@ using Real = double;
 struct String : std::string {
   using std::string::string;
 
+  String(std::string&&);
+  String(const std::string&);
+
   bool is_quoted() const;
 };
 
@@ -129,8 +132,12 @@ public:
   // Value construction
   Value(Null);
   Value(Bool);
+  Value(int);
   Value(Int);
   Value(Real);
+  Value(const char*);
+  Value(std::string&&);
+  Value(const std::string&);
   Value(String&&);
   Value(const String&);
   Value(Array&&);
