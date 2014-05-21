@@ -78,6 +78,20 @@ parse(int argc, char *argv[], String_map& opts, String_list& args) {
   }
 }
 
+// struct Bool {
+//   json::Value operator()(const std::string& s) const {
+    
+//     // Check that s is one of:
+//     //    - true | false
+//     //    - yes | no
+//     //    - on | off
+
+//     // Throw an exception if it isnt?
+    
+//     return true;
+//   }
+// };
+
 } // namespace cli
 
 using namespace cli;
@@ -97,6 +111,12 @@ main(int argc, char *argv[]) {
   for (auto &s : args)
     std::cout << s << endl;
   
+  // { 
+  //   Parameter<Bool> p1("flag", "f", "Indicate that flag is set");
+
+  //   json::Value v1 = p1.get(opts);
+  // }
+
   return 0;
 }
 
