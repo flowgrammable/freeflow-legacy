@@ -30,7 +30,7 @@ public:
   ~Library();
   
   // Symbols
-  void* symbol() const;
+  void* symbol(std::string) const;
   
   // Accessors
   const Path& path() const;

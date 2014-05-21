@@ -34,6 +34,7 @@ public:
   void bind(ff::Switch&);
   void version_known(ff::Switch&);
   void features_known(ff::Switch&);
+  void test();
 
 private:
   Stop stop_ = ON_BIND; // The stopping point.
@@ -41,9 +42,9 @@ private:
 
 
 /// Create instances of the noflow application.
-class Factory : ff::Application_factory {
-  Noflow* make();
-  void destroy(Noflow*);
+class Factory : public ff::Application_factory {
+  ff::Application* make();
+  void destroy(ff::Application*);
 };
   
 } // namespace nocontrol

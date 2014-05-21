@@ -14,7 +14,7 @@
 
 namespace freeflow {
 
-/// Initalize on object by loading the library indicated by
+/// Initalize an object by loading the library indicated by
 /// the specified path. If the library cannot be opened,
 /// an exception is thrown.
 ///
@@ -29,10 +29,29 @@ Library::Library(const std::string& p)
     throw std::runtime_error(dlerror());
 }
 
-/// Destroy the objectd, unloading the underlying library.
+/// Destroy the object, unloading the underlying library.
 inline
 Library::~Library() { 
   dlclose(handle_);
 }
-  
+
+/// Retrieve the symbol from the loaded library
+inline
+void*
+Library::symbol(std::string symbol) const {
+  char* error;
+  dlerror(); // clear existing error
+  void* sym = dlsym(handle_, symbol.c_str());
+  if ((error = dlerror()) != NULL) {
+    throw std::runtime_error(error);
+  }
+  return sym;
+}
+
+inline
+const Path& 
+Library::path() const {
+  return path_;
+}
+
 } // namespace freeflow

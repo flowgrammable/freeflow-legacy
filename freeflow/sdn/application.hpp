@@ -33,8 +33,9 @@ class Application;
 /// Objects of this class are returned from the loading of
 /// application libraries.
 class Application_factory {
+public:
   virtual Application* make() = 0;
-//   virtual void destroy(Application*) = 0;
+  virtual void destroy(Application*) = 0;
 };
 
 /// The Application_library class represents a dynamically loaded
@@ -57,6 +58,7 @@ class Application {
 public:
   virtual ~Application() { }
 
+  virtual void test();
   // Application events
   virtual void load(Controller&);
   virtual void unload(Controller&);
@@ -80,6 +82,8 @@ public:
   virtual void table_status(Switch&, const Table&);
   virtual void role_status(Switch&, const Role&);
 };
+
+typedef Application_factory* create_t();
 
 } // namespace freeflow
 

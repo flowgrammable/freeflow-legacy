@@ -14,6 +14,9 @@
 
 namespace freeflow {
 
+inline void
+Application::test() { }
+
 /// The load event is sent when the controller instantiates the application.
 inline void
 Application::load(Controller&) { }

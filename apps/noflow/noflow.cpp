@@ -20,18 +20,18 @@ using namespace freeflow;
 
 namespace nocontrol {
   
-Noflow* 
+Application* 
 Factory::make() {
   return new Noflow;
 }
 
 void 
-Factory::destroy(Noflow* n) {
-  delete(n);
+Factory::destroy(Application* n) {
+  delete n;
 }
 
 /// The application factory.
-static Factory factory;
+static Factory Noflow_factory;
 
 /// \todo Dynamically configure the application so that it can terminate
 /// on different phases.
@@ -56,7 +56,12 @@ Noflow::features_known(Switch& s) {
   s.disconnect();
 }
 
+void
+Noflow::test() {
+  std::cout << "Success!!" << "\n";
+}
+
 } // namespace nocontrol
 
-extern "C" void* 
-factory() { return &nocontrol::factory; }
+extern "C" Application_factory*
+factory() { return &nocontrol::Noflow_factory; }
