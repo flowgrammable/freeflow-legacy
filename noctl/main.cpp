@@ -27,124 +27,71 @@ using namespace std;
 using namespace freeflow;
 using namespace json;
 
-// Very simple CLI exception handling class
-// TODO: redirect output to stderr
-struct CLI_parser_exception {
-  CLI_parser_exception(string err);
-  CLI_parser_exception(string err, int arg);
-};
+namespace cli {
 
-CLI_parser_exception::CLI_parser_exception(string err) {
-  cout << "CLI parser exception: " << err << endl;
-}
+using string_map = map<string, string>;
+using string_list = vector<string>;
 
-CLI_parser_exception::CLI_parser_exception(string err, int arg) {
-  cout << "CLI parser exception for argument " + to_string(arg) + ": " <<
-    err << endl;
-}
-
-struct CLI_parser {
-  vector<string> pos_args;
-  map<string, string> args;
-  map<string, string> alias;
-  
-  bool parse(int argc, char *argv[]);
-  void add_alias(string full, string alias_name);
-};
-
-bool
-CLI_parser::parse(int argc, char *argv[]) {
-  for (int i = 0; i < argc; i++) {
+// Parses the command line inputs into flags and positional arguments
+void parse (int argc, char *argv[], string_map &flags, string_list &pos_args) {
+  for (int i = 0; i < argc; ++i) {
     string arg = argv[i];
-    string name;
-    string value;
-    unsigned int pos = 0;
     bool set_value = false;
     
-    // Get the argument name
-    while (pos < arg.length() && arg[pos] != '=') {
-      name += arg[pos++];
-    }
-    
-    // Check if they provided an explicit value for the flag.
-    // If not, it should be set to a default of true.
-    if (pos < arg.length() && arg[pos] == '=')
-      set_value = true;
-    else
-      value = "true";
-    
-    // Get the argument value, if there is one
-    while (++pos < arg.length()) {
-      value += arg[pos];
-    }
-    
-    // TODO: if set_value is true and they didn't specify a value after the '=',
-    // should we throw an exception?
-    
-    if (arg[0] == '-') {
-      if (arg.length() > 1) {
-        if (arg[1] == '-') {
-          // TODO: check if the value already exists in the map
-          args[name] = value;
-        }
-        else {
-          // The name is an alias for a longer name.
-          // TODO: either throw a warning if it contains more than one character
-          // or take everything after the first letter to be part of the value.
-          
-          string alias_name = name.substr(0,2);
-          
-          if (alias.count(alias_name) == 0) {
-            throw CLI_parser_exception("Unrecognized flag alias",i);
-          }
-          else {
-            args[alias[alias_name]] = value;
-          }
-        }
-      }
-      else {
-        throw CLI_parser_exception("Expected flag name after '-'", i);
-      }
+    if(arg[0] == '-') {
+      string name;
+      string value;
+      unsigned int pos = 0;
+      
+      // Get the name of the flag
+      while (pos < arg.length() && arg[pos] != '=')
+        name += arg[pos++];
+      
+      // If '=' is not used, assume a default value of true
+      if(pos < arg.length() && arg[pos] == '=')
+        set_value = true;
+      else
+        value = "true";
+        
+      // Get the value of the flag
+      while (++pos < arg.length())
+        value += arg[pos];
+      
+      // If they used '=' but didn't specify a value, assume "NULL"
+      if (set_value && value == "")
+        value = "NULL";
+        
+      flags[name] = value;
     }
     else {
-      pos_args.push_back(name);
+      pos_args.push_back(arg);
     }
   }
-  
-  return true;
 }
 
-// Adds a short alias for a long command
-void
-CLI_parser::add_alias(string full, string alias_name) {
-  alias[alias_name] = full;
-}
+} // namespace cli
+
+using namespace cli;
 
 int
 main(int argc,char *argv[]) {
-  CLI_parser parser;
+  string_map flags;
+  string_list pos_args;
   
-  parser.add_alias("-output","-o");
-  parser.parse(argc,argv);
+  parse(argc, argv, flags, pos_args);
   
-  cout << "----Flags----" << endl;
-  
-  for (auto &p : parser.args) {
-    cout << "'" << p.first << "' is set to '" << p.second << "'" << endl;
+  for (auto &f : flags) {
+    cout << f.first << " is set to " << f.second << endl;
   }
   
-  cout << endl << "----Positional Args----" << endl << endl;
+  cout << endl << "Positional args" << endl << endl;
   
-  for (string &s : parser.pos_args) {
+  for (auto &s : pos_args) {
     cout << s << endl;
   }
+  
+  return 0;
 }
-
-
-
-
-
-
 
 
 
