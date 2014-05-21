@@ -29,11 +29,12 @@ using namespace json;
 
 namespace cli {
 
-using string_map = map<string, string>;
-using string_list = vector<string>;
+using String_map = map<string, string>;
+using String_list = vector<string>;
 
 // Parses the command line inputs into flags and positional arguments
-void parse (int argc, char *argv[], string_map &flags, string_list &pos_args) {
+void
+parse(int argc, char *argv[], String_map &flags, String_list &pos_args) {
   for (int i = 0; i < argc; ++i) {
     string arg = argv[i];
     bool set_value = false;
@@ -59,7 +60,7 @@ void parse (int argc, char *argv[], string_map &flags, string_list &pos_args) {
       
       // If they used '=' but didn't specify a value, assume "NULL"
       if (set_value && value == "")
-        value = "NULL";
+        value = "null";
         
       flags[name] = value;
     }
@@ -75,8 +76,8 @@ using namespace cli;
 
 int
 main(int argc,char *argv[]) {
-  string_map flags;
-  string_list pos_args;
+  String_map flags;
+  String_list pos_args;
   
   parse(argc, argv, flags, pos_args);
   
