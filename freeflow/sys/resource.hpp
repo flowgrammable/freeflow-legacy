@@ -24,7 +24,6 @@
 #include <freeflow/sys/error.hpp>
 #include <freeflow/sys/buffer.hpp>
 
-
 namespace freeflow {
 
 class Buffer;
@@ -43,6 +42,8 @@ public:
   enum Status { FAILED, COMPLETED, DEFERRED, INTERRUPTED };
   using Value_type = std::size_t;
   using Error_type = Error;
+
+  System_result() = default;
 
   // Copy semantics
   System_result(const System_result&);

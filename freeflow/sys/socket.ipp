@@ -40,7 +40,7 @@ Ipv4_sockaddr::Ipv4_sockaddr(const Ipv4_addr& a, Ip_port p) {
 }
 
 inline Ip_port 
-Ipv4_sockaddr::port() const { return sin_port; }
+Ipv4_sockaddr::port() const { return ntohs(sin_port); }
 
 inline Ipv4_addr& 
 Ipv4_sockaddr::addr() { 
@@ -55,7 +55,7 @@ Ipv4_sockaddr::addr() const {
 
 inline bool 
 operator==(const Ipv4_sockaddr& a, const Ipv4_sockaddr& b) {
-  return a.port() == b.port() and a.addr() == b.addr();
+  return a.sin_port == b.sin_port and a.addr() == b.addr();
 }
 
 inline bool 
@@ -91,9 +91,7 @@ Ipv6_sockaddr::Ipv6_sockaddr(const Ipv6_addr& a, Ip_port p) {
 }
 
 inline Ip_port 
-Ipv6_sockaddr::port() const { 
-  return sin6_port; 
-}
+Ipv6_sockaddr::port() const { return ntohs(sin6_port); }
 
 inline Ipv6_addr& 
 Ipv6_sockaddr::addr() {
@@ -107,7 +105,7 @@ Ipv6_sockaddr::addr() const {
 
 inline bool 
 operator==(const Ipv6_sockaddr& a, const Ipv6_sockaddr& b) {
-  return a.port() == b.port() and a.addr() == b.addr();
+  return a.sin6_port == b.sin6_port and a.addr() == b.addr();
 }
 
 inline bool 

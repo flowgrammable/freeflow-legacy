@@ -16,7 +16,11 @@ namespace freeflow {
 
 inline
 Selector::Selector(int n, Select_set& ss)
-  : max_(n), read_(&ss.read.fds), write_(&ss.write.fds), except_(&ss.except.fds) { }
+  : max_(n)
+  , read_(&ss.read.fds)
+  , write_(&ss.write.fds)
+  , except_(&ss.except.fds) 
+{ }
 
 namespace impl {
 // Check the result of calling pselect. If a non-interruption error
@@ -34,9 +38,23 @@ select_result(int r) {
 } // namespace impl
 
 inline int
+Selector::select(timespec* ts) {
+  // Try selecting until it completes.
+  System_result r;
+  do {
+    r = ::pselect(max_, read_, write_, except_, ts, nullptr);
+  } while (r.interrupted());
+
+  // Having completed, get the result or throw.
+ if (r.failed())
+    throw system_error();
+  else
+    return r.value();
+}
+
+inline int
 Selector::operator()() {
-  int r = ::pselect(max_, read_, write_, except_, nullptr, nullptr);
-  return impl::select_result(r);
+  return select(nullptr);
 }
 
 inline int
@@ -45,9 +63,7 @@ Selector::operator()(Microseconds us) {
   timespec ts;
   ts.tv_sec = std::chrono::duration_cast<Seconds>(us).count();
   ts.tv_nsec = 1000 * (us.count() % 1000000);
-  
-  int r = ::pselect(max_, read_, write_, except_, &ts, nullptr);
-  return impl::select_result(r);
+  return select(&ts);
 }
 
 } // namespace freeflow
