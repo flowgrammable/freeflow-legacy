@@ -13,10 +13,12 @@
 // permissions and limitations under the License.
 
 #include <iostream>
+#include <cassert>
 
 #include <freeflow/sys/library.hpp>
 #include <freeflow/sdn/application.hpp>
 
+using namespace std;
 using namespace freeflow;
 
 
@@ -27,19 +29,8 @@ int main() {
   // test loading a second of the same application
   Library l2("./apps/noflow/libnoflow.so"); 
   
-  // FIXME: assert that l1 and l2 are the same library.
-  // assert(l1 == l2);
-  
-  
-  // get the factory function from the shared library
-  Application_factory_fn fn = l1.function<Application_factory_fn>("factory");
-  
-  // create the factory object
-  Application_factory* fact = fn();
-  
-  // create the application object
-  Application* app = fact->make();
+  // assert that l1 and l2 are the same library.
+  assert(l1 == l2);
 
-  app->test();
 }
 

@@ -12,8 +12,8 @@
 // or implied. See the License for the specific language governing
 // permissions and limitations under the License.
 
-#ifndef NOCONTROL_NOFLOW_HPP
-#define NOCONTROL_NOWFLOW_HPP
+#ifndef NOCONTROL_TEMPLATE_HPP
+#define NOCONTROL_TEMPLATE_HPP
 
 #include <freeflow/sdn/application.hpp>
 #include <freeflow/sdn/controller.hpp>
@@ -22,20 +22,27 @@
 #include <nocontrol/config.hpp>
 
 namespace nocontrol {
+  
+class Factory;
+class Template;
 
-/// The noflow 
-class Noflow : public ff::Application {
+/// The Template application
+class Template : public ff::Application {
   enum Stop { ON_BIND, ON_VERSION, ON_FEATURE };
 public:
   void load(ff::Controller&);
-  void bind(ff::Switch&);
-  void version_known(ff::Switch&);
-  void features_known(ff::Switch&);
-
+  void unload(ff::Controller&);
 private:
   Stop stop_ = ON_BIND; // The stopping point.
 };
 
+
+/// Create instances of the Template application.
+class Factory : public ff::Application_factory {
+  ff::Application* make();
+  void destroy(ff::Application*);
+};
+  
 } // namespace nocontrol
 
 #endif

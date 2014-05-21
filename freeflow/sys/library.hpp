@@ -40,6 +40,7 @@ public:
   
   // Accessors
   const Path& path() const;
+  const void* handle() const;
   
 private:  
   Path  path_;   // Path to the loaded library

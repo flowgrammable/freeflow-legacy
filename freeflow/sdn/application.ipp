@@ -14,8 +14,17 @@
 
 namespace freeflow {
 
-inline void
-Application::test() { }
+
+inline
+Application_library::Application_library(const Path& p) : Library(p)
+{
+  factory_ = this->function<Application_factory_fn>("factory")();
+}
+
+inline Application_factory*
+Application_library::factory() const {
+  return factory_;
+}
 
 /// The load event is sent when the controller instantiates the application.
 inline void

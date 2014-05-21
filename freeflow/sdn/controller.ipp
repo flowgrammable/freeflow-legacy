@@ -16,23 +16,42 @@ namespace freeflow {
 
 /// Load an application of the given type, returning true when the
 /// application loads successfully. If the application does not load,
-/// it is not installed.
-template<typename T>
-  inline void
-  Controller::load() {
-    app_ = new T();
-    app_->load(*this);
-  }
+/// it is not installed. (OLD VERSION)
+// template<typename T>
+//   inline void
+//   Controller::load() {
+//     app_ = new T();
+//     app_->load(*this);
+//   }
+  
+  
+/// Load an application from the given library, returning true when the
+/// application loads successfully. If the application does not load,
+/// it is not installed. (NEW VERSION
+inline void
+Controller::load(Application_library& lib) {
+  app_ = lib.factory()->make();
+  app_->load(*this);
+}
 
-/// Unload the application of the given type.
-template<typename T>
-  inline void
-  Controller::unload() {
-    assert(dynamic_cast<T*>(app_));
-    app_->unload(*this);
-    delete app_;
-    app_ = nullptr;
-  }
+/// Unload the application of the given type. (OLD VERSION)
+// template<typename T>
+//   inline void
+//   Controller::unload() {
+//     assert(dynamic_cast<T*>(app_));
+//     app_->unload(*this);
+//     delete app_;
+//     app_ = nullptr;
+//   }
 
+/// Unload the application of the given type. (NEW VERSION)
+inline void
+Controller::unload(Application_library& lib) {
+  //assert(dynamic_cast<T*>(app_));
+  app_->unload(*this);
+  lib.factory()->destroy(app_);
+  app_ = nullptr;
+}
+  
 } // namespace freeflow
 

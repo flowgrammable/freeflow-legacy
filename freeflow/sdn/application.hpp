@@ -46,7 +46,7 @@ class Application_library : Library {
 public:
   Application_library(const Path&);
   
-  Application_factory& factory();
+  Application_factory* factory() const;
   
 private:
   Application_factory* factory_;
@@ -58,7 +58,6 @@ class Application {
 public:
   virtual ~Application() { }
 
-  virtual void test();
   // Application events
   virtual void load(Controller&);
   virtual void unload(Controller&);

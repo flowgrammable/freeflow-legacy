@@ -14,7 +14,7 @@
 
 #include <iostream>
 
-#include "noflow.hpp"
+#include "template.hpp"
 
 using namespace freeflow;
 
@@ -22,41 +22,33 @@ namespace nocontrol {
   
 Application* 
 Factory::make() {
-  return new Noflow;
+  std::cout << "New instance of application 'Template' has been created\n";
+  return new Template;
 }
 
 void 
 Factory::destroy(Application* n) {
+  std::cout << "An instance of application 'Template' has been deleted\n";
   delete n;
 }
 
 /// The application factory.
-static Factory Noflow_factory;
+static Factory Template_factory;
 
-/// \todo Dynamically configure the application so that it can terminate
-/// on different phases.
-void
-Noflow::load(Controller&) { stop_ = ON_BIND; }
 
 void
-Noflow::bind(Switch& s) {
-  if (stop_ == ON_BIND)
-    s.disconnect();
+Template::load(Controller& ctrl) { 
+  std::cout << "Application 'Template' loaded to the controller\n";
 }
 
 void
-Noflow::version_known(Switch& s) {
-  if (stop_ == ON_VERSION)
-    s.disconnect();
+Template::unload(Controller& ctrl) { 
+  std::cout << "Application 'Template' unloaded from the controller\n";
 }
 
-void
-Noflow::features_known(Switch& s) {
-  // The application never operates beyond this point.
-  s.disconnect();
-}
+
 
 } // namespace nocontrol
 
 extern "C" Application_factory*
-factory() { return &nocontrol::Noflow_factory; }
+factory() { return &nocontrol::Template_factory; }

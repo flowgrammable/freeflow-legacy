@@ -15,12 +15,14 @@
 #include <iostream>
 
 #include <freeflow/sdn/application.hpp>
+#include <apps/noflow/noflow.hpp>
 
 using namespace freeflow;
 using namespace std;
 
 
 int main() {
-  Library l1("./apps/noflow/libnoflow.so");
+  Application_library libnoflow("./apps/noflow/libnoflow.so");
+  Application* app = libnoflow.factory()->make();
 }
 

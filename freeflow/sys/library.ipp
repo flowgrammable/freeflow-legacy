@@ -22,7 +22,7 @@ namespace freeflow {
 /// meaning that no other libraries can be resolved against
 /// them.
 inline
-Library::Library(const std::string& p) 
+Library::Library(const Path& p) 
   : path_(p), handle_(dlopen(p.c_str(), RTLD_LOCAL | RTLD_NOW))
 {
   if (not handle_) 
@@ -63,5 +63,20 @@ template<typename T>
 /// Return the path from which the library was loaded.
 inline const Path& 
 Library::path() const { return path_; }
+
+/// Return the library's handle
+inline const void* 
+Library::handle() const { return handle_; }
+
+inline bool 
+operator==(const Library& lhs, const Library& rhs) {
+  return (lhs.handle() == rhs.handle());
+}
+
+inline bool 
+operator!=(const Library& lhs, const Library& rhs) {
+  return !(lhs == rhs);
+}
+
 
 } // namespace freeflow

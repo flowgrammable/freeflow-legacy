@@ -74,10 +74,10 @@ main(int argc, char* argv[]) {
   // Create and configure the controller for NBI applications.
   Controller ctrl;
   Controller_config conf;
-
+  Application_library lib("../apps/template/libtemplate.so");
   // Load default applications.
-  /*ctrl.load<Noflow>();
-
+  ctrl.load(lib);
+/*
   // Configure the conntroller adress.
   static constexpr ff::Socket::Transport TCP = ff::Socket::TCP;
   
@@ -97,10 +97,10 @@ main(int argc, char* argv[]) {
   r.add_handler(&term);
   r.add_handler(&sa);
   r.add_handler(&ma);
-  r.run();
+  r.run();*/
 
   // FIXME: This should be part of the controller's destructor.
-  ctrl.unload<Noflow>();*/
+  ctrl.unload(lib);
 
   return 0;
 }

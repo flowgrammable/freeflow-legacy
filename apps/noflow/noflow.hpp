@@ -13,7 +13,7 @@
 // permissions and limitations under the License.
 
 #ifndef NOCONTROL_NOFLOW_HPP
-#define NOCONTROL_NOWFLOW_HPP
+#define NOCONTROL_NOFLOW_HPP
 
 #include <freeflow/sdn/application.hpp>
 #include <freeflow/sdn/controller.hpp>
@@ -34,7 +34,6 @@ public:
   void bind(ff::Switch&);
   void version_known(ff::Switch&);
   void features_known(ff::Switch&);
-  void test();
 
 private:
   Stop stop_ = ON_BIND; // The stopping point.
