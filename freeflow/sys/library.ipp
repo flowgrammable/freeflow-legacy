@@ -31,27 +31,37 @@ Library::Library(const std::string& p)
 
 /// Destroy the object, unloading the underlying library.
 inline
-Library::~Library() { 
-  dlclose(handle_);
+Library::~Library() { dlclose(handle_); }
+
+/// Returns an opaque pointer to the symbol in the loaded library. If
+/// the symbol cannot be resolved, an exception is thrown.
+inline void*
+Library::symbol(const std::string& s) const {
+  // NOTE: This does not use dlsym in the way recommended by Linux
+  // man pages. However, this is not intended for general usage, but
+  // very constrained usage, so it should be okay in this context.
+  void* p= dlsym(handle_, s.c_str());
+  if (not p)
+    throw std::runtime_error(dlerror());
+  return p;
 }
 
-/// Retrieve the symbol from the loaded library
-inline
-void*
-Library::symbol(std::string symbol) const {
-  char* error;
-  dlerror(); // clear existing error
-  void* sym = dlsym(handle_, symbol.c_str());
-  if ((error = dlerror()) != NULL) {
-    throw std::runtime_error(error);
-  }
-  return sym;
-}
+/// Returns the function from the loaded library. 
+///
+/// \todo This function may rely on undefined behavior to reinterpret
+/// a void pointer as a function pointer. Find a way to guarantee that
+/// behavior is defined.
+template<typename T>
+  inline T
+  Library::function(const std::string& s) const { return (T)symbol(s); }
+ 
+/// Returns the object symbol from the loaded library.
+template<typename T>
+  inline T&
+  Library::object(const std::string& s) const { return (T&)symbol(s); }
 
-inline
-const Path& 
-Library::path() const {
-  return path_;
-}
+/// Return the path from which the library was loaded.
+inline const Path& 
+Library::path() const { return path_; }
 
 } // namespace freeflow

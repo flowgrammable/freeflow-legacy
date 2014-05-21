@@ -16,7 +16,6 @@
 
 #include <freeflow/sys/library.hpp>
 #include <freeflow/sdn/application.hpp>
-#include <apps/noflow/noflow.hpp>
 
 using namespace freeflow;
 
@@ -25,18 +24,22 @@ int main() {
   
   Library l1("./apps/noflow/libnoflow.so");
   
-// test loading a second of the same application
-  Library L2("./apps/noflow/libnoflow.so"); 
+  // test loading a second of the same application
+  Library l2("./apps/noflow/libnoflow.so"); 
   
-// get the factory function from the shared library
-  create_t* l1_factory_maker = (create_t*)l1.symbol("factory");
+  // FIXME: assert that l1 and l2 are the same library.
+  // assert(l1 == l2);
   
-// create the factory object
-  Application_factory* l1_factory = l1_factory_maker();
   
-// create the application object
-  Application* l1_app = l1_factory->make();
+  // get the factory function from the shared library
+  Application_factory_fn fn = l1.function<Application_factory_fn>("factory");
+  
+  // create the factory object
+  Application_factory* fact = fn();
+  
+  // create the application object
+  Application* app = fact->make();
 
-  l1_app->test();
+  app->test();
 }
 

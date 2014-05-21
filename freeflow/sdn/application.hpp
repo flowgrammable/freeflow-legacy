@@ -83,7 +83,7 @@ public:
   virtual void role_status(Switch&, const Role&);
 };
 
-typedef Application_factory* create_t();
+using Application_factory_fn = Application_factory*(*)();
 
 } // namespace freeflow
 

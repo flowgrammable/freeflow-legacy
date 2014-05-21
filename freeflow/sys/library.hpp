@@ -30,7 +30,13 @@ public:
   ~Library();
   
   // Symbols
-  void* symbol(std::string) const;
+  void* symbol(const std::string&) const;
+  
+  template<typename T>
+    T function(const std::string&) const;
+    
+  template<typename T>
+    T& object(const std::string&) const;
   
   // Accessors
   const Path& path() const;
