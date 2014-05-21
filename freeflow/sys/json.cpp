@@ -91,7 +91,7 @@ parse_num(const char*& first, const char* last) {
 
   // Parse the integer part.
   parse_digits(first, last);
-  return convert<Int>(init, first);
+  return Value(convert<Int>(init, first));
 }
 
 // Parse a string. Note that the resulting value will contain

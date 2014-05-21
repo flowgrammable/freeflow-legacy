@@ -32,7 +32,10 @@ set(src fd_utils.cpp
         syslog.cpp
         pipe.cpp
         json.cpp
-        library.cpp)
+        library.cpp
+        print.cpp
+        )
+
 
 if(BSD)
   LIST(APPEND src kqueue.cpp)
@@ -61,7 +64,8 @@ set(hdr fd_utils.hpp
         syslog.hpp
         pipe.hpp
         json.hpp      json.ipp
-        library.hpp   library.ipp)
+        library.hpp   library.ipp
+        print.hpp     print.ipp)
 
 if(BSD)
   LIST(APPEND hdr ${kqueue.hpp})

@@ -17,6 +17,16 @@
 namespace freeflow {
 namespace json {
 
+/// Allow implicit convesion from std::string.
+inline
+String::String(std::string&& s)
+  : std::string(std::move(s)) { }
+
+/// Allow implicit conversion from std::string.
+inline
+String::String(const std::string& s)
+  : std::string(s) { }
+
 /// Returns true if the string is quoted.
 inline bool
 String::is_quoted() const {
@@ -69,6 +79,10 @@ Value::Value(Bool b)
   : type_(BOOL), data_(b) { }
 
 inline
+Value::Value(int n)
+  : type_(INT), data_(Int(n)) { }
+
+inline
 Value::Value(Int z)
   : type_(INT), data_(z) { }
 
@@ -79,6 +93,18 @@ Value::Value(Real r)
 inline
 Value::Value(String&& s)
   : type_(STRING), data_(std::move(s)) { }
+
+inline
+Value::Value(const char* s)
+  : type_(STRING), data_(String(s)) { }
+
+inline
+Value::Value(std::string&& s)
+  : type_(STRING), data_(std::move(s)) { }
+
+inline
+Value::Value(const std::string& s)
+  : type_(STRING), data_(s) { }
 
 inline
 Value::Value(const String& s)
