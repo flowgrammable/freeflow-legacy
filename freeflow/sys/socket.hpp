@@ -186,6 +186,9 @@ bool operator!=(const Address& l, const Address& r);
 // Printing
 std::string to_string(const Address& a);
 
+// Streaming
+std::ostream& operator<<(std::ostream&, const Address&);
+
 
 // -------------------------------------------------------------------------- //
 // Socket

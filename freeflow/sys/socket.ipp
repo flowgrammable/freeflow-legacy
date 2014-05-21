@@ -18,9 +18,7 @@ namespace freeflow {
 // Ipv4
 
 inline
-Ipv4_addr::Ipv4_addr(in_addr_t n) {
-  s_addr = n;
-}
+Ipv4_addr::Ipv4_addr(in_addr_t n) { s_addr = n; }
 
 inline bool 
 operator==(const Ipv4_addr& a, const Ipv4_addr& b) {
