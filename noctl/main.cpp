@@ -32,41 +32,49 @@ namespace cli {
 using String_map = map<string, string>;
 using String_list = vector<string>;
 
+
+std::pair<std::string, std::string>
+parse_flag(const std::string& arg) {
+  // If the argument is only '-', that's an error
+  if (arg.size() == 1)
+    throw std::runtime_error("parse error");
+
+  // Make sure that p points to the first non-flag character.
+  std::size_t p = 1;
+  if (arg[p] == '-')
+    ++p;
+
+  // If the flag is "--", that's an error.
+  if (p == arg.size())
+    throw std::runtime_error("parse error");
+
+  // Parse the name from the flag. If the flag is of the from
+  // f=x, this parses out f. If the '=' is not present, this
+  // returns the name f.
+  std::string name;
+  std::size_t n = arg.find_first_of('=', p);
+  if (n != arg.npos)
+    name = arg.substr(p, n - p);
+  else
+    return {arg.substr(p), "true"};
+
+  // Parse the value. In a flag of the form f=x, this is everything
+  // past the '='. If the value is empty, return as if it were "null".
+  string value = arg.substr(n + 1);
+  if (value.empty())
+    return {name, "null"};
+  else
+    return {name, value};
+}
+
 // Parses the command line inputs into flags and positional arguments
 void
-parse(int argc, char *argv[], String_map &flags, String_list &pos_args) {
+parse(int argc, char *argv[], String_map& opts, String_list& args) {
   for (int i = 0; i < argc; ++i) {
-    string arg = argv[i];
-    bool set_value = false;
-    
-    if(arg[0] == '-') {
-      string name;
-      string value;
-      unsigned int pos = 0;
-      
-      // Get the name of the flag
-      while (pos < arg.length() && arg[pos] != '=')
-        name += arg[pos++];
-      
-      // If '=' is not used, assume a default value of true
-      if(pos < arg.length() && arg[pos] == '=')
-        set_value = true;
-      else
-        value = "true";
-        
-      // Get the value of the flag
-      while (++pos < arg.length())
-        value += arg[pos];
-      
-      // If they used '=' but didn't specify a value, assume "NULL"
-      if (set_value && value == "")
-        value = "null";
-        
-      flags[name] = value;
-    }
-    else {
-      pos_args.push_back(arg);
-    }
+    if (argv[i][0] == '-')
+      opts.insert(parse_flag(argv[i]));
+    else
+      args.push_back(argv[i]);
   }
 }
 
@@ -75,21 +83,19 @@ parse(int argc, char *argv[], String_map &flags, String_list &pos_args) {
 using namespace cli;
 
 int
-main(int argc,char *argv[]) {
-  String_map flags;
-  String_list pos_args;
+main(int argc, char *argv[]) {
+  String_map opts;
+  String_list args;
   
-  parse(argc, argv, flags, pos_args);
+  parse(argc, argv, opts, args);
   
-  for (auto &f : flags) {
-    cout << f.first << " is set to " << f.second << endl;
-  }
+  std::cout << "== options ==\n";
+  for (auto &f : opts)
+    std::cout << f.first << " : " << f.second << '\n';
   
-  cout << endl << "Positional args" << endl << endl;
-  
-  for (auto &s : pos_args) {
-    cout << s << endl;
-  }
+  std::cout << endl << "== positional args ==\n";
+  for (auto &s : args)
+    std::cout << s << endl;
   
   return 0;
 }
