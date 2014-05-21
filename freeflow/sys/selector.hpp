@@ -33,7 +33,7 @@ namespace freeflow {
 struct Select_set {
   Resource_set read;
   Resource_set write;
-  Resource_set error;
+  Resource_set except;
 };
 
 /// The selector class provides a simple wrapper over the POSIX pselect
@@ -55,7 +55,7 @@ private:
   int     max_;
   fd_set* read_;
   fd_set* write_;
-  fd_set* error_;
+  fd_set* except_;
 };
 
 } // namespace freeflow

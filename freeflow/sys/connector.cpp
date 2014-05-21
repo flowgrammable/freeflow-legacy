@@ -12,16 +12,4 @@
 // or implied. See the License for the specific language governing
 // permissions and limitations under the License.
 
-namespace nocontrol {
-
-inline
-Switch_factory::Switch_factory(ff::Controller& c)
-  : ctrl(c) { }
-
-/// Create a new connection for the socket.
-inline Connection* 
-Switch_factory::operator()(ff::Reactor& r, ff::Socket&& s) {
-  return new Connection(r, ctrl, std::move(s));
-}
-
-} // namesapce nocontrol
+#include "connector.hpp"

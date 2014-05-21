@@ -23,38 +23,20 @@ namespace freeflow {
 /// The handler's open() method is called when the service is added. If
 /// open() returns false, the handler is not added, and the function
 /// returns false.
-///
-/// \todo Currently, a handler is registered for both read and write
-/// events. This is dumb (and a performance bug). A handler is usually 
-/// interestd either in read events or in write events, but rarely both. 
-/// Use a mask to select the events of interest.
-bool
-Handler_registry::add(Reactor& r, Handler* h) {
+void
+Handler_registry::add(Event_handler* h) {
   assert(0 <= h->fd() and h->fd() < FD_SETSIZE);
-  assert((*this)[h->fd()] == nullptr);
+  assert(reg_[h->fd()] == nullptr);
   
-  // Initially insert the handler.
-  (*this)[h->fd()] = h;
-  ++active_;
-  int m = std::max(h->fd(), max_);
+  // Insert the handler and recompute the max fd.
+  reg_[h->fd()] = h;
+  max_ = std::max(h->fd(), max_);
+  
+  // Update internal tables based on the handlers initial subscription.
+  on_subscribe(h);
 
-  // Insert the reader into the appropriate set.
-  // TODO: An event mask should specify the event sets
-  // that we're actually interested in. 
-  wait_.read.insert(h->fd());
-  wait_.write.insert(h->fd());
-
-  // Try to open the handler. Changes are committed if this
-  // succeeds and rolled back if it fails.
-  if (not h->on_open(r)) {
-    (*this)[h->fd()] = nullptr;
-    --active_;
-    wait_.read.remove(h->fd());
-    return false;
-  } else {
-    max_ = m;
-    return true;
-  }
+  // Notify the handler that it is now active.
+  h->on_open();
 }
 
 /// Remove the service hander. The handler's close() method is called
@@ -62,19 +44,65 @@ Handler_registry::add(Reactor& r, Handler* h) {
 ///
 /// This function always returns true.
 ///
-/// \todo: If active falls below some some low water mark, re-scan the
+/// \todo If active falls below some some low water mark, re-scan the
 /// list for a new max value. It's not strictly necessary, since *nixes
 /// recycle fds, but if active is very low and max is very high, then
 /// we're going to have a very sparse list.
-bool 
-Handler_registry::remove(Reactor& r, Handler* h) {
-  assert(0 <= h->fd() and h->fd() < FD_SETSIZE);
-  (*this)[h->fd()] = nullptr; 
-  --active_;
-  wait_.read.remove(h->fd());
-  wait_.write.remove(h->fd());
-  h->on_close(r);
-  return true;
+void
+Handler_registry::remove(Event_handler* h) {
+  assert(reg_[h->fd()] == h);
+
+  // Notify the handler that it will soon be inactive.
+  h->on_close();
+  
+  // Update internal tables based on the handler's current subscriptions,
+  // but do not modfiy the handler.
+  on_unsubscribe(h);
+  
+  // Remove the handler.
+  reg_[h->fd()] = nullptr;
+}
+
+/// Update the handler's event mask by registering it to receive
+/// the indicated events.
+///
+/// \todo Add support for signals.
+void
+Handler_registry::subscribe(Event_handler* h, Event_mask m) {
+  assert(reg_[h->fd()] == h);
+  h->subscribe(m);  
+  on_subscribe(h);
+}
+
+/// Update the handler's event mask by unregistering it from various
+/// events.
+void
+Handler_registry::unsubscribe(Event_handler* h, Event_mask m) {
+  assert(reg_[h->fd()] == h);
+  h->unsubscribe(m);
+  on_unsubscribe(h);
+}
+
+/// Update internal tables based on subscriptions.
+void
+Handler_registry::on_subscribe(Event_handler* h) {
+  if (h->events() & READ_EVENTS)
+    wait_.read.insert(h->fd());
+  if (h->events() & WRITE_EVENTS)
+    wait_.write.insert(h->fd());
+  if (h->events() & EXCEPT_EVENTS)
+    wait_.except.insert(h->fd());
+}
+
+/// Update internal tables based on subscriptions.
+void
+Handler_registry::on_unsubscribe(Event_handler* h) {
+  if (h->events() & READ_EVENTS)
+    wait_.read.remove(h->fd());
+  if (h->events() & WRITE_EVENTS)
+    wait_.write.remove(h->fd());
+  if (h->events() & EXCEPT_EVENTS)
+    wait_.except.remove(h->fd());
 }
 
 } // namespace freeflow

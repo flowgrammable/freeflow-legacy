@@ -23,64 +23,127 @@
 
 namespace freeflow {
 
+class File;
+class Socket;
 class Reactor;
 
-/// The Handler class defines the interface required by all specific 
-/// handler instances. An abstract handler is associated with a 
-/// resource, which provides access to an underlying socket descriptor.
-class Handler {
+/// The Event_mask type describes the kinds of events that a handler
+/// can subscribe to.
+using Event_mask = unsigned;
+static constexpr Event_mask NO_EVENTS     = 0u;
+static constexpr Event_mask READ_EVENTS   = 1u << 0;
+static constexpr Event_mask WRITE_EVENTS  = 1u << 1;
+static constexpr Event_mask EXCEPT_EVENTS = 1u << 2;
+static constexpr Event_mask TIME_EVENTS   = 1u << 3;
+static constexpr Event_mask SIGNAL_EVENTS = 1u << 4;
+static constexpr Event_mask ALL_EVENTS    = -1u;
+
+/// Handler flags are managed by the reactor for the purpose of internal
+/// book keeping.
+using Handler_flags = unsigned;
+static constexpr Handler_flags HANDLER_IS_OWNED = 1u << 0;
+
+
+/// The Event_handler class defines the interface required by all specific 
+/// handler instances. Each event handler is associated with a resource
+/// which may be the source of events.
+///
+/// An event handler also keeps tracks of the events to which it is
+/// subscribed.
+class Event_handler {
 public:
-  explicit Handler(Resource&);
-  virtual ~Handler() { }
+  Event_handler(Reactor&, int, Event_mask);
+  virtual ~Event_handler();
 
   // Events
-  virtual bool on_open(Reactor&);
-  virtual bool on_close(Reactor&);
-  virtual bool on_read(Reactor&);
-  virtual bool on_write(Reactor&);
-  virtual bool on_error(Reactor&);
-  virtual bool on_time(Reactor&, int);
-  virtual bool on_signal(Reactor&);
+  virtual bool on_open();
+  virtual bool on_close();
+  virtual bool on_read();
+  virtual bool on_write();
+  virtual bool on_except();
+  virtual bool on_time(int);
+  virtual bool on_signal(int);
 
   // Observers
   int fd() const;
+  Reactor& reactor();
+
+  // Event management
+  Event_mask events() const;
+  bool is_subscribed(Event_mask) const;
+  void subscribe(Event_mask);
+  void unsubscribe(Event_mask);
+
+  // Handler management
+  Handler_flags flags() const;
+  bool has_flags(Handler_flags) const;
+  void set_flags(Handler_flags);
+  void clear_flags(Handler_flags);
 
 private:
-  Resource& r_;
+  Reactor&      react_;  // The attached reactor
+  Handler_flags flags_;  // Internal bookkeeping
+  Event_mask    events_; // Subscribed events
+protected:
+  int           fd_;     // Underlying file descriptor
 };
+
+
+// A helper class that ensures proper initialization order for
+// basic event handlers.
+template<typename T>
+  struct Resource_wrapper {
+    template<typename... Args>
+      explicit Resource_wrapper(Args&&...);
+
+    T rc_;
+  };
 
 /// The resource handler class is an abstract handler associated with
 /// a Resource. The type of that Resource is given as the template
 /// argument, T. It must derive from the Resource class.
 template<typename T>
-  class Resource_handler : public Handler {
+  class Basic_event_handler 
+    : protected Resource_wrapper<T>
+    , public Event_handler 
+  {
   public:
-    Resource_handler() = delete;
-
-    // Non-copyable
-    Resource_handler(const Resource_handler&) = delete;
-    Resource_handler& operator=(const Resource_handler&) = delete;
+    // Non-default constructible.
+    Basic_event_handler() = delete;
 
     // Non-movable
-    Resource_handler(Resource_handler&&) = delete;
-    Resource_handler& operator=(Resource_handler&&) = delete;
+    Basic_event_handler(Basic_event_handler&&) = delete;
+    Basic_event_handler& operator=(Basic_event_handler&&) = delete;
+
+    // Non-copyable
+    Basic_event_handler(const Basic_event_handler&) = delete;
+    Basic_event_handler& operator=(const Basic_event_handler&) = delete;
 
     // Resource initialization
-    Resource_handler(T&&);
-
     template<typename... Args>
-      Resource_handler(Args&&... args);
+      Basic_event_handler(Reactor&, Event_mask, Args&&... args);
 
-    // Observers
+    // Assignment
+    void assign(T&&);
+
+    // Accessors
     T&       rc();
     const T& rc() const;
-
-  private:
-    T rc_;
   };
 
+/// A resource handler is a handler for an attached resource. This
+/// is useful for attaching a resource to an existing file descriptor.
+using Resource_handler = Basic_event_handler<Resource>;
+
+/// A Socket_handler is an event handler for a socket.
+using Socket_handler = Basic_event_handler<Socket>;
+
+/// A File_handler is an event handler for a file.
+using File_handler = Basic_event_handler<File>;
+
+
 /// The handler registry maintains the set of handlers registered
-/// for the reactor loop. The set maintained by the registery is sparse;
+/// for the reactor loop. The set maintained by the registry is sparse;
 /// iteration over the set may include traversal over null pointers.
 ///
 /// \todo The size is currently limited to FD_SETSIZE, which limits
@@ -89,24 +152,41 @@ template<typename T>
 /// \todo Consider a more efficient structure for representing the
 /// set. It would be ideal if iteration required as many increments
 /// as elements in the set. Note that std::set may be too slow.
-///
-/// \todo Find a way to break the coupling with the reactor.
-struct Handler_registry : std::vector<Handler*> {
+class Handler_registry {
+  using Registry = std::vector<Event_handler*>;
+public:
+  using iterator       = Registry::iterator;
+  using const_iterator = Registry::const_iterator;
+
   Handler_registry();
 
   // Registration
-  bool add(Reactor& r, Handler* h);
-  bool remove(Reactor& r, Handler* h);
+  void add(Event_handler*);
+  void remove(Event_handler*);
+
+  // Subscription
+  void subscribe(Event_handler*, Event_mask);
+  void unsubscribe(Event_handler*, Event_mask);
 
   int max() const;
 
   // Wait set
   const Select_set& wait() const;
 
+  // Iterators
+  iterator begin();
+  iterator end();
+  const_iterator begin() const;
+  const_iterator end() const;
+
 private:
-  int        active_;
-  int        max_;
-  Select_set wait_;
+  void on_subscribe(Event_handler*);
+  void on_unsubscribe(Event_handler*);
+
+private:
+  Registry  reg_;   // The registry
+  int        max_;  // Maximum fd in the registry
+  Select_set wait_; // Cached fdsets for the selector
 };
 
 } // namespace nocontrol

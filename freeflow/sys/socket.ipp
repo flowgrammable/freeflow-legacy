@@ -332,9 +332,12 @@ inline int
 Socket_info::protocol() const { return protocol(transport); }
 
 inline
+Socket::Socket()
+  : Socket_info(), Resource() { }
+
+inline
 Socket::Socket(Socket&& s)
-  : Socket_info(s), Resource(std::move(s))
-{ }
+  : Socket_info(s), Resource(std::move(s)) { }
 
 inline Socket&
 Socket::operator=(Socket&& s) {

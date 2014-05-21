@@ -21,8 +21,8 @@
 #include <freeflow/sys/time.hpp>
 #include <freeflow/sys/reactor.hpp>
 
-#include <freeflow/nbi/switch.hpp>
-#include <freeflow/nbi/request.hpp>
+#include <freeflow/sdn/switch.hpp>
+#include <freeflow/sdn/request.hpp>
 
 #include <freeflow/proto/ofp/ofp.hpp>
 
@@ -107,12 +107,10 @@ struct Protocol_handler {
 ///
 /// The primary mechanism for communicating with the communications
 /// controller is a pair of message queues for reading and writing.
-/// Received messages are written 
 ///
-/// TODO: These all take a time argument.
+/// \todo Figure out how the controller and the reactor actually
+/// fit together. Does the controller own the reactor?
 class Protocol {
-  using Version = Protocol_handler;
-
   enum State {
     CLOSED,
     HELLO,       // Version negotiation
@@ -121,7 +119,7 @@ class Protocol {
   };
 
 public:
-  Protocol(Controller*, Handler*);
+  Protocol(Controller*, Event_handler*);
 
   // Network events
   bool on_open(Reactor&);
@@ -150,7 +148,7 @@ public:
 
 private:
   Uint32 xid();
-  Version* negotiate(Uint8);
+  Protocol_handler* negotiate(Uint8);
   bool ping(Reactor&);
 
   // Open state and transitions
@@ -182,10 +180,10 @@ private:
 
 
   // Internal processing facilities
-  Handler*    handler_;
-  Version*    proto_;
-  Config      config_;
-  State       state_;
+  Event_handler*    handler_;
+  Protocol_handler* proto_;
+  Config            config_;
+  State             state_;
 
   Uint32   xid_;       // The curent transaction id
   int      ctime_ = 0; // The connection timeout timer

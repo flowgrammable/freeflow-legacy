@@ -16,81 +16,120 @@
 
 namespace freeflow {
 namespace {
-using Rset = Resource_set;
-using Sset = Select_set;
-using Hreg = Handler_registry;
 
-// Notify the handler if it has a read event. If the handler indicates
-// closure, add it to the close set. If the handler indicates
-void
-notify_read(Reactor& r, Handler* h, const Rset& rs, Rset& close) {
-  if (rs.test(h->fd()))
-    if (not h->on_read(r))
-      close.insert(h->fd());
+// Returns true iff the event handler is subscibed to events m.
+inline bool
+should_notify(Event_handler* h, Event_mask m) {
+  return h->is_subscribed(m);
 }
 
-// Notify the handler if it has a write event. If the handler indicates
-// closure, add it to the close set. If the handler indicates
-void
-notify_write(Reactor& r, Handler* h, const Rset& rs, Rset& close) {
-  if (rs.test(h->fd()))
-    if (not h->on_write(r))
-      close.insert(h->fd());
+// Returns true iff  the event handler h is subscribed to events m
+// and that event is indicated in the resource set r.
+inline bool
+should_notify(Event_handler* h, Event_mask m, const Resource_set& r) {
+  return h->is_subscribed(m) and r.test(h->fd());
 }
 
 
-// Notify handlers of events.
-// TODO: Test error sets also.
+// Notify the handler that data is available for reading. If the handler
+// returns false, register the handler for closing.
+inline void
+notify_read(Event_handler* h, const Resource_set& rs, Resource_set& close) {
+  if (should_notify(h, READ_EVENTS, rs))
+    if (not h->on_read())
+      close.insert(h->fd());
+}
+
+// Notify the handler it is possible to send data. If the handler
+// returns false, register the handler for closing.
+inline void
+notify_write(Event_handler* h, const Resource_set& rs, Resource_set& close) {
+  if (should_notify(h, WRITE_EVENTS, rs))
+    if (not h->on_write())
+      close.insert(h->fd());
+}
+
+// Notify the hander that urgent data is available for reading. If the
+// handler returns false, register the handler for closing.
+inline void
+notify_except(Event_handler* h, const Resource_set& rs, Resource_set& close) {
+  if (should_notify(h, EXCEPT_EVENTS, rs))
+    if (not h->on_except())
+      close.insert(h->fd());
+}
+
 void
-notify_handlers(Reactor& r, Hreg& hr, const Sset& ss, Rset& close) {
-  for (Handler* h : hr)
+notify_timer(const Timer& t, Resource_set& close) {
+  Event_handler* h = t.handler;
+  if (should_notify(h, TIME_EVENTS))
+    if (not h->on_time(t.id))
+      close.insert(h->fd());
+}
+
+} // namespace
+
+// Notify each handler that events are (or may be) available.
+void
+Reactor::notify_select(const Select_set& sel, Resource_set& close) {
+  for (Event_handler* h : handlers_)
     if (h) {
-      notify_read(r, h, ss.read, close);
-      notify_write(r, h, ss.write, close);
+      notify_read(h, sel.read, close);
+      notify_write(h, sel.write, close);
+      notify_except(h, sel.except, close);
     }
 }
 
-/// If the handler is is in the close set, remove it from the
-/// registry.
+// Dequeue expired timers and notify event handlers.
 void
-close_handlers(Reactor& r, Hreg& hr, const Rset& close) {
-   for (Handler* h : hr) {
+Reactor::notify_timers(Resource_set& close) {
+  // Dqueue timers relative to the current time.
+  Time_point t = now();
+  while (timers_.expired(t))
+    expired_.push_back(timers_.expire());
+
+  // Notify the timer's corresponding event handler.
+  for (Timer& t : expired_)
+    notify_timer(t, close);
+
+  // Reset the expiry list.
+  expired_.clear();
+}
+
+/// If the handler is is in the close set, remove it from the reactor.
+void
+Reactor::close_handlers(const Resource_set& close) {
+   for (Event_handler* h : handlers_) {
     if (h and close.test(h->fd()))
-      r.remove_handler(h);
-  }
-}
-} // namespace
-
-
-Reactor::Reactor() { }
-
-Reactor::~Reactor() {
-  for (Handler* h : handlers_) {
-    if (h) remove_handler(h);
+      remove_handler(h);
   }
 }
 
+/// Run the reactor's event loop until stoppage is indicated.
 void
 Reactor::run() {
+  // FIXME: This granularity of time slice is probably not right.
   running_ = true;
-  while (running_) {
-    // Select on the registered handlers. Only wait 10 ms for
-    // an event to trigger.
-    Select_set dispatch = handlers_.wait();
-    Selector s(handlers_.max() + 1, dispatch);    
-    s(10_ms);
+  while (running_)
+    run(10_ms);
+  remove_handlers();
+}
 
-    // Close any handlers that need to removed from the
-    // registry and closed.
-    Resource_set close;
-    notify_handlers(*this, handlers_, dispatch, close);
+void
+Reactor::run(Microseconds us) {
+  // Select on the registered handlers. Only wait 10 ms for
+  // an event to trigger.
+  Select_set dispatch = handlers_.wait();
+  Selector s(handlers_.max() + 1, dispatch);    
+  s(us);
 
-    // Trigger any timers that may have expired.
-    timers_.dispatch(*this);
+  // Close any handlers that need to removed from the
+  // registry and closed.
+  Resource_set close;
+  notify_select(dispatch, close);
+  notify_timers(close);
 
-    // Before exiting, close any outstanding handlers
-    close_handlers(*this, handlers_, close);
-  }
+  // Close any outstanding handlers
+  close_handlers(close);
 }
 
 } // namespace freeflow

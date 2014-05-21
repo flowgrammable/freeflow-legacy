@@ -26,10 +26,14 @@ set(src fd_utils.cpp
         timer.cpp
         selector.cpp
         reactor.cpp
+        acceptor.cpp
+        connector.cpp
         buffer.cpp
         syslog.cpp
         pipe.cpp
-        json.cpp)
+        json.cpp
+        print.cpp
+        )
 
 if(BSD)
   LIST(APPEND src kqueue.cpp)
@@ -52,10 +56,13 @@ set(hdr fd_utils.hpp
         timer.hpp     timer.ipp
         selector.hpp  selector.ipp
         reactor.hpp   reactor.ipp
+        acceptor.hpp  acceptor.ipp
+        connector.hpp connector.ipp
         buffer.hpp    buffer.ipp
         syslog.hpp
         pipe.hpp
-        json.hpp      json.ipp)
+        json.hpp      json.ipp
+        print.hpp     print.ipp)
 
 if(BSD)
   LIST(APPEND hdr ${kqueue.hpp})
@@ -82,5 +89,7 @@ add_subdirectory(examples)
 add_subdirectory(data.test)
 add_subdirectory(socket.test)
 add_subdirectory(reactor.test)
+add_subdirectory(acceptor.test)
+add_subdirectory(connector.test)
 add_subdirectory(json.test)
 

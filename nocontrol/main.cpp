@@ -20,7 +20,7 @@
 #include <freeflow/sys/socket.hpp>
 #include <freeflow/sys/file.hpp>
 #include <freeflow/sys/reactor.hpp>
-#include <freeflow/nbi/controller.hpp>
+#include <freeflow/sdn/controller.hpp>
 
 #include "switch_acceptor.hpp"
 #include "control_acceptor.hpp"
@@ -37,29 +37,25 @@ using namespace nocontrol;
 //
 // This is primarily intended for debugging purposes. Really, we should
 // be trapping signals and shutting down that way instead.
-struct Terminator : Resource_handler<Resource> {
-  Terminator(int fd)
-    : Resource_handler<Resource>(fd) { }
-
-  Terminator(Resource&& f)
-    : Resource_handler<Resource>(std::move(f)) { }
+struct Terminator : Resource_handler {
+  Terminator(Reactor& r, int fd)
+    : Resource_handler(r, READ_EVENTS, fd) { }
 
   // If there is no more data to read, indicate that we want
   // to terminate the reactor loop.
-  bool on_read(Reactor& r) {
+  bool on_read() {
     char c[1024];
     if (read(rc(), &c, 1024) <= 0) {
       std::cout << "shutting down\n";
-      r.stop();
+      reactor().stop();
       return false;
     }
     return true;
   }
 };
 
-
 // Stores configuration information for the controller.
-// FIXME: This needs to move into nbi.
+// FIXME: Move this into the SDN library.
 struct Controller_config {
   Address ctrl_addr {Ipv4_addr::any, 9000};
   Address mgmt_addr {Ipv4_addr::any, 9001};
@@ -67,6 +63,8 @@ struct Controller_config {
 
 int 
 main(int argc, char* argv[]) {
+
+  Reactor r;
 
   // FIXME: Write a command-line argument parser and make sure
   // that this won't crash (it currently will).
@@ -79,20 +77,24 @@ main(int argc, char* argv[]) {
   ctrl.load<Noflow>();
 
   // Configure the conntroller adress.
-  Switch_acceptor ctrl_acc(ctrl, conf.ctrl_addr);
-  Control_acceptor mgmt_acc(ctrl, conf.mgmt_addr);
+  static constexpr ff::Socket::Transport TCP = ff::Socket::TCP;
+  
+  // Accept switch connections.
+  // FIXME: There will be many "acceptors" in the controller.
+  Switch_acceptor sa(r, ctrl);
+  sa.listen(conf.ctrl_addr, TCP); 
+  
+  // Accept management connections.
+  Control_acceptor ma(r, ctrl);
+  ma.listen(conf.mgmt_addr, TCP);
 
-  // Listen for ^D on stdin so we can shutdown easily.
-  Terminator term(0);
-
-  // Run the reactor loop.
-  //
-  // FIXME: Consider moving all of the reactor facilities into
-  // the NBI library.
-  Reactor r;
+  // Acdept shell input.
+  Terminator term(r, 0);
+  
+  // Add handlers and run the reactor loop.
   r.add_handler(&term);
-  r.add_handler(&ctrl_acc);
-  r.add_handler(&mgmt_acc);
+  r.add_handler(&sa);
+  r.add_handler(&ma);
   r.run();
 
   // FIXME: This should be part of the controller's destructor.

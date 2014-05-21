@@ -12,16 +12,23 @@
 // or implied. See the License for the specific language governing
 // permissions and limitations under the License.
 
-namespace nocontrol {
+#include <iostream>
 
-inline
-Switch_factory::Switch_factory(ff::Controller& c)
-  : ctrl(c) { }
+#include <freeflow/sys/reactor.hpp>
 
-/// Create a new connection for the socket.
-inline Connection* 
-Switch_factory::operator()(ff::Reactor& r, ff::Socket&& s) {
-  return new Connection(r, ctrl, std::move(s));
+using namespace freeflow;
+
+// The purpose of this test is simply to ensure that a custom event 
+// loop can be constructed using the reactor. This test just runs
+// the reactor 10 times for 250ms each time. 
+//
+// TODO: Actually handle some events!
+
+int main() {
+  Reactor r;
+
+  for (int i = 0; i < 10; ++i) {
+    std::cout << "* running\n";
+    r.run(250_ms);
+  }
 }
-
-} // namesapce nocontrol

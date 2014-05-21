@@ -15,9 +15,9 @@
 #ifndef NOCONTROL_NOFLOW_HPP
 #define NOCONTROL_NOWFLOW_HPP
 
-#include <freeflow/nbi/application.hpp>
-#include <freeflow/nbi/controller.hpp>
-#include <freeflow/nbi/switch.hpp>
+#include <freeflow/sdn/application.hpp>
+#include <freeflow/sdn/controller.hpp>
+#include <freeflow/sdn/switch.hpp>
 
 #include <nocontrol/config.hpp>
 

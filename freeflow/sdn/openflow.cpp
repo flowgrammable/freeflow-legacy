@@ -1,4 +1,4 @@
-// Copyright (c) 2013-2014 Flowgrammable.org
+// Copyright (c) 2013-2014 Flowgrammable, LLC.
 // 
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,16 +12,5 @@
 // or implied. See the License for the specific language governing
 // permissions and limitations under the License.
 
-namespace nocontrol {
+#include "openflow.hpp"
 
-inline
-Switch_factory::Switch_factory(ff::Controller& c)
-  : ctrl(c) { }
-
-/// Create a new connection for the socket.
-inline Connection* 
-Switch_factory::operator()(ff::Reactor& r, ff::Socket&& s) {
-  return new Connection(r, ctrl, std::move(s));
-}
-
-} // namesapce nocontrol

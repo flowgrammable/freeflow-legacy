@@ -84,7 +84,7 @@ template<typename H, typename P>
 // Protocol
 
 inline
-Protocol::Protocol(Controller* c, Handler* h)
+Protocol::Protocol(Controller* c, Event_handler* h)
   : handler_(h), proto_(nullptr), config_(), state_(CLOSED)
   , ctrl_(c), switch_(nullptr)
 { }

@@ -21,8 +21,27 @@
 
 namespace freeflow {
 
-class Handler;
+class Event_handler;
 class Reactor;
+
+/// A Timer_id uniquely identifies a timer in a queue.
+using Timer_id = int;
+
+/// The Timer structure represnts an entry in a timre queue. The
+/// structure binds together information about an event handler, the
+/// time point at which the timer triggers, and the timer's identifier.
+struct Timer {
+  struct Less;
+
+  Timer(Event_handler*, Time_point, Timer_id);
+
+  Event_handler* handler; // The registered handler
+  Time_point     time;    // When the timer will trigger
+  Timer_id       id;      // The timer id
+};
+
+/// A Timer_list is a sequence of timers.
+using Timer_list = std::vector<Timer>;
 
 /// The Timer_queue is allows handlers to be scheduled for timeout 
 /// events. The timer has microsecond granularity.
@@ -36,34 +55,29 @@ class Reactor;
 ///
 /// \todo Allow repeating timers to be scheduled.
 class Timer_queue {
-  struct Timer;
-  struct Timer_less;
-  using Timer_list = std::vector<Timer>;
 public:
   Timer_queue();
 
-  // Scheduling
-  void schedule(Handler*, int, Microseconds);
-  void reschedule(Handler*, int, Microseconds);
-  void cancel(Handler*, int);
-  void cancel(Handler*);
-
-  // Dispatch.
-  void dispatch(Reactor&);
+  // Scheduling and extraction
+  void schedule(Event_handler*, int, Microseconds);
+  void reschedule(Event_handler*, int, Microseconds);
+  void cancel(Event_handler*, int);
+  void cancel(Event_handler*);
+  Timer expire();
 
   // Observers
   bool empty() const;
+  bool expired(Time_point) const;
 
 private:
   Timer&       top();
   const Timer& top() const;
 
-  void push(Handler*, int, Time_point);
+  void push(Event_handler*, int, Time_point);
   void pop();
 
 private:
   Timer_list heap_;    // The actual queue
-  Timer_list trigger_; // Triggered timers
 };
 
 } // namespace freeflow

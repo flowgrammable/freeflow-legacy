@@ -13,39 +13,31 @@
 // permissions and limitations under the License.
 
 #include <freeflow/sys/socket.hpp>
+#include <freeflow/sys/connector.hpp>
 #include <freeflow/sys/reactor.hpp>
 
 using namespace freeflow;
 
-struct Connection : Socket_handler {
-  Connection(Reactor& r, const Address& a)
-    : Socket_handler(r, WRITE_EVENTS, Socket::IP4, Socket::TCP) 
-    {
-      set_nonblocking(rc());
-      System_result res = connect(rc(), a);
-      if (res.failed())
-        throw std::runtime_error("connection");
-    }
+// The echo client is extremely thin...
+struct Echo_client : Socket_handler {
 
-  // Print a connection message and exit.
-  //
-  // FIXME: Stop responding to write events after being accepted.
-  // We don't need to keep calling this function.
-  bool on_write() {
-    // FIXME: Actually check that connection has succeeded.
-    std::cout << "* connected\"n";
+  Echo_client(Reactor& r)
+    : Socket_handler(r, NO_EVENTS) { }
 
-    // Don't receive write events any more.
-    reactor().unsubscribe_events(this, WRITE_EVENTS);
-    return true;    
+  bool on_open() {
+    std::cout << "* init client\n";
+    return true;
   }
 
-  bool connected = false;
+  bool on_close() {
+    std::cout << "* end client\n";
+    return true;
+  }
 };
 
 // Read from standard input and send through the connection.
-struct Reader : Resource_handler {
-  Reader(Reactor& r, Connection& c)
+struct Input_reader : Resource_handler {
+  Input_reader(Reactor& r, Echo_client& c)
     : Resource_handler(r, READ_EVENTS, 0), conn(c) { }
 
   // If there is no more data to read, indicate that we want
@@ -57,11 +49,9 @@ struct Reader : Resource_handler {
     if (res.completed()) {
       std::size_t n = res.value();
       if (n == 0) {
-        std::cout << "* terminating\n";
         reactor().stop();
-        return false;
-      }
-      else {
+        return true;
+      } else {
         buf[n] = 0;
         send(conn.rc(), &buf[0], n);
       }
@@ -72,19 +62,25 @@ struct Reader : Resource_handler {
     }
   }
 
-  Connection& conn;
+  Echo_client& conn;
 };
 
-int main() {
+using My_connector = Connector<Echo_client>;
 
+int main() {
   Reactor r;
 
-  // Create and add the service handlers.
-  Connection conn(r, Address(Ipv4_addr::loopback, 9876));
-  Reader read(r, conn);
-  r.add_handler(&conn);
-  r.add_handler(&read);
+  // The echo client maintains the client socket.
+  Echo_client client(r);
 
-  // Run the event loop.  
+  // // The reader accepts terminal input.
+  Input_reader reader(r, client);
+
+  // Establishes the asynchronous connection.
+  My_connector conn(r);
+  conn.connect(&client, Address(Ipv4_addr::loopback, 9876), Socket::TCP);
+
+  // Add the reader and run the event loop.
+  r.add_handler(&reader);
   r.run();
 }

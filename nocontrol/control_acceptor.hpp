@@ -15,27 +15,30 @@
 #ifndef NOCONTROL_CONTROL_ACCEPTOR_HPP
 #define NOCONTROL_CONTROL_ACCEPTOR_HPP
 
-#include <freeflow/sys/socket.hpp>
-#include <freeflow/sys/handler.hpp>
-#include <freeflow/sys/reactor.hpp>
-#include <freeflow/nbi/controller.hpp>
+#include <freeflow/sys/acceptor.hpp>
+#include <freeflow/sdn/controller.hpp>
 
 #include <nocontrol/config.hpp>
 
 namespace nocontrol {
 
-// The acceptor is responsible for accepting connections when
-// they are available.
-class Control_acceptor : public ff::Resource_handler<ff::Socket> {
-public:
-  Control_acceptor(ff::Controller&, const ff::Address&);
+/// The Control_factory class is responsible for handling management
+/// connections.
+struct Control_factory {
+  Control_factory(ff::Controller& c);
 
-  // Events
-  bool on_read(ff::Reactor&);
+  ff::Event_handler* operator()(ff::Reactor& r, ff::Socket&& s);
 
-private:
-  ff::Controller& ctrl_;
+  ff::Controller& ctrl;
 };
+
+/// The Control_acceptor is resposnble for accepting connections
+/// on the management port and construcitng service handlers to
+/// manage that connection.
+///
+/// \todo This should be called Mangagement_acceptor or something
+/// like that.
+using Control_acceptor = ff::Acceptor<ff::Event_handler, Control_factory>;
 
 } // namesapce nocontrol
 

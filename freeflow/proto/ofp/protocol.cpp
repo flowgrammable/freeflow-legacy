@@ -15,8 +15,7 @@
 #include <algorithm>
 
 #include <freeflow/sys/socket.hpp>
-#include <freeflow/nbi/controller.hpp>
-#include <freeflow/nbi/switch.hpp>
+#include <freeflow/sdn/controller.hpp>
 
 #include <freeflow/proto/ofp/v1.0/message.hpp>
 #include <freeflow/proto/ofp/v1.0/protocol.hpp>
@@ -26,11 +25,12 @@
 namespace freeflow {
 namespace ofp {
 
+/// FIXME: This doens't exist any more...
+
 bool 
 Protocol::on_open(Reactor& r) {
   // Extract the socket from the handler...
   // FIXME: This isn't pretty. It should be.
-  using Socket_handler = Resource_handler<Socket>;
   Socket_handler* sock = dynamic_cast<Socket_handler*>(handler_);
 
   // Connect the switch, sending a bind event to any associated
@@ -232,7 +232,7 @@ Protocol::ping(Reactor& r) {
 // Configure the protocol version.
 // Note that version negotiation should never fail, assuming that we've
 // actually impletemeted the full set of protocols.
-Protocol::Version*
+Protocol_handler*
 Protocol::negotiate(Uint8 v) {
   Uint8 v0 = std::min(config_.current_version, v);
   Uint8 v1 = protocol_version(v0),

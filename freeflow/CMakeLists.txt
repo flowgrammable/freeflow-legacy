@@ -17,5 +17,5 @@
 include_directories(${CMAKE_SOURCE_DIR})
 
 add_subdirectory(sys)
-add_subdirectory(nbi)
+add_subdirectory(sdn)
 add_subdirectory(proto)

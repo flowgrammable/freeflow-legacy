@@ -1,4 +1,4 @@
-# Copyright (c) 2013-2014 Flowgrammable, LLC.
+# Copyright (c) 2013-2014 Flowgrammable.org
 # 
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,16 +12,7 @@
 # or implied. See the License for the specific language governing
 # permissions and limitations under the License.
 
-include_directories(${CMAKE_SOURCE_DIR})
+set(libs freeflow)
 
-set(src main.cpp 
-        connection.cpp 
-        switch_acceptor.cpp
-        control_acceptor.cpp
-        noflow.cpp
-        bridge.cpp)
-
-set(libs freeflow freeflow-ofp freeflow-ofp-1.0 freeflow-sdn)
-
-add_executable(nocontrol ${src})
-target_link_libraries(nocontrol ${libs})
+add_executable(sys_acceptor accept.cpp)
+target_link_libraries(sys_acceptor ${libs})
