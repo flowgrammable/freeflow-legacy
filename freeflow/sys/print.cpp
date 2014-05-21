@@ -41,9 +41,21 @@ void Printer::print(const json::String& s){
 	os_ << s;
 }
 
-
+// After '{' increment indent_, add spaces to tab and insert newline.
 void Printer::start_object() {
-	
+	++indent_; 
+	tab_  += "   ";
+	os_ << "\n" << tab_;
+}
+
+void Printer::end_object() {
+	--indent_;
+	// Remove spaces from tab_
+}
+
+// Print object
+void Printer::print(const json::Object& o) {
+
 }
 
 } // freeflow
