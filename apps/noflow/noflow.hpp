@@ -13,15 +13,16 @@
 // permissions and limitations under the License.
 
 #ifndef NOCONTROL_NOFLOW_HPP
-#define NOCONTROL_NOWFLOW_HPP
+#define NOCONTROL_NOFLOW_HPP
 
 #include <freeflow/sdn/application.hpp>
 #include <freeflow/sdn/controller.hpp>
 #include <freeflow/sdn/switch.hpp>
 
-#include <nocontrol/config.hpp>
+namespace ff = freeflow;
 
-namespace nocontrol {
+class Factory;
+class Noflow;
 
 /// The noflow 
 class Noflow : public ff::Application {
@@ -36,6 +37,11 @@ private:
   Stop stop_ = ON_BIND; // The stopping point.
 };
 
-} // namespace nocontrol
+
+/// Create instances of the noflow application.
+class Factory : public ff::Application_factory {
+  ff::Application* construct();
+  void destroy(ff::Application*);
+};
 
 #endif

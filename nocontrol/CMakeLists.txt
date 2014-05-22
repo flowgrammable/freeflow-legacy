@@ -18,10 +18,9 @@ set(src main.cpp
         connection.cpp 
         switch_acceptor.cpp
         control_acceptor.cpp
-        noflow.cpp
         bridge.cpp)
 
 set(libs freeflow freeflow-ofp freeflow-ofp-1.0 freeflow-sdn)
 
 add_executable(nocontrol ${src})
-target_link_libraries(nocontrol ${libs})
+target_link_libraries(nocontrol ${libs} dl)

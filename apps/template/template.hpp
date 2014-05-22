@@ -12,35 +12,30 @@
 // or implied. See the License for the specific language governing
 // permissions and limitations under the License.
 
-#include <iostream>
+#ifndef NOCONTROL_TEMPLATE_HPP
+#define NOCONTROL_TEMPLATE_HPP
 
-#include "noflow.hpp"
+#include <freeflow/sdn/application.hpp>
+#include <freeflow/sdn/controller.hpp>
+#include <freeflow/sdn/switch.hpp>
 
-using namespace freeflow;
+namespace ff = freeflow;
 
-namespace nocontrol {
+class Factory;
+class Template;
 
-/// \todo Dynamically configure the application so that it can terminate
-/// on different phases.
-void
-Noflow::load(Controller&) { stop_ = ON_BIND; }
+/// The Template application
+class Template : public ff::Application {
+public:
+  void load(ff::Controller&);
+  void unload(ff::Controller&);
+};
 
-void
-Noflow::bind(Switch& s) {
-  if (stop_ == ON_BIND)
-    s.disconnect();
-}
 
-void
-Noflow::version_known(Switch& s) {
-  if (stop_ == ON_VERSION)
-    s.disconnect();
-}
+/// Create instances of the Template application.
+class Factory : public ff::Application_factory {
+  ff::Application* construct();
+  void destroy(ff::Application*);
+};
 
-void
-Noflow::features_known(Switch& s) {
-  // The application never operates beyond this point.
-  s.disconnect();
-}
-
-} // namespace nocontrol
+#endif

@@ -41,6 +41,7 @@ include(FreeFlowDoc)
 # ---------------------------------------------------------------------------- #
 # Build
 
+add_subdirectory(apps)
 add_subdirectory(freeflow)
 add_subdirectory(nocontrol)
 add_subdirectory(noctl)

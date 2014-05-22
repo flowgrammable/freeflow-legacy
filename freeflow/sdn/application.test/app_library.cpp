@@ -14,21 +14,15 @@
 
 #include <iostream>
 
-#include <freeflow/sys/reactor.hpp>
+#include <freeflow/sdn/application.hpp>
+#include <apps/noflow/noflow.hpp>
 
 using namespace freeflow;
-
-// The purpose of this test is simply to ensure that a custom event 
-// loop can be constructed using the reactor. This test just runs
-// the reactor 10 times for 250ms each time. 
-//
-// TODO: Actually handle some events!
+using namespace std;
 
 int main() {
-  Reactor r;
-
-  for (int i = 0; i < 10; ++i) {
-    std::cout << "* running\n";
-    r.run(10_ms);
-  }
+  Application_library libnoflow("flog_noflow.app");
+  Application* app = libnoflow.factory()->construct();
+  libnoflow.factory()->destroy(app);
 }
+
