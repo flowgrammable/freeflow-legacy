@@ -74,33 +74,34 @@ main(int argc, char* argv[]) {
   // Create and configure the controller for NBI applications.
   Controller ctrl;
   Controller_config conf;
-  Application_library lib("../apps/template/libtemplate.so");
+
+
   // Load default applications.
-  ctrl.load(lib);
+  // Application_library lib("../apps/template/libtemplate.so");
+  // ctrl.load(lib);
 
-  // // Configure the conntroller adress.
-  // static constexpr ff::Socket::Transport TCP = ff::Socket::TCP;
+  // Configure the conntroller adress.
+  static constexpr ff::Socket::Transport TCP = ff::Socket::TCP;
   
-  // // Accept switch connections.
-  // // FIXME: There will be many "acceptors" in the controller.
-  // Switch_acceptor sa(r, ctrl);
-  // sa.listen(conf.ctrl_addr, TCP); 
+  // Accept switch connections.
+  Switch_acceptor sa(r, ctrl);
+  sa.listen(conf.ctrl_addr, TCP); 
   
-  // // Accept management connections.
-  // Control_acceptor ma(r, ctrl);
-  // ma.listen(conf.mgmt_addr, TCP);
+  // Accept management connections.
+  Control_acceptor ma(r, ctrl);
+  ma.listen(conf.mgmt_addr, TCP);
 
-  // // Acdept shell input.
-  // Terminator term(r, 0);
+  // Acdept shell input.
+  Terminator term(r, 0);
   
-  // // Add handlers and run the reactor loop.
-  // r.add_handler(&term);
-  // r.add_handler(&sa);
-  // r.add_handler(&ma);
-  // r.run();
+  // Add handlers and run the reactor loop.
+  r.add_handler(&term);
+  r.add_handler(&sa);
+  r.add_handler(&ma);
+  r.run();
 
   // FIXME: This should be part of the controller's destructor.
-  ctrl.unload(lib);
+  // ctrl.unload(lib);
 
   return 0;
 }
