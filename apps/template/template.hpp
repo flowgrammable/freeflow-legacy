@@ -19,21 +19,16 @@
 #include <freeflow/sdn/controller.hpp>
 #include <freeflow/sdn/switch.hpp>
 
-#include <nocontrol/config.hpp>
+using namesapce ff = freeflow;
 
-namespace nocontrol {
-  
 class Factory;
 class Template;
 
 /// The Template application
 class Template : public ff::Application {
-  enum Stop { ON_BIND, ON_VERSION, ON_FEATURE };
 public:
   void load(ff::Controller&);
   void unload(ff::Controller&);
-private:
-  Stop stop_ = ON_BIND; // The stopping point.
 };
 
 
@@ -42,7 +37,5 @@ class Factory : public ff::Application_factory {
   ff::Application* make();
   void destroy(ff::Application*);
 };
-  
-} // namespace nocontrol
 
 #endif

@@ -77,27 +77,27 @@ main(int argc, char* argv[]) {
   Application_library lib("../apps/template/libtemplate.so");
   // Load default applications.
   ctrl.load(lib);
-/*
-  // Configure the conntroller adress.
-  static constexpr ff::Socket::Transport TCP = ff::Socket::TCP;
-  
-  // Accept switch connections.
-  // FIXME: There will be many "acceptors" in the controller.
-  Switch_acceptor sa(r, ctrl);
-  sa.listen(conf.ctrl_addr, TCP); 
-  
-  // Accept management connections.
-  Control_acceptor ma(r, ctrl);
-  ma.listen(conf.mgmt_addr, TCP);
 
-  // Acdept shell input.
-  Terminator term(r, 0);
+  // // Configure the conntroller adress.
+  // static constexpr ff::Socket::Transport TCP = ff::Socket::TCP;
   
-  // Add handlers and run the reactor loop.
-  r.add_handler(&term);
-  r.add_handler(&sa);
-  r.add_handler(&ma);
-  r.run();*/
+  // // Accept switch connections.
+  // // FIXME: There will be many "acceptors" in the controller.
+  // Switch_acceptor sa(r, ctrl);
+  // sa.listen(conf.ctrl_addr, TCP); 
+  
+  // // Accept management connections.
+  // Control_acceptor ma(r, ctrl);
+  // ma.listen(conf.mgmt_addr, TCP);
+
+  // // Acdept shell input.
+  // Terminator term(r, 0);
+  
+  // // Add handlers and run the reactor loop.
+  // r.add_handler(&term);
+  // r.add_handler(&sa);
+  // r.add_handler(&ma);
+  // r.run();
 
   // FIXME: This should be part of the controller's destructor.
   ctrl.unload(lib);

@@ -28,15 +28,15 @@ class Table;
 class Role;
 class Application;
 
-/// The Application_factory is an abstract base class whose
-/// derived classes are responsible for creating applications.
-/// Objects of this class are returned from the loading of
-/// application libraries.
+/// The Application_factory is an abstract base class whose derived 
+/// classes are responsible for creating applications. Objects of this 
+/// class are returned from the loading of application libraries.
 class Application_factory {
 public:
-  virtual Application* make() = 0;
+  virtual Application* construct() = 0;
   virtual void destroy(Application*) = 0;
 };
+
 
 /// The Application_library class represents a dynamically loaded
 /// library that implements (one or more?) freeflow applications.
