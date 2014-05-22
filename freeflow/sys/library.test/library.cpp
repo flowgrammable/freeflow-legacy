@@ -24,11 +24,11 @@ using namespace freeflow;
 
 int main() {
   // Assert that l1 and l2 are the same library.
-  Library l1("libnoflow.so");
-  Library l2("libnoflow.so"); 
+  Library l1("flog_noflow.app");
+  Library l2("flog_noflow.app"); 
   assert(l1 == l2);
 
-  Library l3("libtemplate.so");
+  Library l3("flog_template.app");
   assert(l1 != l3);
 
   // TODO: Write unloading tests

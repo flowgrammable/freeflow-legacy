@@ -12,15 +12,9 @@
 # or implied. See the License for the specific language governing
 # permissions and limitations under the License.
 
-include_directories(${CMAKE_SOURCE_DIR})
 
 # ---------------------------------------------------------------------------- #
 # Build
 
-set(src template.cpp)
-
-add_library(template SHARED ${src})
-target_link_libraries(template freeflow freeflow-sdn)
-
-
+add_application(flog_template template.cpp)
 

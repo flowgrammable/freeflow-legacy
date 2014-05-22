@@ -12,15 +12,7 @@
 # or implied. See the License for the specific language governing
 # permissions and limitations under the License.
 
-include_directories(${CMAKE_SOURCE_DIR})
-
 # ---------------------------------------------------------------------------- #
 # Build
 
-set(src noflow.cpp)
-
-add_library(noflow SHARED ${src})
-target_link_libraries(noflow freeflow freeflow-sdn)
-
-
-
+add_application(flog_noflow noflow.cpp)
