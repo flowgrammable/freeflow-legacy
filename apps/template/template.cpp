@@ -16,16 +16,24 @@
 
 #include "template.hpp"
 
-using namespace freeflow;
+// -------------------------------------------------------------------------- //
+// Factory
 
-namespace nocontrol {
+
+/// The factory_ instance is a static global variable.
+static Factory factory_;
+
+/// The factory() function is the library hook that returns the
+/// factory instance to the application loader.
+extern "C" void*
+factory() { return &factory_; }
 
 /// The construct() function is responsible for allocating new instances 
 /// of the application. 
 ///
 /// Note that this does not necessarily need to dynamically allocate a
 /// new object, it could return a singleton value instead.
-Application* 
+ff::Application* 
 Factory::construct() { return new Template(); }
 
 /// The destroy() function is responsible for disposing of application
@@ -35,14 +43,18 @@ Factory::construct() { return new Template(); }
 /// objet. If, for example, the application is a singletone, this function
 /// may do nothing.
 void 
-Factory::destroy(Application* a) { delete a; }
+Factory::destroy(ff::Application* a) { delete a; }
+
+
+// -------------------------------------------------------------------------- //
+// Application
 
 /// The load() function is called by the controller after the the
 /// application has been constructed. This operation allows the application
 /// to initialize resources related to the controller instance (unlike
 /// the constructor, which does not have access to a controller instance).
 void
-Template::load(Controller& ctrl) { 
+Template::load(ff::Controller& ctrl) { 
   std::cout << "Application 'Template' loaded to the controller\n";
 }
 
@@ -50,15 +62,7 @@ Template::load(Controller& ctrl) {
 /// application is destroyed. This provides a context for the application
 /// to release resources acquired during in during loading.
 void
-Template::unload(Controller& ctrl) { 
+Template::unload(ff::Controller& ctrl) { 
   std::cout << "Application 'Template' unloaded from the controller\n";
 }
 
-} // namespace nocontrol
-
-
-/// The application factory.
-static nocontrol::Factory Template_factory;
-
-extern "C" Application_factory*
-factory() { return &nocontrol::Template_factory; }

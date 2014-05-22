@@ -68,14 +68,16 @@ Library::path() const { return path_; }
 inline const void* 
 Library::handle() const { return handle_; }
 
+/// Returns true when two libraries refer to the same dynamically loaded
+/// library. This is the case when the two libraries have the same handle.
 inline bool 
-operator==(const Library& lhs, const Library& rhs) {
-  return (lhs.handle() == rhs.handle());
+operator==(const Library& a, const Library& b) {
+  return a.handle() == b.handle();
 }
 
 inline bool 
-operator!=(const Library& lhs, const Library& rhs) {
-  return !(lhs == rhs);
+operator!=(const Library& a, const Library& b) {
+  return !(a == b);
 }
 
 

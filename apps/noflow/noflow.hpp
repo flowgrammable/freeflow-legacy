@@ -19,10 +19,8 @@
 #include <freeflow/sdn/controller.hpp>
 #include <freeflow/sdn/switch.hpp>
 
-#include <nocontrol/config.hpp>
+namespace ff = freeflow;
 
-namespace nocontrol {
-  
 class Factory;
 class Noflow;
 
@@ -42,10 +40,8 @@ private:
 
 /// Create instances of the noflow application.
 class Factory : public ff::Application_factory {
-  ff::Application* make();
+  ff::Application* construct();
   void destroy(ff::Application*);
 };
-  
-} // namespace nocontrol
 
 #endif

@@ -16,47 +16,36 @@
 
 #include "noflow.hpp"
 
-using namespace freeflow;
+/// The application factory.
+static Factory factory_;
 
-namespace nocontrol {
-  
-Application* 
-Factory::make() {
-  return new Noflow;
-}
+extern "C" void*
+factory() { return &factory_; }
+
+ff::Application* 
+Factory::construct() { return new Noflow; }
 
 void 
-Factory::destroy(Application* n) {
-  delete n;
-}
+Factory::destroy(ff::Application* a) { delete a; }
 
-/// The application factory.
-static Factory Noflow_factory;
 
 /// \todo Dynamically configure the application so that it can terminate
 /// on different phases.
 void
-Noflow::load(Controller&) { stop_ = ON_BIND; }
+Noflow::load(ff::Controller&) { stop_ = ON_BIND; }
 
 void
-Noflow::bind(Switch& s) {
+Noflow::bind(ff::Switch& s) {
   if (stop_ == ON_BIND)
     s.disconnect();
 }
 
 void
-Noflow::version_known(Switch& s) {
+Noflow::version_known(ff::Switch& s) {
   if (stop_ == ON_VERSION)
     s.disconnect();
 }
 
+// The application never operates beyond this point.
 void
-Noflow::features_known(Switch& s) {
-  // The application never operates beyond this point.
-  s.disconnect();
-}
-
-} // namespace nocontrol
-
-extern "C" Application_factory*
-factory() { return &nocontrol::Noflow_factory; }
+Noflow::features_known(ff::Switch& s) { s.disconnect(); }

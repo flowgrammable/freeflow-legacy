@@ -23,7 +23,18 @@
 
 namespace freeflow {
 
-/// The Library class...
+/// The Library class represents a dynmaically loaded library. The
+/// library is loaded by the dynamic linker on construction: its symbols
+/// are kept local, and all symbols are resolved immediately.  The
+/// libary is unloaded when it is destroyed.
+///
+/// Note that dynamically loaded libraries are reference-counted, so
+/// loading the same library twice will return equal objects. The
+/// dynamic library is unloaded only when the last library object goes
+/// out of scope.
+///
+/// The primray purpose of this class is to provide facilities for
+/// implemnting plugin loaders.
 class Library {
 public:  
   Library(const Path&);
@@ -46,6 +57,10 @@ private:
   Path  path_;   // Path to the loaded library
   void* handle_; // The underlying library
 };
+
+/// Equality comparison
+bool operator==(const Library&, const Library&);
+bool operator!=(const Library&, const Library&);
 
 } // namespace freeflow
 

@@ -14,5 +14,4 @@
 
 set(libs freeflow ${CMAKE_DL_LIBS})
 
-add_executable(sys_library library.cpp)
-target_link_libraries(sys_library ${libs})
+add_unit_test(sys_library library.cpp ${libs})

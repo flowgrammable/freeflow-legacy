@@ -19,7 +19,7 @@
 #include <freeflow/sdn/controller.hpp>
 #include <freeflow/sdn/switch.hpp>
 
-using namesapce ff = freeflow;
+namespace ff = freeflow;
 
 class Factory;
 class Template;
@@ -34,7 +34,7 @@ public:
 
 /// Create instances of the Template application.
 class Factory : public ff::Application_factory {
-  ff::Application* make();
+  ff::Application* construct();
   void destroy(ff::Application*);
 };
 

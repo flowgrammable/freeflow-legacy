@@ -13,10 +13,14 @@
 # permissions and limitations under the License.
 
 
+# Build application libraries directly in this location, making
+# them easier to find by the linker.
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
+
 # ---------------------------------------------------------------------------- #
 # Applications
 
-add_subdirectory(noflow)
 add_subdirectory(template)
+add_subdirectory(noflow)
 
 

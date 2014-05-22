@@ -30,7 +30,7 @@ namespace freeflow {
 /// it is not installed. (NEW VERSION
 inline void
 Controller::load(Application_library& lib) {
-  app_ = lib.factory()->make();
+  app_ = lib.factory()->construct();
   app_->load(*this);
 }
 

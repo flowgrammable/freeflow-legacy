@@ -23,14 +23,15 @@ using namespace freeflow;
 
 
 int main() {
-  
-  Library l1("./apps/noflow/libnoflow.so");
-  
-  // test loading a second of the same application
-  Library l2("./apps/noflow/libnoflow.so"); 
-  
-  // assert that l1 and l2 are the same library.
+  // Assert that l1 and l2 are the same library.
+  Library l1("libnoflow.so");
+  Library l2("libnoflow.so"); 
   assert(l1 == l2);
+
+  Library l3("libtemplate.so");
+  assert(l1 != l3);
+
+  // TODO: Write unloading tests
 
 }
 
