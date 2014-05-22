@@ -27,7 +27,7 @@ struct Printer : Resource_handler {
 
   bool on_open() {
     std::cout << "* open\n";
-    reactor().schedule_timer(this, 0, 250_ms);
+    reactor().schedule_timer(this, 0, 10_ms);
     return true;
   }
 
@@ -37,7 +37,7 @@ struct Printer : Resource_handler {
     if (count == 10)
       reactor().stop();
     else
-      reactor().schedule_timer(this, 0, 250_ms);
+      reactor().schedule_timer(this, 0, 10_ms);
     return true;
   }
 

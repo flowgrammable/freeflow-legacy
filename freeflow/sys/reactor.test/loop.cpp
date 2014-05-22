@@ -29,6 +29,6 @@ int main() {
 
   for (int i = 0; i < 10; ++i) {
     std::cout << "* running\n";
-    r.run(250_ms);
+    r.run(10_ms);
   }
 }
