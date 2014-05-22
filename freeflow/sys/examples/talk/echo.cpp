@@ -23,6 +23,8 @@
 #include <freeflow/sys/acceptor.hpp>
 #include <freeflow/sys/reactor.hpp>
 
+#include "service.hpp"
+
 using namespace std;
 using namespace freeflow;
 
@@ -32,39 +34,58 @@ struct Echo_server : Socket_handler {
   bool on_open();
   bool on_close();
   bool on_read();
+
+  std::ostream& log();
+
+  Buffer buf;
 };
 
 /// Note that this constructor can be inherited from Socket_handler.
 Echo_server::Echo_server(Reactor& r, Socket&& s)
-  : Socket_handler(r, READ_EVENTS, move(s)) { }
+  : Socket_handler(r, READ_EVENTS, move(s)) 
+  , buf(2048) { }
 
 bool
 Echo_server::on_open() {
-  cout << "[...] connected\n";
+  log() << "connected\n";
   return true;
 }
 
 bool
 Echo_server::on_close() { 
-  cout << "[...] closed\n";
+  log() << "disconnected\n";
   return true;
 }
 
 bool
 Echo_server::on_read() { 
-  char buf[2048];
-  System_result r = rc().recv(buf, 2048, 0);
+  // Read data into the buffer.
+  Buffer buf(2048);
+  System_result r = rc().read(buf);
+
+  // Make sure that this didn't fail.
   if (r.failed()) {
-    cout << "[...] error\n";
+    log() << "read error: '" << strerror(errno) << "'\n";
     return false;
   }
+
+  int n = r.value();
   
   // Close the socket if we read 0 bytes.
-  if (not r.value())
+  if (n == 0)
     return false;
-  cout << "[...] message\n";
+  
+  // Log the message. Write a newline if needed.
+  log() << buf.data();
+  if (buf[n-1] != '\n')
+    std::cout << '\n';
   
   return true;
+}
+
+std::ostream&
+Echo_server::log() {
+  return std::cout << bracket(rc().peer) << ' ';
 }
 
 using Echo_acceptor = Acceptor<Echo_server>;
