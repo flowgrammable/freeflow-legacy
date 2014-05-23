@@ -13,6 +13,7 @@
 // permissions and limitations under the License.
 
 #include <iostream>
+#include <sstream>
 #include <fstream>
 #include <iterator>
 #include <string>
@@ -25,7 +26,7 @@
 
 using namespace std;
 using namespace freeflow;
-using namespace json;
+//using namespace json;
 
 namespace cli {
 
@@ -78,19 +79,49 @@ parse(int argc, char *argv[], String_map& opts, String_list& args) {
   }
 }
 
-// struct Bool {
-//   json::Value operator()(const std::string& s) const {
-    
-//     // Check that s is one of:
-//     //    - true | false
-//     //    - yes | no
-//     //    - on | off
+struct Parameter {
+  json::Value value;
+  virtual json::Value operator()(const std::string& s) const = 0;
+};
 
-//     // Throw an exception if it isnt?
-    
-//     return true;
-//   }
-// };
+struct Bool : Parameter {
+  json::Value operator()(const std::string& s) const {
+    if(s == "true" or s == "yes" or s == "on"){
+      return json::Value(json::Bool(true));
+    }
+
+    else if(s == "false" or s == "no" or s == "off"){
+      return json::Value(json::Bool(false));
+    }
+    // Check that s is one of:
+    //    - true | false
+    //    - yes | no
+    //    - on | off
+
+    // Throw an exception if it isnt?
+    else throw runtime_error(s + " is an invalid value. Expected a value of type Bool");
+  }
+};
+
+struct Real : Parameter {
+  json::Value operator()(const std::string& s) const {
+    double d;
+    stringstream ss(s);
+    if(ss >> d) return json::Value(json::Real(d));
+    else throw runtime_error(s + " is an invalid value. Expected a numerical value of type Real");
+
+  }
+};
+
+
+
+template<typename T>
+struct Optional : Parameter {
+  json::Value operator()(const std::string& s) const {
+    if(s == "NULL" or s == "null" or s=="") return json::Value(json::Null());
+    else return T{}(s);
+  }
+};
 
 } // namespace cli
 
@@ -100,7 +131,12 @@ int
 main(int argc, char *argv[]) {
   String_map opts;
   String_list args;
-  
+
+  map<string, Parameter*> pars;
+
+
+  pars["flag-bool"] = new Optional<Bool>;
+
   parse(argc, argv, opts, args);
   
   std::cout << "== options ==\n";
@@ -110,6 +146,22 @@ main(int argc, char *argv[]) {
   std::cout << endl << "== positional args ==\n";
   for (auto &s : args)
     std::cout << s << endl;
+
+  cout << endl;
+
+
+  for (auto &f : opts) {
+    if (pars.count(f.first) == 0) 
+      cout << "Unknown arg " << f.first << endl;
+    else {
+      Parameter *p = pars[f.first];
+      pars[f.first]->value = p->operator()(f.second);
+    }
+  }
+
+  for (auto &f : pars) {
+    cout << "parameter " << f.first << " is set to " << f.second->value << endl;
+  }
   
   // { 
   //   Parameter<Bool> p1("flag", "f", "Indicate that flag is set");
