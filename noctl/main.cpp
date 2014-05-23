@@ -12,17 +12,13 @@
 // or implied. See the License for the specific language governing
 // permissions and limitations under the License.
 
-#include <iostream>
-#include <sstream>
-#include <fstream>
-#include <iterator>
-#include <string>
-#include <vector>
-#include <map>
+
+
 #include <assert.h>
 
 #include <freeflow/sys/socket.hpp>
 #include <freeflow/sys/json.hpp>
+#include "command.hpp"
 
 using namespace std;
 using namespace freeflow;
@@ -30,9 +26,8 @@ using namespace freeflow;
 
 namespace cli {
 
-using String_map = map<string, string>;
-using String_list = vector<string>;
-
+//static String_map commands;
+//commands["add"] = new Add();
 
 std::pair<std::string, std::string>
 parse_flag(const std::string& arg) {
@@ -93,12 +88,6 @@ struct Bool : Parameter {
     else if(s == "false" or s == "no" or s == "off"){
       return json::Value(json::Bool(false));
     }
-    // Check that s is one of:
-    //    - true | false
-    //    - yes | no
-    //    - on | off
-
-    // Throw an exception if it isnt?
     else throw runtime_error(s + " is an invalid value. Expected a value of type Bool");
   }
 };
@@ -134,8 +123,14 @@ main(int argc, char *argv[]) {
 
   map<string, Parameter*> pars;
 
+  Command *c = nullptr;
 
-  pars["flag-bool"] = new Optional<Bool>;
+  Command::commands["hello"] = c;
+
+  pars["flag-optional-bool"] = new Optional<Bool>;
+  pars["flag-optional-real"] = new Optional<Real>;
+  pars["flag-bool"] = new Bool;
+  pars["flag-real"] = new Real;
 
   parse(argc, argv, opts, args);
   
@@ -171,20 +166,3 @@ main(int argc, char *argv[]) {
 
   return 0;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
