@@ -22,40 +22,44 @@ namespace freeflow {
 
 // Print primitive data types.
 void Printer::print(json::Null n) {
-	os_ << n;
-}	
+ os_ << n;
+} 
 
 void Printer::print(json::Bool b) {
-	os_ << b;
+ os_ << b;
 }
 
 void Printer::print(json::Int i) {
-	os_ << i;
+ os_ << i;
 }
 
 void Printer::print(json::Real r) {
-	os_ << r;
+ os_ << r;
 }
 
 void Printer::print(const json::String& s){
-	os_ << s;
+ os_ << s;
 }
 
-// After '{' increment indent_, add spaces to tab and insert newline.
+// After '{' increment indent_, add spaces to tab, then insert newline and tab.
 void Printer::start_object() {
-	++indent_; 
-	tab_  += "   ";
-	os_ << "\n" << tab_;
+ ++indent_; 
+ tab_  += "   ";
+ os_ << "\n" << tab_;
 }
 
+// Print end of object. 
 void Printer::end_object() {
-	--indent_;
-	// Remove spaces from tab_
+ --indent_;
+ tab_.clear();
+ for(int i=0; i < indent_; i++)
+  tab_+=" ";
+os_ << "\n" << tab_;
 }
 
 // Print object
 void Printer::print(const json::Object& o) {
-
+  
 }
 
 } // freeflow
