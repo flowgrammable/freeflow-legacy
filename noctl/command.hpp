@@ -24,13 +24,10 @@
 #include <map>
 
 #include <freeflow/sys/json.hpp>
-#include "parameter.hpp"
+#include <freeflow/sys/parameter.hpp>
 
 
 namespace cli {
-
-using String_map = std::map<std::string, std::string>;
-using String_list = std::vector<std::string>;
 
 struct Command {
   virtual void run(String_map&, String_list) = 0;

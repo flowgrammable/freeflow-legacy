@@ -26,6 +26,8 @@ namespace ff = freeflow;
 
 namespace cli {
 
+using String_map = std::map<std::string, std::string>;
+using String_list = std::vector<std::string>;
 
 // An extension of the JSON model that indicates an error.
 struct Error { };
@@ -163,6 +165,12 @@ template<typename T>
 
 template<typename T>
   struct Sequence { Value operator()(const std::string&) const; };
+
+// -------------------------------------------------------------------------- //
+// Parsing
+std::pair<std::string, std::string> parse_flag(const std::string&);
+void parse(int, char**, String_map&, String_list&);
+Argument_map parse(const Parameter_set&, int, char**);
 
 } // namespace cli
 
