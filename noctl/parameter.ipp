@@ -23,7 +23,7 @@ Parameter::Parameter(const std::string& n,
                      const Type& t, 
                      const Initializer& i, 
                      const std::string& d)
-  : name_{n, {}}, type_(t), init_(i), doc_(d) { }
+  : name_(n), type_(t), init_(i), doc_(d) { }
 
 /// Returns the full name of the parameter. 
 inline const std::string&
@@ -39,12 +39,19 @@ inline const Type&
 Parameter::type() const { return type_; }
 
 /// Returns the parameter's initializer.
-inline const Parameter::Initializer&
+inline const Initializer&
 Parameter::init() const { return init_; }
 
 /// Returns the string containing the documentation for the parameter. 
 inline const std::string&
 Parameter::doc() const { return doc_; }
+
+inline void 
+Parameter_set::declare(const std::string&, 
+                       const Type&, 
+                       const Initializer&, 
+                       const std::string&)
+{ }
 
 
 // -------------------------------------------------------------------------- //

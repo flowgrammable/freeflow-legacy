@@ -25,72 +25,6 @@ namespace ff = freeflow;
 
 namespace cli {
 
-/// The type of a parameter is determined by a function. If a string can be
-/// converted into a JSON value, then the type is assumed to have checked.
-using Type = std::function<freeflow::json::Value(std::string)>;
-
-/// The Valuation semantics describe properties of a parameters value:
-/// whether or not it is required, or a default has been provided.
-enum Valuation {
-  /// An optional parameter is one that need not be specified in the
-  /// command line arguments.
-  OPTIONAL, 
-
-  /// A required parameter must be specified in the command line
-  /// arguments.
-  REQUIRED, 
-
-  /// A parameter with a default argument is initialized to that value
-  /// only if no command line argument is given.
-  DEFAULT
-};
-
-
-/// The Parameter embodies the declaration of a command line parameter.
-/// This includes its name (possibly including an alias or short name),
-/// its type (given as a validating function), a value property that
-/// provides additional semantics for the parameter, and its documentation.
-class Parameter {
-public:
-  /// The Name struct contains the name and alias of a parameter
-  struct Name {
-    std::string name;
-    std::string alias;
-  };
-
-  /// Represents properties of the parameters valuation. Note that
-  /// the value is present only if which is DEFAULT.
-  struct Initializer {
-    Valuation which;
-    std::string value;
-  };
-
-  //Constructors
-  Parameter(const std::string&, const Type&, const Initializer&, const std::string&);
-
-  //Accessors
-  const std::string& name() const;
-  const std::string& alias() const;
-  const Type& type() const;
-  const Initializer& init() const;
-  const std::string& doc() const;
-
-private:
-  Name        name_;
-  Type        type_;
-  Initializer init_;
-  std::string doc_;
-};
-
-
-class Parameter_set {
-
-
-};
-
-
-// -------------------------------------------------------------------------- //
-// Type checking
 
 // An extension of the JSON model that indicates an error.
 struct Error { };
@@ -110,6 +44,108 @@ public:
 private:
   bool error_ = false;
 };
+
+
+/// The type of a parameter is determined by a function. If a string can be
+/// converted into a JSON value, then the type is assumed to have checked.
+using Type = std::function<Value(const std::string&)>;
+
+/// The Name struct contains the name and alias of a parameter.
+///
+/// \todo Write constructors
+struct Name {
+  Name(const char* s) : name(s) { }
+  Name(const std::string& s) : name(s) { }
+
+  std::string name;
+  std::string alias;
+};
+
+/// The Valuation semantics describe properties of a parameters value:
+/// whether or not it is required, or a default has been provided.
+enum Valuation {
+  /// An optional parameter is one that need not be specified in the
+  /// command line arguments.
+  OPTIONAL, 
+
+  /// A required parameter must be specified in the command line
+  /// arguments.
+  REQUIRED, 
+
+  /// A parameter with a default argument is initialized to that value
+  /// only if no command line argument is given.
+  DEFAULT
+};
+
+/// Represents properties of the parameters valuation. Note that
+/// the value is present only if which is DEFAULT.
+///
+/// \todo Write constructors.
+struct Initializer {
+  Initializer() : which(OPTIONAL) { }
+  Initializer(Valuation v): which(v) { }
+  Initializer(const char* s): which(DEFAULT), value(s) { }
+  Initializer(const std::string& s): which(DEFAULT), value(s) { }
+
+  Valuation which;
+  std::string value;
+};
+
+
+/// The Parameter embodies the declaration of a command line parameter.
+/// This includes its name (possibly including an alias or short name),
+/// its type (given as a validating function), a value property that
+/// provides additional semantics for the parameter, and its documentation.
+class Parameter {
+public:
+
+  //Constructors
+  Parameter(const std::string&, const Type&, const Initializer&, const std::string&);
+
+  //Accessors
+  const std::string& name() const;
+  const std::string& alias() const;
+  const Type& type() const;
+  const Initializer& init() const;
+  const std::string& doc() const;
+
+private:
+  Name        name_;
+  Type        type_;
+  Initializer init_;
+  std::string doc_;
+};
+
+
+/// The Parameter_set contains a set of parameters, which are declared
+/// by the user, and used by the compiler to parse command line arugments.
+class Parameter_set {
+  using Parm_map = std::unordered_map<std::string, Parameter*>;
+public:
+
+  void declare(const std::string&, const Type&, const Initializer&, const std::string&);
+
+private:
+  Parm_map parms_;
+};
+
+/// The Argument_map contains the parsed command line options (binding of
+/// names to values), and the positional arguments.
+class Argument_map {
+  using Option_map = std::map<std::string, Value>;
+  using Argument_list = std::vector<Value>;
+
+  Value operator[](const std::string&) const;
+
+  // Other accessors, convenience functions.
+
+  Option_map    opts;  // Name/value mappings
+  Argument_list args;  // Positional aorguments.
+};
+
+
+// -------------------------------------------------------------------------- //
+// Type checking
 
 // Type checkers
 struct Null { Value operator()(const std::string&) const; };

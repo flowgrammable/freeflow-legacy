@@ -76,57 +76,67 @@ parse(int argc, char *argv[], String_map& opts, String_list& args) {
   }
 }
 
+Argument_map
+parse(const Parameter_set&, int argc, char* argv[]) {
+  return {};
+}
+
 } // namespace cli
 
 using namespace cli;
 
 int
 main(int argc, char *argv[]) {
-  String_map opts;
-  String_list args;
 
-  map<string, Parameter*> pars;
+  Parameter_set parms;
+  parms.declare("flag", Type(cli::Bool()), cli::REQUIRED, "Just a flag");
+  // parms.declare("number", cli::Int(), "42", "Just a flag");
+  // parms.declare("name", cli::String(), "some value", "The name of something");
+  // parms.declare("config", cli::String(), cli::OPTIONAL, "The path to a configuration file");
 
-  Command *c = nullptr;
 
-  Command::commands["hello"] = c;
+  Argument_map args = parse(parms, argc, argv);
+
+// 
+  // Command *c = nullptr;
+  // Command::commands["hello"] = c;
 
   // pars["flag-optional-bool"] = new Optional<Bool>;
   // pars["flag-optional-real"] = new Optional<Real>;
   // pars["flag-bool"] = new Bool;
   // pars["flag-real"] = new Real;
 
-  parse(argc, argv, opts, args);
+  // parse(argc, argv, opts, args);
   
-  std::cout << "== options ==\n";
-  for (auto &f : opts)
-    std::cout << f.first << " : " << f.second << '\n';
+  // std::cout << "== options ==\n";
+  // for (auto &f : opts)
+  //   std::cout << f.first << " : " << f.second << '\n';
   
-  std::cout << endl << "== positional args ==\n";
-  for (auto &s : args)
-    std::cout << s << endl;
+  // std::cout << endl << "== positional args ==\n";
+  // for (auto &s : args)
+  //   std::cout << s << endl;
 
-  cout << endl;
+  // cout << endl;
 
 
-  for (auto &f : opts) {
-    if (pars.count(f.first) == 0) 
-      cout << "Unknown arg " << f.first << endl;
-    else {
-      // Parameter *p = pars[f.first];
-      // pars[f.first]->value = p->operator()(f.second);
-    }
-  }
-
-  for (auto &f : pars) {
-    // cout << "parameter " << f.first << " is set to " << f.second->value << endl;
-  }
-  
-  // { 
-  //   Parameter<Bool> p1("flag", "f", "Indicate that flag is set");
-
-  //   json::Value v1 = p1.get(opts);
+  // for (auto &f : opts) {
+  //   if (pars.count(f.first) == 0) 
+  //     cout << "Unknown arg " << f.first << endl;
+  //   else {
+  //     // Parameter *p = pars[f.first];
+  //     // pars[f.first]->value = p->operator()(f.second);
+  //   }
   // }
+
+  // for (auto &f : pars) {
+  //   // cout << "parameter " << f.first << " is set to " << f.second->value << endl;
+  // }
+  
+  // // { 
+  // //   Parameter<Bool> p1("flag", "f", "Indicate that flag is set");
+
+  // //   json::Value v1 = p1.get(opts);
+  // // }
 
   return 0;
 }
