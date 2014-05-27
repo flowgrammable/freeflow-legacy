@@ -14,17 +14,39 @@
 
 namespace freeflow {
 
+// -------------------------------------------------------------------------- //
+// Application factory
 
+/// Tthe type of the application factory function.
+using Application_factory_fn = Application_factory*(*)();
+
+// \todo This will crash if function returns null.
 inline
-Application_library::Application_library(const Path& p) : Library(p)
+Application_library::Application_library(const Path& p) 
+  : Library(p), factory_(function<Application_factory_fn>("factory")())
 {
-  factory_ = this->function<Application_factory_fn>("factory")();
+  if (not factory_)
+    throw std::runtime_error("cannot resolve application symbol");
 }
 
+/// Return the factory function from the application.
 inline Application_factory*
 Application_library::factory() const {
   return factory_;
 }
+
+/// Create a new application through the library interface.
+inline Application*
+Application_library::create() const { return factory_->create(); }
+
+/// Destroy 
+inline void
+Application_library::destroy(Application* app) const { 
+  return factory_->destroy(app); 
+}
+
+// -------------------------------------------------------------------------- //
+// Application
 
 /// The load event is sent when the controller instantiates the application.
 inline void

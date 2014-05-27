@@ -15,6 +15,8 @@
 #ifndef FREEFLOW_CONTROLLER_HPP
 #define FREEFLOW_CONTROLLER_HPP
 
+#include <list>
+#include <unordered_map>
 #include <unordered_set>
 
 #include <freeflow/sys/socket.hpp>
@@ -24,26 +26,25 @@ namespace freeflow {
 
 struct Switch;
 
-/// The Controller class represents...
+/// The Controller class is...
 ///
-/// \todo The application currently hosts a single application. Obviously
-/// it should host more.
+/// \todo Force the controller to manage plugins? Or make that the
+/// responsibility of some other component.
 class Controller {
+  using App_set = std::unordered_set<Application*>;
   using Switch_set = std::unordered_set<Switch*>;
 
 public:
-  // Application management.
-  // template<typename T> void load();
-  // template<typename T> void unload();
-  void load(Application_library&);
-  void unload(Application_library&);
+  // void load(Application_library&);
+  // void unload(Application_library&);
+
   // Switch management
   Switch& connect(Socket&);
   void disconnect(Switch&);
 
 private:
-  Application* app_;      // The hosted application.
-  Switch_set   switches_;
+  App_set    apps_;     // The hosted applications
+  Switch_set switches_; // Connected switches
 };
 
 } // namespace freeflow
