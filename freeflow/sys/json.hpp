@@ -123,7 +123,7 @@ public:
 
   // Move semantics
   Value(Value&&);
-  //Value& operator=(Value&&);
+  Value& operator=(Value&&);
 
   // Copy semantics
   Value(const Value&);
@@ -171,6 +171,10 @@ public:
   const Object& as_object() const;
 
 private:
+  void copy(const Value&);
+  void move(Value&&);
+  void destroy();
+
   template<typename T> T&       check(Type, T&);
   template<typename T> const T& check(Type, const T&) const;
 
