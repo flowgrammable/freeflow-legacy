@@ -30,9 +30,31 @@
 namespace ff = freeflow;
 
 namespace cli {
-  
+
+/// The type of a parameter is determined by a function. If a string can be
+/// converted into a JSON value, then the type is assumed to have checked.
 using Type = std::function<freeflow::json::Value(std::string)>;
 
+/// The Value enumeration describes properties of the parameters value.
+enum Value {
+  /// An optional parameter is one that need not be specified in the
+  /// command line arguments.
+  OPTIONAL, 
+
+  /// A required parameter must be specified in the command line
+  /// arguments.
+  REQUIRED, 
+
+  /// A parameter with a default argument is initialized to that value
+  /// only if no command line argument is given.
+  DEFAULT
+};
+
+
+/// The Parameter embodies the declaration of a command line parameter.
+/// This includes its name (possibly including an alias or short name),
+/// its type (given as a validating function), a value property that
+/// provides additional semantics for the parameter, and its documentation.
 class Parameter {
 public:
   /// The Name struct contains the name and alias of a parameter
@@ -41,41 +63,64 @@ public:
     std::string alias;
   };
 
-  /// The Initializer struct contains an enumeration that tells the constructor
-  /// how the parameter should be constructed and a string containing the 
-  /// default value for the parameter. The default value is only used when the
-  /// state is PRESENT
+  /// Represents properties of the parameters valuation. Note that
+  /// the value is present only if which is DEFAULT.
   struct Initializer {
-    enum state { OPTIONAL, REQUIRED, PRESENT };
+    Value which;
     std::string value;
   };
 
   //Constructors
+  Parameter(const std::string&, const Type&, const Initializer&, const std::string&);
 
   //Accessors
-  Name name();
-  std::string doc();
-  Type& type();
+  const std::string& name() const;
+  const std::string& alias() const;
+  const Type& type() const;
+  const Initializer& init() const;
+  const std::string& doc() const;
 
 private:
-  Name name_;
+  Name        name_;
   Initializer init_;
   std::string doc_;
-  Type& type_;
+  Type&       type_;
 };
 
-struct Bool {
-  ff::json::Value operator()(const std::string&) const;
+// -------------------------------------------------------------------------- //
+// Type checking
+
+// An extension of the JSON model that indicates an error.
+struct Error { };
+
+/// The Value class extends JSON values to include additional error
+/// information.
+class Value : json::Value {
+public:
+  static constexpr Error error;
+
+  using json::Value::Value;
+
+  Value(Error);
+
+  explicit operator bool() const;
+private:
+  bool error_ = false;
 };
 
-struct Real {
-  ff::json::Value operator()(const std::string&) const;
-};
+// Type checkers
+struct Null { Value operator()(const std::string&) const; };
+struct Bool { Value operator()(const std::string&) const; };
+struct Int { Value operator()(const std::string&) const; };
+struct Real { Value operator()(const std::string&) const; };
+struct String { Value operator()(const std::string&) const; };
+
+// Type checking combinators
+template<typename T>
+  struct Optional { Value operator()(const std::string&) const; };
 
 template<typename T>
-struct Optional {
-  ff::json::Value operator()(const std::string&) const;
-};
+  struct Sequence { Value operator()(const std::string&) const; };
 
 } // namespace cli
 

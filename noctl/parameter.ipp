@@ -15,50 +15,96 @@
 
 namespace cli {
 
-/// Returns the name of the parameter. The name contains both the
-/// alias and the full name of the parameter
-Name Parameter::name() {
-  return name_;
+// -------------------------------------------------------------------------- //
+// Parameter
+
+/// Returns the full name of the parameter. 
+inline const std::string&
+Parameter::name() const { return name_.name; }
+
+/// Returns the alias of the parameter. If the string is empty, then
+/// there is no alias.
+inline const std::string&
+Parameter::alias() const { return name_.alias; }
+
+/// Returns the type of the parameter.
+inline const Type& 
+Parameter::type() const { return type_; }
+
+/// Returns the parameter's initializer.
+inline const Initializer&
+Parameter::init() const { return init_; }
+
+/// Returns the string containing the documentation for the parameter. 
+inline const std::string&
+Parameter::doc() { return doc_; }
+
+
+// -------------------------------------------------------------------------- //
+// Type checking
+
+inline
+Value::Value(Error)
+  : json::Value(), error_(true) { }
+
+inline 
+Value::operator bool() const { return not error_; }
+
+// -------------------------------------------------------------------------- //
+// Type checkers
+
+inline Value 
+Null::operator()(const std::string&) const {
+  if (s == "null")
+    return {};
+  else
+    return Value::error;
 }
 
-/// Returns the string containing the documentation for the parameter. This 
-/// documentation is currently stored as a C++ raw string literal that is
-/// written with an 80 character line limit.
-std::string Parameter::doc() {
-  return doc_;
-}
-
-/// Returns the function that checks the type of the argument and returns
-/// it as a JSON value.
-///
-/// The function that this references will throw a runtime error if an invalid
-/// value is supplied.
-Type& Parameter::type() {
-  return type_;
-}
-
-json::Value operator()(const std::string& s) const {
-  if(s == "true" or s == "yes" or s == "on")
-    return json::Value(json::Bool(true));
-  else if(s == "false" or s == "no" or s == "off")
-    return json::Value(json::Bool(false));
+inline Value 
+Bool::operator()(const std::string& s) const {
+  if (s == "true")
+    return true;
+  else if (s == "false")
+    return false;
   else 
-    throw runtime_error(s + 
-                        " is an invalid value. Expected a value of type Bool");
+    return Value::error;
 }
 
-json::Value operator()(const std::string& s) const {
+inline Value
+Int::operator()(const std::string& s) const {
+  return {};
+}
+
+inline Value 
+Real::operator()(const std::string& s) const {
   double d;
   stringstream ss(s);
-  if(ss >> d) return json::Value(json::Real(d));
+  if (ss >> d) 
+    return d;
   else 
-    throw runtime_error(s + 
-              " is an invalid value. Expected a numerical value of type Real");
+    return Value::error;
 }
 
-json::Value operator()(const std::string& s) const {
-  if(s == "NULL" or s == "null" or s=="") return json::Value(json::Null());
-  else return T{}(s);
+inline Value
+String::operator()(const std::string& s) const {
+  return {};
 }
+
+template<typename T>
+  inline Value 
+  Optional<T>::operator()(const std::string& s) const {
+    T type;
+    Null null;
+    if (Value x = null(s))
+      return x;
+    return type(s);
+  }
+
+template<typename T>
+  inline Value
+  Sequence<T>::operator()(const std::string& s) const {
+    return {};
+  }
 
 } // namespace cli
