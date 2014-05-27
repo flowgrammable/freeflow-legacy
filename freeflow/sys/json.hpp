@@ -131,6 +131,7 @@ public:
 
   // Value construction
   Value(Null);
+  Value(std::nullptr_t);
   Value(Bool);
   Value(int);
   Value(Int);

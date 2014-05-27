@@ -72,6 +72,10 @@ Value::Value(Null n)
   : type_(NIL), data_(n) { }
 
 inline
+Value::Value(std::nullptr_t)
+  : type_(NIL), data_(Null{}) { }
+
+inline
 Value::Value(Bool b)
   : type_(BOOL), data_(b) { }
 
