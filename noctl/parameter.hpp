@@ -50,15 +50,18 @@ public:
     std::string value;
   };
 
+  //Constructors
+
   //Accessors
   Name name();
   std::string doc();
+  Type& type();
 
 private:
   Name name_;
   Initializer init_;
   std::string doc_;
-
+  Type& type_;
 };
 
 struct Bool {

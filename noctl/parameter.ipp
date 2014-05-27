@@ -21,26 +21,39 @@ Name Parameter::name() {
   return name_;
 }
 
+/// Returns the string containing the documentation for the parameter. This 
+/// documentation is currently stored as a C++ raw string literal that is
+/// written with an 80 character line limit.
 std::string Parameter::doc() {
   return doc_;
 }
 
-json::Value operator()(const std::string& s) const {
-  if(s == "true" or s == "yes" or s == "on"){
-    return json::Value(json::Bool(true));
-  }
+/// Returns the function that checks the type of the argument and returns
+/// it as a JSON value.
+///
+/// The function that this references will throw a runtime error if an invalid
+/// value is supplied.
+Type& Parameter::type() {
+  return type_;
+}
 
-  else if(s == "false" or s == "no" or s == "off"){
+json::Value operator()(const std::string& s) const {
+  if(s == "true" or s == "yes" or s == "on")
+    return json::Value(json::Bool(true));
+  else if(s == "false" or s == "no" or s == "off")
     return json::Value(json::Bool(false));
-  }
-  else throw runtime_error(s + " is an invalid value. Expected a value of type Bool");
+  else 
+    throw runtime_error(s + 
+                        " is an invalid value. Expected a value of type Bool");
 }
 
 json::Value operator()(const std::string& s) const {
   double d;
   stringstream ss(s);
   if(ss >> d) return json::Value(json::Real(d));
-  else throw runtime_error(s + " is an invalid value. Expected a numerical value of type Real");
+  else 
+    throw runtime_error(s + 
+              " is an invalid value. Expected a numerical value of type Real");
 }
 
 json::Value operator()(const std::string& s) const {
