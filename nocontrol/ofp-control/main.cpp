@@ -26,9 +26,7 @@
 
 #include "prelude.hpp"
 #include "nocontrol.hpp"
-
-// #include "ofp_acceptor.hpp"
-// #include "ofp_handler.hpp"
+#include "openflow.hpp"
 
 using namespace std;
 using namespace freeflow;
@@ -78,10 +76,9 @@ main(int argc, char* argv[]) {
   Nocontrol_acceptor nc(r, c);
   nc.listen(conf.nocontrol_addr, ff::Socket::TCP);
 
-  
-  // // Accept switch connections.
-  // Switch_acceptor sa(r, ctrl);
-  // sa.listen(conf.ctrl_addr, TCP); 
+  // Accept switch connections.
+  Ofp_acceptor ofp(r, c);
+  ofp.listen(conf.openflow_addr, ff::Socket::TCP); 
   
 
   // Accept shell input.
@@ -90,7 +87,7 @@ main(int argc, char* argv[]) {
   // Add handlers and run the reactor loop.
   r.add_handler(&term);
   r.add_handler(&nc);
-  // r.add_handler(&sa);
+  r.add_handler(&ofp);
   r.run();
 
   return 0;

@@ -28,7 +28,7 @@ struct Ofp_handler::Write_on_exit {
 inline
 Ofp_handler::Ofp_handler(ff::Reactor& r, ff::Socket&& s, ff::Controller& c)
   : ff::Socket_handler(r, ff::READ_EVENTS | ff::TIME_EVENTS, std::move(s))
-  , ctrl_(&c) 
+  , ctrl_(c) 
 { }
 
 /// Create a version negotiation state machine so we know what version
@@ -38,7 +38,7 @@ Ofp_handler::Ofp_handler(ff::Reactor& r, ff::Socket&& s, ff::Controller& c)
 inline bool
 Ofp_handler::on_open() {
   Write_on_exit g(*this);
-  proto_ = new ff::ofp::Protocol(ctrl_, this);
+  proto_ = new ff::ofp::Protocol(&ctrl_, this);
   return proto_->on_open(reactor());
 }
 
@@ -79,7 +79,7 @@ Ofp_factory::Ofp_factory(ff::Controller& c)
   : ctrl_(c) { }
 
 inline Ofp_handler* 
-Ofp_factory::operator()(ff::Reactor& r, ff::Socket&& s) {
+Ofp_factory::operator()(ff::Reactor& r, ff::Socket&& s) const {
   return new Ofp_handler(r, std::move(s), ctrl_);
 }
 
