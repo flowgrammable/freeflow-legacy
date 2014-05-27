@@ -89,7 +89,7 @@ int
 main(int argc, char *argv[]) {
 
   Parameter_set parms;
-  parms.declare("flag", Type(cli::Bool()), cli::REQUIRED, "Just a flag");
+  parms.declare("flag", cli::Bool(), cli::REQUIRED, "Just a flag");
   // parms.declare("number", cli::Int(), "42", "Just a flag");
   // parms.declare("name", cli::String(), "some value", "The name of something");
   // parms.declare("config", cli::String(), cli::OPTIONAL, "The path to a configuration file");

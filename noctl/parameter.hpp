@@ -16,6 +16,7 @@
 #define FREEFLOW_PARAMETER_HPP
 
 #include <functional>
+#include <list>
 #include <sstream>
 #include <unordered_map>
 
@@ -120,13 +121,15 @@ private:
 /// The Parameter_set contains a set of parameters, which are declared
 /// by the user, and used by the compiler to parse command line arugments.
 class Parameter_set {
+  using Parm_list = std::list<Parameter>;
   using Parm_map = std::unordered_map<std::string, Parameter*>;
 public:
 
   void declare(const std::string&, const Type&, const Initializer&, const std::string&);
 
 private:
-  Parm_map parms_;
+  Parm_list parms_;
+  Parm_map map_;
 };
 
 /// The Argument_map contains the parsed command line options (binding of
