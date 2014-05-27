@@ -15,6 +15,16 @@
 
 namespace cli {
 
+/// Returns the name of the parameter. The name contains both the
+/// alias and the full name of the parameter
+Name Parameter::name() {
+  return name_;
+}
+
+std::string Parameter::doc() {
+  return doc_;
+}
+
 json::Value operator()(const std::string& s) const {
   if(s == "true" or s == "yes" or s == "on"){
     return json::Value(json::Bool(true));

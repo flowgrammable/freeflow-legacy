@@ -22,11 +22,12 @@
 
 namespace ff = freeflow;
 
-using type = std::function<ff::json::Value(std::string)>;
-
 namespace cli {
 
-struct Parameter {
+using type = std::function<ff::json::Value(std::string)>;
+
+class Parameter {
+public:
   /// The Name struct contains the name and alias of a parameter
   struct Name {
     std::string name;
@@ -41,6 +42,15 @@ struct Parameter {
     enum state { OPTIONAL, REQUIRED, PRESENT };
     std::string value;
   };
+
+  //Accessors
+  Name name();
+  std::string doc();
+
+private:
+  Name name_;
+  Initializer init_;
+  std::string doc_;
 
 };
 
