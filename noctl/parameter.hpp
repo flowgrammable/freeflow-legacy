@@ -16,17 +16,25 @@
 #define FREEFLOW_PARAMETER_HPP
 
 #include <functional>
+#include <iostream>
+#include <sstream>
+#include <fstream>
+#include <iterator>
+#include <string>
+#include <vector>
+#include <map>
 
-#include "command.hpp"
+//#include <command.hpp>
 #include <freeflow/sys/json.hpp>
 
 namespace ff = freeflow;
 
-using type = std::function<ff::json::Value(std::string)>;
-
 namespace cli {
+  
+using Type = std::function<freeflow::json::Value(std::string)>;
 
-struct Parameter {
+class Parameter {
+public:
   /// The Name struct contains the name and alias of a parameter
   struct Name {
     std::string name;
@@ -41,6 +49,15 @@ struct Parameter {
     enum state { OPTIONAL, REQUIRED, PRESENT };
     std::string value;
   };
+
+  //Accessors
+  Name name();
+  std::string doc();
+
+private:
+  Name name_;
+  Initializer init_;
+  std::string doc_;
 
 };
 

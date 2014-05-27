@@ -23,6 +23,9 @@
 #include <vector>
 #include <map>
 
+#include <freeflow/sys/json.hpp>
+#include "parameter.hpp"
+
 
 namespace cli {
 
@@ -31,9 +34,10 @@ using String_list = std::vector<std::string>;
 
 struct Command {
   virtual void run(String_map&, String_list) = 0;
-  String_map params_;
-  std::string helptext_;
-
+  String_map params;
+  String_map alias;
+  std::string helptext;  
+  
   static std::map<std::string, Command *> commands;
 };
 
@@ -46,7 +50,6 @@ struct Help : Command {
 
 struct Add : Command {
   void run(String_map&, String_list);
-
 };
 
 
