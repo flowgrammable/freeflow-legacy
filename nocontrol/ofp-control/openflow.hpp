@@ -64,7 +64,7 @@ private:
   ff::Controller& ctrl_;
 };
 
-/// The Switch_acceptor is responsible for accepting connections from
+/// The Ofp_acceptor is responsible for accepting connections from
 /// switches and constructing service handlers to manage the OpenFlow
 /// protocol.
 using Ofp_acceptor = ff::Acceptor<Ofp_handler, Ofp_factory>;
