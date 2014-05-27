@@ -15,7 +15,8 @@
 include_directories(${CMAKE_SOURCE_DIR})
 
 set(src main.cpp
-	    command.cpp)
+	    command.cpp
+      parameter.cpp)
 	    
 set(libs freeflow)
 
