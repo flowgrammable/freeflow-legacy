@@ -16,15 +16,22 @@
 #define FREEFLOW_PARAMETER_HPP
 
 #include <functional>
+#include <iostream>
+#include <sstream>
+#include <fstream>
+#include <iterator>
+#include <string>
+#include <vector>
+#include <map>
 
-#include "command.hpp"
+//#include <command.hpp>
 #include <freeflow/sys/json.hpp>
 
 namespace ff = freeflow;
 
 namespace cli {
-
-using type = std::function<ff::json::Value(std::string)>;
+  
+using Type = std::function<freeflow::json::Value(std::string)>;
 
 class Parameter {
 public:
