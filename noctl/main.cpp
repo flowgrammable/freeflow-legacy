@@ -19,6 +19,7 @@
 #include <freeflow/sys/socket.hpp>
 #include <freeflow/sys/json.hpp>
 #include "command.hpp"
+#include "parameter.hpp"
 
 using namespace std;
 using namespace freeflow;
@@ -74,46 +75,6 @@ parse(int argc, char *argv[], String_map& opts, String_list& args) {
   }
 }
 
-/// The Parameter class is the base class...
-struct Parameter {
-  virtual json::Value operator()(const std::string& s) const = 0;
-
-private:
-  json::Value default_;
-};
-
-struct Bool : Parameter {
-  json::Value operator()(const std::string& s) const {
-    if(s == "true" or s == "yes" or s == "on")
-      return json::Value(json::Bool(true));
-    else if(s == "false" or s == "no" or s == "off")
-      return json::Value(json::Bool(false));
-    else 
-      throw runtime_error(s + " is an invalid value. Expected a value of type Bool");
-  }
-};
-
-struct Real : Parameter {
-  json::Value operator()(const std::string& s) const {
-    double d;
-    stringstream ss(s);
-    if(ss >> d) 
-      return json::Value(json::Real(d));
-    else 
-      throw runtime_error(s + " is an invalid value. Expected a numerical value of type Real");
-  }
-};
-
-
-
-template<typename T>
-struct Optional : Parameter {
-  json::Value operator()(const std::string& s) const {
-    if(s == "NULL" or s == "null" or s=="") return json::Value(json::Null());
-    else return T{}(s);
-  }
-};
-
 } // namespace cli
 
 using namespace cli;
@@ -129,10 +90,10 @@ main(int argc, char *argv[]) {
 
   Command::commands["hello"] = c;
 
-  pars["flag-optional-bool"] = new Optional<Bool>;
-  pars["flag-optional-real"] = new Optional<Real>;
-  pars["flag-bool"] = new Bool;
-  pars["flag-real"] = new Real;
+  // pars["flag-optional-bool"] = new Optional<Bool>;
+  // pars["flag-optional-real"] = new Optional<Real>;
+  // pars["flag-bool"] = new Bool;
+  // pars["flag-real"] = new Real;
 
   parse(argc, argv, opts, args);
   
@@ -151,7 +112,7 @@ main(int argc, char *argv[]) {
     if (pars.count(f.first) == 0) 
       cout << "Unknown arg " << f.first << endl;
     else {
-      Parameter *p = pars[f.first];
+      // Parameter *p = pars[f.first];
       // pars[f.first]->value = p->operator()(f.second);
     }
   }

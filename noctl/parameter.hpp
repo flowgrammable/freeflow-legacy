@@ -15,29 +15,45 @@
 #ifndef FREEFLOW_PARAMETER_HPP
 #define FREEFLOW_PARAMETER_HPP
 
+#include <functional>
 
 #include "command.hpp"
 #include <freeflow/sys/json.hpp>
 
 namespace ff = freeflow;
 
+using type = std::function<ff::json::Value(std::string)>;
+
 namespace cli {
 
 struct Parameter {
-  ff::json::Value value;
-  virtual ff::json::Value operator()(const std::string& s) const = 0;
+  /// The Name struct contains the name and alias of a parameter
+  struct Name {
+    std::string name;
+    std::string alias;
+  };
+
+  /// The Initializer struct contains an enumeration that tells the constructor
+  /// how the parameter should be constructed and a string containing the 
+  /// default value for the parameter. The default value is only used when the
+  /// state is PRESENT
+  struct Initializer {
+    enum state { OPTIONAL, REQUIRED, PRESENT };
+    std::string value;
+  };
+
 };
 
-struct Bool : Parameter {
+struct Bool {
   ff::json::Value operator()(const std::string&) const;
 };
 
-struct Real : Parameter {
+struct Real {
   ff::json::Value operator()(const std::string&) const;
 };
 
 template<typename T>
-struct Optional : Parameter {
+struct Optional {
   ff::json::Value operator()(const std::string&) const;
 };
 
