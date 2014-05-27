@@ -16,15 +16,9 @@
 #define FREEFLOW_PARAMETER_HPP
 
 #include <functional>
-#include <iostream>
 #include <sstream>
-#include <fstream>
-#include <iterator>
-#include <string>
-#include <vector>
-#include <map>
+#include <unordered_map>
 
-//#include <command.hpp>
 #include <freeflow/sys/json.hpp>
 
 namespace ff = freeflow;
@@ -35,8 +29,9 @@ namespace cli {
 /// converted into a JSON value, then the type is assumed to have checked.
 using Type = std::function<freeflow::json::Value(std::string)>;
 
-/// The Value enumeration describes properties of the parameters value.
-enum Value {
+/// The Valuation semantics describe properties of a parameters value:
+/// whether or not it is required, or a default has been provided.
+enum Valuation {
   /// An optional parameter is one that need not be specified in the
   /// command line arguments.
   OPTIONAL, 
@@ -66,7 +61,7 @@ public:
   /// Represents properties of the parameters valuation. Note that
   /// the value is present only if which is DEFAULT.
   struct Initializer {
-    Value which;
+    Valuation which;
     std::string value;
   };
 
@@ -82,10 +77,17 @@ public:
 
 private:
   Name        name_;
+  Type        type_;
   Initializer init_;
   std::string doc_;
-  Type&       type_;
 };
+
+
+class Parameter_set {
+
+
+};
+
 
 // -------------------------------------------------------------------------- //
 // Type checking
@@ -95,12 +97,13 @@ struct Error { };
 
 /// The Value class extends JSON values to include additional error
 /// information.
-class Value : json::Value {
+class Value : ff::json::Value {
 public:
-  static constexpr Error error;
+  static constexpr Error error { };
 
-  using json::Value::Value;
+  using ff::json::Value::Value;
 
+  Value() = default;
   Value(Error);
 
   explicit operator bool() const;
@@ -123,5 +126,7 @@ template<typename T>
   struct Sequence { Value operator()(const std::string&) const; };
 
 } // namespace cli
+
+#include "parameter.ipp"
 
 #endif

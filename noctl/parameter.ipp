@@ -18,6 +18,13 @@ namespace cli {
 // -------------------------------------------------------------------------- //
 // Parameter
 
+inline
+Parameter::Parameter(const std::string& n, 
+                     const Type& t, 
+                     const Initializer& i, 
+                     const std::string& d)
+  : name_{n, {}}, type_(t), init_(i), doc_(d) { }
+
 /// Returns the full name of the parameter. 
 inline const std::string&
 Parameter::name() const { return name_.name; }
@@ -32,12 +39,12 @@ inline const Type&
 Parameter::type() const { return type_; }
 
 /// Returns the parameter's initializer.
-inline const Initializer&
+inline const Parameter::Initializer&
 Parameter::init() const { return init_; }
 
 /// Returns the string containing the documentation for the parameter. 
 inline const std::string&
-Parameter::doc() { return doc_; }
+Parameter::doc() const { return doc_; }
 
 
 // -------------------------------------------------------------------------- //
@@ -45,7 +52,7 @@ Parameter::doc() { return doc_; }
 
 inline
 Value::Value(Error)
-  : json::Value(), error_(true) { }
+  : ff::json::Value(), error_(true) { }
 
 inline 
 Value::operator bool() const { return not error_; }
@@ -54,7 +61,7 @@ Value::operator bool() const { return not error_; }
 // Type checkers
 
 inline Value 
-Null::operator()(const std::string&) const {
+Null::operator()(const std::string& s) const {
   if (s == "null")
     return {};
   else
@@ -79,7 +86,7 @@ Int::operator()(const std::string& s) const {
 inline Value 
 Real::operator()(const std::string& s) const {
   double d;
-  stringstream ss(s);
+  std::stringstream ss(s);
   if (ss >> d) 
     return d;
   else 
