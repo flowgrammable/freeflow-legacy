@@ -78,7 +78,14 @@ parse(int argc, char *argv[], String_map& opts, String_list& args) {
 
 Argument_map
 parse(const Parameter_set&, int argc, char* argv[]) {
-  return {};
+  String_map opts;
+  String_list args;
+  parse(argc, argv, opts, args);
+
+  // FIXME: Post-process the parsed arguments and construct the argument 
+  // map.
+  Argument_map result;
+  return result;
 }
 
 } // namespace cli
