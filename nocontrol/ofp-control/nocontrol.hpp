@@ -41,7 +41,7 @@ private:
 struct Nocontrol_factory {
   Nocontrol_factory(ff::Controller& c);
 
-  Nocontrol_handler* operator()(ff::Reactor&, ff::Socket&&);
+  Nocontrol_handler* operator()(ff::Reactor&, ff::Socket&&) const;
 
 private:
   ff::Controller& ctrl_;      // The controller

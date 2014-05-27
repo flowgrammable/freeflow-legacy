@@ -35,7 +35,7 @@ Nocontrol_factory::Nocontrol_factory(ff::Controller& c)
   : ctrl_(c) { }
 
 inline Nocontrol_handler*
-Nocontrol_factory::operator()(ff::Reactor& r, ff::Socket&& s) {
+Nocontrol_factory::operator()(ff::Reactor& r, ff::Socket&& s) const {
   return new Nocontrol_handler(r, std:: move(s), ctrl_);
 }
 
