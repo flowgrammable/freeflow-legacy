@@ -34,47 +34,36 @@ String::is_quoted() const {
     return (*this)[0] == '"';
 }
 
-inline Value&
-Value::operator=(const Value& v) {
-  this->~Value();
-  new(this) Value(v);
-
-  return *this;
-}
-
-
 inline
 Value::Value()
   : type_(NIL), data_() { }
 
 inline
 Value::Value(Value&& x)
-  : type_(x.type_) 
-{
-  switch (type_) {
-  case NIL: new (&data_.n) Null(x.data_.n); break;
-  case BOOL: new (&data_.b) Bool(x.data_.b); break;
-  case INT: new (&data_.z) Int(x.data_.z); break;
-  case REAL: new (&data_.r) Real(x.data_.r); break;
-  case STRING: new (&data_.s) String(std::move(x.data_.s)); break;
-  case ARRAY: new (&data_.a) Array(std::move(x.data_.a)); break;
-  case OBJECT: new (&data_.o) Object(std::move(x.data_.o)); break;
+  : type_(x.type_) { move(std::move(x)); }
+
+inline Value&
+Value::operator=(Value&& x) {
+  if (&x != this) {
+    destroy();
+    type_ = x.type_;
+    move(std::move(x));
   }
+  return *this;
 }
 
 inline
 Value::Value(const Value& x)
-  : type_(x.type_)
-{
-  switch (type_) {
-  case NIL: new (&data_.n) Null(x.data_.n); break;
-  case BOOL: new (&data_.b) Bool(x.data_.b); break;
-  case INT: new (&data_.z) Int(x.data_.z); break;
-  case REAL: new (&data_.r) Real(x.data_.r); break;
-  case STRING: new (&data_.s) String(x.data_.s); break;
-  case ARRAY: new (&data_.a) Array(x.data_.a); break;
-  case OBJECT: new (&data_.o) Object(x.data_.o); break;
+  : type_(x.type_) { copy(x); }
+
+inline Value&
+Value::operator=(const Value& x) {
+  if (&x != this) {
+    destroy();
+    type_ = x.type_;
+    copy(x);
   }
+  return *this;
 }
 
 // Value construction
@@ -135,18 +124,55 @@ Value::Value(const Object& o)
   : type_(OBJECT), data_(o) { }
 
 inline
-Value::~Value() {
-  // Destroy non-trivial data_ members.
+Value::~Value() { destroy(); }
+
+inline Value::Type
+Value::type() const { return type_; }
+
+// Copy the contents of x into this value. Note that type_ is already
+// initialized or assigned.
+inline void
+Value::copy(const Value& x) {
+  switch (type_) {
+  case NIL: new (&data_.n) Null(x.data_.n); break;
+  case BOOL: new (&data_.b) Bool(x.data_.b); break;
+  case INT: new (&data_.z) Int(x.data_.z); break;
+  case REAL: new (&data_.r) Real(x.data_.r); break;
+  case STRING: new (&data_.s) String(x.data_.s); break;
+  case ARRAY: new (&data_.a) Array(x.data_.a); break;
+  case OBJECT: new (&data_.o) Object(x.data_.o); break;
+  }
+}
+
+// Move the contents of x into this value. Note that type_ is already
+// initialized or assigned.
+inline void
+Value::move(Value&& x) {
+  switch (type_) {
+  case NIL: new (&data_.n) Null(x.data_.n); break;
+  case BOOL: new (&data_.b) Bool(x.data_.b); break;
+  case INT: new (&data_.z) Int(x.data_.z); break;
+  case REAL: new (&data_.r) Real(x.data_.r); break;
+  case STRING: new (&data_.s) String(std::move(x.data_.s)); break;
+  case ARRAY: new (&data_.a) Array(std::move(x.data_.a)); break;
+  case OBJECT: new (&data_.o) Object(std::move(x.data_.o)); break;
+  }
+}
+
+// Destroy non-trivial data_ members.
+inline void
+Value::destroy() {
   switch(type_) {
+  case NIL: data_.n.~Null(); break;
+  case BOOL: data_.b.~Bool(); break;
+  case INT: data_.z.~Int(); break;
+  case REAL: data_.r.~Real(); break;
   case STRING: data_.s.~String(); break;
   case ARRAY: data_.a.~Array(); break;
   case OBJECT: data_.o.~Object(); break;
   default: break;
   }
 }
-
-inline Value::Type
-Value::type() const { return type_; }
 
 template<typename T>
   inline T&
