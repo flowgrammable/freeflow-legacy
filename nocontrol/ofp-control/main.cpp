@@ -24,15 +24,16 @@
 #include <freeflow/sdn/controller.hpp>
 #include <apps/noflow/noflow.hpp>
 
+#include "prelude.hpp"
+#include "nocontrol.hpp"
 
-#include "switch_acceptor.hpp"
-#include "control_acceptor.hpp"
-#include "connection.hpp"
-#include "bridge.hpp"
+// #include "ofp_acceptor.hpp"
+// #include "ofp_handler.hpp"
 
 using namespace std;
 using namespace freeflow;
 using namespace nocontrol;
+
 
 // This handler is responsible for watching for the end of
 // file from an open file. 
@@ -56,52 +57,41 @@ struct Terminator : Resource_handler {
   }
 };
 
+
 // Stores configuration information for the controller.
 // FIXME: Move this into the SDN library.
 struct Controller_config {
-  Address ctrl_addr {Ipv4_addr::any, 9000};
-  Address mgmt_addr {Ipv4_addr::any, 9001};
+  Address openflow_addr {Ipv4_addr::any, 9000};
+  Address nocontrol_addr {Ipv4_addr::any, 9001};
 };
+
 
 int 
 main(int argc, char* argv[]) {
-
   Reactor r;
 
-  // FIXME: Write a command-line argument parser and make sure
-  // that this won't crash (it currently will).
-
   // Create and configure the controller for NBI applications.
-  Controller ctrl;
+  Controller c;
   Controller_config conf;
 
-
-  // Load default applications.
-  // Application_library lib("../apps/template/libtemplate.so");
-  // ctrl.load(lib);
-
-  // Configure the conntroller adress.
-  static constexpr ff::Socket::Transport TCP = ff::Socket::TCP;
-  
-  // Accept switch connections.
-  Switch_acceptor sa(r, ctrl);
-  sa.listen(conf.ctrl_addr, TCP); 
-  
   // Accept management connections.
-  Control_acceptor ma(r, ctrl);
-  ma.listen(conf.mgmt_addr, TCP);
+  Nocontrol_acceptor nc(r, c);
+  nc.listen(conf.nocontrol_addr, ff::Socket::TCP);
 
-  // Acdept shell input.
+  
+  // // Accept switch connections.
+  // Switch_acceptor sa(r, ctrl);
+  // sa.listen(conf.ctrl_addr, TCP); 
+  
+
+  // Accept shell input.
   Terminator term(r, 0);
   
   // Add handlers and run the reactor loop.
   r.add_handler(&term);
-  r.add_handler(&sa);
-  r.add_handler(&ma);
+  r.add_handler(&nc);
+  // r.add_handler(&sa);
   r.run();
-
-  // FIXME: This should be part of the controller's destructor.
-  // ctrl.unload(lib);
 
   return 0;
 }

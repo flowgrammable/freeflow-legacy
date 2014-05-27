@@ -12,22 +12,37 @@
 // or implied. See the License for the specific language governing
 // permissions and limitations under the License.
 
-#ifndef NOCONTROL_BRIDGE_HPP
-#define NOCONTROL_BRIDGE_HPP
+#include <iostream>
 
-#include <freeflow/sdn/application.hpp>
-#include <freeflow/sdn/switch.hpp>
+#include <freeflow/sys/json.hpp>
 
-#include <nocontrol/config.hpp>
+#include "nocontrol.hpp"
 
 namespace nocontrol {
 
-class Bridge : ff::Application {
-public:
-  void start(ff::Switch&);
-  void stop(ff::Switch&);
-};
+using namespace freeflow;
 
-} // namespace nocontrol
+bool
+Nocontrol_handler::on_read() {
+  System_result res = rc().read(buf_);
 
-#endif
+  // Check for failures.
+  // FIXME: Improve error handling.
+  if (res.failed()) {
+    std::cerr << "failed to read from client\n";
+    return false; 
+  }
+
+  // If we read 0, bytes, the connection is closed.
+  if (res.value() == 0)
+    return false;
+  
+  // Decode and dispatch the command.
+  // FIXME: Actually do something here!
+  json::Value v = json::parse(buf_);
+  std::cout << v << '\n';
+
+  return true;
+}
+
+} // namesapce nocontrol
