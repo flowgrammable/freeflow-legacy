@@ -36,11 +36,16 @@ Nocontrol_handler::on_read() {
   // If we read 0, bytes, the connection is closed.
   if (res.value() == 0)
     return false;
-  
+
   // Decode and dispatch the command.
-  // FIXME: Actually do something here!
-  json::Value v = json::parse(buf_);
-  std::cout << v << '\n';
+  // FIXME: Actually do something here! Also improve error handling.
+  try {
+    json::Value v = json::parse(buf_);
+    std::cout << v << '\n';
+  } catch (...) {
+    std::cerr << "error: ill-formed command\n";
+    return false;
+  }
 
   return true;
 }
