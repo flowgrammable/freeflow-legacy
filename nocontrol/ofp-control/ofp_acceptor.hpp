@@ -23,21 +23,6 @@
 
 namespace nocontrol {
 
-/// The Switch_acceptor is responsible for creating new service handlers
-/// for connected switches.
-struct Switch_factory {
-  Switch_factory(ff::Controller&);
-  
-  Connection* operator()(ff::Reactor&, ff::Socket&&);
-
-  ff::Controller& ctrl;
-};
-
-/// The Switch_acceptor is responsible for accepting connections from
-/// switches and constructing service handlers to manage the OpenFlow
-/// protocol.
-using Switch_acceptor = ff::Acceptor<Connection, Switch_factory>;
-
 } // namesapce nocontrol
 
 #include <nocontrol/switch_acceptor.ipp>

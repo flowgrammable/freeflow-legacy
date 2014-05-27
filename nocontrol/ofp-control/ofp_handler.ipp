@@ -14,6 +14,9 @@
 
 namespace nocontrol {
 
+// -------------------------------------------------------------------------- //
+// Openflow handler
+
 // A scope guard that guarantees messages are always written before
 // returning from the function.
 struct Ofp_handler::Write_on_exit {
@@ -66,5 +69,19 @@ Ofp_handler::on_time(int t) {
   Write_on_exit g(*this);
   return proto_->on_time(reactor(), t);
 }
+
+
+// -------------------------------------------------------------------------- //
+// Openflow factory
+
+inline
+Ofp_factory::Ofp_factory(ff::Controller& c)
+  : ctrl_(c) { }
+
+inline Ofp_handler* 
+Ofp_factory::operator()(ff::Reactor& r, ff::Socket&& s) {
+  return new Ofp_handler(r, std::move(s), ctrl_);
+}
+
 
 } // namespace nocontrol

@@ -22,7 +22,7 @@
 
 namespace nocontrol {
 
-/// The nocontrol handler is responsible for implementing queries
+/// The Nocontrol_handler is responsible for implementing queries
 /// and commands sent to this service. When data is available for reading,
 /// it reads the value, parses it into JSON, and dispatches the appropriate
 /// commands.
@@ -37,6 +37,7 @@ private:
 };
 
 
+/// Responsible for the allocation of nocontrol handlers.
 struct Nocontrol_factory {
   Nocontrol_factory(ff::Controller& c);
 
