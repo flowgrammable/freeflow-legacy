@@ -74,21 +74,22 @@ parse(int argc, char *argv[], String_map& opts, String_list& args) {
   }
 }
 
+/// The Parameter class is the base class...
 struct Parameter {
-  json::Value value;
   virtual json::Value operator()(const std::string& s) const = 0;
+
+private:
+  json::Value default_;
 };
 
 struct Bool : Parameter {
   json::Value operator()(const std::string& s) const {
-    if(s == "true" or s == "yes" or s == "on"){
+    if(s == "true" or s == "yes" or s == "on")
       return json::Value(json::Bool(true));
-    }
-
-    else if(s == "false" or s == "no" or s == "off"){
+    else if(s == "false" or s == "no" or s == "off")
       return json::Value(json::Bool(false));
-    }
-    else throw runtime_error(s + " is an invalid value. Expected a value of type Bool");
+    else 
+      throw runtime_error(s + " is an invalid value. Expected a value of type Bool");
   }
 };
 
@@ -96,9 +97,10 @@ struct Real : Parameter {
   json::Value operator()(const std::string& s) const {
     double d;
     stringstream ss(s);
-    if(ss >> d) return json::Value(json::Real(d));
-    else throw runtime_error(s + " is an invalid value. Expected a numerical value of type Real");
-
+    if(ss >> d) 
+      return json::Value(json::Real(d));
+    else 
+      throw runtime_error(s + " is an invalid value. Expected a numerical value of type Real");
   }
 };
 
@@ -150,12 +152,12 @@ main(int argc, char *argv[]) {
       cout << "Unknown arg " << f.first << endl;
     else {
       Parameter *p = pars[f.first];
-      pars[f.first]->value = p->operator()(f.second);
+      // pars[f.first]->value = p->operator()(f.second);
     }
   }
 
   for (auto &f : pars) {
-    cout << "parameter " << f.first << " is set to " << f.second->value << endl;
+    // cout << "parameter " << f.first << " is set to " << f.second->value << endl;
   }
   
   // { 
