@@ -12,27 +12,27 @@
 // or implied. See the License for the specific language governing
 // permissions and limitations under the License.
 
-#ifndef NOCONTROL_CONNECTION_HPP
-#define NOCONTROL_CONNECTION_HPP
+#ifndef NOCONTROL_OFP_HANDLER_HPP
+#define NOCONTROL_OFP_HANDLER_HPP
 
 #include <freeflow/sys/socket.hpp>
 #include <freeflow/sys/handler.hpp>
 #include <freeflow/proto/ofp/protocol.hpp>
 
-#include <nocontrol/config.hpp>
+#include "prelude.hpp"
 
 namespace nocontrol {
 
-/// Represents a connection to a switch. This class acts as a small
-/// shim that buffers messages and hands them to a state machine for
+/// Represents an OpenFlow connection with a switch. This class acts as a 
+/// small shim that buffers messages and hands them to a state machine for
 /// further processing.
 ///
 /// \todo We're required to TLS for switch connections. This
 /// seems like the likely integration point for that work.
-class Connection : public ff::Socket_handler {
+class Ofp_handler : public ff::Socket_handler {
   struct Write_on_exit;
 public:
-  Connection(ff::Reactor&, ff::Controller&, ff::Socket&&);
+  Ofp_handler(ff::Reactor&, ff::Socket&&, ff::Controller&);
 
   bool on_open();
   bool on_close();
@@ -43,12 +43,12 @@ private:
   bool read();
   bool write();
 
-  ff::Controller* ctrl_;
+  ff::Controller& ctrl_;
   ff::ofp::Protocol* proto_;
 };
 
 } // namespace nocontrol
 
-#include <nocontrol/connection.ipp>
+#include "ofp_handler.hpp"
 
 #endif

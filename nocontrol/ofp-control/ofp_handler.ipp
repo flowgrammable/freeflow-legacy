@@ -16,14 +16,14 @@ namespace nocontrol {
 
 // A scope guard that guarantees messages are always written before
 // returning from the function.
-struct Connection::Write_on_exit {
-  Write_on_exit(Connection& c) : conn(c) { }
+struct Ofp_handler::Write_on_exit {
+  Write_on_exit(Ofp_handler& c) : conn(c) { }
   ~Write_on_exit() { conn.write(); }
-  Connection& conn;
+  Ofp_handler& conn;
 };
 
 inline
-Connection::Connection(ff::Reactor& r, ff::Controller& c, ff::Socket&& s)
+Ofp_handler::Ofp_handler(ff::Reactor& r, ff::Socket&& s, ff::Controller& c)
   : ff::Socket_handler(r, ff::READ_EVENTS | ff::TIME_EVENTS, std::move(s))
   , ctrl_(&c) 
 { }
@@ -33,7 +33,7 @@ Connection::Connection(ff::Reactor& r, ff::Controller& c, ff::Socket&& s)
 ///
 /// \todo Error checking.
 inline bool
-Connection::on_open() {
+Ofp_handler::on_open() {
   Write_on_exit g(*this);
   proto_ = new ff::ofp::Protocol(ctrl_, this);
   return proto_->on_open(reactor());
@@ -41,7 +41,7 @@ Connection::on_open() {
 
 /// Shutdown the state machine and delete the handler.
 inline bool 
-Connection::on_close() {
+Ofp_handler::on_close() {
   Write_on_exit g(*this);
   proto_->on_close(reactor());
   delete this;
@@ -53,7 +53,7 @@ Connection::on_close() {
 ///
 /// \todo Error checking.
 inline bool
-Connection::on_read() {
+Ofp_handler::on_read() {
   Write_on_exit g(*this);
   if (not read()) 
     return false;
@@ -62,7 +62,7 @@ Connection::on_read() {
 
 /// When a timeout occurs, notify the protocol of the expired timer.
 inline bool
-Connection::on_time(int t) {
+Ofp_handler::on_time(int t) {
   Write_on_exit g(*this);
   return proto_->on_time(reactor(), t);
 }

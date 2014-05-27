@@ -17,7 +17,7 @@
 #include <freeflow/sys/buffer.hpp>
 #include <freeflow/proto/ofp/ofp.hpp>
 
-#include "connection.hpp"
+#include "ofp_handler.hpp"
 
 using namespace freeflow;
 
@@ -36,7 +36,7 @@ namespace nocontrol {
 // If we had a recombinant buffers, we could eliminate the need to
 // allocate or issue multiple reads.
 bool
-Connection::read() {
+Ofp_handler::read() {
   // Sample enough to read only the header.
   // FIXME: I may not read 8 bytes.
   Buffer buf(8);
@@ -61,7 +61,7 @@ Connection::read() {
 
 // Write all messages to the socket.
 bool
-Connection::write() {
+Ofp_handler::write() {
   while (not proto_->write.empty()) {
     Buffer b;
     proto_->write.get_buffer(b);
