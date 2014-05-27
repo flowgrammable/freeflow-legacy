@@ -83,5 +83,4 @@ Ofp_factory::operator()(ff::Reactor& r, ff::Socket&& s) {
   return new Ofp_handler(r, std::move(s), ctrl_);
 }
 
-
 } // namespace nocontrol

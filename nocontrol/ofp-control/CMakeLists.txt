@@ -16,7 +16,7 @@ include_directories(${CMAKE_SOURCE_DIR})
 
 set(src main.cpp 
         nocontrol.cpp
-        ofp_handler.cpp)
+        openflow.cpp)
 
 set(libs freeflow freeflow-ofp freeflow-ofp-1.0 freeflow-sdn)
 

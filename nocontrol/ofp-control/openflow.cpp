@@ -17,7 +17,7 @@
 #include <freeflow/sys/buffer.hpp>
 #include <freeflow/proto/ofp/ofp.hpp>
 
-#include "ofp_handler.hpp"
+#include "openflow.hpp"
 
 using namespace freeflow;
 

@@ -71,6 +71,6 @@ using Ofp_acceptor = ff::Acceptor<Ofp_handler, Ofp_factory>;
 
 } // namespace nocontrol
 
-#include "ofp_handler.hpp"
+#include "openflow.hpp"
 
 #endif
