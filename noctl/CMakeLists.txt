@@ -14,7 +14,10 @@
 
 include_directories(${CMAKE_SOURCE_DIR})
 
-set(src main.cpp)
+set(src main.cpp
+	    command.cpp
+      parameter.cpp)
+	    
 set(libs freeflow)
 
 add_executable(noctl ${src})

@@ -123,11 +123,11 @@ public:
 
   // Move semantics
   Value(Value&&);
-  Value& operator=(Value&&) = delete;
+  //Value& operator=(Value&&);
 
   // Copy semantics
   Value(const Value&);
-  Value& operator=(const Value&) = delete;
+  Value& operator=(const Value&);
 
   // Value construction
   Value(Null);

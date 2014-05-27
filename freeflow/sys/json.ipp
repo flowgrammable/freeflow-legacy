@@ -34,6 +34,14 @@ String::is_quoted() const {
     return (*this)[0] == '"';
 }
 
+inline Value&
+Value::operator=(const Value& v) {
+  this->~Value();
+  new(this) Value(v);
+
+  return *this;
+}
+
 
 inline
 Value::Value()

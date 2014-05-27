@@ -12,118 +12,120 @@
 // or implied. See the License for the specific language governing
 // permissions and limitations under the License.
 
-#include <iostream>
-#include <fstream>
-#include <iterator>
-#include <string>
+
+
+#include <assert.h>
 
 #include <freeflow/sys/socket.hpp>
 #include <freeflow/sys/json.hpp>
+#include "command.hpp"
+#include "parameter.hpp"
 
 using namespace std;
 using namespace freeflow;
+//using namespace json;
 
+namespace cli {
 
-struct Config {
-  Address ctrl_addr {Address::IP4, "127.0.0.1", 9001};
-};
+//static String_map commands;
+//commands["add"] = new Add();
 
-enum Command {
-  VERSION_CMD,
-  HELP_CMD,
-  RAW_CMD
-};
+std::pair<std::string, std::string>
+parse_flag(const std::string& arg) {
+  // If the argument is only '-', that's an error
+  if (arg.size() == 1)
+    throw std::runtime_error("parse error");
 
-// Print version information.
-int 
-version() {
-  std::cout << "noctl v0.1\n";
-  std::cout << "Copyright (c) 2013-2014 Flowgrammable.org\n";
-  return 0;
+  // Make sure that p points to the first non-flag character.
+  std::size_t p = 1;
+  if (arg[p] == '-')
+    ++p;
+
+  // If the flag is "--", that's an error.
+  if (p == arg.size())
+    throw std::runtime_error("parse error");
+
+  // Parse the name from the flag. If the flag is of the from
+  // f=x, this parses out f. If the '=' is not present, this
+  // returns the name f.
+  std::string name;
+  std::size_t n = arg.find_first_of('=', p);
+  if (n != arg.npos)
+    name = arg.substr(p, n - p);
+  else
+    return {arg.substr(p), "true"};
+
+  // Parse the value. In a flag of the form f=x, this is everything
+  // past the '='. If the value is empty, return as if it were "null".
+  string value = arg.substr(n + 1);
+  if (value.empty())
+    return {std::move(name), "null"};
+  else
+    return {std::move(name), std::move(value)};
 }
 
-int 
-help() {
-  std::cout << "noctl [prog-opts] command [cmd-opts] [cmd-args]\n";
-  return 0;
+// Parses the command line inputs into flags and positional arguments
+void
+parse(int argc, char *argv[], String_map& opts, String_list& args) {
+  for (int i = 0; i < argc; ++i) {
+    if (argv[i][0] == '-')
+      opts.insert(parse_flag(argv[i]));
+    else
+      args.push_back(argv[i]);
+  }
 }
+
+} // namespace cli
+
+using namespace cli;
 
 int
-raw(int arg, int argc, char* argv[]) {
-  if (arg == argc) {
-    std::cerr << "usage: noctl raw <json-file>\n";
-    return -1;
-  }
+main(int argc, char *argv[]) {
+  String_map opts;
+  String_list args;
 
-  string buf;
-  try {
-    // Read the json-file into a buffer.
-    ifstream f(argv[arg]);
-    istreambuf_iterator<char> iter(f);
-    istreambuf_iterator<char> end;
-    buf = string(iter, end);
-  } catch (...) {
-    std::cerr << "error: could not read file\n";
-    return -1;
-  }
+  map<string, Parameter*> pars;
 
-  try {
-    Config conf;
-    Socket s(Socket::IP4, Socket::TCP);
+  Command *c = nullptr;
 
-    // Connect to nocontrol.
-    System_result rc = connect(s, conf.ctrl_addr);
-    if (rc.failed())
-      std::cerr << "error: could not connect\n";
-    
-    // Write JSON to the socket.
-    System_result rw  = s.write(buf.c_str(), buf.size());
-    if (rw.completed())
-      std::cerr << "sent " << rw.value() << " bytes\n";
-    else
-      std::cout << "did not send data\n";
-  } catch (...) {
-    std::cerr << "error: could not send command\n";
-    return  -1;
-  }
+  Command::commands["hello"] = c;
 
-  return 0;
-}
+  // pars["flag-optional-bool"] = new Optional<Bool>;
+  // pars["flag-optional-real"] = new Optional<Real>;
+  // pars["flag-bool"] = new Bool;
+  // pars["flag-real"] = new Real;
 
-int 
-main(int argc, char* argv[]) {
-  // Parse command line arguments.
-  //
-  // FIXME: This is totally broken. Parsing options occurs in 3
-  // pases. First, the program options (applies to all commands),
-  // the the command, then the command options and arguments (which 
-  // actually depend on the command). Note that only one command
-  // is permitted.
-  Command cmd = HELP_CMD;
-  int arg = 1;
-  for (; arg < argc; ++arg) {
-    string s = argv[arg++];
-    if (s == "version") {
-      cmd = VERSION_CMD; 
-      break;
-    } else if (s == "help") {
-      cmd = HELP_CMD;
-      break;
-    } else if (s == "raw") {
-      cmd = RAW_CMD;
-      break; 
-    } else {
-      std::cerr << "error: unknown command\n";
-      help();
-      return -1;
+  parse(argc, argv, opts, args);
+  
+  std::cout << "== options ==\n";
+  for (auto &f : opts)
+    std::cout << f.first << " : " << f.second << '\n';
+  
+  std::cout << endl << "== positional args ==\n";
+  for (auto &s : args)
+    std::cout << s << endl;
+
+  cout << endl;
+
+
+  for (auto &f : opts) {
+    if (pars.count(f.first) == 0) 
+      cout << "Unknown arg " << f.first << endl;
+    else {
+      // Parameter *p = pars[f.first];
+      // pars[f.first]->value = p->operator()(f.second);
     }
   }
 
-  switch (cmd) {
-  case VERSION_CMD: return version();
-  case HELP_CMD: return help();
-  case RAW_CMD: return raw(arg, argc, argv);
+  for (auto &f : pars) {
+    // cout << "parameter " << f.first << " is set to " << f.second->value << endl;
   }
+  
+  // { 
+  //   Parameter<Bool> p1("flag", "f", "Indicate that flag is set");
 
+  //   json::Value v1 = p1.get(opts);
+  // }
+
+  return 0;
 }
-
