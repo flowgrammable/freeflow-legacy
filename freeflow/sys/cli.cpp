@@ -67,6 +67,15 @@ parse(int argc, char *argv[]) {
   return args;
 }
 
+/// Return an environment variable name constructed from the given
+/// prefix and parameter name.
+inline std::string
+make_env_var(const std::string& pre, const Parameter& parm) {
+  return pre + "_" + toupper(parm.name());
+}
+
+
+
 } // namespace
 
 Arguments
@@ -86,27 +95,22 @@ parse_env(const Parameters& parms, const char* prefix){
 }
 
 Arguments 
-parse_env(const Parameters& parms, const std::string& prefix){
-  Arguments env_args;
-  std::string upped_prefix = toupper(prefix);
-  std::stringstream errors;
+parse_env(const Parameters& parms, const std::string& pre){
   // Iterate through the list of parameters and check the environment
   // to see if it contains any of them. Any arguments found in the
   // environment are added to the (named) arguments map.
-  for(auto parm : parms.parms_){
-    std::string env_var = upped_prefix + "_" + toupper(parm.name());
-    char* env_value;
-    env_value = getenv(env_var.c_str());
-    if (env_value == NULL) continue; // not found
-    else {                           // found
-      Value v = parm.type()(env_value);
-      if(!v) errors << "Environment variable " << env_var 
-                    << " contains a value of an invalid type\n";
-      else env_args.named.emplace(env_var, v); 
-    }
+  std::string prefix = toupper(pre);
+  Parsed_arguments args;
+  for (auto parm : parms.parms_) {
+    std::string var = make_env_var(prefix, parm);
+    if (char* p = getenv(var.c_str()))
+      args.named.emplace(parm.name(), p);
   }
-  std::cout << errors.str();
-  return env_args;
+
+  // FIXME: Postprocess parsed arguments, checking for required
+  // values and instantiating default arguments.
+
+  return {};
 }
 
 

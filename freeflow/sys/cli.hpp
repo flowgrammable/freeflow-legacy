@@ -140,7 +140,7 @@ public:
 
 //private:
   Parm_list parms_;
-  Parm_map map_;
+  Parm_map  map_;
 };
 
 
