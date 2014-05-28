@@ -18,7 +18,7 @@ namespace freeflow {
 namespace cli {
 namespace {
 
-using Named_argument = Arguments::Argument_map::value_type;
+using Named_argument = Arguments::String_map::value_type;
 
 Named_argument
 parse_flag(const std::string& arg) {
@@ -43,13 +43,13 @@ parse_flag(const std::string& arg) {
   if (n != arg.npos)
     name = arg.substr(p, n - p);
   else
-    return {arg.substr(p), true};
+    return {arg.substr(p), "true"};
 
   // Parse the value. In a flag of the form f=x, this is everything
   // past the '='. If the value is empty, return as if it were "null".
   std::string value = arg.substr(n + 1);
   if (value.empty())
-    return {std::move(name), nullptr};
+    return {std::move(name), ""};
   else
     return {std::move(name), std::move(value)};
 }
@@ -68,48 +68,77 @@ make_env_var(const std::string& pre, const Parameter& parm) {
 ///
 /// FIXME: Improve error handling. If an error occurs, the program
 /// should probably stop running after diagnosing all errors.
-Arguments
-parse_args(const Parameters& parms, int argc, char* argv[]) {
-  Arguments args;
+void
+parse_args(const Parameters& parms, Arguments& args, int argc, char* argv[]) {
   for (int i = 0; i < argc; ++i) {
     if (argv[i][0] == '-') {
       auto x = parse_flag(argv[i]);
       if (parms.map_.count(x.first) == 0) {
         std::cerr << "error: unrecognized parameter '" << x.first << "'\n";
       } else {
-        args.named.insert(parse_flag(argv[i]));
+        args.initial.insert(parse_flag(argv[i]));
       }
     }
     else
       args.listed.push_back(argv[i]);
   }
-  return args;
 }
 
 /// Parse the enviornment, constructing arguments from those environment
 /// variables listed in the parameter specification. This effectively
 /// filters the environment to find only those variables that the 
 /// configuration is interested in.
-Arguments 
-parse_env(const Parameters& parms, const char* prefix) {
-  Arguments args;
+void 
+parse_env(const Parameters& parms, Arguments& args, const char* prefix) {
   std::string pre = toupper(prefix);
   for (auto parm : parms.parms_) {
     std::string var = make_env_var(pre, parm);
     if (char* p = getenv(var.c_str()))
-      args.named.emplace(parm.name(), p);
+      args.initial.emplace(parm.name(), p);
   }
-  return args;
 }
 
 /// Iterate through the list of parameters and check the environment
 /// to see if it contains any of them. Any arguments found in the
-/// environment are added to the (named) arguments map.
-Arguments 
-parse_env(const Parameters& parms, const std::string& prefix) {
-  return parse_env(parms, prefix.c_str());
+/// environment are added to the (initial) arguments map.
+void 
+parse_env(const Parameters& parms, Arguments& args, const std::string& prefix) {
+  parse_env(parms, args, prefix.c_str());
 }
 
+void
+check_type(const Parameter& parm, Arguments& args, const std::string& val) {
+  Value v = parm.type()(val);
+  if(!v) 
+    std::cerr << "error: argument '" << parm.name() << "' has invalid type\n"; 
+  else 
+    args.named.emplace(parm.name(), v); 
+}
+
+void check_args(const Parameters& parms, Arguments& args) {
+  for (auto parm : parms.parms_) {
+    // An argument for the parameter was provided. In this case 'which' may be
+    // OPTIONAL, REQUIRED, or DEFAULT
+    if (args.initial.count(parm.name()))
+      check_type(parm, args, args.initial[parm.name()]);
+    
+    // An argument for the parameter was not provided. This covers the rest of
+    // the cases where 'which' is DEFAULT. A valid default value must exist for
+    // the parameter
+    else if (parm.init().which == cli::DEFAULT) 
+      check_type(parm, args, parm.init().value);
+
+    // An argument for the parameter was not provided. In this case 'which'
+    // may be OPTIONAL or REQUIRED. Cases where 'which' is OPTIONAL can be
+    // disregarded since no argument was provided.
+    else {
+      if(parm.init().which == cli::REQUIRED)
+        std::cerr << "error: no argument provided for required parameter '" 
+                  << parm.name() << "'\n";
+    }
+    
+  }
+}
 
 
 } // namespace cli

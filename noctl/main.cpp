@@ -35,24 +35,30 @@ main(int argc, char *argv[]) {
   parms.declare("config", cli::String(), cli::OPTIONAL, "The path to a configuration file");
 
 
-  cli::Arguments cli_args = parse_args(parms, argc, argv);
-  cli::Arguments env_args = parse_env(parms, "flog");
+  cli::Arguments cli_args;
+  cli::Arguments env_args;
+  
+  parse_args(parms, cli_args, argc, argv);
+  parse_env(parms, env_args, "flog");
 
+
+  check_args(parms, cli_args);
+  check_args(parms, env_args);
+
+  cout << "Parsed command-line arguments:\n";
   for (auto& x : cli_args.named)
     cout << x.first << " = " << x.second << '\n';
 
+  cout << "\nParsed environment variables:\n";
   for (auto& x : env_args.named) 
     cout << x.first << " = " << x.second << "\n";
+
+  cout << "\n";
 
 
 
   // Command *c = nullptr;
   // Command::commands["hello"] = c;
-
-  // pars["flag-optional-bool"] = new Optional<Bool>;
-  // pars["flag-optional-real"] = new Optional<Real>;
-  // pars["flag-bool"] = new Bool;
-  // pars["flag-real"] = new Real;
 
   // parse(argc, argv, opts, args);
   

@@ -149,9 +149,10 @@ public:
 struct Arguments {
   using Argument_map = std::map<std::string, Value>;
   using Argument_list = std::vector<Value>;
-
-  Argument_map  named;  // Name/value mappings
-  Argument_list listed; // Positional arguments.
+  using String_map = std::map<std::string, std::string>;
+  String_map    initial;  // Initial arguments as strings
+  Argument_map  named;    // Name/value mappings
+  Argument_list listed;   // Positional arguments.
 };
 
 
@@ -177,14 +178,17 @@ template<typename T>
 // Parsing
 
 // Parsing functions
-Arguments parse_args(const Parameters&, int, char*[]);
+void parse_args(const Parameters&, Arguments&, int, char*[]);
 
-Arguments parse_env(const Parameters&, const char*);
-Arguments parse_env(const Parameters&, const std::string&);
+void parse_env(const Parameters&, Arguments&, const char*);
+void parse_env(const Parameters&, Arguments&, const std::string&);
 
-Arguments parse_config(const Parameters&, const char*);
-Arguments parse_config(const Parameters&, const std::string&);
+void parse_config(const Parameters&, Arguments&, const char*);
+void parse_config(const Parameters&, Arguments&, const std::string&);
 
+void
+check_type(const Parameter&, Arguments&, const std::string&);
+void check_args(const Parameters&, Arguments&);
 
 
 } // namespace cli
