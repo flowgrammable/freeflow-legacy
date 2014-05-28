@@ -22,8 +22,11 @@ using namespace std;
 
 int main() {
   Controller ctrl;
-  Application_library libnoflow("flog_noflow.app");
-  Application* app = libnoflow.factory()->create(ctrl);
-  libnoflow.factory()->destroy(app);
+  
+  Application_library libnoflow("flog_template.app");
+
+  Application* app = libnoflow.create(ctrl);
+
+  libnoflow.destroy(app);
 }
 

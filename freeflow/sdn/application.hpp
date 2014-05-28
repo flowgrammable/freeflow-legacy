@@ -37,6 +37,9 @@ public:
   virtual void destroy(Application*) = 0;
 };
 
+/// The type of the factory function pointer
+using Application_factory_fn = Application_factory*(*)();
+
 
 /// The Application_library class represents a dynamically loaded
 /// library that implements (one or more?) freeflow applications.
@@ -54,7 +57,8 @@ public:
   void destroy(Application*) const;
   
 private:
-  Application_factory* factory_;
+  Application_factory_fn entry_;   // Resolved etnry point
+  Application_factory*   factory_; // The factory object
 };
 
 

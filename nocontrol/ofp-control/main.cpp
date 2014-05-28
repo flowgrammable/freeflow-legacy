@@ -80,9 +80,11 @@ main(int argc, char* argv[]) {
   Ofp_acceptor ofp(r, c);
   ofp.listen(conf.openflow_addr, ff::Socket::TCP); 
   
-
   // Accept shell input.
   Terminator term(r, 0);
+
+  // Load some default applications
+  c.start("flog_noflow.app");
   
   // Add handlers and run the reactor loop.
   r.add_handler(&term);

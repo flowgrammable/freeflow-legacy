@@ -12,18 +12,21 @@
 // or implied. See the License for the specific language governing
 // permissions and limitations under the License.
 
+#include <typeinfo>
+
 namespace freeflow {
 
 // -------------------------------------------------------------------------- //
 // Application factory
 
 /// Tthe type of the application factory function.
-using Application_factory_fn = Application_factory*(*)();
 
 // \todo This will crash if function returns null.
 inline
 Application_library::Application_library(const Path& p) 
-  : Library(p), factory_(function<Application_factory_fn>("factory")())
+  : Library(p)
+  , entry_(function<Application_factory_fn>("factory"))
+  , factory_(entry_())
 {
   if (not factory_)
     throw std::runtime_error("cannot resolve application symbol");
@@ -31,13 +34,11 @@ Application_library::Application_library(const Path& p)
 
 /// Return the factory function from the application.
 inline Application_factory*
-Application_library::factory() const {
-  return factory_;
-}
+Application_library::factory() const { return factory_; }
 
 /// Create a new application through the library interface.
 inline Application*
-Application_library::create(Controller& c) const { 
+Application_library::create(Controller& c) const {
   return factory_->create(c); 
 }
 

@@ -51,7 +51,7 @@ struct Process {
 
 /// The Controller class is...
 class Controller {
-  using Library_map = std::unordered_map<std::string, Application_library>;
+  using Library_map = std::unordered_map<std::string, Application_library*>;
   using Process_list = std::list<Process>;
   using Switch_set = std::unordered_set<Switch*>;
 

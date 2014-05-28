@@ -37,10 +37,13 @@ Controller::is_loaded(const std::string& name) {
 inline Application_library*
 Controller::load(const std::string& name) {
   auto iter = libs_.find(name);
-  if (iter != libs_.end())
-    return &iter->second;
-  else
-    return &libs_.insert({name, Application_library(name)}).first->second;
+  if (iter != libs_.end()) {
+    return iter->second;
+  } else {
+    Application_library* lib = new Application_library(name);
+    libs_.insert({name, lib});
+    return lib;
+  }
 }
 
 /// Unload the application library. Unloading a library that is not
@@ -63,7 +66,10 @@ Controller::start(const std::string& name) {
   // FIXME: We should be passing arguments to create.
   Application_library* lib = load(name);
   try {
+    // FIXME: I don't think create returns nullptr.
     Application* app = lib->create(*this);
+    if (not app) 
+      return nullptr;
 
     // Create the process record
     auto iter = procs_.emplace(procs_.end(), app, lib);
@@ -73,8 +79,9 @@ Controller::start(const std::string& name) {
     app->start();
     return &*iter;
   } catch(...) {
-    /// FIXME: Diagnose this error.
-    return nullptr;
+    std::cerr << "error: could not load library\n";
+    throw;
+    // return nullptr;
   }
 }
 
