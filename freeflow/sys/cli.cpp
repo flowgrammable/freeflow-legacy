@@ -82,27 +82,19 @@ Arguments
 parse_args(const Parameters& parms, int argc, char* argv[]) {
   Parsed_arguments pa = parse(argc, argv);
 
-  // TODO: Post-process the parsed arguments, creating the new
+  // FIXME: Post-process the parsed arguments, creating the new
   // argument set.
 
   return {};
 }
 
+/// Do stuff...
 Arguments 
 parse_env(const Parameters& parms, const char* prefix){
-  std::string pre(prefix);
-  return parse_env(parms, pre);
-}
-
-Arguments 
-parse_env(const Parameters& parms, const std::string& pre){
-  // Iterate through the list of parameters and check the environment
-  // to see if it contains any of them. Any arguments found in the
-  // environment are added to the (named) arguments map.
-  std::string prefix = toupper(pre);
+  std::string pre = toupper(prefix);
   Parsed_arguments args;
   for (auto parm : parms.parms_) {
-    std::string var = make_env_var(prefix, parm);
+    std::string var = make_env_var(pre, parm);
     if (char* p = getenv(var.c_str()))
       args.named.emplace(parm.name(), p);
   }
@@ -111,6 +103,14 @@ parse_env(const Parameters& parms, const std::string& pre){
   // values and instantiating default arguments.
 
   return {};
+}
+
+/// Iterate through the list of parameters and check the environment
+/// to see if it contains any of them. Any arguments found in the
+/// environment are added to the (named) arguments map.
+Arguments 
+parse_env(const Parameters& parms, const std::string& prefix){
+  return parse_env(parms, prefix.c_str());
 }
 
 
