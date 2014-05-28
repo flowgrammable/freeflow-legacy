@@ -37,7 +37,9 @@ Application_library::factory() const {
 
 /// Create a new application through the library interface.
 inline Application*
-Application_library::create() const { return factory_->create(); }
+Application_library::create(Controller& c) const { 
+  return factory_->create(c); 
+}
 
 /// Destroy 
 inline void
@@ -48,13 +50,17 @@ Application_library::destroy(Application* app) const {
 // -------------------------------------------------------------------------- //
 // Application
 
-/// The load event is sent when the controller instantiates the application.
-inline void
-Application::load(Controller&) { }
+inline
+Application::Application(Controller& c)
+  : ctrl_(c) { }
 
-/// The unload event is sent when the controller tears down the application.
-inline void
-Application::unload(Controller&) { }
+inline
+Application::~Application() { }
+
+/// Returns the controller on which the application was started.
+inline Controller&
+Application::controller() { return ctrl_; }
+
 
 /// The bind event is sent whenever the application is bound to a switch.
 /// This happens immediately after the switch connects to the controller.
@@ -79,19 +85,13 @@ inline void
 Application::features_known(Switch&) { }
 
 /// The start event is sent when an application is first instantiated
-/// on the given switch. The start event intended to be point at which
-/// an application establishes all necessary resources to function.
-/// Examples include the announcement of program requirements, the
-/// allocation of tables, and the allocation of groups.
+/// as a process.
 inline void
-Application::start(Switch&) { }
+Application::start() { }
 
-/// The stop event is sent when an application is uninstalled, either
-/// because the connection was closed or because an operator requested
-/// shutdown. Any resources acquired during startup must be released
-/// during shutdown.
+/// The stop event is sent when an application process is terminated.
 inline void
-Application::stop(Switch&) { }
+Application::stop() { }
 
 /// The packet-in event is sent whenever a packet is transferred to
 /// the controller due to a table miss or a flow configuration.

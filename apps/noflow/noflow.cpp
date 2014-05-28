@@ -23,7 +23,7 @@ extern "C" void*
 factory() { return &factory_; }
 
 ff::Application* 
-Factory::construct() { return new Noflow; }
+Factory::create(ff::Controller& c) { return new Noflow(c); }
 
 void 
 Factory::destroy(ff::Application* a) { delete a; }
@@ -31,21 +31,6 @@ Factory::destroy(ff::Application* a) { delete a; }
 
 /// \todo Dynamically configure the application so that it can terminate
 /// on different phases.
-void
-Noflow::load(ff::Controller&) { stop_ = ON_BIND; }
+Noflow::Noflow(ff::Controller& c)
+  : ff::Application(c) { }
 
-void
-Noflow::bind(ff::Switch& s) {
-  if (stop_ == ON_BIND)
-    s.disconnect();
-}
-
-void
-Noflow::version_known(ff::Switch& s) {
-  if (stop_ == ON_VERSION)
-    s.disconnect();
-}
-
-// The application never operates beyond this point.
-void
-Noflow::features_known(ff::Switch& s) { s.disconnect(); }

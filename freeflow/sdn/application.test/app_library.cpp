@@ -21,8 +21,9 @@ using namespace freeflow;
 using namespace std;
 
 int main() {
+  Controller ctrl;
   Application_library libnoflow("flog_noflow.app");
-  Application* app = libnoflow.factory()->construct();
+  Application* app = libnoflow.factory()->create(ctrl);
   libnoflow.factory()->destroy(app);
 }
 

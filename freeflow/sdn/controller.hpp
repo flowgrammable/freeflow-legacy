@@ -25,26 +25,53 @@
 namespace freeflow {
 
 struct Switch;
+struct Process;
+
+
+/// A positoin in a process list.
+using Process_iterator = std::list<Process>::iterator;
+
+
+/// A process represents an instance of a running application. It
+/// tracks book-keeping information related to the process' running.
+///
+/// \todo This should probably be in its own module.
+///
+/// \todo A process should have a process identifier. Probably some
+/// integer, but also possibly a name?
+struct Process {
+  Process(Application*, Application_library*);
+
+  Application*         app; // The actual application
+  Application_library* lib; // The source library
+  
+  Process_iterator     pos; // Internal position in application list
+};
+
 
 /// The Controller class is...
-///
-/// \todo Force the controller to manage plugins? Or make that the
-/// responsibility of some other component.
 class Controller {
-  using App_set = std::unordered_set<Application*>;
+  using Library_map = std::unordered_map<std::string, Application_library>;
+  using Process_list = std::list<Process>;
   using Switch_set = std::unordered_set<Switch*>;
 
 public:
-  // void load(Application_library&);
-  // void unload(Application_library&);
+  Application_library* load(const std::string&);
+  void unload(const std::string&);
+  bool is_loaded(const std::string&);
 
+  Process* start(const std::string&);
+  void stop(Process*);
+
+  
   // Switch management
   Switch& connect(Socket&);
   void disconnect(Switch&);
 
 private:
-  App_set    apps_;     // The hosted applications
-  Switch_set switches_; // Connected switches
+  Library_map  libs_;     // The set of libraries
+  Process_list procs_;    // The hosted applications
+  Switch_set   switches_; // Connected switches
 };
 
 } // namespace freeflow

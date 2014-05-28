@@ -33,9 +33,10 @@ class Application;
 /// class are returned from the loading of application libraries.
 class Application_factory {
 public:
-  virtual Application* create() = 0;
+  virtual Application* create(Controller&) = 0;
   virtual void destroy(Application*) = 0;
 };
+
 
 /// The Application_library class represents a dynamically loaded
 /// library that implements (one or more?) freeflow applications.
@@ -45,23 +46,26 @@ class Application_library : Library {
 public:
   Application_library(const Path&);
   
+  // Accessors
   Application_factory* factory() const;
-  Application* create() const;
+  
+  // Application management
+  Application* create(Controller&) const;
   void destroy(Application*) const;
   
 private:
   Application_factory* factory_;
 };
 
+
 /// The base class of all native Freeflow applications. This defines the
 /// abstract events sent to derived classes.
 class Application {
 public:
-  virtual ~Application() { }
+  Application(Controller&);
+  virtual ~Application();
 
-  // Application events
-  virtual void load(Controller&);
-  virtual void unload(Controller&);
+  Controller& controller();
 
   // Transport events
   virtual void bind(Switch&);
@@ -72,8 +76,8 @@ public:
   virtual void features_known(Switch&);
 
   // Startup events
-  virtual void start(Switch&);
-  virtual void stop(Switch&);
+  virtual void start();
+  virtual void stop();
 
   // Datapath events
   virtual void packet_in(Switch&, const Packet&);
@@ -81,6 +85,9 @@ public:
   virtual void port_status(Switch&, const Port&);
   virtual void table_status(Switch&, const Table&);
   virtual void role_status(Switch&, const Role&);
+
+private:
+  Controller& ctrl_;
 };
 
 
