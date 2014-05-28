@@ -147,7 +147,7 @@ Real::operator()(const std::string& s) const {
 
 inline Value
 String::operator()(const std::string& s) const {
-  return {};
+  return s;
 }
 
 template<typename T>
@@ -166,6 +166,23 @@ template<typename T>
     return {};
   }
 
+
+
 } // namespace cli
 } // namespace freeflow
 
+/// Transform a string to be in all uppercase
+inline std::string
+toupper(const std::string& str) { 
+  std::string upper(str);
+  for (auto & c: upper) c = toupper(c); 
+  return upper;
+}
+
+/// Transform a character array to be in all uppercase
+inline std::string
+toupper(const char* str) { 
+  std::string upper(str);
+  for (auto & c: upper) c = toupper(c); 
+  return upper;
+}

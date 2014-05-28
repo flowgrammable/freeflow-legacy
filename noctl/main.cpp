@@ -30,14 +30,18 @@ main(int argc, char *argv[]) {
 
   cli::Parameters parms;
   parms.declare("flag", cli::Bool(), cli::REQUIRED, "Just a flag");
-  // parms.declare("number", cli::Int(), "42", "Just a flag");
-  // parms.declare("name", cli::String(), "some value", "The name of something");
-  // parms.declare("config", cli::String(), cli::OPTIONAL, "The path to a configuration file");
+  parms.declare("number", cli::Real(), "42", "Just a number");
+  parms.declare("name", cli::String(), "some value", "The name of something");
+  parms.declare("config", cli::String(), cli::OPTIONAL, "The path to a configuration file");
 
 
   cli::Arguments args = parse_args(parms, argc, argv);
+  cli::Arguments env_args = parse_env(parms, "flog");
 
-// 
+  for (auto & f : env_args.named) cout << f.first << " = " << f.second << "\n";
+
+
+
   // Command *c = nullptr;
   // Command::commands["hello"] = c;
 

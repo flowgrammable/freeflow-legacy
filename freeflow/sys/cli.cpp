@@ -70,7 +70,7 @@ parse(int argc, char *argv[]) {
 } // namespace
 
 Arguments
-parse_args(const Parameters&, int argc, char* argv[]) {
+parse_args(const Parameters& parms, int argc, char* argv[]) {
   Parsed_arguments pa = parse(argc, argv);
 
   // TODO: Post-process the parsed arguments, creating the new
@@ -78,6 +78,38 @@ parse_args(const Parameters&, int argc, char* argv[]) {
 
   return {};
 }
+
+Arguments 
+parse_env(const Parameters& parms, const char* prefix){
+  std::string pre(prefix);
+  return parse_env(parms, pre);
+}
+
+Arguments 
+parse_env(const Parameters& parms, const std::string& prefix){
+  Arguments env_args;
+  std::string upped_prefix = toupper(prefix);
+  std::stringstream errors;
+  // Iterate through the list of parameters and check the environment
+  // to see if it contains any of them. Any arguments found in the
+  // environment are added to the (named) arguments map.
+  for(auto parm : parms.parms_){
+    std::string env_var = upped_prefix + "_" + toupper(parm.name());
+    char* env_value;
+    env_value = getenv(env_var.c_str());
+    if (env_value == NULL) continue; // not found
+    else {                           // found
+      Value v = parm.type()(env_value);
+      if(!v) errors << "Environment variable " << env_var 
+                    << " contains a value of an invalid type\n";
+      else env_args.named.emplace(env_var, v); 
+    }
+  }
+  std::cout << errors.str();
+  return env_args;
+}
+
+
 
 } // namespace cli
 } // namespace freeflow

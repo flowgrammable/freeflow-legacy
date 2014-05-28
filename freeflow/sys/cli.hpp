@@ -19,6 +19,7 @@
 #include <list>
 #include <sstream>
 #include <unordered_map>
+#include <iostream>
 
 #include <freeflow/sys/json.hpp>
 
@@ -33,7 +34,7 @@ struct Error { };
 
 /// The Value class extends JSON values to include additional error
 /// information.
-class Value : json::Value {
+class Value : public json::Value {
 public:
   static constexpr Error error { };
 
@@ -137,7 +138,7 @@ public:
                      const Initializer&, 
                      const std::string&);
 
-private:
+//private:
   Parm_list parms_;
   Parm_map map_;
 };
@@ -152,7 +153,7 @@ template<typename T>
     using Argument_list = std::vector<Argument_value>;
 
     Argument_map  named;  // Name/value mappings
-    Argument_list listed; // Positional aorguments.
+    Argument_list listed; // Positional arguments.
   };
 
 /// The Arguments type contains the parsed command line options, binding
@@ -193,8 +194,14 @@ Arguments parse_env(const Parameters&, const std::string&);
 Arguments parse_config(const Parameters&, const char*);
 Arguments parse_config(const Parameters&, const std::string&);
 
+
+
 } // namespace cli
 } // namespace freeflow
+
+std::string toupper(const std::string&); // toupper for string
+std::string toupper(const char*);        // toupper for char[]
+
 
 #include <freeflow/sys/cli.ipp>
 
