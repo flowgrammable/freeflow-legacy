@@ -35,10 +35,14 @@ main(int argc, char *argv[]) {
   parms.declare("config", cli::String(), cli::OPTIONAL, "The path to a configuration file");
 
 
-  cli::Arguments args = parse_args(parms, argc, argv);
+  cli::Arguments cli_args = parse_args(parms, argc, argv);
   cli::Arguments env_args = parse_env(parms, "flog");
 
-  for (auto & f : env_args.named) cout << f.first << " = " << f.second << "\n";
+  for (auto& x : cli_args.named)
+    cout << x.first << " = " << x.second << '\n';
+
+  for (auto& x : env_args.named) 
+    cout << x.first << " = " << x.second << "\n";
 
 
 

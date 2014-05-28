@@ -144,21 +144,15 @@ public:
 };
 
 
-// Stores name/value and positional arguments. The associated value type
-// is given as the template parameter T.
-template<typename T>
-  struct Argument_store {
-    using Argument_value = T;
-    using Argument_map = std::map<std::string, Argument_value>;
-    using Argument_list = std::vector<Argument_value>;
-
-    Argument_map  named;  // Name/value mappings
-    Argument_list listed; // Positional arguments.
-  };
-
 /// The Arguments type contains the parsed command line options, binding
 /// parameter names to values, and also the positional arguments.
-using Arguments = Argument_store<Value>;
+struct Arguments {
+  using Argument_map = std::map<std::string, Value>;
+  using Argument_list = std::vector<Value>;
+
+  Argument_map  named;  // Name/value mappings
+  Argument_list listed; // Positional arguments.
+};
 
 
 // -------------------------------------------------------------------------- //
@@ -181,9 +175,6 @@ template<typename T>
 
 // -------------------------------------------------------------------------- //
 // Parsing
-
-/// A support structure for parsing coniguration by parts.
-using Parsed_arguments = Argument_store<json::Value>;
 
 // Parsing functions
 Arguments parse_args(const Parameters&, int, char*[]);

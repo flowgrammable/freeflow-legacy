@@ -18,7 +18,7 @@ namespace freeflow {
 namespace cli {
 namespace {
 
-using Named_argument = Parsed_arguments::Argument_map::value_type;
+using Named_argument = Arguments::Argument_map::value_type;
 
 Named_argument
 parse_flag(const std::string& arg) {
@@ -43,28 +43,15 @@ parse_flag(const std::string& arg) {
   if (n != arg.npos)
     name = arg.substr(p, n - p);
   else
-    return {arg.substr(p), "true"};
+    return {arg.substr(p), true};
 
   // Parse the value. In a flag of the form f=x, this is everything
   // past the '='. If the value is empty, return as if it were "null".
   std::string value = arg.substr(n + 1);
   if (value.empty())
-    return {std::move(name), "null"};
+    return {std::move(name), nullptr};
   else
     return {std::move(name), std::move(value)};
-}
-
-// Parses the command line inputs into flags and positional arguments
-Parsed_arguments
-parse(int argc, char *argv[]) {
-  Parsed_arguments args;
-  for (int i = 0; i < argc; ++i) {
-    if (argv[i][0] == '-')
-      args.named.insert(parse_flag(argv[i]));
-    else
-      args.listed.push_back(argv[i]);
-  }
-  return args;
 }
 
 /// Return an environment variable name constructed from the given
@@ -74,42 +61,52 @@ make_env_var(const std::string& pre, const Parameter& parm) {
   return pre + "_" + toupper(parm.name());
 }
 
-
-
 } // namespace
 
+
+/// Parse the given command line arguments.
+///
+/// FIXME: Improve error handling. If an error occurs, the program
+/// should probably stop running after diagnosing all errors.
 Arguments
 parse_args(const Parameters& parms, int argc, char* argv[]) {
-  Parsed_arguments pa = parse(argc, argv);
-
-  // FIXME: Post-process the parsed arguments, creating the new
-  // argument set.
-
-  return {};
+  Arguments args;
+  for (int i = 0; i < argc; ++i) {
+    if (argv[i][0] == '-') {
+      auto x = parse_flag(argv[i]);
+      if (parms.map_.count(x.first) == 0) {
+        std::cerr << "error: unrecognized parameter '" << x.first << "'\n";
+      } else {
+        args.named.insert(parse_flag(argv[i]));
+      }
+    }
+    else
+      args.listed.push_back(argv[i]);
+  }
+  return args;
 }
 
-/// Do stuff...
+/// Parse the enviornment, constructing arguments from those environment
+/// variables listed in the parameter specification. This effectively
+/// filters the environment to find only those variables that the 
+/// configuration is interested in.
 Arguments 
-parse_env(const Parameters& parms, const char* prefix){
+parse_env(const Parameters& parms, const char* prefix) {
+  Arguments args;
   std::string pre = toupper(prefix);
-  Parsed_arguments args;
   for (auto parm : parms.parms_) {
     std::string var = make_env_var(pre, parm);
     if (char* p = getenv(var.c_str()))
       args.named.emplace(parm.name(), p);
   }
-
-  // FIXME: Postprocess parsed arguments, checking for required
-  // values and instantiating default arguments.
-
-  return {};
+  return args;
 }
 
 /// Iterate through the list of parameters and check the environment
 /// to see if it contains any of them. Any arguments found in the
 /// environment are added to the (named) arguments map.
 Arguments 
-parse_env(const Parameters& parms, const std::string& prefix){
+parse_env(const Parameters& parms, const std::string& prefix) {
   return parse_env(parms, prefix.c_str());
 }
 
