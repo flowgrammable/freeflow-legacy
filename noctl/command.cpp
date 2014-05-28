@@ -14,9 +14,3 @@
 
 #include "command.hpp"
 
-namespace cli {
-
-std::map<std::string, Command *> Command::commands;
-
-} // namespace cli
-

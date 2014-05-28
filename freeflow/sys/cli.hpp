@@ -22,23 +22,22 @@
 
 #include <freeflow/sys/json.hpp>
 
-namespace ff = freeflow;
-
+namespace freeflow {
 namespace cli {
 
-using String_map = std::map<std::string, std::string>;
-using String_list = std::vector<std::string>;
+// -------------------------------------------------------------------------- //
+// Value types
 
 // An extension of the JSON model that indicates an error.
 struct Error { };
 
 /// The Value class extends JSON values to include additional error
 /// information.
-class Value : ff::json::Value {
+class Value : json::Value {
 public:
   static constexpr Error error { };
 
-  using ff::json::Value::Value;
+  using json::Value::Value;
 
   Value() = default;
   Value(Error);
@@ -49,20 +48,23 @@ private:
 };
 
 
+// -------------------------------------------------------------------------- //
+// Parameters
+
 /// The type of a parameter is determined by a function. If a string can be
 /// converted into a JSON value, then the type is assumed to have checked.
 using Type = std::function<Value(const std::string&)>;
 
+
 /// The Name struct contains the name and alias of a parameter.
-///
-/// \todo Write constructors
 struct Name {
-  Name(const char* s) : name(s) { }
-  Name(const std::string& s) : name(s) { }
+  Name(const char* s);
+  Name(const std::string& s);
 
   std::string name;
   std::string alias;
 };
+
 
 /// The Valuation semantics describe properties of a parameters value:
 /// whether or not it is required, or a default has been provided.
@@ -85,10 +87,10 @@ enum Valuation {
 ///
 /// \todo Write constructors.
 struct Initializer {
-  Initializer() : which(OPTIONAL) { }
-  Initializer(Valuation v): which(v) { }
-  Initializer(const char* s): which(DEFAULT), value(s) { }
-  Initializer(const std::string& s): which(DEFAULT), value(s) { }
+  Initializer();
+  Initializer(Valuation v);
+  Initializer(const char* s);
+  Initializer(const std::string& s);
 
   Valuation which;
   std::string value;
@@ -106,6 +108,8 @@ public:
   Parameter(const std::string&, const Type&, const Initializer&, const std::string&);
 
   //Accessors
+  bool has_alias() const;
+
   const std::string& name() const;
   const std::string& alias() const;
   const Type& type() const;
@@ -122,31 +126,38 @@ private:
 
 /// The Parameter_set contains a set of parameters, which are declared
 /// by the user, and used by the compiler to parse command line arugments.
-class Parameter_set {
+class Parameters {
   using Parm_list = std::list<Parameter>;
   using Parm_map = std::unordered_map<std::string, Parameter*>;
 public:
 
-  void declare(const std::string&, const Type&, const Initializer&, const std::string&);
+  // Parameter declaration
+  Parameter* declare(const std::string&, 
+                     const Type&, 
+                     const Initializer&, 
+                     const std::string&);
 
 private:
   Parm_list parms_;
   Parm_map map_;
 };
 
-/// The Argument_map contains the parsed command line options (binding of
-/// names to values), and the positional arguments.
-class Argument_map {
-  using Option_map = std::map<std::string, Value>;
-  using Argument_list = std::vector<Value>;
 
-  Value operator[](const std::string&) const;
+// Stores name/value and positional arguments. The associated value type
+// is given as the template parameter T.
+template<typename T>
+  struct Argument_store {
+    using Argument_value = T;
+    using Argument_map = std::map<std::string, Argument_value>;
+    using Argument_list = std::vector<Argument_value>;
 
-  // Other accessors, convenience functions.
+    Argument_map  named;  // Name/value mappings
+    Argument_list listed; // Positional aorguments.
+  };
 
-  Option_map    opts;  // Name/value mappings
-  Argument_list args;  // Positional aorguments.
-};
+/// The Arguments type contains the parsed command line options, binding
+/// parameter names to values, and also the positional arguments.
+using Arguments = Argument_store<Value>;
 
 
 // -------------------------------------------------------------------------- //
@@ -166,14 +177,25 @@ template<typename T>
 template<typename T>
   struct Sequence { Value operator()(const std::string&) const; };
 
+
 // -------------------------------------------------------------------------- //
 // Parsing
-std::pair<std::string, std::string> parse_flag(const std::string&);
-void parse(int, char**, String_map&, String_list&);
-Argument_map parse(const Parameter_set&, int, char**);
+
+/// A support structure for parsing coniguration by parts.
+using Parsed_arguments = Argument_store<json::Value>;
+
+// Parsing functions
+Arguments parse_args(const Parameters&, int, char*[]);
+
+Arguments parse_env(const Parameters&, const char*);
+Arguments parse_env(const Parameters&, const std::string&);
+
+Arguments parse_config(const Parameters&, const char*);
+Arguments parse_config(const Parameters&, const std::string&);
 
 } // namespace cli
+} // namespace freeflow
 
-#include "parameter.ipp"
+#include <freeflow/sys/cli.ipp>
 
 #endif

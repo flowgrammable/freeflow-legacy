@@ -12,14 +12,15 @@
 // or implied. See the License for the specific language governing
 // permissions and limitations under the License.
 
-#include "parameter.hpp"
+#include "cli.hpp"
 
+namespace freeflow {
 namespace cli {
+namespace {
 
-// -------------------------------------------------------------------------- //
-// Parsing
+using Named_argument = Parsed_arguments::Argument_map::value_type;
 
-std::pair<std::string, std::string>
+Named_argument
 parse_flag(const std::string& arg) {
   // If the argument is only '-', that's an error
   if (arg.size() == 1)
@@ -54,20 +55,30 @@ parse_flag(const std::string& arg) {
 }
 
 // Parses the command line inputs into flags and positional arguments
-void
-parse(int argc, char *argv[], String_map& opts, String_list& args) {
+Parsed_arguments
+parse(int argc, char *argv[]) {
+  Parsed_arguments args;
   for (int i = 0; i < argc; ++i) {
     if (argv[i][0] == '-')
-      opts.insert(parse_flag(argv[i]));
+      args.named.insert(parse_flag(argv[i]));
     else
-      args.push_back(argv[i]);
+      args.listed.push_back(argv[i]);
   }
+  return args;
 }
 
-Argument_map
-parse(const Parameter_set&, int argc, char* argv[]) {
+} // namespace
+
+Arguments
+parse_args(const Parameters&, int argc, char* argv[]) {
+  Parsed_arguments pa = parse(argc, argv);
+
+  // TODO: Post-process the parsed arguments, creating the new
+  // argument set.
+
   return {};
 }
 
 } // namespace cli
+} // namespace freeflow
 

@@ -18,28 +18,24 @@
 
 #include <freeflow/sys/socket.hpp>
 #include <freeflow/sys/json.hpp>
-#include <freeflow/sys/parameter.hpp>
+#include <freeflow/sys/cli.hpp>
+
 #include "command.hpp"
 
 using namespace std;
 using namespace freeflow;
 
-//using namespace json;
-
-
-using namespace cli;
-
 int
 main(int argc, char *argv[]) {
 
-  Parameter_set parms;
+  cli::Parameters parms;
   parms.declare("flag", cli::Bool(), cli::REQUIRED, "Just a flag");
   // parms.declare("number", cli::Int(), "42", "Just a flag");
   // parms.declare("name", cli::String(), "some value", "The name of something");
   // parms.declare("config", cli::String(), cli::OPTIONAL, "The path to a configuration file");
 
 
-  Argument_map args = parse(parms, argc, argv);
+  cli::Arguments args = parse_args(parms, argc, argv);
 
 // 
   // Command *c = nullptr;

@@ -23,37 +23,32 @@
 #include <vector>
 #include <map>
 
-#include <freeflow/sys/json.hpp>
-#include <freeflow/sys/parameter.hpp>
+#include <freeflow/sys/cli.hpp>
 
 
-namespace cli {
-
-struct Command {
-  virtual void run(String_map&, String_list) = 0;
-  String_map params;
-  String_map alias;
-  std::string helptext;  
+// struct Command {
+//   virtual void run(String_map&, String_list) = 0;
+//   String_map params;
+//   String_map alias;
+//   std::string helptext;  
   
-  static std::map<std::string, Command *> commands;
-};
+//   static std::map<std::string, Command *> commands;
+// };
 
 
 
-struct Help : Command {
-  void run(String_map&, String_list);
-  std::string help();
-};
+// struct Help : Command {
+//   void run(String_map&, String_list);
+//   std::string help();
+// };
 
-struct Add : Command {
-  void run(String_map&, String_list);
-};
+// struct Add : Command {
+//   void run(String_map&, String_list);
+// };
 
 
 
 //addCommand("add","Help text",add_run);
-
-} // namespace cli
 
 #include "command.ipp"
 

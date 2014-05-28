@@ -12,8 +12,51 @@
 // or implied. See the License for the specific language governing
 // permissions and limitations under the License.
 
-
+namespace freeflow {
 namespace cli {
+
+// -------------------------------------------------------------------------- //
+// Value type
+
+inline
+Value::Value(Error)
+  : json::Value(), error_(true) { }
+
+inline 
+Value::operator bool() const { return not error_; }
+
+
+// -------------------------------------------------------------------------- //
+// Name
+
+inline
+Name::Name(const char* s) 
+  : name(s) { }
+
+inline
+Name::Name(const std::string& s) 
+  : name(s) { }
+
+
+// -------------------------------------------------------------------------- //
+// Initializer
+
+inline
+Initializer::Initializer() 
+  : which(OPTIONAL) { }
+
+inline
+Initializer::Initializer(Valuation v)
+  : which(v) { }
+
+inline
+Initializer::Initializer(const char* s)
+  : which(DEFAULT), value(s) { }
+
+inline
+Initializer::Initializer(const std::string& s)
+  : which(DEFAULT), value(s) { }
+
 
 // -------------------------------------------------------------------------- //
 // Parameter
@@ -24,6 +67,11 @@ Parameter::Parameter(const std::string& n,
                      const Initializer& i, 
                      const std::string& d)
   : name_(n), type_(t), init_(i), doc_(d) { }
+
+/// Returns true if the parameter has an alias. This is the case whenever
+/// the name's alias field is non-empty.
+inline bool
+Parameter::has_alias() const { return not name_.alias.empty(); }
 
 /// Returns the full name of the parameter. 
 inline const std::string&
@@ -46,23 +94,20 @@ Parameter::init() const { return init_; }
 inline const std::string&
 Parameter::doc() const { return doc_; }
 
-inline void 
-Parameter_set::declare(const std::string&, 
-                       const Type&, 
-                       const Initializer&, 
-                       const std::string&)
-{ }
+inline Parameter* 
+Parameters::declare(const std::string& n, 
+                    const Type& t, 
+                    const Initializer& i, 
+                    const std::string& d)
+{
+  parms_.emplace_back(n, t, i, d);
+  Parameter* p = &parms_.back();
+  map_[p->name()] = p;
+  if (p->has_alias())
+    map_[p->alias()] = p;
+  return p;
+}
 
-
-// -------------------------------------------------------------------------- //
-// Type checking
-
-inline
-Value::Value(Error)
-  : ff::json::Value(), error_(true) { }
-
-inline 
-Value::operator bool() const { return not error_; }
 
 // -------------------------------------------------------------------------- //
 // Type checkers
@@ -122,3 +167,5 @@ template<typename T>
   }
 
 } // namespace cli
+} // namespace freeflow
+
