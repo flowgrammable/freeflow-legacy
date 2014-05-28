@@ -32,5 +32,8 @@ Factory::destroy(ff::Application* a) { delete a; }
 /// \todo Dynamically configure the application so that it can terminate
 /// on different phases.
 Noflow::Noflow(ff::Controller& c)
-  : ff::Application(c) { }
+  : ff::Application(c) 
+{ 
+  std::cout << "starting noflow\n";
+}
 

@@ -63,7 +63,6 @@ public:
   Process* start(const std::string&);
   void stop(Process*);
 
-  
   // Switch management
   Switch& connect(Socket&);
   void disconnect(Switch&);
