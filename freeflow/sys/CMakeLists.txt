@@ -33,6 +33,7 @@ set(src fd_utils.cpp
         pipe.cpp
         json.cpp
         print.cpp
+        parameter.cpp
         )
 
 if(BSD)
