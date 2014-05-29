@@ -28,7 +28,7 @@ using namespace freeflow;
 int
 main(int argc, char *argv[]) {
   cli::Parameters parms;
-  parms.declare("flag", cli::Bool(), cli::REQUIRED, "Just a flag");
+  parms.declare("flag, f", cli::Bool(), cli::REQUIRED, "Just a flag");
   parms.declare("number", cli::Real(), "42", "Just a number");
   parms.declare("name", cli::String(), "some value", "The name of something");
   parms.declare("config", cli::String(), cli::OPTIONAL, "The path to a configuration file");
@@ -48,38 +48,6 @@ main(int argc, char *argv[]) {
 
   // Command *c = nullptr;
   // Command::commands["hello"] = c;
-
-  // parse(argc, argv, opts, args);
-  
-  // std::cout << "== options ==\n";
-  // for (auto &f : opts)
-  //   std::cout << f.first << " : " << f.second << '\n';
-  
-  // std::cout << endl << "== positional args ==\n";
-  // for (auto &s : args)
-  //   std::cout << s << endl;
-
-  // cout << endl;
-
-
-  // for (auto &f : opts) {
-  //   if (pars.count(f.first) == 0) 
-  //     cout << "Unknown arg " << f.first << endl;
-  //   else {
-  //     // Parameter *p = pars[f.first];
-  //     // pars[f.first]->value = p->operator()(f.second);
-  //   }
-  // }
-
-  // for (auto &f : pars) {
-  //   // cout << "parameter " << f.first << " is set to " << f.second->value << endl;
-  // }
-  
-  // // { 
-  // //   Parameter<Bool> p1("flag", "f", "Indicate that flag is set");
-
-  // //   json::Value v1 = p1.get(opts);
-  // // }
 
   return 0;
 }

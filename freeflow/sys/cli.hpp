@@ -20,6 +20,7 @@
 #include <sstream>
 #include <unordered_map>
 #include <iostream>
+#include <cstring>
 
 #include <freeflow/sys/json.hpp>
 
@@ -153,11 +154,6 @@ struct Arguments {
   String_map    initial;  // Initial arguments as strings
   Argument_map  named;    // Name/value mappings
   Argument_list listed;   // Positional arguments.
-};
-
-struct Parse_info {
-  Parameters parms;
-  Arguments  args;
 };
 
 // -------------------------------------------------------------------------- //

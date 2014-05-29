@@ -72,12 +72,12 @@ void
 parse_args(const Parameters& parms, Arguments& args, int argc, char* argv[]) {
   for (int i = 0; i < argc; ++i) {
     if (argv[i][0] == '-') {
-      auto x = parse_flag(argv[i]);
+      Named_argument x = parse_flag(argv[i]);
       if (parms.map_.count(x.first) == 0) {
         std::cerr << "error: unrecognized parameter '" << x.first << "'\n";
       } else {
-        Named_argument n = parse_flag(argv[i]);
-        args.initial[n.first] = n.second;
+        auto n = parms.map_.find(x.first);
+        args.initial[n->second->name()] = x.second;
       }
     }
     else
@@ -122,7 +122,7 @@ void check_args(const Parameters& parms, Arguments& args) {
   for (auto parm : parms.parms_) {
     // An argument for the parameter was provided. In this case 'which' may be
     // OPTIONAL, REQUIRED, or DEFAULT
-    if (args.initial.count(parm.name()))
+    if (args.initial.count(parm.name()) or args.initial.count(parm.alias()))
       check_type(parm, args, args.initial[parm.name()]);
     
     // An argument for the parameter was not provided. This covers the rest of

@@ -30,12 +30,22 @@ Value::operator bool() const { return not error_; }
 // Name
 
 inline
-Name::Name(const char* s) 
-  : name(s) { }
+Name::Name(const char* s) : name(""), alias(""){
+  new (this) Name(std::string(s));
+}
 
 inline
-Name::Name(const std::string& s) 
-  : name(s) { }
+Name::Name(const std::string& s) {
+  std::size_t pos = 0;
+  std::size_t n = s.find(", ", pos);
+  if (n != s.npos) {
+    name = s.substr(pos, n - pos);
+    alias = s.substr(n + 2, s.npos - (n + 2));
+  }
+  else {
+    name = s;
+  }
+}
 
 
 // -------------------------------------------------------------------------- //
