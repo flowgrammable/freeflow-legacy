@@ -149,7 +149,7 @@ public:
 /// parameter names to values, and also the positional arguments.
 struct Arguments {
   using Argument_map = std::map<std::string, Value>;
-  using Argument_list = std::vector<Value>;
+  using Argument_list = std::vector<std::string>;
   using String_map = std::map<std::string, std::string>;
   String_map    initial;  // Initial arguments as strings
   Argument_map  named;    // Name/value mappings

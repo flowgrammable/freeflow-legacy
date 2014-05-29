@@ -24,31 +24,48 @@
 #include <map>
 
 #include <freeflow/sys/cli.hpp>
+namespace freeflow {
+namespace cli {
+
+using Run = std::function<void(const Arguments&)>;
+using Parms = std::vector<std::string>;
+
+class Command {
+public:
+
+  //Constructors
+  Command(const std::string&, const Run&, const Parms&, const std::string&);
+
+  std::string name;
+  Run         run;
+  Parms       parameters;
+  std::string helptext;
+};
+
+class Commands {
+  using Command_map = std::unordered_map<std::string, Command>;
+public:
+
+  // Command declaration
+  void declare(const std::string&, 
+               const Run&, 
+               const Parms&, 
+               const std::string&);
+  void help() const;
+  void help(const std::string&) const;
+
+  // Map of command names to commands
+  Command_map commands;
+};
+
+void run(const Commands&, const Arguments&);
+
+struct Add { void operator()(const Arguments&) const; };
+struct Remove { void operator()(const Arguments&) const; };
 
 
-// struct Command {
-//   virtual void run(String_map&, String_list) = 0;
-//   String_map params;
-//   String_map alias;
-//   std::string helptext;  
-  
-//   static std::map<std::string, Command *> commands;
-// };
-
-
-
-// struct Help : Command {
-//   void run(String_map&, String_list);
-//   std::string help();
-// };
-
-// struct Add : Command {
-//   void run(String_map&, String_list);
-// };
-
-
-
-//addCommand("add","Help text",add_run);
+} // namespace cli
+} // namespace freeflow
 
 #include "command.ipp"
 

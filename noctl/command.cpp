@@ -14,3 +14,8 @@
 
 #include "command.hpp"
 
+namespace freeflow {
+namespace cli {
+
+} // namespace cli
+} // namespace freeflow

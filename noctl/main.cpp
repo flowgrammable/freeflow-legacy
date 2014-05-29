@@ -27,6 +27,13 @@ using namespace freeflow;
 
 int
 main(int argc, char *argv[]) {
+  cli::Commands cmds;
+  cmds.declare("add", cli::Add(), { "name", "path", "config" },
+   "This command adds something somewhere.");
+  cmds.declare("remove", cli::Add(), { "name", "path", "config" }, 
+   "This command removes something somewhere");
+
+
   cli::Parameters parms;
   parms.declare("flag, f", cli::Bool(), cli::REQUIRED, "Just a flag");
   parms.declare("number", cli::Real(), "42", "Just a number");
@@ -39,15 +46,11 @@ main(int argc, char *argv[]) {
 
   parse(parms, args, argc, argv, "flog");
 
+  run(cmds, args);
 
-  cout << "Parsed arguments:\n";
-  for (auto& x : args.named)
-    cout << x.first << " = " << x.second << '\n';
-
-
-
-  // Command *c = nullptr;
-  // Command::commands["hello"] = c;
+  // cout << "Parsed arguments:\n";
+  // for (auto& x : args.named)
+  //   cout << x.first << " = " << x.second << '\n';
 
   return 0;
 }
