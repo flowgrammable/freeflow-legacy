@@ -30,6 +30,7 @@ namespace cli {
 using Run = std::function<void(const Arguments&)>;
 using Parms = std::vector<std::string>;
 
+/// The command class represents a command-line command ...
 class Command {
 public:
 
@@ -42,6 +43,7 @@ public:
   std::string helptext;
 };
 
+/// The commands class manages the map of command names to commands ...
 class Commands {
   using Command_map = std::unordered_map<std::string, Command>;
 public:
@@ -58,6 +60,7 @@ public:
   Command_map commands;
 };
 
+/// Run a command ...
 void run(const Commands&, const Arguments&);
 
 struct Add { void operator()(const Arguments&) const; };
