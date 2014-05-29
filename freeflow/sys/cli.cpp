@@ -76,7 +76,8 @@ parse_args(const Parameters& parms, Arguments& args, int argc, char* argv[]) {
       if (parms.map_.count(x.first) == 0) {
         std::cerr << "error: unrecognized parameter '" << x.first << "'\n";
       } else {
-        args.initial.insert(parse_flag(argv[i]));
+        Named_argument n = parse_flag(argv[i]);
+        args.initial[n.first] = n.second;
       }
     }
     else
@@ -110,7 +111,9 @@ void
 check_type(const Parameter& parm, Arguments& args, const std::string& val) {
   Value v = parm.type()(val);
   if(!v) 
-    std::cerr << "error: argument '" << parm.name() << "' has invalid type\n"; 
+    std::cerr << "error: argument '" << parm.name() << "' has invalid type\n";
+  else if(args.named.count(parm.name()))
+    args.named[parm.name()] = v;
   else 
     args.named.emplace(parm.name(), v); 
 }
@@ -131,13 +134,23 @@ void check_args(const Parameters& parms, Arguments& args) {
     // An argument for the parameter was not provided. In this case 'which'
     // may be OPTIONAL or REQUIRED. Cases where 'which' is OPTIONAL can be
     // disregarded since no argument was provided.
-    else {
-      if(parm.init().which == cli::REQUIRED)
-        std::cerr << "error: no argument provided for required parameter '" 
-                  << parm.name() << "'\n";
-    }
-    
+    else if(parm.init().which == cli::REQUIRED)
+      std::cerr << "error: no argument provided for required parameter '" 
+                << parm.name() << "'\n";
   }
+}
+
+
+void parse(const Parameters& parms,
+           Arguments& args,
+           int argc, 
+           char* argv[], 
+           const char* prefix) 
+{
+  parse_env(parms, args, prefix);
+  parse_args(parms, args, argc, argv);
+
+  check_args(parms, args);
 }
 
 

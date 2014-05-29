@@ -27,33 +27,22 @@ using namespace freeflow;
 
 int
 main(int argc, char *argv[]) {
-
   cli::Parameters parms;
   parms.declare("flag", cli::Bool(), cli::REQUIRED, "Just a flag");
   parms.declare("number", cli::Real(), "42", "Just a number");
   parms.declare("name", cli::String(), "some value", "The name of something");
   parms.declare("config", cli::String(), cli::OPTIONAL, "The path to a configuration file");
+  parms.declare("path", cli::String(), "*default path*", "Path to something");
+  parms.declare("version", cli::Real(), cli::REQUIRED, "Version of something");
+
+  cli::Arguments args;
+
+  parse(parms, args, argc, argv, "flog");
 
 
-  cli::Arguments cli_args;
-  cli::Arguments env_args;
-  
-  parse_args(parms, cli_args, argc, argv);
-  parse_env(parms, env_args, "flog");
-
-
-  check_args(parms, cli_args);
-  check_args(parms, env_args);
-
-  cout << "Parsed command-line arguments:\n";
-  for (auto& x : cli_args.named)
+  cout << "Parsed arguments:\n";
+  for (auto& x : args.named)
     cout << x.first << " = " << x.second << '\n';
-
-  cout << "\nParsed environment variables:\n";
-  for (auto& x : env_args.named) 
-    cout << x.first << " = " << x.second << "\n";
-
-  cout << "\n";
 
 
 

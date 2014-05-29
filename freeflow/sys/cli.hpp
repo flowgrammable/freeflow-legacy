@@ -155,6 +155,10 @@ struct Arguments {
   Argument_list listed;   // Positional arguments.
 };
 
+struct Parse_info {
+  Parameters parms;
+  Arguments  args;
+};
 
 // -------------------------------------------------------------------------- //
 // Type checking
@@ -186,9 +190,11 @@ void parse_env(const Parameters&, Arguments&, const std::string&);
 void parse_config(const Parameters&, Arguments&, const char*);
 void parse_config(const Parameters&, Arguments&, const std::string&);
 
-void
-check_type(const Parameter&, Arguments&, const std::string&);
+void check_type(const Parameter&, Arguments&, const std::string&);
+
 void check_args(const Parameters&, Arguments&);
+
+void parse(const Parameters&, Arguments&, int, char*[], const char*);
 
 
 } // namespace cli
