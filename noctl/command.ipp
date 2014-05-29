@@ -32,7 +32,7 @@ Commands::declare(const std::string& n,
 }
 
 inline void 
-Commands::help() const{
+Commands::help() const {
   for(auto command : commands) {
     std::cout << command.first << "\t\t"
     << command.second.helptext << "\n";
@@ -40,7 +40,7 @@ Commands::help() const{
 }
 
 inline void 
-Commands::help(const std::string& cmd) const{
+Commands::help(const std::string& cmd) const {
   auto command = commands.find(cmd);
   std::cout << command->first << "\t\t"
   << command->second.helptext << "\n";
