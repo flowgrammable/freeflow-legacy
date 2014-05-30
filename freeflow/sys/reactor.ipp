@@ -14,6 +14,7 @@
 
 namespace freeflow {
 
+// Initialize the reactor.
 inline
 Reactor::Reactor()
   : running_(true), handlers_(), timers_(), expired_()

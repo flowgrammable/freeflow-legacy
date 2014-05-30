@@ -32,6 +32,27 @@ using namespace std;
 using namespace freeflow;
 using namespace nocontrol;
 
+// This signal handler is responsible for implementing graceful
+// shutdown on termination signals.
+struct Signal_handler : Resource_handler {
+  Signal_handler(Reactor& r)
+    : Resource_handler(r, SIGNAL_EVENTS, 0) { }
+
+  bool on_signal(int s) {
+    std::cout << "* shutting down\n";
+    switch (s) {
+    case SIGINT:
+    case SIGTERM:
+    case SIGQUIT:
+      reactor().stop();
+      break;
+    default:
+      break;
+    }
+    return true;
+  }
+};
+
 
 int 
 main(int argc, char* argv[]) {
@@ -47,6 +68,10 @@ main(int argc, char* argv[]) {
   c.add_listener<Ncp_acceptor>(ncp_addr, tcp);
   c.add_listener<Ofp_acceptor>(ofp_addr, tcp); 
   
+  // Add the signal handler
+  Signal_handler sh(c);
+  c.add_handler(&sh);
+
   // Load some default applications
   c.start("flog_noflow.app");
   c.start("flog_noflow.app"); // Yes, I'm loading this twice.

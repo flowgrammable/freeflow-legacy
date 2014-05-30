@@ -15,8 +15,7 @@
 #ifndef FREEFLOW_SIGNAL_HPP
 #define FREEFLOW_SIGNAL_HPP
 
-#include <signal.h>
-
+#include <csignal>
 #include <cstring>
 
 #include <freeflow/sys/resource.hpp>
@@ -40,7 +39,31 @@ struct Signal_action : sigaction {
   Signal_action(Signal_info_fn);
 
   System_result install(int);
+
+  explicit operator bool() const;
 };
+
+/// The Signal_mask type provides a means of specifying which
+/// signals should be blocked or not.
+struct Signal_set {
+  enum Init { NONE, ALL, DEFAULT };
+
+  Signal_set(Init = DEFAULT);
+
+  void insert(int);
+  void remove(int);
+  bool test(int);
+
+  static Signal_set all();
+  static Signal_set none();
+  static Signal_set current();
+
+  operator sigset_t*();
+  operator const sigset_t*() const;
+
+  sigset_t mask;
+};
+
 
 } // namespace freeflow 
 

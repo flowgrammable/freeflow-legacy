@@ -52,8 +52,7 @@ struct Process {
 
 /// The Controller class is a reactor that provides services for running
 /// a service that queries, configures, or controls some component of the 
-/// SDN data model. Each service using this class provides support for
-/// reg
+/// SDN data model.
 ///
 /// Note that it is possible to write primary Nocontrol services like
 /// the OpenFlow controller as applications. This is made possible because
@@ -82,6 +81,7 @@ public:
 
   template<typename T>
     void remove_listener(T*);
+
 
   // Application loading
   Application_library* load(const std::string&);

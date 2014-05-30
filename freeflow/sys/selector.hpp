@@ -22,6 +22,7 @@
 
 #include <freeflow/sys/error.hpp>
 #include <freeflow/sys/time.hpp>
+#include <freeflow/sys/signal.hpp>
 #include <freeflow/sys/resource.hpp>
 
 namespace freeflow {
@@ -49,10 +50,12 @@ public:
 
   // Select
   int operator()();
-  int operator()(Microseconds ms);
+  int operator()(const Signal_set&);
+  int operator()(Microseconds);
+  int operator()(Microseconds, const Signal_set&);
 
 private:
-  int select(timespec* ts);
+  int select(timespec*, const sigset_t*);
 
 private:
   int     max_;

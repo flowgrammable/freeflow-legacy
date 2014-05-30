@@ -20,12 +20,22 @@
 
 namespace freeflow {
 
+namespace impl {
+// A helper class for initializing reactor data.
+struct Reactor_init {
+  Reactor_init();
+
+  static void init_signals();
+};
+} // namespace impl
+
 /// The Reactor class implements an event processor that notifies handlers
 /// of resource events and availability, timer expiration, and signals.
 ///
 /// \todo This should probably be renamed Select_reactor and more tightly
 /// coupled with the handler registry.
-class Reactor {
+class Reactor : private impl::Reactor_init {
+  friend class Reactor_init;
 public:
   Reactor();
 
@@ -54,6 +64,7 @@ public:
   void stop();
 
 private:
+  void notify_signal(Resource_set&);
   void notify_select(const Select_set&, Resource_set&);
   void notify_timers(Resource_set&);
   void close_handlers(const Resource_set&);
