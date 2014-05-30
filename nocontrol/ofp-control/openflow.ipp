@@ -37,17 +37,20 @@ Ofp_handler::Ofp_handler(ff::Reactor& r, ff::Socket&& s, ff::Controller& c)
 /// \todo Error checking.
 inline bool
 Ofp_handler::on_open() {
-  Write_on_exit g(*this);
-  proto_ = new ff::ofp::Protocol(&ctrl_, this);
-  return proto_->on_open(reactor());
+  // Write_on_exit g(*this);
+  // proto_ = new ff::ofp::Protocol(&ctrl_, this);
+  // return proto_->on_open(reactor());
+  std::cout << "* open OFP\n";
+  return true;
 }
 
 /// Shutdown the state machine and delete the handler.
 inline bool 
 Ofp_handler::on_close() {
-  Write_on_exit g(*this);
-  proto_->on_close(reactor());
-  delete this;
+  // Write_on_exit g(*this);
+  // proto_->on_close(reactor());
+  // delete this;
+  std::cout << "* close OFP\n";
   return true; 
 }
 
@@ -57,17 +60,24 @@ Ofp_handler::on_close() {
 /// \todo Error checking.
 inline bool
 Ofp_handler::on_read() {
-  Write_on_exit g(*this);
-  if (not read()) 
+  // Write_on_exit g(*this);
+  // if (not read()) 
+  //   return false;
+  // return proto_->on_recv(reactor());
+
+  char buf[2048];
+  ff::System_result res = rc().read(buf, 2048);
+  if (res and res.value() == 0)
     return false;
-  return proto_->on_recv(reactor());
+  return true;
 }
 
 /// When a timeout occurs, notify the protocol of the expired timer.
 inline bool
 Ofp_handler::on_time(int t) {
-  Write_on_exit g(*this);
-  return proto_->on_time(reactor(), t);
+  // Write_on_exit g(*this);
+  // return proto_->on_time(reactor(), t);
+  return true;
 }
 
 
