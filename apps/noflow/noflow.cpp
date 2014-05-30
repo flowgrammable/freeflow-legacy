@@ -28,7 +28,6 @@ Factory::create(ff::Controller& c) { return new Noflow(c); }
 void 
 Factory::destroy(ff::Application* a) { delete a; }
 
-
 /// \todo Dynamically configure the application so that it can terminate
 /// on different phases.
 Noflow::Noflow(ff::Controller& c)

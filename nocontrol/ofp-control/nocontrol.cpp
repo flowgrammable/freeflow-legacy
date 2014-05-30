@@ -23,7 +23,7 @@ namespace nocontrol {
 using namespace freeflow;
 
 bool
-Nocontrol_handler::on_read() {
+Ncp_handler::on_read() {
   System_result res = rc().read(buf_);
 
   // Check for failures.

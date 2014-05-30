@@ -28,7 +28,8 @@ Reactor::add_handler(Event_handler* h) {
 }
 
 /// Unregister the handler with the reactor. Any outstanding timers
-/// are canceled before removing the handler. If the handler 
+/// are canceled before removing the handler. If the handler is managed
+/// by the reactor, then it is also deleted.
 inline void
 Reactor::remove_handler(Event_handler* h) { 
   timers_.cancel(h);

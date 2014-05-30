@@ -25,6 +25,29 @@ Process::Process(Application* a, Application_library* l)
 // -------------------------------------------------------------------------- //
 // Controller
 
+/// Add a new handler that accepts connections from the specified address,
+/// over the tansport protocol. The returned event handler is managed by
+/// the controller object.
+///
+/// \todo Provide an additional argument for the backlog.
+template<typename T>
+  inline T*
+  Controller::add_listener(const Address& a, Socket::Transport t) {
+    T* h = new T(react_, *this);
+    h->listen(a, t);
+    return h;
+  }
+
+/// Remove the listener, closing the socket on which it accepts
+/// connections. The listener is destroyed after removal.
+template<typename T>
+  inline void
+  Controller::remove_listener(T* h) { 
+    react_.remove_handler(h); 
+    delete h;
+  }
+
+
 /// Returns true if the library is already loaded.
 inline bool
 Controller::is_loaded(const std::string& name) {
@@ -99,6 +122,10 @@ Controller::stop(Process* proc) {
   // Remove the process.
   procs_.erase(proc->pos);
 }
+
+// Process events by running the controller's event loop.
+inline void
+Controller::run() { react_.run(); }
 
 } // namespace freeflow
 

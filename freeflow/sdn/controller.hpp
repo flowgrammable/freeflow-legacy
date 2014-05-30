@@ -20,6 +20,7 @@
 #include <unordered_set>
 
 #include <freeflow/sys/socket.hpp>
+#include <freeflow/sys/reactor.hpp>
 #include <freeflow/sdn/application.hpp>
 
 namespace freeflow {
@@ -50,16 +51,28 @@ struct Process {
 
 
 /// The Controller class is...
+///
+/// \todo Maybe this should be called agent since it could conceivably
+/// be used as the basis for building either controller or switch agent.
 class Controller {
   using Library_map = std::unordered_map<std::string, Application_library*>;
   using Process_list = std::list<Process>;
   using Switch_set = std::unordered_set<Switch*>;
 
 public:
+  // Listener management
+  template<typename T>
+    T* add_listener(const Address&, Socket::Transport);
+
+  template<typename T>
+    void remove_listener(T*);
+
+  // Application loading
   Application_library* load(const std::string&);
   void unload(const std::string&);
   bool is_loaded(const std::string&);
 
+  // Process managment
   Process* start(const std::string&);
   void stop(Process*);
 
@@ -67,7 +80,11 @@ public:
   Switch& connect(Socket&);
   void disconnect(Switch&);
 
+  // Event processing
+  void run();
+
 private:
+  Reactor      react_;    // The controller's rector.
   Library_map  libs_;     // The set of libraries
   Process_list procs_;    // The hosted applications
   Switch_set   switches_; // Connected switches

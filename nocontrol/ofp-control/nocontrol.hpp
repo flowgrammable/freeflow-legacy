@@ -22,12 +22,13 @@
 
 namespace nocontrol {
 
-/// The Nocontrol_handler is responsible for implementing queries
-/// and commands sent to this service. When data is available for reading,
-/// it reads the value, parses it into JSON, and dispatches the appropriate
-/// commands.
-struct Nocontrol_handler : ff::Socket_handler {
-  inline Nocontrol_handler(ff::Reactor&, ff::Socket&&, ff::Controller&);
+/// NOTE: The abbreviation NCP means "NoControl Protocol".
+
+/// The Ncp_handler is responsible for implementing queries and commands 
+/// sent to this service. When data is available for reading, it reads 
+/// the value, parses it into JSON, and dispatches the appropriate commands.
+struct Ncp_handler : ff::Socket_handler {
+  inline Ncp_handler(ff::Reactor&, ff::Socket&&, ff::Controller&);
 
   bool on_read();
 
@@ -38,19 +39,19 @@ private:
 
 
 /// Responsible for the allocation of nocontrol handlers.
-struct Nocontrol_factory {
-  Nocontrol_factory(ff::Controller& c);
+struct Ncp_factory {
+  Ncp_factory(ff::Controller& c);
 
-  Nocontrol_handler* operator()(ff::Reactor&, ff::Socket&&) const;
+  Ncp_handler* operator()(ff::Reactor&, ff::Socket&&) const;
 
 private:
   ff::Controller& ctrl_;      // The controller
 };
 
-/// The Nocontrol_acceptor is resposnble for accepting connections
+/// The Ncp_acceptor is resposnble for accepting connections
 /// on the management port and construcitng service handlers to
 /// manage that connection.
-using Nocontrol_acceptor = ff::Acceptor<Nocontrol_handler, Nocontrol_factory>;
+using Ncp_acceptor = ff::Acceptor<Ncp_handler, Ncp_factory>;
 
 } // namesapce nocontrol
 

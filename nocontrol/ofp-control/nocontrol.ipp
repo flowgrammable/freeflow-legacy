@@ -15,28 +15,28 @@
 namespace nocontrol {
 
 // -------------------------------------------------------------------------- //
-// Nocontrol handler
+// Ncp handler
 
 /// Initialize the event handler.
 ///
 /// \todo Pre-allocate 1 page worth memory.
 inline
-Nocontrol_handler::Nocontrol_handler(ff::Reactor& r, 
+Ncp_handler::Ncp_handler(ff::Reactor& r, 
                                      ff::Socket&& s, 
                                      ff::Controller& c)
   : ff::Socket_handler(r, ff::READ_EVENTS, std::move(s)), ctrl_(c), buf_(4096)
 { }
 
 // -------------------------------------------------------------------------- //
-// Nocontrol factory
+// Ncp factory
 
 inline
-Nocontrol_factory::Nocontrol_factory(ff::Controller& c)
+Ncp_factory::Ncp_factory(ff::Controller& c)
   : ctrl_(c) { }
 
-inline Nocontrol_handler*
-Nocontrol_factory::operator()(ff::Reactor& r, ff::Socket&& s) const {
-  return new Nocontrol_handler(r, std:: move(s), ctrl_);
+inline Ncp_handler*
+Ncp_factory::operator()(ff::Reactor& r, ff::Socket&& s) const {
+  return new Ncp_handler(r, std:: move(s), ctrl_);
 }
 
 
