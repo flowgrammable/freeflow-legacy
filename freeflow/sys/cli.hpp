@@ -98,7 +98,6 @@ struct Initializer {
   std::string value;
 };
 
-
 /// The Parameter embodies the declaration of a command line parameter.
 /// This includes its name (possibly including an alias or short name),
 /// its type (given as a validating function), a value property that
@@ -151,6 +150,33 @@ public:
 };
 
 
+// -------------------------------------------------------------------------- //
+// Arguments
+
+enum Source {
+  ENVIRONMENT,
+  CONFIG,
+  COMMAND_LINE
+};
+
+class Initial_argument {
+public:
+  Initial_argument() = default;
+  Initial_argument(const std::string&, const Source&);
+  bool from_cl() const;
+
+  // Mutators
+  void set_value(const std::string&);
+  void set_source(const Source&);
+
+  // Accessors
+  std::string get_value() const;
+  Source get_source() const;
+private:
+  std::string value_;
+  Source source_;
+};
+
 /// The Arguments type contains the parsed command line options, binding
 /// parameter names to values, and also the positional arguments.
 class Arguments {
@@ -158,16 +184,69 @@ class Arguments {
 public:
   using Argument_map  = std::map<std::string, Value>;
   using Argument_list = std::vector<std::string>;
-  using String_map    = std::map<std::string, std::string>;
+  using Initial_args_map = std::map<std::string, Initial_argument>;
+
   bool has_initial(const Parameter&);
-  std::string get_initial(const std::string&);
-  Value get_named(const std::string&);
-  Value get_listed(const std::string&);
-//private:
-  String_map    initial_;  // Initial arguments as strings
-  Argument_map  named_;    // Name/value mappings
-  Argument_list listed_;   // Positional arguments.
+  bool has_initial(const std::string&);
+  bool has_named(const std::string&);
+  void display_errors();
+
+  // Mutators
+  void set_initial(const Parameter&, const Initial_argument&);
+  void set_named(const std::string&, const Value&);
+  void set_listed(const std::string&);
+
+  // Accessors
+  std::string get_initial_value(const std::string&) const;
+  Initial_argument get_initial(const std::string&) const;
+  Value get_named(const std::string&) const;
+  std::string get_listed(const int&) const;
+  int get_listed_size() const;
+
+private:
+  Initial_args_map initial_;  // Initial arguments as strings
+  Argument_map     named_;    // Name/value mappings
+  Argument_list    listed_;   // Positional arguments.
 };
+
+
+// -------------------------------------------------------------------------- //
+// Command
+
+using Run = std::function<void(const Arguments&)>;
+using Parms = std::vector<std::string>;
+
+/// The command class represents a command-line command ...
+class Command {
+public:
+
+  //Constructors
+  Command(const std::string&, const Run&, const Parms&, const std::string&);
+
+  std::string name;
+  Run         run;
+  Parms       parameters;
+  std::string helptext;
+};
+
+/// The commands class manages the map of command names to commands ...
+class Commands {
+  using Command_map = std::unordered_map<std::string, Command>;
+public:
+
+  // Command declaration
+  void declare(const std::string&, 
+               const Run&, 
+               const Parms&, 
+               const std::string&);
+  void help() const;
+  void help(const std::string&) const;
+  void run(const Arguments&);
+
+  // Map of command names to commands
+  Command_map commands;
+};
+
 
 // -------------------------------------------------------------------------- //
 // Type checking
@@ -201,9 +280,14 @@ void parse_config(const Parameters&, Arguments&, const std::string&);
 
 void check_type(const Parameter&, Arguments&, const std::string&);
 
-void check_args(const Parameters&, Arguments&);
+bool check_args(const Parameters&, const Command&, Arguments&);
 
-void parse(const Parameters&, Arguments&, int, char*[], const char*);
+bool parse(const Parameters&, 
+           const Commands&, 
+           Arguments&, 
+           int, 
+           char*[], 
+           const char*);
 
 
 } // namespace cli

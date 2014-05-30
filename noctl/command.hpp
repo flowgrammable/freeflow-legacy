@@ -27,45 +27,9 @@
 namespace freeflow {
 namespace cli {
 
-using Run = std::function<void(const Arguments&)>;
-using Parms = std::vector<std::string>;
-
-/// The command class represents a command-line command ...
-class Command {
-public:
-
-  //Constructors
-  Command(const std::string&, const Run&, const Parms&, const std::string&);
-
-  std::string name;
-  Run         run;
-  Parms       parameters;
-  std::string helptext;
-};
-
-/// The commands class manages the map of command names to commands ...
-class Commands {
-  using Command_map = std::unordered_map<std::string, Command>;
-public:
-
-  // Command declaration
-  void declare(const std::string&, 
-               const Run&, 
-               const Parms&, 
-               const std::string&);
-  void help() const;
-  void help(const std::string&) const;
-
-  // Map of command names to commands
-  Command_map commands;
-};
-
-/// Run a command ...
-void run(const Commands&, const Arguments&);
-
 struct Add { void operator()(const Arguments&) const; };
 struct Remove { void operator()(const Arguments&) const; };
-
+struct Help { void operator()(const Arguments&) const; };
 
 } // namespace cli
 } // namespace freeflow

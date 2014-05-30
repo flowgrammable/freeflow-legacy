@@ -31,10 +31,12 @@ main(int argc, char *argv[]) {
   
   
   cli::Commands cmds;
-  cmds.declare("add", cli::Add(), { "name", "path", "config" },
+  cmds.declare("add", cli::Add(), { "name", "path", "config", "version" },
    "This command adds something somewhere.");
-  cmds.declare("remove", cli::Add(), { "name", "path", "config" }, 
+  cmds.declare("remove", cli::Remove(), { "name", "path", "config" }, 
    "This command removes something somewhere");
+  cmds.declare("help", cli::Help(), { "name", "path", "config" },
+   "This command gives help text for other commands...");
 
 
   cli::Parameters parms;
@@ -43,17 +45,20 @@ main(int argc, char *argv[]) {
   parms.declare("name", cli::String(), "some value", "The name of something");
   parms.declare("config", cli::String(), cli::OPTIONAL, "The path to a configuration file");
   parms.declare("path", cli::String(), "*default path*", "Path to something");
-  parms.declare("version", cli::Real(), cli::REQUIRED, "Version of something");
+  parms.declare("version, v", cli::Real(), cli::REQUIRED, "Version of something");
 
   cli::Arguments args;
 
-  parse(parms, args, argc, argv, "flog");
-
-  run(cmds, args);
+  bool err = !parse(parms, cmds, args, argc, argv, "flog");
+  if (err)
+    return 1;
+  else
+    cmds.run(args);
 
   // cout << "Parsed arguments:\n";
   // for (auto& x : args.named)
   //   cout << x.first << " = " << x.second << '\n';
+
 
   return 0;
 }

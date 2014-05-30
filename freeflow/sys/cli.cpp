@@ -18,10 +18,11 @@ namespace freeflow {
 namespace cli {
 namespace {
 
-using Named_argument = Arguments::String_map::value_type;
+using Named_argument = Arguments::Initial_args_map::value_type;
 
 Named_argument
 parse_flag(const std::string& arg) {
+  Source src = COMMAND_LINE;
   // If the argument is only '-', that's an error
   if (arg.size() == 1)
     throw std::runtime_error("parse error");
@@ -43,15 +44,15 @@ parse_flag(const std::string& arg) {
   if (n != arg.npos)
     name = arg.substr(p, n - p);
   else
-    return {arg.substr(p), "true"};
+    return {arg.substr(p), Initial_argument("true", src)};
 
   // Parse the value. In a flag of the form f=x, this is everything
   // past the '='. If the value is empty, return as if it were "null".
   std::string value = arg.substr(n + 1);
   if (value.empty())
-    return {std::move(name), ""};
+    return { std::move(name), Initial_argument("", src) };
   else
-    return {std::move(name), std::move(value)};
+    return { std::move(name), Initial_argument(std::move(value), src) };
 }
 
 /// Return an environment variable name constructed from the given
@@ -77,11 +78,11 @@ parse_args(const Parameters& parms, Arguments& args, int argc, char* argv[]) {
         std::cerr << "error: unrecognized parameter '" << x.first << "'\n";
       } else {
         auto n = parms.map_.find(x.first);
-        args.initial_[n->second->name()] = x.second;
+        args.set_initial(*n->second, x.second);
       }
     }
     else
-      args.listed_.push_back(argv[i]);
+      args.set_listed(argv[i]);
   }
 }
 
@@ -91,11 +92,12 @@ parse_args(const Parameters& parms, Arguments& args, int argc, char* argv[]) {
 /// configuration is interested in.
 void 
 parse_env(const Parameters& parms, Arguments& args, const char* prefix) {
+  Source src = ENVIRONMENT;
   std::string pre = toupper(prefix);
   for (auto parm : parms.parms_) {
     std::string var = make_env_var(pre, parm);
     if (char* p = getenv(var.c_str()))
-      args.initial_.emplace(parm.name(), p);
+      args.set_initial(parm, Initial_argument(p,src));
   }
 }
 
@@ -109,64 +111,72 @@ parse_env(const Parameters& parms, Arguments& args, const std::string& prefix) {
 
 void
 check_type(const Parameter& parm, Arguments& args, const std::string& val) {
-  Value v = parm.type()(val);
-  if(!v) 
-    std::cerr << "error: argument '" << parm.name() << "' has invalid type\n";
-  else if(args.named_.count(parm.name()))
-    args.named_[parm.name()] = v;
-  else 
-    args.named_.emplace(parm.name(), v); 
+  args.set_named(parm.name(), parm.type()(val));
 }
 
-void check_args(const Parameters& parms, Arguments& args) {
-  for (auto parm : parms.parms_) {
-  // for (const Parameter& parm : parms.parms_) {
-    // // Check for default arguments
-    // if (parm.has_default() and args.has_option(parm.name()))
-    //   check_type(parm, args, parm.default_argument());
-
-    // // Check for required values.      
-    // else if (parms.is_required() and not args.has_option(parm.name()))
-    //   std::cerr << "error: no argument provided for required parameter '" 
-    //             << parm.name() << "'\n";
-    
-    // // Otherwise, if the parameter has a value, just check its type.
-    // else if (args.has_option(parm.name()))
-    //   check_type(parm, args, args.option(parm.name()));
-    bool r = true;
-    Value v;
-
-    // This checks whether an argument 
-    if (args.has_initial(parm))
-      check_type(parm, args, args.get_initial(parm.name()));
+bool 
+check_args(const Parameters& parms, const Command& cmd, Arguments& args) {
+  bool r = true;
+  for (const std::string& parm_name: cmd.parameters) {
+  //for (auto parm : parms.parms_) {
+    // An argument for the parameter was provided. In this case 'which' may be
+    // OPTIONAL, REQUIRED, or DEFAULT
+    Parameter* parm = parms.map_.find(parm_name)->second;
+    if (args.has_initial(parm_name)) {
+      check_type(*parm, args, args.get_initial_value(parm->name()));
+      r &= true; // necessary?
+    }
     
     // An argument for the parameter was not provided. This covers the rest of
     // the cases where 'which' is DEFAULT. A valid default value must exist for
     // the parameter
-    else if (parm.init().which == cli::DEFAULT) 
-      check_type(parm, args, parm.init().value);
+    else if (parm->has_default()) {
+      check_type(*parm, args, parm->default_argument());
+      r &= true; // necessary?
+    }
 
     // An argument for the parameter was not provided. In this case 'which'
     // may be OPTIONAL or REQUIRED. Cases where 'which' is OPTIONAL can be
     // disregarded since no argument was provided.
-    else if(parm.init().which == cli::REQUIRED)
-      std::cerr << "error: no argument provided for required parameter '" 
-                << parm.name() << "'\n";
-    
+    else if (parm->is_required()) {
+      args.set_named(parm->name(), Value::error);
+      r &= false;
+    }
   }
+  return r;
 }
 
 
-void parse(const Parameters& parms,
-           Arguments& args, 
-           int argc, 
-           char* argv[], 
-           const char* prefix) 
+bool 
+parse(const Parameters& parms,
+      const Commands& cmds,
+      Arguments& args, 
+      int argc, 
+      char* argv[], 
+      const char* prefix) 
 {
   parse_env(parms, args, prefix);
   parse_args(parms, args, argc, argv);
 
-  check_args(parms, args);
+  if (args.get_listed_size() < 2) {
+    std::cerr << "error: a command must be provided\n";
+    return false;
+  }
+
+  std::string cmd_name = args.get_listed(1);
+
+  if (!cmds.commands.count(cmd_name)) {
+    std::cerr << "error: command not recognized\n";
+    return false;
+  }
+  
+  Command cmd = cmds.commands.find(cmd_name)->second;
+
+  bool result = check_args(parms, cmd, args);
+  if (!result){ 
+    args.display_errors();
+  }
+  return result;
 }
 
 

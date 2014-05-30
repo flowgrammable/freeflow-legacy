@@ -103,22 +103,22 @@ Parameter::init() const { return init_; }
 
 inline bool 
 Parameter::is_required() const { 
-  return init().which == REQUIRED ? true : false; 
+  return init_.which == REQUIRED ? true : false; 
 }
 
 inline bool 
 Parameter::is_optional() const { 
-  return init().which == OPTIONAL ? true : false; 
+  return init_.which == OPTIONAL ? true : false; 
 }
 
 inline bool 
 Parameter::has_default() const { 
-  return init().which == DEFAULT ? true : false; 
+  return init_.which == DEFAULT ? true : false; 
 }
 
 inline const std::string& 
 Parameter::default_argument() const {
-  return init().value;
+  return init_.value;
 }
 
 /// Returns the string containing the documentation for the parameter. 
@@ -140,7 +140,96 @@ Parameters::declare(const std::string& n,
 }
 
 // -------------------------------------------------------------------------- //
+// Command
+
+inline
+Command::Command(const std::string& n, 
+                 const Run& r, 
+                 const Parms& p, 
+                 const std::string& h)
+  : name(n), run(r), parameters(p), helptext(h) { }
+
+inline void
+Commands::declare(const std::string& n, 
+                  const Run& r, 
+                  const Parms& p, 
+                  const std::string& h)
+{
+  commands.emplace(n, Command(n, r, p, h));
+}
+
+inline void 
+Commands::help() const {
+  for(auto command : commands) {
+    std::cout << command.first << "\t\t"
+    << command.second.helptext << "\n";
+  }
+}
+
+inline void 
+Commands::help(const std::string& cmd) const {
+  auto command = commands.find(cmd);
+  std::cout << command->first << "\t\t"
+  << command->second.helptext << "\n";
+}
+
+inline void
+Commands::run(const Arguments& args) {
+  if (args.get_listed(1) == "help"){
+    if (args.get_listed_size() > 2)
+      this->help(args.get_listed(2));
+    else
+      this->help();      
+  }
+  else 
+    commands.find(args.get_listed(1))->second.run(args);
+}
+
+// -------------------------------------------------------------------------- //
+// Initial argument
+
+// Constructor
+inline
+Initial_argument::Initial_argument(const std::string& v, const Source& s) 
+  : value_(v), source_(s) 
+{ }
+
+inline bool 
+Initial_argument::from_cl() const { 
+  return source_ == COMMAND_LINE ? true : false; 
+}
+
+// Mutators
+inline void 
+Initial_argument::set_value(const std::string& v) {
+  value_ = v;
+}
+inline void 
+Initial_argument::set_source(const Source& s) {
+  source_ = s;
+}
+
+// Accessors
+inline std::string 
+Initial_argument::get_value() const {
+  return value_;
+}
+inline Source 
+Initial_argument::get_source() const {
+  return source_;
+}
+
+
+// -------------------------------------------------------------------------- //
 // Arguments
+
+inline bool 
+Arguments::has_named(const std::string& n) {
+  if (named_.count(n))
+    return true;
+  else
+    return false;
+}
 
 inline bool 
 Arguments::has_initial(const Parameter& parm) {
@@ -150,27 +239,71 @@ Arguments::has_initial(const Parameter& parm) {
     return false;
 }
 
+inline bool 
+Arguments::has_initial(const std::string& n) {
+  if (initial_.count(n))
+    return true;
+  else
+    return false;
+}
+
+inline void
+Arguments::display_errors() {
+  // display errors
+}
+
+// Mutators
+
+inline void
+Arguments::set_initial(const Parameter& parm, const Initial_argument& arg) {
+  if (this->has_initial(parm)) // argument exists already
+    initial_[parm.name()] = arg;
+  else 
+    initial_.emplace(parm.name(), arg);
+}
+
+inline void
+Arguments::set_named(const std::string& n, const Value& v) {
+  if (this->has_named(n)) // argument exists already
+    named_[n] = v;
+  else 
+    named_.emplace(n, v); 
+}
+
+inline void
+Arguments::set_listed(const std::string& v) {
+  listed_.push_back(v);
+}
+
+// Accessors
+
 /// Returns the string pointed to by the name passed in the function. If the
 /// name does not exist in the map then ...
 inline std::string 
-Arguments::get_initial(const std::string& n) {
+Arguments::get_initial_value(const std::string& n) const {
+  return initial_.find(n)->second.get_value();
+}
+
+inline Initial_argument
+Arguments::get_initial(const std::string& n) const {
   return initial_.find(n)->second;
 }
 
 inline Value 
-Arguments::get_named(const std::string& arg) {
-  Value v;
-  if (v = named_.find(arg)->second)
-    return v;
-  else
-    return Value::error;
+Arguments::get_named(const std::string& arg) const {
+  return named_.find(arg)->second;
 }
 
-inline Value 
-Arguments::get_listed(const std::string&) {
-  Value v;
-  return v;
+inline std::string 
+Arguments::get_listed(const int& i) const {
+  return listed_[i];
 }
+
+inline int 
+Arguments::get_listed_size() const {
+  return listed_.size();
+}
+
 
 // -------------------------------------------------------------------------- //
 // Type checkers
@@ -228,8 +361,6 @@ template<typename T>
   Sequence<T>::operator()(const std::string& s) const {
     return {};
   }
-
-
 
 } // namespace cli
 } // namespace freeflow

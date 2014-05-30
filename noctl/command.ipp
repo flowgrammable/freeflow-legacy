@@ -15,36 +15,6 @@
 namespace freeflow {
 namespace cli {
 
-inline
-Command::Command(const std::string& n, 
-                 const Run& r, 
-                 const Parms& p, 
-                 const std::string& h)
-  : name(n), run(r), parameters(p), helptext(h) { }
-
-inline void
-Commands::declare(const std::string& n, 
-                  const Run& r, 
-                  const Parms& p, 
-                  const std::string& h)
-{
-  commands.emplace(n, Command(n, r, p, h));
-}
-
-inline void 
-Commands::help() const {
-  for(auto command : commands) {
-    std::cout << command.first << "\t\t"
-    << command.second.helptext << "\n";
-  }
-}
-
-inline void 
-Commands::help(const std::string& cmd) const {
-  auto command = commands.find(cmd);
-  std::cout << command->first << "\t\t"
-  << command->second.helptext << "\n";
-}
 
 inline void
 Add::operator()(const Arguments& args) const {
@@ -56,19 +26,10 @@ Remove::operator()(const Arguments& args) const {
   std::cout << "Ran remove" << "\n";
 }
 
+// no-op
 inline void
-run(const Commands& cmds, const Arguments& args) {
-  if(args.listed_.size()<2)
-    std::cerr << "error: a command must be provided" << "\n";
-  else if(args.listed_[1] == "help"){
-    if (args.listed_.size()>2)
-      cmds.help(args.listed_[2]);
-    else
-      cmds.help();      
-  }
-  else 
-    cmds.commands.find(args.listed_[1])->second.run(args);
-}
+Help::operator()(const Arguments& args) const { }
+
 
 
 } // namespace cli
