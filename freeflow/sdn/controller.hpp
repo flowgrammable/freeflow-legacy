@@ -50,11 +50,27 @@ struct Process {
 };
 
 
-/// The Controller class is...
+/// The Controller class is a reactor that provides services for running
+/// a service that queries, configures, or controls some component of the 
+/// SDN data model. Each service using this class provides support for
+/// reg
+///
+/// Note that it is possible to write primary Nocontrol services like
+/// the OpenFlow controller as applications. This is made possible because
+/// the registration of listeners can occur during application startup.
+/// The same is also true of applicaitons that must connect to remote
+/// services.
 ///
 /// \todo Maybe this should be called agent since it could conceivably
 /// be used as the basis for building either controller or switch agent.
-class Controller {
+///
+/// \todo This class leaks memory.
+///
+/// \todo Refactor the library loading features into a separate class.
+/// The controller should simply inherit those capabilities.
+///
+/// \todo Refactor process management into a separate class.
+class Controller : public Reactor {
   using Library_map = std::unordered_map<std::string, Application_library*>;
   using Process_list = std::list<Process>;
   using Switch_set = std::unordered_set<Switch*>;
@@ -80,11 +96,7 @@ public:
   Switch& connect(Socket&);
   void disconnect(Switch&);
 
-  // Event processing
-  void run();
-
 private:
-  Reactor      react_;    // The controller's rector.
   Library_map  libs_;     // The set of libraries
   Process_list procs_;    // The hosted applications
   Switch_set   switches_; // Connected switches
