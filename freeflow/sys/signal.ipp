@@ -14,4 +14,40 @@
 
 namespace freeflow {
 
+/// Construct a signal action whose handler is a nullptr. This can
+/// be used to uninstall handlers for an action.
+inline
+Signal_action::Signal_action()
+  : Signal_action((Signal_fn)nullptr) { }
+
+
+/// Copy the curently installed signal action for signal s into this
+/// object. An exception is thrown if this fails for any reason.
+inline
+Signal_action::Signal_action(int s) {
+  System_result r = ::sigaction(s, nullptr, this);
+  if (not r)
+    throw std::runtime_error(strerror(errno));
+}
+
+inline
+Signal_action::Signal_action(Signal_fn f) {
+  sigemptyset(&sa_mask);
+  sa_flags = 0;
+  sa_handler = f;
+}
+
+inline
+Signal_action::Signal_action(Signal_info_fn f) {
+  sigemptyset(&sa_mask);
+  sa_flags = SA_SIGINFO;
+  sa_sigaction = f;
+}
+
+/// Install this action for the signal s.
+inline System_result
+Signal_action::install(int s) {
+  return ::sigaction(s, this, nullptr);
+}
+
 } // namespace freeflow

@@ -17,9 +17,30 @@
 
 #include <signal.h>
 
+#include <cstring>
+
+#include <freeflow/sys/resource.hpp>
+
 namespace freeflow {
 
+using Signal_fn = void(*)(int);
+using Signal_info_fn = void(*)(int, siginfo_t*, void*);
 
+/// The Signal_action class describes behaviors to be taken when a
+/// signal is sent to ths proces.
+///
+/// This class is a simple wrapper on sigation that provides initialization
+/// semantics.
+///
+/// \todo Allow the specification of flags, etc.
+struct Signal_action : sigaction {
+  Signal_action();
+  Signal_action(int);
+  Signal_action(Signal_fn);
+  Signal_action(Signal_info_fn);
+
+  System_result install(int);
+};
 
 } // namespace freeflow 
 
