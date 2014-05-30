@@ -115,7 +115,13 @@ public:
   const std::string& name() const;
   const std::string& alias() const;
   const Type& type() const;
+  
   const Initializer& init() const;
+  bool is_required() const;
+  bool is_optional() const;
+  bool has_default() const;
+  const std::string& default_argument() const;
+  
   const std::string& doc() const;
 
 private:
@@ -148,9 +154,9 @@ public:
 /// The Arguments type contains the parsed command line options, binding
 /// parameter names to values, and also the positional arguments.
 struct Arguments {
-  using Argument_map = std::map<std::string, Value>;
+  using Argument_map  = std::map<std::string, Value>;
   using Argument_list = std::vector<std::string>;
-  using String_map = std::map<std::string, std::string>;
+  using String_map    = std::map<std::string, std::string>;
   String_map    initial;  // Initial arguments as strings
   Argument_map  named;    // Name/value mappings
   Argument_list listed;   // Positional arguments.

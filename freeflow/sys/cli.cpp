@@ -119,11 +119,23 @@ check_type(const Parameter& parm, Arguments& args, const std::string& val) {
 }
 
 void check_args(const Parameters& parms, Arguments& args) {
-  for (auto parm : parms.parms_) {
-    // An argument for the parameter was provided. In this case 'which' may be
-    // OPTIONAL, REQUIRED, or DEFAULT
-    if (args.initial.count(parm.name()) or args.initial.count(parm.alias()))
-      check_type(parm, args, args.initial[parm.name()]);
+  for (const Paramater& parm : parms.parms_) {
+    // Check for default arguments
+    if (param.has_default() and args.has_option(parm.name()))
+      check_type(parm, args, parm.default_argument());
+
+    // Check for required values.      
+    else if (parms.is_required() and not args.has_option(parm.name()))
+      std::cerr << "error: no argument provided for required parameter '" 
+                << parm.name() << "'\n";
+    
+    // Otherwise, if the parameter has a value, just check its type.
+    else if (args.has_option(parm.name()))
+      check_type(parm, args, args.option(parm.name()));
+    
+    /*
+    // if (args.initial.count(parm.name()) or args.initial.count(parm.alias()))
+    //  check_type(parm, args, args.initial[parm.name()]);
     
     // An argument for the parameter was not provided. This covers the rest of
     // the cases where 'which' is DEFAULT. A valid default value must exist for
@@ -137,12 +149,13 @@ void check_args(const Parameters& parms, Arguments& args) {
     else if(parm.init().which == cli::REQUIRED)
       std::cerr << "error: no argument provided for required parameter '" 
                 << parm.name() << "'\n";
+    */
   }
 }
 
 
 void parse(const Parameters& parms,
-           Arguments& args,
+           Arguments& args, 
            int argc, 
            char* argv[], 
            const char* prefix) 
