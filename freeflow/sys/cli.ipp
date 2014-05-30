@@ -150,16 +150,20 @@ Arguments::has_initial(const Parameter& parm) {
     return false;
 }
 
+/// Returns the string pointed to by the name passed in the function. If the
+/// name does not exist in the map then ...
 inline std::string 
-Arguments::get_initial(const std::string& arg) {
-  return "FIXME";
+Arguments::get_initial(const std::string& n) {
+  return initial_.find(n)->second;
 }
 
 inline Value 
 Arguments::get_named(const std::string& arg) {
   Value v;
-  //if (v = named_.find())
-  return v;
+  if (v = named_.find(arg)->second)
+    return v;
+  else
+    return Value::error;
 }
 
 inline Value 
