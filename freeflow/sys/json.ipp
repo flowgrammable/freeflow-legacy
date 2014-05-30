@@ -17,6 +17,9 @@
 namespace freeflow {
 namespace json {
 
+inline
+Error::Error(Error_code c, intptr_t d) : code(c), data(d) { } 
+
 /// Allow implicit convesion from std::string.
 inline
 String::String(std::string&& s)
@@ -66,6 +69,11 @@ Value::operator=(const Value& x) {
   return *this;
 }
 
+inline
+Value::operator bool() {
+  return type_ != ERROR;
+}
+
 // Value construction
 inline
 Value::Value(Null n)
@@ -86,6 +94,10 @@ Value::Value(int n)
 inline
 Value::Value(Int z)
   : type_(INT), data_(z) { }
+  
+inline
+Value::Value(const Error e)
+  : type_(ERROR), data_(e) { }
 
 inline
 Value::Value(Real r)
@@ -145,6 +157,7 @@ Value::copy(const Value& x) {
   case STRING: new (&data_.s) String(x.data_.s); break;
   case ARRAY: new (&data_.a) Array(x.data_.a); break;
   case OBJECT: new (&data_.o) Object(x.data_.o); break;
+  case ERROR: new (&data_.e) Error(x.data_.e); break;
   }
 }
 
@@ -160,6 +173,7 @@ Value::move(Value&& x) {
   case STRING: new (&data_.s) String(std::move(x.data_.s)); break;
   case ARRAY: new (&data_.a) Array(std::move(x.data_.a)); break;
   case OBJECT: new (&data_.o) Object(std::move(x.data_.o)); break;
+  case ERROR: new (&data_.e) Error(x.data_.e); break;
   }
 }
 
@@ -174,6 +188,7 @@ Value::destroy() {
   case STRING: data_.s.~String(); break;
   case ARRAY: data_.a.~Array(); break;
   case OBJECT: data_.o.~Object(); break;
+  case ERROR: data_.e.~Error(); break;
   default: break;
   }
 }
@@ -292,6 +307,8 @@ template<typename C, typename T>
       return print(os, v.as_array());
     case Value::OBJECT:
       return print(os, v.as_object());
+    case Value::ERROR:
+       return os << "ERROR!"; // TODO: smarter error messages?
     }
     return os;
   }

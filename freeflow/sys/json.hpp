@@ -84,6 +84,22 @@ using Pair = std::pair<String, Value>;
 /// \todo The set of values can be readily extended with new literal types.
 /// For example, it might be useful to include ipv4 and ipv6 addresses,
 /// hex literals, or binary literals as new kinds of values.
+
+enum Error_code {
+  TYPE_ERROR,
+  PARSE_ERROR,
+  REQUIRED_ERROR,
+  VALUE_ERROR
+};
+
+
+struct Error {
+  Error_code code;
+  intptr_t   data;
+  
+  Error(Error_code, intptr_t);
+};
+
 class Value {
 public:
   enum Type {
@@ -93,7 +109,8 @@ public:
       REAL,
       STRING,
       ARRAY,
-      OBJECT
+      OBJECT,
+      ERROR
   };
 
   union Data {
@@ -108,6 +125,7 @@ public:
     Data(const Array& a) : a(a) { }
     Data(Object&& o) : o(std::move(o)) { }
     Data(const Object& o) : o(o) { }
+    Data(Error _e) : e(_e) { }
     ~Data() { }
 
     Null   n;
@@ -117,6 +135,7 @@ public:
     String s;
     Array  a;
     Object o;
+    Error  e;
   };
 
   Value();
@@ -145,6 +164,7 @@ public:
   Value(const Array&);
   Value(Object&&);
   Value(const Object&);
+  Value(const Error e);
 
   ~Value();
 
@@ -170,6 +190,8 @@ public:
   
   Object&       as_object();
   const Object& as_object() const;
+  
+  operator bool();
 
 private:
   void copy(const Value&);
