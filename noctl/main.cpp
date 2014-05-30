@@ -27,6 +27,9 @@ using namespace freeflow;
 
 int
 main(int argc, char *argv[]) {
+  json::Value v = json::Error(json::TYPE_ERROR, 5);
+  
+  
   cli::Commands cmds;
   cmds.declare("add", cli::Add(), { "name", "path", "config" },
    "This command adds something somewhere.");
