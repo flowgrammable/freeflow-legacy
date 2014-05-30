@@ -20,6 +20,7 @@ Reactor::Reactor()
   : running_(true), handlers_(), timers_(), expired_()
 {
   expired_.reserve(32);
+  signals_.reserve(32);
 }
 
 /// Register the handler with the reactor.
@@ -95,6 +96,11 @@ inline void
 Reactor::cancel_timer(Event_handler* h, int id) {
   timers_.cancel(h, id);
 }
+
+/// Send a signal to the queue. Note that signals are processed during
+/// the main event loop and not asynchronously.
+inline void
+Reactor::send_signal(int s) { signals_.push_back(s); }
 
 /// Stop the reactor from running.
 inline void

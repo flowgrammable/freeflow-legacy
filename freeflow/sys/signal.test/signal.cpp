@@ -18,6 +18,8 @@
 
 using namespace freeflow;
 
+// FIXME: This could be better.
+
 void on_interrupt(int) {
   std::cout << "signal: interrupt!\n";
   exit(0);

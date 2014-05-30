@@ -36,7 +36,7 @@ Signal_action::Signal_action(int s) {
 /// Construct a signal action with the signal handler f.
 inline
 Signal_action::Signal_action(Signal_fn f) {
-  sigemptyset(&sa_mask);
+  sigfillset(&sa_mask);
   sa_flags = 0;
   sa_handler = f;
 }
@@ -44,7 +44,7 @@ Signal_action::Signal_action(Signal_fn f) {
 /// Construct a signal action with the signal information function f.
 inline
 Signal_action::Signal_action(Signal_info_fn f) {
-  sigemptyset(&sa_mask);
+  sigfillset(&sa_mask);
   sa_flags = SA_SIGINFO;
   sa_sigaction = f;
 }

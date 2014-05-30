@@ -31,6 +31,9 @@ using Signal_info_fn = void(*)(int, siginfo_t*, void*);
 /// This class is a simple wrapper on sigation that provides initialization
 /// semantics.
 ///
+/// Note that by default, the action is constructed so that all signals
+/// are blocked during processing an signal handler.
+///
 /// \todo Allow the specification of flags, etc.
 struct Signal_action : sigaction {
   Signal_action();

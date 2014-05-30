@@ -71,16 +71,23 @@ notify_timer(const Timer& t, Resource_set& close) {
 // -------------------------------------------------------------------------- //
 // Signaling infrastructure
 
-// The global signal recorder.
-//
-// Note that 0 should be "no signal".
-static volatile std::sig_atomic_t signal_ = 0;
+using Reactor_list = std::vector<Reactor*>;
+
+/// A global list of reactor instances. This allos multiple reactors
+/// to be running in a single thread or process.
+static Reactor_list reactors_;
 
 // The basic signal handler simply records the signal that
 // was received by the process. This is acted on in the
 // event loop.
+//
+// BUG: This is fundamentally broken. The handler needs to queue then
+// signal for each reactor instance.
 void
-signal_handler(int sig) { signal_ = sig; }
+signal_handler(int sig) { 
+  for (Reactor* r : reactors_)
+    r->send_signal(sig);
+}
 
 } // namespace
 
@@ -88,11 +95,27 @@ signal_handler(int sig) { signal_ = sig; }
 // Reactor initialization
 
 namespace impl {
+
+inline Reactor*
+Reactor_init::self() { return reinterpret_cast<Reactor*>(this); }
+
+
 // Initialize the signal handler infrastructure. Note that this
 // happens only once.
 Reactor_init::Reactor_init() {
   init_signals();
+
+  // Add the reactor to the global reactor list.
+  reactors_.push_back(self());
 }
+
+Reactor_init::~Reactor_init() {
+  // Remove this reactor from the registry.
+  // NOTE: This is not efficient, but we expect the number of reactors
+  // to be small.
+  reactors_.erase(std::find(reactors_.begin(), reactors_.end(), self()));
+}
+
 
 // One-time initialiation of signal handling.
 ///
@@ -168,17 +191,16 @@ Reactor::close_handlers(const Resource_set& close) {
   }
 }
 
-// Notify subscribed handlers of their signals.
+// Notify each handler of each pending signal, and then clear the queue.
 inline void
 Reactor::notify_signal(Resource_set& close) {
-  if (signal_) {
+  for (int s : signals_)
     for (Event_handler* h : handlers_) {
       if (h and h->is_subscribed(SIGNAL_EVENTS))
-        if (not h->on_signal(signal_))
+        if (not h->on_signal(s))
           close.insert(h->fd());
     }
-    signal_ = 0;
-  }
+  signals_.clear();
 }
 
 /// Run the reactor's event loop until stoppage is indicated.

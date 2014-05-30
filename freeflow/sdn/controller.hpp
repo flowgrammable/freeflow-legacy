@@ -19,7 +19,7 @@
 #include <unordered_map>
 #include <unordered_set>
 
-#include <freeflow/sys/socket.hpp>
+#include <freeflow/sys/acceptor.hpp>
 #include <freeflow/sys/reactor.hpp>
 #include <freeflow/sdn/application.hpp>
 
@@ -27,7 +27,7 @@ namespace freeflow {
 
 struct Switch;
 struct Process;
-
+struct Controller;
 
 /// A positoin in a process list.
 using Process_iterator = std::list<Process>::iterator;
@@ -48,6 +48,32 @@ struct Process {
   
   Process_iterator     pos; // Internal position in application list
 };
+
+
+/// The Default_listener_factory is responsible for the allocation of
+/// Services for a given controller.
+template<typename Service>
+  struct Default_listener_factory {
+    Default_listener_factory(Controller&);
+
+    Service* operator()(Reactor&, Socket&&) const;
+
+  private:
+    Controller& ctrl_;
+  };
+
+/// A listener is an acceptor bound to a controller. This class is
+/// primarily provided as a convenience, providing an appropriate
+/// default factory and useful constructor.
+///
+/// \todo Consider making this an actual component of the controller
+/// rather than just a trivial wrapper.
+///
+/// \todo Move this into its own module.
+template<typename Service, typename Factory = Default_listener_factory<Service>>
+  struct Listener : Acceptor<Service, Factory> {
+    Listener(Controller& ctrl);
+  };
 
 
 /// The Controller class is a reactor that provides services for running
