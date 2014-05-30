@@ -103,11 +103,7 @@ class Controller : public Reactor {
 public:
   // Listener management
   template<typename T>
-    T* add_listener(const Address&, Socket::Transport);
-
-  template<typename T>
-    void remove_listener(T*);
-
+    void add_listener(T*, const Address&, Socket::Transport);
 
   // Application loading
   Application_library* load(const std::string&);

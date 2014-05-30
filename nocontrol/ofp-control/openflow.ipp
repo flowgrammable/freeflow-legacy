@@ -80,17 +80,4 @@ Ofp_handler::on_time(int t) {
   return true;
 }
 
-
-// -------------------------------------------------------------------------- //
-// Openflow factory
-
-inline
-Ofp_factory::Ofp_factory(ff::Controller& c)
-  : ctrl_(c) { }
-
-inline Ofp_handler* 
-Ofp_factory::operator()(ff::Reactor& r, ff::Socket&& s) const {
-  return new Ofp_handler(r, std::move(s), ctrl_);
-}
-
 } // namespace nocontrol

@@ -37,21 +37,10 @@ private:
   ff::Buffer buf_;        // A pre-allocated read buffer.
 };
 
-
-/// Responsible for the allocation of nocontrol handlers.
-struct Ncp_factory {
-  Ncp_factory(ff::Controller& c);
-
-  Ncp_handler* operator()(ff::Reactor&, ff::Socket&&) const;
-
-private:
-  ff::Controller& ctrl_;      // The controller
-};
-
 /// The Ncp_acceptor is resposnble for accepting connections
 /// on the management port and construcitng service handlers to
 /// manage that connection.
-using Ncp_acceptor = ff::Acceptor<Ncp_handler, Ncp_factory>;
+using Ncp_listener = ff::Listener<Ncp_handler>;
 
 } // namesapce nocontrol
 

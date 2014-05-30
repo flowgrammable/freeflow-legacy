@@ -49,12 +49,10 @@ template<typename S, typename F>
 ///
 /// \todo Provide an additional argument for the backlog.
 template<typename T>
-  inline T*
-  Controller::add_listener(const Address& a, Socket::Transport t) {
-    T* h = new T(*this, *this);
+  inline void
+  Controller::add_listener(T* h, const Address& a, Socket::Transport t) {
     h->listen(a, t);
-    new_handler(h);
-    return h;
+    add_handler(h); // Shouldn't listen auto-register the acceptor?
   }
 
 /// Returns true if the library is already loaded.

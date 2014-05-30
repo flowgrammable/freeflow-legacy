@@ -49,25 +49,10 @@ private:
   ff::ofp::Protocol* proto_;
 };
 
-
-/// The Ofp_factory is responsible for creating new service handlers
-/// for connected switches.
-///
-/// \todo This is the same as the Nocontrol_factory. Factor this into
-/// a template in the SDN library.
-struct Ofp_factory {
-  Ofp_factory(ff::Controller&);
-  
-  Ofp_handler* operator()(ff::Reactor&, ff::Socket&&) const;
-
-private:
-  ff::Controller& ctrl_;
-};
-
 /// The Ofp_acceptor is responsible for accepting connections from
 /// switches and constructing service handlers to manage the OpenFlow
 /// protocol.
-using Ofp_acceptor = ff::Acceptor<Ofp_handler, Ofp_factory>;
+using Ofp_listener = ff::Listener<Ofp_handler>;
 
 } // namespace nocontrol
 
