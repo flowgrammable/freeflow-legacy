@@ -77,11 +77,11 @@ parse_args(const Parameters& parms, Arguments& args, int argc, char* argv[]) {
         std::cerr << "error: unrecognized parameter '" << x.first << "'\n";
       } else {
         auto n = parms.map_.find(x.first);
-        args.initial[n->second->name()] = x.second;
+        args.initial_[n->second->name()] = x.second;
       }
     }
     else
-      args.listed.push_back(argv[i]);
+      args.listed_.push_back(argv[i]);
   }
 }
 
@@ -95,7 +95,7 @@ parse_env(const Parameters& parms, Arguments& args, const char* prefix) {
   for (auto parm : parms.parms_) {
     std::string var = make_env_var(pre, parm);
     if (char* p = getenv(var.c_str()))
-      args.initial.emplace(parm.name(), p);
+      args.initial_.emplace(parm.name(), p);
   }
 }
 
@@ -112,30 +112,33 @@ check_type(const Parameter& parm, Arguments& args, const std::string& val) {
   Value v = parm.type()(val);
   if(!v) 
     std::cerr << "error: argument '" << parm.name() << "' has invalid type\n";
-  else if(args.named.count(parm.name()))
-    args.named[parm.name()] = v;
+  else if(args.named_.count(parm.name()))
+    args.named_[parm.name()] = v;
   else 
-    args.named.emplace(parm.name(), v); 
+    args.named_.emplace(parm.name(), v); 
 }
 
 void check_args(const Parameters& parms, Arguments& args) {
-  for (const Paramater& parm : parms.parms_) {
-    // Check for default arguments
-    if (param.has_default() and args.has_option(parm.name()))
-      check_type(parm, args, parm.default_argument());
+  for (auto parm : parms.parms_) {
+  // for (const Parameter& parm : parms.parms_) {
+    // // Check for default arguments
+    // if (parm.has_default() and args.has_option(parm.name()))
+    //   check_type(parm, args, parm.default_argument());
 
-    // Check for required values.      
-    else if (parms.is_required() and not args.has_option(parm.name()))
-      std::cerr << "error: no argument provided for required parameter '" 
-                << parm.name() << "'\n";
+    // // Check for required values.      
+    // else if (parms.is_required() and not args.has_option(parm.name()))
+    //   std::cerr << "error: no argument provided for required parameter '" 
+    //             << parm.name() << "'\n";
     
-    // Otherwise, if the parameter has a value, just check its type.
-    else if (args.has_option(parm.name()))
-      check_type(parm, args, args.option(parm.name()));
-    
-    /*
-    // if (args.initial.count(parm.name()) or args.initial.count(parm.alias()))
-    //  check_type(parm, args, args.initial[parm.name()]);
+    // // Otherwise, if the parameter has a value, just check its type.
+    // else if (args.has_option(parm.name()))
+    //   check_type(parm, args, args.option(parm.name()));
+    bool r = true;
+    Value v;
+
+    // This checks whether an argument 
+    if (args.has_initial(parm))
+      check_type(parm, args, args.get_initial(parm.name()));
     
     // An argument for the parameter was not provided. This covers the rest of
     // the cases where 'which' is DEFAULT. A valid default value must exist for
@@ -149,7 +152,7 @@ void check_args(const Parameters& parms, Arguments& args) {
     else if(parm.init().which == cli::REQUIRED)
       std::cerr << "error: no argument provided for required parameter '" 
                 << parm.name() << "'\n";
-    */
+    
   }
 }
 

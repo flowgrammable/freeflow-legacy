@@ -153,13 +153,20 @@ public:
 
 /// The Arguments type contains the parsed command line options, binding
 /// parameter names to values, and also the positional arguments.
-struct Arguments {
+class Arguments {
+
+public:
   using Argument_map  = std::map<std::string, Value>;
   using Argument_list = std::vector<std::string>;
   using String_map    = std::map<std::string, std::string>;
-  String_map    initial;  // Initial arguments as strings
-  Argument_map  named;    // Name/value mappings
-  Argument_list listed;   // Positional arguments.
+  bool has_initial(const Parameter&);
+  std::string get_initial(const std::string&);
+  Value get_named(const std::string&);
+  Value get_listed(const std::string&);
+//private:
+  String_map    initial_;  // Initial arguments as strings
+  Argument_map  named_;    // Name/value mappings
+  Argument_list listed_;   // Positional arguments.
 };
 
 // -------------------------------------------------------------------------- //

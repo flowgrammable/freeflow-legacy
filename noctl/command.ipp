@@ -58,16 +58,16 @@ Remove::operator()(const Arguments& args) const {
 
 inline void
 run(const Commands& cmds, const Arguments& args) {
-  if(args.listed.size()<2)
+  if(args.listed_.size()<2)
     std::cerr << "error: a command must be provided" << "\n";
-  else if(args.listed[1] == "help"){
-    if (args.listed.size()>2)
-      cmds.help(args.listed[2]);
+  else if(args.listed_[1] == "help"){
+    if (args.listed_.size()>2)
+      cmds.help(args.listed_[2]);
     else
       cmds.help();      
   }
   else 
-    cmds.commands.find(args.listed[1])->second.run(args);
+    cmds.commands.find(args.listed_[1])->second.run(args);
 }
 
 

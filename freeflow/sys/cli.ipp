@@ -100,6 +100,27 @@ Parameter::type() const { return type_; }
 inline const Initializer&
 Parameter::init() const { return init_; }
 
+
+inline bool 
+Parameter::is_required() const { 
+  return init().which == REQUIRED ? true : false; 
+}
+
+inline bool 
+Parameter::is_optional() const { 
+  return init().which == OPTIONAL ? true : false; 
+}
+
+inline bool 
+Parameter::has_default() const { 
+  return init().which == DEFAULT ? true : false; 
+}
+
+inline const std::string& 
+Parameter::default_argument() const {
+  return init().value;
+}
+
 /// Returns the string containing the documentation for the parameter. 
 inline const std::string&
 Parameter::doc() const { return doc_; }
@@ -118,6 +139,34 @@ Parameters::declare(const std::string& n,
   return p;
 }
 
+// -------------------------------------------------------------------------- //
+// Arguments
+
+inline bool 
+Arguments::has_initial(const Parameter& parm) {
+  if (initial_.count(parm.name()) or initial_.count(parm.alias()))
+    return true;
+  else
+    return false;
+}
+
+inline std::string 
+Arguments::get_initial(const std::string& arg) {
+  return "FIXME";
+}
+
+inline Value 
+Arguments::get_named(const std::string& arg) {
+  Value v;
+  //if (v = named_.find())
+  return v;
+}
+
+inline Value 
+Arguments::get_listed(const std::string&) {
+  Value v;
+  return v;
+}
 
 // -------------------------------------------------------------------------- //
 // Type checkers
