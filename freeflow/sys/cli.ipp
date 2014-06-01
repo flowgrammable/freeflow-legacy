@@ -281,6 +281,11 @@ Arguments::display_errors(const Command& cmd, const char* pre) {
                  << display_err_info(arg.second/*.as_error*/) << "\n";
           break;
         }
+        case FROM_DEFAULT: {
+          errors << "error: default argument '" << arg.first << "' " 
+                 << display_err_info(arg.second/*.as_error*/) << "\n";
+          break;
+        }
         case NOT_PROVIDED: {
           errors << "error: argument '" << arg.first << "' " 
                  <<  display_err_info(arg.second/*.as_error*/) << "\n";
@@ -288,7 +293,7 @@ Arguments::display_errors(const Command& cmd, const char* pre) {
       }
     }
   }
-  std::cerr << warnings.str() << errors.str() << "\n";
+  std::cerr << warnings.str() << errors.str();
 }
 
 inline std::string

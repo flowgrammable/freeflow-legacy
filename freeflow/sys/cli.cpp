@@ -114,7 +114,6 @@ check_type(const Parameter& parm, Arguments& args, const std::string& val) {
 
 bool 
 check_args(const Parameters& parms, const Command& cmd, Arguments& args) {
-  Source src = NOT_PROVIDED;
   bool r = true;
   // for (const std::string& parm_name: cmd.parameters) {
   for (auto parm : parms.parms_) {
@@ -127,14 +126,16 @@ check_args(const Parameters& parms, const Command& cmd, Arguments& args) {
     // An argument for the parameter was not provided. This covers the rest of
     // the cases where 'which' is DEFAULT. A valid default value must exist for
     // the parameter
-    else if (parm.has_default())
+    else if (parm.has_default()) {
+      args.set_initial(parm, Initial_argument(parm.default_argument(), FROM_DEFAULT));
       r &= check_type(parm, args, parm.default_argument());
-    
+    }
+
     // An argument for the parameter was not provided. In this case 'which'
     // may be OPTIONAL or REQUIRED. Cases where 'which' is OPTIONAL can be
     // disregarded since no argument was provided.
     else if (parm.is_required()) {
-      args.set_initial(parm, Initial_argument("", src));
+      args.set_initial(parm, Initial_argument("", NOT_PROVIDED));
       args.set_named(parm.name(), json::Error(json::REQUIRED_ERROR, 0));
       r &= false;
     }
@@ -169,9 +170,11 @@ parse(const Parameters& parms,
   Command cmd = cmds.commands.find(cmd_name)->second;
 
   bool result = check_args(parms, cmd, args);
+
   if (!result){ 
     args.display_errors(cmd, prefix);
   }
+
   return result;
 }
 
