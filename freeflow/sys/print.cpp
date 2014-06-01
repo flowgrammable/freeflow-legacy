@@ -14,6 +14,8 @@
 
 #include <iostream>
 #include <string>
+#include <map>
+#include <utility>
 
 #include <freeflow/sys/print.hpp>
 #include <freeflow/sys/json.hpp>
@@ -41,11 +43,15 @@ void Printer::print(const json::String& s){
  os_ << s;
 }
 
-// After '{' increment indent_, add spaces to tab, then insert newline and tab.
+void Printer::print(const json::Pair& p){
+  os_ << p.first << ": " << p.second;
+}
+
+// Print beginning of object
 void Printer::start_object() {
  ++indent_; 
  tab_  += "   ";
- os_ << "\n" << tab_;
+ os_<< '{' << "\n" << tab_ ;
 }
 
 // Print end of object. 
@@ -54,13 +60,52 @@ void Printer::end_object() {
  tab_.clear();
  for(int i=0; i < indent_; i++)
   tab_+=" ";
-os_ << "\n" << tab_;
+os_ << '}' << "\n" << tab_;
 }
 
 // Print object
 void Printer::print(const json::Object& o) {
-  
+  start_object();     
+  for(auto& it : o){
+  os_ << it.first << " : ";
+  // print(it.second);
+ }
+ end_object();
 }
+
+// Print beginning of an array.
+void Printer::start_array() {
+  os_  << '[';
+}
+
+// Print end of array
+void Printer::end_array() {
+  os_ << ']';
+}
+
+// Print array
+void Printer::print(const json::Array& a) {
+  start_array();
+  for(auto& it : a){
+    switch(it.type()){
+      case json::Value::NIL:
+      case json::Value::BOOL:
+      case json::Value::INT:
+      case json::Value::REAL:
+      case json::Value::STRING:
+      os_ << it;
+      break;
+      case json::Value::ARRAY:
+      // print(it);
+      break;
+      case json::Value::OBJECT:
+      // print(it);
+      break;
+    }
+  }
+  end_array();
+}
+
 
 } // freeflow
 
