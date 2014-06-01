@@ -15,6 +15,13 @@
 namespace freeflow {
 namespace cli {
 
+/// Return an environment variable name constructed from the given
+/// prefix and parameter name.
+inline std::string
+make_env_var(const std::string& pre, const std::string& parm) {
+  return pre + "_" + toupper(parm);
+}
+
 // -------------------------------------------------------------------------- //
 // Value type
 
@@ -248,8 +255,65 @@ Arguments::has_initial(const std::string& n) {
 }
 
 inline void
-Arguments::display_errors() {
-  // display errors
+Arguments::display_errors(const Command& cmd, const char* pre) {
+  std::stringstream errors;
+  std::stringstream warnings;
+  for (auto arg : named_) {
+    if(!cmd.parameters.count(arg.first) and get_initial(arg.first).from_cl()) {
+      warnings << "warning: command-line argument '" << arg.first
+               << "' is not accepted for this command and will be ignored\n";
+    }
+    else if (arg.second.type() == json::Value::ERROR) {
+      switch (get_initial(arg.first).get_source()) {
+        case ENVIRONMENT: {
+          errors << "error: environment variable '" 
+                 << make_env_var(pre, arg.first) << "' " 
+                 <<  display_err_info(arg.second/*.as_error*/) << "\n";
+          break;
+        }
+        case CONFIG: {
+          errors << "error: argument '" << arg.first << "' from config file " 
+                 << display_err_info(arg.second/*.as_error*/) << "\n";
+          break;
+        }
+        case COMMAND_LINE: {
+          errors << "error: command-line argument '" << arg.first << "' " 
+                 << display_err_info(arg.second/*.as_error*/) << "\n";
+          break;
+        }
+        case NOT_PROVIDED: {
+          errors << "error: argument '" << arg.first << "' " 
+                 <<  display_err_info(arg.second/*.as_error*/) << "\n";
+        }
+      }
+    }
+  }
+  std::cerr << warnings.str() << errors.str() << "\n";
+}
+
+inline std::string
+display_err_info(const json::Value& v/*json::Error& e*/) { 
+  // return error-specific string
+  std::string error_msg = "";
+  switch (v.data_.e.code/*e.code*/) {
+    case json::TYPE_ERROR: {
+      error_msg = "has invalid type";
+      break;
+    }
+    case json::PARSE_ERROR: {
+      error_msg = "caused an error during parsing"; // ?
+      break;
+    }
+    case json::REQUIRED_ERROR: {
+      error_msg = "is required but was not provided";
+      break;
+    }
+    case json::VALUE_ERROR: {
+      error_msg = "has a value that is not allowed";
+      break;
+    }
+  }
+  return error_msg;
 }
 
 // Mutators
@@ -263,7 +327,7 @@ Arguments::set_initial(const Parameter& parm, const Initial_argument& arg) {
 }
 
 inline void
-Arguments::set_named(const std::string& n, const Value& v) {
+Arguments::set_named(const std::string& n, const json::Value& v) {
   if (this->has_named(n)) // argument exists already
     named_[n] = v;
   else 
@@ -289,7 +353,7 @@ Arguments::get_initial(const std::string& n) const {
   return initial_.find(n)->second;
 }
 
-inline Value 
+inline json::Value 
 Arguments::get_named(const std::string& arg) const {
   return named_.find(arg)->second;
 }
@@ -308,46 +372,46 @@ Arguments::get_listed_size() const {
 // -------------------------------------------------------------------------- //
 // Type checkers
 
-inline Value 
+inline json::Value 
 Null::operator()(const std::string& s) const {
   if (s == "null")
     return {};
   else
-    return Value::error;
+    return json::Error(json::TYPE_ERROR, 0);
 }
 
-inline Value 
+inline json::Value 
 Bool::operator()(const std::string& s) const {
   if (s == "true")
     return true;
   else if (s == "false")
     return false;
   else 
-    return Value::error;
+    return json::Error(json::TYPE_ERROR, 0);
 }
 
-inline Value
+inline json::Value
 Int::operator()(const std::string& s) const {
   return {};
 }
 
-inline Value 
+inline json::Value 
 Real::operator()(const std::string& s) const {
   double d;
   std::stringstream ss(s);
   if (ss >> d) 
     return d;
   else 
-    return Value::error;
+    return json::Error(json::TYPE_ERROR, 0);
 }
 
-inline Value
+inline json::Value
 String::operator()(const std::string& s) const {
   return s;
 }
 
 template<typename T>
-  inline Value 
+  inline json::Value 
   Optional<T>::operator()(const std::string& s) const {
     T type;
     Null null;
@@ -357,7 +421,7 @@ template<typename T>
   }
 
 template<typename T>
-  inline Value
+  inline json::Value
   Sequence<T>::operator()(const std::string& s) const {
     return {};
   }

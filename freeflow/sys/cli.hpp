@@ -19,6 +19,7 @@
 #include <list>
 #include <sstream>
 #include <unordered_map>
+#include <set>
 #include <iostream>
 #include <cstring>
 
@@ -26,6 +27,8 @@
 
 namespace freeflow {
 namespace cli {
+
+class Command;
 
 // -------------------------------------------------------------------------- //
 // Value types
@@ -55,7 +58,7 @@ private:
 
 /// The type of a parameter is determined by a function. If a string can be
 /// converted into a JSON value, then the type is assumed to have checked.
-using Type = std::function<Value(const std::string&)>;
+using Type = std::function<json::Value(const std::string&)>;
 
 
 /// The Name struct contains the name and alias of a parameter.
@@ -156,7 +159,8 @@ public:
 enum Source {
   ENVIRONMENT,
   CONFIG,
-  COMMAND_LINE
+  COMMAND_LINE,
+  NOT_PROVIDED
 };
 
 class Initial_argument {
@@ -182,24 +186,24 @@ private:
 class Arguments {
 
 public:
-  using Argument_map  = std::map<std::string, Value>;
+  using Argument_map  = std::map<std::string, json::Value>;
   using Argument_list = std::vector<std::string>;
   using Initial_args_map = std::map<std::string, Initial_argument>;
 
   bool has_initial(const Parameter&);
   bool has_initial(const std::string&);
   bool has_named(const std::string&);
-  void display_errors();
+  void display_errors(const Command&, const char*);
 
   // Mutators
   void set_initial(const Parameter&, const Initial_argument&);
-  void set_named(const std::string&, const Value&);
+  void set_named(const std::string&, const json::Value&);
   void set_listed(const std::string&);
 
   // Accessors
   std::string get_initial_value(const std::string&) const;
   Initial_argument get_initial(const std::string&) const;
-  Value get_named(const std::string&) const;
+  json::Value get_named(const std::string&) const;
   std::string get_listed(const int&) const;
   int get_listed_size() const;
 
@@ -214,7 +218,7 @@ private:
 // Command
 
 using Run = std::function<void(const Arguments&)>;
-using Parms = std::vector<std::string>;
+using Parms = std::set<std::string>;
 
 /// The command class represents a command-line command ...
 class Command {
@@ -252,18 +256,18 @@ public:
 // Type checking
 
 // Type checkers
-struct Null { Value operator()(const std::string&) const; };
-struct Bool { Value operator()(const std::string&) const; };
-struct Int { Value operator()(const std::string&) const; };
-struct Real { Value operator()(const std::string&) const; };
-struct String { Value operator()(const std::string&) const; };
+struct Null { json::Value operator()(const std::string&) const; };
+struct Bool { json::Value operator()(const std::string&) const; };
+struct Int { json::Value operator()(const std::string&) const; };
+struct Real { json::Value operator()(const std::string&) const; };
+struct String { json::Value operator()(const std::string&) const; };
 
 // Type checking combinators
 template<typename T>
-  struct Optional { Value operator()(const std::string&) const; };
+  struct Optional { json::Value operator()(const std::string&) const; };
 
 template<typename T>
-  struct Sequence { Value operator()(const std::string&) const; };
+  struct Sequence { json::Value operator()(const std::string&) const; };
 
 
 // -------------------------------------------------------------------------- //
@@ -278,7 +282,7 @@ void parse_env(const Parameters&, Arguments&, const std::string&);
 void parse_config(const Parameters&, Arguments&, const char*);
 void parse_config(const Parameters&, Arguments&, const std::string&);
 
-void check_type(const Parameter&, Arguments&, const std::string&);
+bool check_type(const Parameter&, Arguments&, const std::string&);
 
 bool check_args(const Parameters&, const Command&, Arguments&);
 
@@ -289,6 +293,7 @@ bool parse(const Parameters&,
            char*[], 
            const char*);
 
+inline std::string display_err_info(const json::Value&/*json::Error&*/);
 
 } // namespace cli
 } // namespace freeflow

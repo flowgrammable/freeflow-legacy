@@ -36,7 +36,7 @@ parse_flag(const std::string& arg) {
   if (p == arg.size())
     throw std::runtime_error("parse error");
 
-  // Parse the name from the flag. If the flag is of the from
+  // Parse the name from the flag. If the flag is of the form
   // f=x, this parses out f. If the '=' is not present, this
   // returns the name f.
   std::string name;
@@ -55,12 +55,6 @@ parse_flag(const std::string& arg) {
     return { std::move(name), Initial_argument(std::move(value), src) };
 }
 
-/// Return an environment variable name constructed from the given
-/// prefix and parameter name.
-inline std::string
-make_env_var(const std::string& pre, const Parameter& parm) {
-  return pre + "_" + toupper(parm.name());
-}
 
 } // namespace
 
@@ -95,7 +89,7 @@ parse_env(const Parameters& parms, Arguments& args, const char* prefix) {
   Source src = ENVIRONMENT;
   std::string pre = toupper(prefix);
   for (auto parm : parms.parms_) {
-    std::string var = make_env_var(pre, parm);
+    std::string var = make_env_var(pre, parm.name());
     if (char* p = getenv(var.c_str()))
       args.set_initial(parm, Initial_argument(p,src));
   }
@@ -109,37 +103,39 @@ parse_env(const Parameters& parms, Arguments& args, const std::string& prefix) {
   parse_env(parms, args, prefix.c_str());
 }
 
-void
+bool
 check_type(const Parameter& parm, Arguments& args, const std::string& val) {
   args.set_named(parm.name(), parm.type()(val));
+  if (args.get_named(parm.name()).type() == json::Value::ERROR)
+    return false;
+  else
+    return true;
 }
 
 bool 
 check_args(const Parameters& parms, const Command& cmd, Arguments& args) {
+  Source src = NOT_PROVIDED;
   bool r = true;
-  for (const std::string& parm_name: cmd.parameters) {
-  //for (auto parm : parms.parms_) {
+  // for (const std::string& parm_name: cmd.parameters) {
+  for (auto parm : parms.parms_) {
     // An argument for the parameter was provided. In this case 'which' may be
     // OPTIONAL, REQUIRED, or DEFAULT
-    Parameter* parm = parms.map_.find(parm_name)->second;
-    if (args.has_initial(parm_name)) {
-      check_type(*parm, args, args.get_initial_value(parm->name()));
-      r &= true; // necessary?
-    }
+    // Parameter* parm = parms.map_.find(parm_name)->second;
+    if (args.has_initial(parm.name()))
+      r &= check_type(parm, args, args.get_initial_value(parm.name()));
     
     // An argument for the parameter was not provided. This covers the rest of
     // the cases where 'which' is DEFAULT. A valid default value must exist for
     // the parameter
-    else if (parm->has_default()) {
-      check_type(*parm, args, parm->default_argument());
-      r &= true; // necessary?
-    }
-
+    else if (parm.has_default())
+      r &= check_type(parm, args, parm.default_argument());
+    
     // An argument for the parameter was not provided. In this case 'which'
     // may be OPTIONAL or REQUIRED. Cases where 'which' is OPTIONAL can be
     // disregarded since no argument was provided.
-    else if (parm->is_required()) {
-      args.set_named(parm->name(), Value::error);
+    else if (parm.is_required()) {
+      args.set_initial(parm, Initial_argument("", src));
+      args.set_named(parm.name(), json::Error(json::REQUIRED_ERROR, 0));
       r &= false;
     }
   }
@@ -174,7 +170,7 @@ parse(const Parameters& parms,
 
   bool result = check_args(parms, cmd, args);
   if (!result){ 
-    args.display_errors();
+    args.display_errors(cmd, prefix);
   }
   return result;
 }

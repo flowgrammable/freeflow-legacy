@@ -31,7 +31,7 @@ main(int argc, char *argv[]) {
   
   
   cli::Commands cmds;
-  cmds.declare("add", cli::Add(), { "name", "path", "config", "version" },
+  cmds.declare("add", cli::Add(), { "name", "path", "config", "version", "flag" },
    "This command adds something somewhere.");
   cmds.declare("remove", cli::Remove(), { "name", "path", "config" }, 
    "This command removes something somewhere");
@@ -49,11 +49,11 @@ main(int argc, char *argv[]) {
 
   cli::Arguments args;
 
-  bool err = !parse(parms, cmds, args, argc, argv, "flog");
-  if (err)
-    return 1;
-  else
+  if (parse(parms, cmds, args, argc, argv, "flog"))
     cmds.run(args);
+  else
+    return 1;
+    
 
   // cout << "Parsed arguments:\n";
   // for (auto& x : args.named)
