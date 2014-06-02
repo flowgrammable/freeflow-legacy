@@ -78,7 +78,11 @@ main(int argc, char *argv[]) {
 
 // ---------------- Parse global arguments up to the command ---------------- //
   // Initialize the parse state
-  cli::Parse_state ps(argc, 0, argv);
+  cli::Parse_state ps(argc, 1, argv);
+  if (ps.argc == 1) {
+    std::cerr << "error: a command must be provided\n";
+    return -1;
+  }
 
   // Initialize the program arguments
   cli::Arguments program_args;
@@ -107,24 +111,28 @@ main(int argc, char *argv[]) {
   
   // Make sure the command exists
   std::string cmd_name = ps.argv[ps.current];
+  cout << cmd_name << endl;
   if (!cmds.count(cmd_name)) {
     std::cerr << "error: command not recognized\n";
     return -1;
   }
 
     // FIXME: If this returns null, it will crash.
-  cli::Parameters command_parms = cmds.find(cmd_name)->second->parms();
+  cli::Command* cmd = cmds.find(cmd_name)->second;
   cli::Arguments command_args;
   // Parse command args
-  parse_args(command_parms, command_args, ps);
+  parse_args(cmd->parms(), command_args, ps);
 
   // Check command args
-  success &= check_args(command_parms, command_args);
+  success &= check_args(cmd->parms(), command_args);
 
-  // if (!success){ 
-  //   program_args.display_errors(*cmd, prefix);
-  // }
+  if (!success){ 
+    //program_args.display_errors(*cmd, prefix);
+    std::cout << "ERROR\n";
+    return -1;
+  }
 
+  cmd->run(command_args);
   return 0;
   // // Parse arguments.
   // cli::Arguments args;
