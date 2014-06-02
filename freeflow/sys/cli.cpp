@@ -159,7 +159,7 @@ parse(const Parameters& parms,
     return false;
   }
 
-  std::string cmd_name = args.get_listed(1);
+  std::string cmd_name = args.get_listed(1).as_string();
 
   if (!cmds.count(cmd_name)) {
     std::cerr << "error: command not recognized\n";
@@ -181,6 +181,11 @@ parse(const Parameters& parms,
 // -------------------------------------------------------------------------- //
 // Commands
 
+Help_command::Help_command(Commands& cmds)
+  : Command("help", "Print help information on a topic")
+  , cmds_(cmds)
+{ }
+
 void
 Help_command::help() {
   for (auto p : cmds_)
@@ -196,8 +201,10 @@ Help_command::help(const Command& cmd) {
 
 bool
 Help_command::run(const Arguments& args) {
+  // TODO: What if the user calls "help cmd1 cmd2"?
   if (args.get_listed_size()) {
-    if (Command* cmd = cmds_[args.get_listed(0)]) {
+    // FIXME: Verify that the argument is actually a string.
+    if (Command* cmd = cmds_[args.get_listed(0).as_string()]) {
       help(*cmd);
     } else {
       std::cerr << "error: no such command '" << "'\n";

@@ -108,10 +108,10 @@ struct Initializer {
 class Parameter {
 public:
 
-  //Constructors
+  // Constructors
   Parameter(const std::string&, const Type&, const Initializer&, const std::string&);
 
-  //Accessors
+  // Accessors
   bool has_alias() const;
 
   const std::string& name() const;
@@ -188,10 +188,9 @@ private:
 /// The Arguments type contains the parsed command line options, binding
 /// parameter names to values, and also the positional arguments.
 class Arguments {
-
 public:
   using Argument_map  = std::map<std::string, json::Value>;
-  using Argument_list = std::vector<std::string>;
+  using Argument_list = std::vector<json::Value>;
   using Initial_args_map = std::map<std::string, Initial_argument>;
 
   // Initial values
@@ -207,8 +206,8 @@ public:
   json::Value get_named(const std::string&) const;
   
   // Positional arguments
-  void set_listed(const std::string&);
-  std::string get_listed(const int&) const;
+  void set_listed(const json::Value&);
+  json::Value get_listed(const int&) const;
   int get_listed_size() const;
 
   // Error handling

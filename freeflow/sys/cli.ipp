@@ -167,12 +167,6 @@ inline const std::string&
 Command::help() const { return doc_; }
 
 inline
-Help_command::Help_command(Commands& cmds)
-  : Command("help", "Print help information on a topic")
-  , cmds_(cmds)
-{ }
-
-inline
 Commands::Commands() {
   declare<Help_command>(*this);
 }
@@ -343,7 +337,7 @@ Arguments::set_named(const std::string& n, const json::Value& v) {
 }
 
 inline void
-Arguments::set_listed(const std::string& v) {
+Arguments::set_listed(const json::Value& v) {
   listed_.push_back(v);
 }
 
@@ -366,7 +360,7 @@ Arguments::get_named(const std::string& arg) const {
   return named_.find(arg)->second;
 }
 
-inline std::string 
+inline json::Value
 Arguments::get_listed(const int& i) const {
   return listed_[i];
 }
