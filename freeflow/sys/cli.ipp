@@ -25,12 +25,12 @@ make_env_var(const std::string& pre, const std::string& parm) {
 // -------------------------------------------------------------------------- //
 // Value type
 
-inline
-Value::Value(Error)
-  : json::Value(), error_(true) { }
+// inline
+// Value::Value(Error)
+//   : json::Value(), error_(true) { }
 
-inline 
-Value::operator bool() const { return not error_; }
+// inline 
+// Value::operator bool() const { return not error_; }
 
 
 // -------------------------------------------------------------------------- //
@@ -297,7 +297,7 @@ inline std::string
 display_err_info(const json::Value& v/*json::Error& e*/) { 
   // return error-specific string
   std::string error_msg = "";
-  switch (v.data_.e.code/*e.code*/) {
+  switch (v.data_.e.code()) {
     case json::TYPE_ERROR: {
       error_msg = "has invalid type";
       break;
@@ -376,20 +376,22 @@ Arguments::get_listed_size() const {
 
 inline json::Value 
 Null_typed::operator()(const json::Value& s) const {
-  if (s == "null")
-    return {};
-  else
-    return json::Error(json::TYPE_ERROR, 0);
+  // if (s == "null")
+  //   return {};
+  // else
+  //   return Error(json::TYPE_ERROR, 0);
+  return {};
 }
 
 inline json::Value 
 Bool_typed::operator()(const json::Value& s) const {
-  if (s == "true")
-    return true;
-  else if (s == "false")
-    return false;
-  else 
-    return json::Error(json::TYPE_ERROR, 0);
+  // if (s == "true")
+  //   return true;
+  // else if (s == "false")
+  //   return false;
+  // else 
+  //   return Error(json::TYPE_ERROR, 0);
+  return {};
 }
 
 inline json::Value
@@ -400,11 +402,12 @@ Int_typed::operator()(const json::Value& s) const {
 inline json::Value 
 Real_typed::operator()(const json::Value& s) const {
   double d;
-  std::stringstream ss(s);
+  // FIXME: Validate the s is a string.
+  std::stringstream ss(s.as_string());
   if (ss >> d) 
     return d;
   else 
-    return json::Error(json::TYPE_ERROR, 0);
+    return Error(json::TYPE_ERROR);
 }
 
 inline json::Value
@@ -416,8 +419,8 @@ template<typename T>
   inline json::Value 
   Optional_typed<T>::operator()(const json::Value& s) const {
     T type;
-    Null null;
-    if (Value x = null(s))
+    Null_typed null;
+    if (json::Value x = null(s))
       return x;
     return type(s);
   }

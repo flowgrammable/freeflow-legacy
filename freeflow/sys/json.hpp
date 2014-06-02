@@ -21,6 +21,7 @@
 #include <vector>
 
 #include <freeflow/sys/data.hpp>
+#include <freeflow/sys/error.hpp>
 
 namespace freeflow {
 
@@ -92,14 +93,6 @@ enum Error_code {
   VALUE_ERROR
 };
 
-
-struct Error {
-  Error_code code;
-  intptr_t   data;
-  
-  Error(Error_code, intptr_t);
-};
-
 class Value {
 public:
   enum Type {
@@ -125,7 +118,7 @@ public:
     Data(const Array& a) : a(a) { }
     Data(Object&& o) : o(std::move(o)) { }
     Data(const Object& o) : o(o) { }
-    Data(Error _e) : e(_e) { }
+    Data(Error e) : e(e) { }
     ~Data() { }
 
     Null   n;
@@ -164,7 +157,7 @@ public:
   Value(const Array&);
   Value(Object&&);
   Value(const Object&);
-  Value(const Error e);
+  Value(Error);
 
   ~Value();
 

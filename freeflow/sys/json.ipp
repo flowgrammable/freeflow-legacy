@@ -17,9 +17,6 @@
 namespace freeflow {
 namespace json {
 
-inline
-Error::Error(Error_code c, intptr_t d) : code(c), data(d) { } 
-
 /// Allow implicit convesion from std::string.
 inline
 String::String(std::string&& s)
@@ -96,7 +93,7 @@ Value::Value(Int z)
   : type_(INT), data_(z) { }
   
 inline
-Value::Value(const Error e)
+Value::Value(Error e)
   : type_(ERROR), data_(e) { }
 
 inline

@@ -136,7 +136,7 @@ check_args(const Parameters& parms, const Command& cmd, Arguments& args) {
     // disregarded since no argument was provided.
     else if (parm.is_required()) {
       args.set_initial(parm, Initial_argument("", NOT_PROVIDED));
-      args.set_named(parm.name(), json::Error(json::REQUIRED_ERROR, 0));
+      args.set_named(parm.name(), Error(json::REQUIRED_ERROR, 0));
       r &= false;
     }
   }

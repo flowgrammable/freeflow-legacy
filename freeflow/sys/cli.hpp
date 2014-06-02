@@ -33,24 +33,21 @@ class Command;
 // -------------------------------------------------------------------------- //
 // Value types
 
-// An extension of the JSON model that indicates an error.
-struct Error { };
+// /// The Value class extends JSON values to include additional error
+// /// information.
+// class Value : public json::Value {
+// public:
+//   static constexpr Error error { };
 
-/// The Value class extends JSON values to include additional error
-/// information.
-class Value : public json::Value {
-public:
-  static constexpr Error error { };
+//   using json::Value::Value;
 
-  using json::Value::Value;
+//   Value() = default;
+//   Value(Error);
 
-  Value() = default;
-  Value(Error);
-
-  explicit operator bool() const;
-private:
-  bool error_ = false;
-};
+//   explicit operator bool() const;
+// private:
+//   bool error_ = false;
+// };
 
 
 // -------------------------------------------------------------------------- //

@@ -30,11 +30,11 @@ struct Add_command : cli::Command {
   Add_command() 
     : Command("add", "Add something to something else")
   {
-    declare("name", cli::String(), cli::REQUIRED, "The name of the thing added");
-    declare("path", cli::String(), cli::REQUIRED, "The path to the thing added");
-    declare("config", cli::String(), cli::REQUIRED, "Path to a configuration file");
-    declare("version", cli::String(), cli::REQUIRED, "The version of the thing added");
-    declare("flag", cli::Bool(), cli::REQUIRED, "A mysterious flag");
+    declare("name", cli::String_typed(), cli::REQUIRED, "The name of the thing added");
+    declare("path", cli::String_typed(), cli::REQUIRED, "The path to the thing added");
+    declare("config", cli::String_typed(), cli::REQUIRED, "Path to a configuration file");
+    declare("version", cli::String_typed(), cli::REQUIRED, "The version of the thing added");
+    declare("flag", cli::Bool_typed(), cli::REQUIRED, "A mysterious flag");
   }
 
   bool run(const cli::Arguments& args) { 
@@ -47,9 +47,9 @@ struct Del_command : cli::Command {
   Del_command() 
     : Command("del", "Remove something from something else")
   {
-    declare("name", cli::String(), cli::REQUIRED, "The name of the thing removed");
-    declare("path", cli::String(), cli::REQUIRED, "The path to the thing being removed");
-    declare("config", cli::String(), cli::REQUIRED, "Path to a configuration file");
+    declare("name", cli::String_typed(), cli::REQUIRED, "The name of the thing removed");
+    declare("path", cli::String_typed(), cli::REQUIRED, "The path to the thing being removed");
+    declare("config", cli::String_typed(), cli::REQUIRED, "Path to a configuration file");
   }
 
   bool run(const cli::Arguments& args) {
@@ -63,12 +63,12 @@ int
 main(int argc, char *argv[]) {
   // Create program options.
   cli::Parameters parms;
-  parms.declare("flag, f", cli::Bool(), cli::REQUIRED, "Just a flag");
-  parms.declare("number", cli::Real(), "42", "Just a number");
-  parms.declare("name", cli::String(), "some value", "The name of something");
-  parms.declare("config", cli::String(), cli::OPTIONAL, "The path to a configuration file");
-  parms.declare("path", cli::String(), "*default path*", "Path to something");
-  parms.declare("version, v", cli::Real(), cli::REQUIRED, "Version of something");
+  parms.declare("flag, f", cli::Bool_typed(), cli::REQUIRED, "Just a flag");
+  parms.declare("number", cli::Real_typed(), "42", "Just a number");
+  parms.declare("name", cli::String_typed(), "some value", "The name of something");
+  parms.declare("config", cli::String_typed(), cli::OPTIONAL, "The path to a configuration file");
+  parms.declare("path", cli::String_typed(), "*default path*", "Path to something");
+  parms.declare("version, v", cli::Real_typed(), cli::REQUIRED, "Version of something");
 
   // Create commands.
   cli::Commands cmds;
