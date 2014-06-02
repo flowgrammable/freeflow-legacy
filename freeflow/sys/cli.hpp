@@ -288,18 +288,18 @@ public:
 // Type checking
 
 // Type checkers
-struct Null { json::Value operator()(const std::string&) const; };
-struct Bool { json::Value operator()(const std::string&) const; };
-struct Int { json::Value operator()(const std::string&) const; };
-struct Real { json::Value operator()(const std::string&) const; };
-struct String { json::Value operator()(const std::string&) const; };
+struct Null_typed { json::Value operator()(const json::Value&) const; };
+struct Bool_typed { json::Value operator()(const json::Value&) const; };
+struct Int_typed { json::Value operator()(const json::Value&) const; };
+struct Real_typed { json::Value operator()(const json::Value&) const; };
+struct String_typed { json::Value operator()(const json::Value&) const; };
 
 // Type checking combinators
 template<typename T>
-  struct Optional { json::Value operator()(const std::string&) const; };
+  struct Optional_typed { json::Value operator()(const json::Value&) const; };
 
 template<typename T>
-  struct Sequence { json::Value operator()(const std::string&) const; };
+  struct Sequence_typed { json::Value operator()(const json::Value&) const; };
 
 
 // -------------------------------------------------------------------------- //

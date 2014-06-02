@@ -375,7 +375,7 @@ Arguments::get_listed_size() const {
 // Type checkers
 
 inline json::Value 
-Null::operator()(const std::string& s) const {
+Null_typed::operator()(const json::Value& s) const {
   if (s == "null")
     return {};
   else
@@ -383,7 +383,7 @@ Null::operator()(const std::string& s) const {
 }
 
 inline json::Value 
-Bool::operator()(const std::string& s) const {
+Bool_typed::operator()(const json::Value& s) const {
   if (s == "true")
     return true;
   else if (s == "false")
@@ -393,12 +393,12 @@ Bool::operator()(const std::string& s) const {
 }
 
 inline json::Value
-Int::operator()(const std::string& s) const {
+Int_typed::operator()(const json::Value& s) const {
   return {};
 }
 
 inline json::Value 
-Real::operator()(const std::string& s) const {
+Real_typed::operator()(const json::Value& s) const {
   double d;
   std::stringstream ss(s);
   if (ss >> d) 
@@ -408,13 +408,13 @@ Real::operator()(const std::string& s) const {
 }
 
 inline json::Value
-String::operator()(const std::string& s) const {
+String_typed::operator()(const json::Value& s) const {
   return s;
 }
 
 template<typename T>
   inline json::Value 
-  Optional<T>::operator()(const std::string& s) const {
+  Optional_typed<T>::operator()(const json::Value& s) const {
     T type;
     Null null;
     if (Value x = null(s))
@@ -424,7 +424,7 @@ template<typename T>
 
 template<typename T>
   inline json::Value
-  Sequence<T>::operator()(const std::string& s) const {
+  Sequence_typed<T>::operator()(const json::Value& s) const {
     return {};
   }
 
