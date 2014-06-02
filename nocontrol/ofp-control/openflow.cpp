@@ -18,10 +18,69 @@
 #include <freeflow/proto/ofp/ofp.hpp>
 
 #include "openflow.hpp"
+#include "machine.hpp"
 
 using namespace freeflow;
 
 namespace nocontrol {
+
+/// Create a new switch in the SDN model, and an OpenFlow state machnine
+/// to manage this connection.
+///
+/// \todo Error checking.
+inline bool
+Ofp_handler::on_open() {
+  Write_on_exit g(*this);
+  std::cout << "* Open OFP connection\n";
+
+  // Create the state machine.
+  // FIXME: Create the state machine for the greatest version of the
+  // protocol supported.
+  sm_ = new Machine(ch_, &ctrl_);
+
+  // if (Trap err = sm_->)
+
+  return true;
+}
+
+/// Shutdown the state machine and delete the handler.
+inline bool 
+Ofp_handler::on_close() {
+  Write_on_exit g(*this);
+  std::cout << "* close OFP connection\n";
+
+  // Destroy the existing switch object.
+
+
+  return true; 
+}
+
+/// When data is available, read as many messages as possibly and send
+/// them to the state machine.
+///
+/// \todo Error checking.
+inline bool
+Ofp_handler::on_read() {
+  // Write_on_exit g(*this);
+  // if (not read()) 
+  //   return false;
+  // return proto_->on_recv(reactor());
+
+  char buf[2048];
+  ff::System_result res = rc().read(buf, 2048);
+  if (res and res.value() == 0)
+    return false;
+  return true;
+}
+
+/// When a timeout occurs, notify the protocol of the expired timer.
+inline bool
+Ofp_handler::on_time(int t) {
+  // Write_on_exit g(*this);
+  // return proto_->on_time(reactor(), t);
+  return true;
+}
+
 
 // Read from the socket to put message data into the read queue.
 //
@@ -55,16 +114,16 @@ Ofp_handler::read() {
   rc().read(buf.data() + 8, hdr.length - 8);
 
   // Queue the buffer.
-  proto_->read.put_buffer(std::move(buf));
+  ch_.recv.push_buf(std::move(buf));
   return true;
 }
 
 // Write all messages to the socket.
 bool
 Ofp_handler::write() {
-  while (not proto_->write.empty()) {
+  while (not ch_.send.empty()) {
     Buffer b;
-    proto_->write.get_buffer(b);
+    ch_.send.pop_buf(b);
 
     // FIXME: Error handling
     rc().write(b);

@@ -28,56 +28,7 @@ struct Ofp_handler::Write_on_exit {
 inline
 Ofp_handler::Ofp_handler(ff::Reactor& r, ff::Socket&& s, ff::Controller& c)
   : ff::Socket_handler(r, ff::READ_EVENTS | ff::TIME_EVENTS, std::move(s))
-  , ctrl_(c) 
+  , ctrl_(c)
 { }
-
-/// Create a version negotiation state machine so we know what version
-/// we should accept.
-///
-/// \todo Error checking.
-inline bool
-Ofp_handler::on_open() {
-  // Write_on_exit g(*this);
-  // proto_ = new ff::ofp::Protocol(&ctrl_, this);
-  // return proto_->on_open(reactor());
-  std::cout << "* Open OFP connection\n";
-  return true;
-}
-
-/// Shutdown the state machine and delete the handler.
-inline bool 
-Ofp_handler::on_close() {
-  // Write_on_exit g(*this);
-  // proto_->on_close(reactor());
-  // delete this;
-  std::cout << "* close OFP connection\n";
-  return true; 
-}
-
-/// When data is available, read as many messages as possibly and send
-/// them to the state machine.
-///
-/// \todo Error checking.
-inline bool
-Ofp_handler::on_read() {
-  // Write_on_exit g(*this);
-  // if (not read()) 
-  //   return false;
-  // return proto_->on_recv(reactor());
-
-  char buf[2048];
-  ff::System_result res = rc().read(buf, 2048);
-  if (res and res.value() == 0)
-    return false;
-  return true;
-}
-
-/// When a timeout occurs, notify the protocol of the expired timer.
-inline bool
-Ofp_handler::on_time(int t) {
-  // Write_on_exit g(*this);
-  // return proto_->on_time(reactor(), t);
-  return true;
-}
 
 } // namespace nocontrol

@@ -22,6 +22,8 @@
 #include <freeflow/proto/ofp/protocol.hpp>
 
 #include "prelude.hpp"
+#include "queue.hpp"
+#include "machine.hpp"
 
 namespace nocontrol {
 
@@ -46,7 +48,8 @@ private:
   bool write();
 
   ff::Controller& ctrl_;
-  ff::ofp::Protocol* proto_;
+  Channel ch_;
+  Machine* sm_;
 };
 
 /// The Ofp_acceptor is responsible for accepting connections from
