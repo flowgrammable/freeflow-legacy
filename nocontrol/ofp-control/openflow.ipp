@@ -40,7 +40,7 @@ Ofp_handler::on_open() {
   // Write_on_exit g(*this);
   // proto_ = new ff::ofp::Protocol(&ctrl_, this);
   // return proto_->on_open(reactor());
-  std::cout << "* open OFP\n";
+  std::cout << "* Open OFP connection\n";
   return true;
 }
 
@@ -50,7 +50,7 @@ Ofp_handler::on_close() {
   // Write_on_exit g(*this);
   // proto_->on_close(reactor());
   // delete this;
-  std::cout << "* close OFP\n";
+  std::cout << "* close OFP connection\n";
   return true; 
 }
 
