@@ -61,6 +61,7 @@ struct Del_command : cli::Command {
 
 int
 main(int argc, char *argv[]) {
+  bool success = true;
   // Create program options.
   cli::Parameters parms;
   parms.declare("flag, f", cli::Bool_typed(), cli::REQUIRED, "Just a flag");
@@ -75,12 +76,62 @@ main(int argc, char *argv[]) {
   cmds.declare<Add_command>();
   cmds.declare<Del_command>();
 
-  // Parse arguments.
-  cli::Arguments args;
-  if (parse(parms, cmds, args, argc, argv, "flog"))
-    return 0;
-  else
-    return -1;    
+// ---------------- Parse global arguments up to the command ---------------- //
+  // Initialize the parse state
+  cli::Parse_state ps(argc, 0, argv);
+
+  // Initialize the program arguments
+  cli::Arguments program_args;
+
+  // Parse the environment for program options
+  const char* prefix = "flog";
+  parse_env(parms, program_args, prefix);
+
+  // Parse the command-line for program options up to the command
+  parse_keyword_args(parms, program_args, ps);
+
+  // Check program args
+  success &= check_args(parms, program_args);
+
+  // if (!success){ 
+  //   program_args.display_errors(*cmd, prefix);
+  // }
+// -------------------------------------------------------------------------- //
+
+// ---------- Parse the command and its named/positional arguments ---------- //
+  // Make sure a command name was provided
+  if (ps.current == ps.argc) {
+    std::cerr << "error: a command must be provided\n";
+    return -1;
+  }
+  
+  // Make sure the command exists
+  std::string cmd_name = ps.argv[ps.current];
+  if (!cmds.count(cmd_name)) {
+    std::cerr << "error: command not recognized\n";
+    return -1;
+  }
+
+    // FIXME: If this returns null, it will crash.
+  cli::Parameters command_parms = cmds.find(cmd_name)->second->parms();
+  cli::Arguments command_args;
+  // Parse command args
+  parse_args(command_parms, command_args, ps);
+
+  // Check command args
+  success &= check_args(command_parms, command_args);
+
+  // if (!success){ 
+  //   program_args.display_errors(*cmd, prefix);
+  // }
+
+  return 0;
+  // // Parse arguments.
+  // cli::Arguments args;
+  // if (parse(parms, cmds, args, argc, argv, "flog"))
+  //   return 0;
+  // else
+  //   return -1;    
 
   // What command did I parse?
 }

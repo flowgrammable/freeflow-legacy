@@ -30,12 +30,14 @@ namespace cli {
 
 class Command;
 
+
+
 // -------------------------------------------------------------------------- //
 // Parameters
 
 /// The type of a parameter is determined by a function. If a string can be
 /// converted into a JSON value, then the type is assumed to have checked.
-using Type = std::function<json::Value(const std::string&)>;
+using Type = std::function<json::Value(const json::Value&)>;
 
 
 /// The Name struct contains the name and alias of a parameter.
@@ -75,7 +77,7 @@ struct Initializer {
   Initializer(const std::string& s);
 
   Valuation which;
-  std::string value;
+  json::Value value;
 };
 
 /// The Parameter embodies the declaration of a command line parameter.
@@ -99,7 +101,7 @@ public:
   bool is_required() const;
   bool is_optional() const;
   bool has_default() const;
-  const std::string& default_argument() const;
+  const json::Value& default_argument() const;
   
   const std::string& doc() const;
 
@@ -134,7 +136,7 @@ public:
 
 
 // -------------------------------------------------------------------------- //
-// Arguments
+// Location
 
 enum Source {
   ENVIRONMENT,
@@ -144,43 +146,55 @@ enum Source {
   NOT_PROVIDED
 };
 
-class Initial_argument {
+class Location {
 public:
-  Initial_argument() = default;
-  Initial_argument(const std::string&, const Source&);
-  bool from_cl() const;
+  Location() = default;
+  Location(const Source&);
+
+  void set_source(const Source&);
+  Source get_source() const;
+
+private:
+  Source source_;
+  // TODO: Add json line number/location/index info
+};
+
+
+// -------------------------------------------------------------------------- //
+// Arguments
+class Argument {
+public:
+  Argument() = default;
+  Argument(const json::Value&, const Source&);
 
   // Mutators
-  void set_value(const std::string&);
+  void set_value(const json::Value&);
   void set_source(const Source&);
 
   // Accessors
-  std::string get_value() const;
+  json::Value get_value() const;
   Source get_source() const;
+
 private:
-  std::string value_;
-  Source source_;
+  json::Value value_;
+  Location loc_;
 };
 
 /// The Arguments type contains the parsed command line options, binding
 /// parameter names to values, and also the positional arguments.
 class Arguments {
 public:
-  using Argument_map  = std::map<std::string, json::Value>;
+  using Argument_map  = std::map<std::string, Argument>;
   using Argument_list = std::vector<json::Value>;
-  using Initial_args_map = std::map<std::string, Initial_argument>;
 
-  // Initial values
-  bool has_initial(const Parameter&);
-  bool has_initial(const std::string&);
-  void set_initial(const Parameter&, const Initial_argument&);
-  std::string get_initial_value(const std::string&) const;
-  Initial_argument get_initial(const std::string&) const;
-  
   // Keyword arguments
+  bool has_named(const Parameter&);
   bool has_named(const std::string&);
-  void set_named(const std::string&, const json::Value&);
-  json::Value get_named(const std::string&) const;
+  void set_named(const Parameter&, const Argument&);
+  void set_named(const std::string&, const Argument&);
+  json::Value get_named_value(const std::string&) const;
+  Argument get_named_arg(const std::string&) const;
+  
   
   // Positional arguments
   void set_listed(const json::Value&);
@@ -191,7 +205,6 @@ public:
   void display_errors(const Command&, const char*);
 
 private:
-  Initial_args_map initial_;  // Initial arguments as strings
   Argument_map     named_;    // Name/value mappings
   Argument_list    listed_;   // Positional arguments.
 };
@@ -282,8 +295,19 @@ template<typename T>
 // -------------------------------------------------------------------------- //
 // Parsing
 
+struct Parse_state {
+  Parse_state() = default;
+  Parse_state(const int&, const int&, char*[]);
+
+  int argc;
+  int current;
+  char** argv;
+};
+
 // Parsing functions
-void parse_args(const Parameters&, Arguments&, int, char*[]);
+
+void parse_keyword_args(const Parameters&, Arguments&, Parse_state&);
+void parse_args(const Parameters&, Arguments&, Parse_state&);
 
 void parse_env(const Parameters&, Arguments&, const char*);
 void parse_env(const Parameters&, Arguments&, const std::string&);
@@ -291,9 +315,9 @@ void parse_env(const Parameters&, Arguments&, const std::string&);
 void parse_config(const Parameters&, Arguments&, const char*);
 void parse_config(const Parameters&, Arguments&, const std::string&);
 
-bool check_type(const Parameter&, Arguments&, const std::string&);
+bool check_type(const Parameter&, Arguments&, const json::Value&);
 
-bool check_args(const Parameters&, const Command&, Arguments&);
+bool check_args(const Parameters&, Arguments&);
 
 bool parse(const Parameters&, 
            const Commands&, 

@@ -18,7 +18,7 @@ namespace freeflow {
 namespace cli {
 namespace {
 
-using Named_argument = Arguments::Initial_args_map::value_type;
+using Named_argument = Arguments::Argument_map::value_type;
 
 Named_argument
 parse_flag(const std::string& arg) {
@@ -44,19 +44,36 @@ parse_flag(const std::string& arg) {
   if (n != arg.npos)
     name = arg.substr(p, n - p);
   else
-    return {arg.substr(p), Initial_argument("true", src)};
+    return {arg.substr(p), Argument("true", src)};
 
   // Parse the value. In a flag of the form f=x, this is everything
   // past the '='. If the value is empty, return as if it were "null".
   std::string value = arg.substr(n + 1);
   if (value.empty())
-    return { std::move(name), Initial_argument("", src) };
+    return { std::move(name), Argument("", src) };
   else
-    return { std::move(name), Initial_argument(std::move(value), src) };
+    return { std::move(name), Argument(std::move(value), src) };
 }
 
 
 } // namespace
+
+void 
+parse_keyword_args(const Parameters& parms, Arguments& args, Parse_state& ps) {
+  for (int& i = ps.current; i < ps.argc; ++i) {
+    if (ps.argv[i][0] == '-') {
+      Named_argument x = parse_flag(ps.argv[i]);
+      if (parms.map_.count(x.first) == 0) {
+        std::cerr << "error: unrecognized parameter '" << x.first << "'\n";
+      } else {
+        auto n = parms.map_.find(x.first);
+        args.set_named(*n->second, x.second);
+      }
+    }
+    else 
+      return;   
+  }
+}
 
 
 /// Parse the given command line arguments.
@@ -64,19 +81,19 @@ parse_flag(const std::string& arg) {
 /// FIXME: Improve error handling. If an error occurs, the program
 /// should probably stop running after diagnosing all errors.
 void
-parse_args(const Parameters& parms, Arguments& args, int argc, char* argv[]) {
-  for (int i = 0; i < argc; ++i) {
-    if (argv[i][0] == '-') {
-      Named_argument x = parse_flag(argv[i]);
+parse_args(const Parameters& parms, Arguments& args, Parse_state& ps) {
+  for (int& i = ps.current; i < ps.argc; ++i) {
+    if (ps.argv[i][0] == '-') {
+      Named_argument x = parse_flag(ps.argv[i]);
       if (parms.map_.count(x.first) == 0) {
         std::cerr << "error: unrecognized parameter '" << x.first << "'\n";
       } else {
         auto n = parms.map_.find(x.first);
-        args.set_initial(*n->second, x.second);
+        args.set_named(*n->second, x.second);
       }
     }
     else
-      args.set_listed(argv[i]);
+      args.set_listed(ps.argv[i]);
   }
 }
 
@@ -91,7 +108,7 @@ parse_env(const Parameters& parms, Arguments& args, const char* prefix) {
   for (const auto& parm : parms) {
     std::string var = make_env_var(pre, parm.name());
     if (char* p = getenv(var.c_str()))
-      args.set_initial(parm, Initial_argument(p,src));
+      args.set_named(parm, Argument(p,src));
   }
 }
 
@@ -104,79 +121,40 @@ parse_env(const Parameters& parms, Arguments& args, const std::string& prefix) {
 }
 
 bool
-check_type(const Parameter& parm, Arguments& args, const std::string& val) {
-  args.set_named(parm.name(), parm.type()(val));
-  if (args.get_named(parm.name()).type() == json::Value::ERROR)
+check_type(const Parameter& parm, Arguments& args, const Argument& arg) {
+  args.set_named(parm, Argument(parm.type()(arg.get_value()), arg.get_source()));
+  if (args.get_named_value(parm.name()).type() == json::Value::ERROR)
     return false;
   else
     return true;
 }
 
 bool 
-check_args(const Parameters& parms, const Command& cmd, Arguments& args) {
+check_args(const Parameters& parms, Arguments& args) {
   bool r = true;
-  // for (const std::string& parm_name: cmd.parameters) {
   for (const auto& parm : parms) {
     // An argument for the parameter was provided. In this case 'which' may be
     // OPTIONAL, REQUIRED, or DEFAULT
-    // Parameter* parm = parms.map_.find(parm_name)->second;
-    if (args.has_initial(parm.name()))
-      r &= check_type(parm, args, args.get_initial_value(parm.name()));
+    if (args.has_named(parm))
+      r &= check_type(parm, args, args.get_named_arg(parm.name()));
     
     // An argument for the parameter was not provided. This covers the rest of
     // the cases where 'which' is DEFAULT. A valid default value must exist for
     // the parameter
-    else if (parm.has_default()) {
-      args.set_initial(parm, Initial_argument(parm.default_argument(), FROM_DEFAULT));
-      r &= check_type(parm, args, parm.default_argument());
-    }
+    else if (parm.has_default()) 
+      r &= check_type(parm, args, Argument(parm.default_argument(), FROM_DEFAULT));
 
     // An argument for the parameter was not provided. In this case 'which'
     // may be OPTIONAL or REQUIRED. Cases where 'which' is OPTIONAL can be
     // disregarded since no argument was provided.
     else if (parm.is_required()) {
-      args.set_initial(parm, Initial_argument("", NOT_PROVIDED));
-      args.set_named(parm.name(), Error(json::REQUIRED_ERROR, 0));
+      args.set_named(parm, Argument(Error(json::REQUIRED_ERROR, 0), NOT_PROVIDED));
       r &= false;
     }
   }
   return r;
 }
 
-bool 
-parse(const Parameters& parms,
-      const Commands& cmds,
-      Arguments& args, 
-      int argc, 
-      char* argv[], 
-      const char* prefix) 
-{
-  parse_env(parms, args, prefix);
-  parse_args(parms, args, argc, argv);
-
-  if (args.get_listed_size() < 2) {
-    std::cerr << "error: a command must be provided\n";
-    return false;
-  }
-
-  std::string cmd_name = args.get_listed(1).as_string();
-
-  if (!cmds.count(cmd_name)) {
-    std::cerr << "error: command not recognized\n";
-    return false;
-  }
-  
-  // FIXME: If this returns null, it will crash.
-  Command* cmd = cmds.find(cmd_name)->second;
-
-  bool result = check_args(parms, *cmd, args);
-
-  if (!result){ 
-    args.display_errors(*cmd, prefix);
-  }
-
-  return result;
-}
 
 // -------------------------------------------------------------------------- //
 // Commands
