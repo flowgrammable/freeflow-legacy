@@ -21,6 +21,7 @@
 #include <vector>
 
 #include <freeflow/sys/data.hpp>
+#include <freeflow/sys/error.hpp>
 
 namespace freeflow {
 
@@ -84,6 +85,14 @@ using Pair = std::pair<String, Value>;
 /// \todo The set of values can be readily extended with new literal types.
 /// For example, it might be useful to include ipv4 and ipv6 addresses,
 /// hex literals, or binary literals as new kinds of values.
+
+enum Error_code {
+  TYPE_ERROR,
+  PARSE_ERROR,
+  REQUIRED_ERROR,
+  VALUE_ERROR
+};
+
 class Value {
 public:
   enum Type {
@@ -93,7 +102,8 @@ public:
       REAL,
       STRING,
       ARRAY,
-      OBJECT
+      OBJECT,
+      ERROR
   };
 
   union Data {
@@ -108,6 +118,7 @@ public:
     Data(const Array& a) : a(a) { }
     Data(Object&& o) : o(std::move(o)) { }
     Data(const Object& o) : o(o) { }
+    Data(Error e) : e(e) { }
     ~Data() { }
 
     Null   n;
@@ -117,20 +128,22 @@ public:
     String s;
     Array  a;
     Object o;
+    Error  e;
   };
 
   Value();
 
   // Move semantics
   Value(Value&&);
-  Value& operator=(Value&&) = delete;
+  Value& operator=(Value&&);
 
   // Copy semantics
   Value(const Value&);
-  Value& operator=(const Value&) = delete;
+  Value& operator=(const Value&);
 
   // Value construction
   Value(Null);
+  Value(std::nullptr_t);
   Value(Bool);
   Value(int);
   Value(Int);
@@ -144,6 +157,7 @@ public:
   Value(const Array&);
   Value(Object&&);
   Value(const Object&);
+  Value(Error);
 
   ~Value();
 
@@ -169,8 +183,14 @@ public:
   
   Object&       as_object();
   const Object& as_object() const;
+  
+  operator bool();
 
-private:
+// private:
+  void copy(const Value&);
+  void move(Value&&);
+  void destroy();
+
   template<typename T> T&       check(Type, T&);
   template<typename T> const T& check(Type, const T&) const;
 

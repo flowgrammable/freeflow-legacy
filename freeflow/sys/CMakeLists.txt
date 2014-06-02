@@ -34,7 +34,7 @@ set(src fd_utils.cpp
         json.cpp
         library.cpp
         print.cpp
-        )
+        cli.cpp)
 
 
 if(BSD)
@@ -65,7 +65,8 @@ set(hdr fd_utils.hpp
         pipe.hpp
         json.hpp      json.ipp
         library.hpp   library.ipp
-        print.hpp     print.ipp)
+        print.hpp     print.ipp
+        cli.hpp       cli.ipp)
 
 if(BSD)
   LIST(APPEND hdr ${kqueue.hpp})
