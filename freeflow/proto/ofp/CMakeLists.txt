@@ -15,13 +15,11 @@
 # ---------------------------------------------------------------------------- #
 # Build
 
-set(src ofp.cpp protocol.cpp)
+set(src ofp.cpp)
 
 set(hdr error.hpp
         ofp.hpp 
-        ofp.ipp
-        protocol.hpp
-        protocol.ipp)
+        ofp.ipp)
 
 add_library(freeflow-ofp ${src})
 

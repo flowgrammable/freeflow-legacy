@@ -24,34 +24,38 @@ using namespace freeflow;
 
 namespace nocontrol {
 
-/// Create a new switch in the SDN model, and an OpenFlow state machnine
-/// to manage this connection.
-///
-/// \todo Error checking.
-inline bool
+/// Create a state machine and initiate version negotiation. 
+
+/// Note that the state machine does not "drive" its own state during
+/// the startup states of communication. Instead, the event handler
+/// drives because the state machine may be replaced when the first
+/// hello mesage is recieved.
+bool
 Ofp_handler::on_open() {
   Write_on_exit g(*this);
   std::cout << "* Open OFP connection\n";
 
-  // Create the state machine.
+  // Create the state machine. Note that any errors sending hello
+  // cannot be communicated as errors to the connected switch.
+  //
   // FIXME: Create the state machine for the greatest version of the
   // protocol supported.
   sm_ = new Machine(ch_, &ctrl_);
 
-  // if (Trap err = sm_->)
+  // FIXME: How do we do this in a version independent manner? Note
+  // that sm_ will be a base-class pointer in the not-so-distant future.
+  if (Trap err = sm_->send_hello())
+    return false;
+  state_ = VERSION;
 
   return true;
 }
 
-/// Shutdown the state machine and delete the handler.
-inline bool 
+/// Destroy the state machine. Note that messages sent in a state
+/// machine's destructor are not sent.
+bool 
 Ofp_handler::on_close() {
-  Write_on_exit g(*this);
-  std::cout << "* close OFP connection\n";
-
-  // Destroy the existing switch object.
-
-
+  delete sm_;
   return true; 
 }
 
@@ -59,26 +63,45 @@ Ofp_handler::on_close() {
 /// them to the state machine.
 ///
 /// \todo Error checking.
-inline bool
+bool
 Ofp_handler::on_read() {
-  // Write_on_exit g(*this);
-  // if (not read()) 
-  //   return false;
-  // return proto_->on_recv(reactor());
-
-  char buf[2048];
-  ff::System_result res = rc().read(buf, 2048);
-  if (res and res.value() == 0)
+  Write_on_exit g(*this);
+  if (not read()) 
     return false;
-  return true;
+
+  if (state_ == VERSION)
+    return on_version();
+  else
+    return sm_->on_message();
 }
 
 /// When a timeout occurs, notify the protocol of the expired timer.
-inline bool
+bool
 Ofp_handler::on_time(int t) {
   // Write_on_exit g(*this);
   // return proto_->on_time(reactor(), t);
   return true;
+}
+
+
+bool
+Ofp_handler::on_version() {
+  ofp::Header h;
+  ch_.recv.peek(h);
+
+  // Determine what version of the protocol we're running.
+  //
+  // FIXME: We only support version 1 for now. In the future, we'll need
+  // to allocate a new state machine if we find that the switch is
+  // running some other version of the protocol.
+  if (h.version == 1) {
+    state_ = RUN;
+    return true;
+  } else {
+    // FIXME: How do we do this in a version independent way?
+    send_error(Error::INCOMPATIBLE);
+    return false;
+  }
 }
 
 

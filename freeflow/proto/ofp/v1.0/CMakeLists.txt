@@ -20,8 +20,7 @@ set(src port.cpp
         match.cpp 
         action.cpp 
         stats.cpp 
-        message.cpp
-        protocol.cpp)
+        message.cpp)
 
 set(hdr message.hpp 
         message.ipp
@@ -32,8 +31,7 @@ set(hdr message.hpp
         match.hpp
         match.ipp
         action.hpp
-        action.ipp
-        protocol.hpp)
+        action.ipp)
 
 add_library(freeflow-ofp-1.0 ${src})
 
