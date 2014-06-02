@@ -52,6 +52,9 @@ public:
   int operator()(Microseconds ms);
 
 private:
+  int select(timespec* ts);
+
+private:
   int     max_;
   fd_set* read_;
   fd_set* write_;

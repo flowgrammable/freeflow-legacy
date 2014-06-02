@@ -56,6 +56,18 @@ operator<<(std::ostream& os, const Ipv6_addr& a) {
   return os;
 }
 
+/// Write the address to the given stream. The formatting of the address
+/// depends on its type.
+std::ostream&
+operator<<(std::ostream& os, const Address& a) {
+  if (a.family() == Address::IP4)
+    return os << a.as_ipv4().addr();
+  else if (a.family() == Address::IP6)
+    return os << a.as_ipv6().addr();
+  else
+    return os << "<unknown address family>";
+}
+
 
 std::string
 to_string(const Address& a) {

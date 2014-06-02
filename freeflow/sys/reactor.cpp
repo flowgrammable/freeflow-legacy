@@ -19,9 +19,7 @@ namespace {
 
 // Returns true iff the event handler is subscibed to events m.
 inline bool
-should_notify(Event_handler* h, Event_mask m) {
-  return h->is_subscribed(m);
-}
+should_notify(Event_handler* h, Event_mask m) { return h->is_subscribed(m); }
 
 // Returns true iff  the event handler h is subscribed to events m
 // and that event is indicated in the resource set r.
@@ -116,16 +114,16 @@ Reactor::run() {
 
 void
 Reactor::run(Microseconds us) {
-  // Select on the registered handlers. Only wait 10 ms for
-  // an event to trigger.
-  Select_set dispatch = handlers_.wait();
-  Selector s(handlers_.max() + 1, dispatch);    
-  s(us);
-
-  // Close any handlers that need to removed from the
-  // registry and closed.
   Resource_set close;
-  notify_select(dispatch, close);
+  
+  // Select any event handlers with active events. Only dispatch if
+  // there were any events.
+  Select_set dispatch = handlers_.wait();
+  Selector select(handlers_.max() + 1, dispatch);    
+  if (select(us))
+    notify_select(dispatch, close);
+  
+  // Notfiy handlers of expired timers.
   notify_timers(close);
 
   // Close any outstanding handlers

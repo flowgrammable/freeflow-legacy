@@ -1,4 +1,4 @@
-// Copyright (c) 2013-2014 Flowgrammable.org
+// Copyright (c) 2013-2014 Flowgrammable, LLC.
 // 
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -14,21 +14,18 @@
 
 #include <iostream>
 
+#include <freeflow/sys/socket.hpp>
+#include <freeflow/sys/acceptor.hpp>
+#include <freeflow/sys/connector.hpp>
 #include <freeflow/sys/reactor.hpp>
 
+using namespace std;
 using namespace freeflow;
 
-// The purpose of this test is simply to ensure that a custom event 
-// loop can be constructed using the reactor. This test just runs
-// the reactor 10 times for 250ms each time. 
-//
-// TODO: Actually handle some events!
 
-int main() {
+
+
+int 
+main(int argc, char* argv[]) {
   Reactor r;
-
-  for (int i = 0; i < 10; ++i) {
-    std::cout << "* running\n";
-    r.run(10_ms);
-  }
 }

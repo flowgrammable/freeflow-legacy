@@ -13,22 +13,25 @@
 // permissions and limitations under the License.
 
 #include <iostream>
+#include <cassert>
 
-#include <freeflow/sys/reactor.hpp>
+#include <freeflow/sys/library.hpp>
+#include <freeflow/sdn/application.hpp>
 
+using namespace std;
 using namespace freeflow;
 
-// The purpose of this test is simply to ensure that a custom event 
-// loop can be constructed using the reactor. This test just runs
-// the reactor 10 times for 250ms each time. 
-//
-// TODO: Actually handle some events!
 
 int main() {
-  Reactor r;
+  // Assert that l1 and l2 are the same library.
+  Library l1("flog_noflow.app");
+  Library l2("flog_noflow.app"); 
+  assert(l1 == l2);
 
-  for (int i = 0; i < 10; ++i) {
-    std::cout << "* running\n";
-    r.run(10_ms);
-  }
+  Library l3("flog_template.app");
+  assert(l1 != l3);
+
+  // TODO: Write unloading tests
+
 }
+

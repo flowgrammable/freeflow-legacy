@@ -12,13 +12,9 @@
 # or implied. See the License for the specific language governing
 # permissions and limitations under the License.
 
-set(libs freeflow)
 
-add_executable(sys_reactor_accept accept.cpp)
-target_link_libraries(sys_reactor_accept ${libs})
+# ---------------------------------------------------------------------------- #
+# Build
 
-add_executable(sys_reactor_connect connect.cpp)
-target_link_libraries(sys_reactor_connect ${libs})
+add_application(flog_template template.cpp)
 
-add_unit_test(sys_reactor_timer timer.cpp ${libs})
-add_unit_test(sys_reactor_loop loop.cpp ${libs})

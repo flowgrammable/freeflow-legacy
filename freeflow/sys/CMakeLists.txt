@@ -32,8 +32,10 @@ set(src fd_utils.cpp
         syslog.cpp
         pipe.cpp
         json.cpp
+        library.cpp
         print.cpp
         cli.cpp)
+
 
 if(BSD)
   LIST(APPEND src kqueue.cpp)
@@ -62,6 +64,7 @@ set(hdr fd_utils.hpp
         syslog.hpp
         pipe.hpp
         json.hpp      json.ipp
+        library.hpp   library.ipp
         print.hpp     print.ipp
         cli.hpp       cli.ipp)
 
@@ -71,7 +74,8 @@ elseif(LINUX)
   LIST(APPEND hdr ${epoll.hpp})
 endif()
 
-add_library(freeflow ${src})
+add_library(freeflow SHARED ${src})
+target_link_libraries(freeflow ${CMAKE_DL_LIBS})
 
 
 # --------------------------------------------------------------------------- //
@@ -92,5 +96,6 @@ add_subdirectory(socket.test)
 add_subdirectory(reactor.test)
 add_subdirectory(acceptor.test)
 add_subdirectory(connector.test)
+add_subdirectory(library.test)
 add_subdirectory(json.test)
 
