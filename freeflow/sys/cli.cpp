@@ -88,7 +88,7 @@ void
 parse_env(const Parameters& parms, Arguments& args, const char* prefix) {
   Source src = ENVIRONMENT;
   std::string pre = toupper(prefix);
-  for (auto parm : parms.parms_) {
+  for (const auto& parm : parms) {
     std::string var = make_env_var(pre, parm.name());
     if (char* p = getenv(var.c_str()))
       args.set_initial(parm, Initial_argument(p,src));
@@ -116,7 +116,7 @@ bool
 check_args(const Parameters& parms, const Command& cmd, Arguments& args) {
   bool r = true;
   // for (const std::string& parm_name: cmd.parameters) {
-  for (auto parm : parms.parms_) {
+  for (const auto& parm : parms) {
     // An argument for the parameter was provided. In this case 'which' may be
     // OPTIONAL, REQUIRED, or DEFAULT
     // Parameter* parm = parms.map_.find(parm_name)->second;
@@ -143,7 +143,6 @@ check_args(const Parameters& parms, const Command& cmd, Arguments& args) {
   return r;
 }
 
-
 bool 
 parse(const Parameters& parms,
       const Commands& cmds,
@@ -162,22 +161,53 @@ parse(const Parameters& parms,
 
   std::string cmd_name = args.get_listed(1);
 
-  if (!cmds.commands.count(cmd_name)) {
+  if (!cmds.count(cmd_name)) {
     std::cerr << "error: command not recognized\n";
     return false;
   }
   
-  Command cmd = cmds.commands.find(cmd_name)->second;
+  // FIXME: If this returns null, it will crash.
+  Command* cmd = cmds.find(cmd_name)->second;
 
-  bool result = check_args(parms, cmd, args);
+  bool result = check_args(parms, *cmd, args);
 
   if (!result){ 
-    args.display_errors(cmd, prefix);
+    args.display_errors(*cmd, prefix);
   }
 
   return result;
 }
 
+// -------------------------------------------------------------------------- //
+// Commands
+
+void
+Help_command::help() {
+  for (auto p : cmds_)
+    std::cout << p.first << ": " << p.second->help() << '\n';
+}
+
+void
+Help_command::help(const Command& cmd) {
+  std::cout << cmd.help() << '\n';
+  for (const auto& p : cmd.parms())
+    std::cout << p.doc() << '\n';
+}
+
+bool
+Help_command::run(const Arguments& args) {
+  if (args.get_listed_size()) {
+    if (Command* cmd = cmds_[args.get_listed(0)]) {
+      help(*cmd);
+    } else {
+      std::cerr << "error: no such command '" << "'\n";
+      return false;
+    }
+  } else {
+    help();
+  }
+  return true;
+}
 
 } // namespace cli
 } // namespace freeflow

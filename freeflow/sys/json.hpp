@@ -193,7 +193,7 @@ public:
   
   operator bool();
 
-private:
+// private:
   void copy(const Value&);
   void move(Value&&);
   void destroy();

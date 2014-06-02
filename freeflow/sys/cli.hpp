@@ -136,8 +136,8 @@ private:
 
 /// The Parameter_set contains a set of parameters, which are declared
 /// by the user, and used by the compiler to parse command line arugments.
-class Parameters {
-  using Parm_list = std::list<Parameter>;
+class Parameters : private std::list<Parameter> {
+  using Base = std::list<Parameter>;
   using Parm_map = std::unordered_map<std::string, Parameter*>;
 public:
 
@@ -147,8 +147,11 @@ public:
                      const Initializer&, 
                      const std::string&);
 
+  // Imported base operations
+  using Base::begin;
+  using Base::end;
+
 //private:
-  Parm_list parms_;
   Parm_map  map_;
 };
 
@@ -191,22 +194,25 @@ public:
   using Argument_list = std::vector<std::string>;
   using Initial_args_map = std::map<std::string, Initial_argument>;
 
+  // Initial values
   bool has_initial(const Parameter&);
   bool has_initial(const std::string&);
-  bool has_named(const std::string&);
-  void display_errors(const Command&, const char*);
-
-  // Mutators
   void set_initial(const Parameter&, const Initial_argument&);
-  void set_named(const std::string&, const json::Value&);
-  void set_listed(const std::string&);
-
-  // Accessors
   std::string get_initial_value(const std::string&) const;
   Initial_argument get_initial(const std::string&) const;
+  
+  // Keyword arguments
+  bool has_named(const std::string&);
+  void set_named(const std::string&, const json::Value&);
   json::Value get_named(const std::string&) const;
+  
+  // Positional arguments
+  void set_listed(const std::string&);
   std::string get_listed(const int&) const;
   int get_listed_size() const;
+
+  // Error handling
+  void display_errors(const Command&, const char*);
 
 private:
   Initial_args_map initial_;  // Initial arguments as strings
@@ -216,42 +222,68 @@ private:
 
 
 // -------------------------------------------------------------------------- //
-// Command
+// Commands
 
-using Run = std::function<void(const Arguments&)>;
-using Parms = std::set<std::string>;
+class Command;
+class Commands;
 
 /// The command class represents a command-line command ...
-class Command {
+class Command : private Parameters {
 public:
+  virtual ~Command();
+  Command(const std::string&, const std::string&);
 
-  //Constructors
-  Command(const std::string&, const Run&, const Parms&, const std::string&);
+  virtual bool run(const Arguments&) = 0;
 
-  std::string name;
-  Run         run;
-  Parms       parameters;
-  std::string helptext;
+  // Accessors
+  const Parameters& parms() const;
+  const std::string& name() const;
+  const std::string& help() const;
+
+  // Imported base class operations
+  using Parameters::declare;
+
+  std::string name_;
+  std::string doc_;
 };
+
+/// The Help_command is a built-in command that is used to print
+/// help text for a program and its commands.
+class Help_command : public Command {
+public:
+  Help_command(Commands&);
+
+  bool run(const Arguments&) override;
+
+private:
+  void help();
+  void help(const Command&);
+
+private:
+  Commands& cmds_;
+};
+
 
 /// The commands class manages the map of command names to commands ...
-class Commands {
-  using Command_map = std::unordered_map<std::string, Command>;
+///
+/// \todo Is this class movable? Is it copyable?
+class Commands : private std::map<std::string, Command*> {
+  using Base = std::map<std::string, Command*>;
 public:
+  Commands();
+  ~Commands();
 
   // Command declaration
-  void declare(const std::string&, 
-               const Run&, 
-               const Parms&, 
-               const std::string&);
-  void help() const;
-  void help(const std::string&) const;
-  void run(const Arguments&);
+  template<typename T, typename... Args>
+    Command* declare(Args&&...);
 
-  // Map of command names to commands
-  Command_map commands;
+  // Base class imports
+  using Base::operator[];
+  using Base::count;
+  using Base::find;
+  using Base::begin;
+  using Base::end;
 };
-
 
 // -------------------------------------------------------------------------- //
 // Type checking

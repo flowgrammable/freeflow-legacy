@@ -25,20 +25,43 @@
 using namespace std;
 using namespace freeflow;
 
+
+struct Add_command : cli::Command {
+  Add_command() 
+    : Command("add", "Add something to something else")
+  {
+    declare("name", cli::String(), cli::REQUIRED, "The name of the thing added");
+    declare("path", cli::String(), cli::REQUIRED, "The path to the thing added");
+    declare("config", cli::String(), cli::REQUIRED, "Path to a configuration file");
+    declare("version", cli::String(), cli::REQUIRED, "The version of the thing added");
+    declare("flag", cli::Bool(), cli::REQUIRED, "A mysterious flag");
+  }
+
+  bool run(const cli::Arguments& args) { 
+    std::cout << "Adding...\n";
+    return true; 
+  }
+};
+
+struct Del_command : cli::Command {
+  Del_command() 
+    : Command("del", "Remove something from something else")
+  {
+    declare("name", cli::String(), cli::REQUIRED, "The name of the thing removed");
+    declare("path", cli::String(), cli::REQUIRED, "The path to the thing being removed");
+    declare("config", cli::String(), cli::REQUIRED, "Path to a configuration file");
+  }
+
+  bool run(const cli::Arguments& args) {
+    std::cout << "Removing...\n";
+    return true;
+  }
+};
+
+
 int
 main(int argc, char *argv[]) {
-  json::Value v = json::Error(json::TYPE_ERROR, 5);
-  
-  
-  cli::Commands cmds;
-  cmds.declare("add", cli::Add(), { "name", "path", "config", "version", "flag" },
-   "This command adds something somewhere.");
-  cmds.declare("remove", cli::Remove(), { "name", "path", "config" }, 
-   "This command removes something somewhere");
-  cmds.declare("help", cli::Help(), { "name", "path", "config" },
-   "This command gives help text for other commands...");
-
-
+  // Create program options.
   cli::Parameters parms;
   parms.declare("flag, f", cli::Bool(), cli::REQUIRED, "Just a flag");
   parms.declare("number", cli::Real(), "42", "Just a number");
@@ -47,18 +70,17 @@ main(int argc, char *argv[]) {
   parms.declare("path", cli::String(), "*default path*", "Path to something");
   parms.declare("version, v", cli::Real(), cli::REQUIRED, "Version of something");
 
+  // Create commands.
+  cli::Commands cmds;
+  cmds.declare<Add_command>();
+  cmds.declare<Del_command>();
+
+  // Parse arguments.
   cli::Arguments args;
-
   if (parse(parms, cmds, args, argc, argv, "flog"))
-    cmds.run(args);
+    return 0;
   else
-    return 1;
-    
+    return -1;    
 
-  // cout << "Parsed arguments:\n";
-  // for (auto& x : args.named)
-  //   cout << x.first << " = " << x.second << '\n';
-
-
-  return 0;
+  // What command did I parse?
 }

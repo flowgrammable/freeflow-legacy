@@ -138,59 +138,60 @@ Parameters::declare(const std::string& n,
                     const Initializer& i, 
                     const std::string& d)
 {
-  parms_.emplace_back(n, t, i, d);
-  Parameter* p = &parms_.back();
+  emplace_back(n, t, i, d);
+  Parameter* p = &back();
   map_[p->name()] = p;
   if (p->has_alias())
     map_[p->alias()] = p;
   return p;
 }
 
+
 // -------------------------------------------------------------------------- //
 // Command
 
 inline
-Command::Command(const std::string& n, 
-                 const Run& r, 
-                 const Parms& p, 
-                 const std::string& h)
-  : name(n), run(r), parameters(p), helptext(h) { }
+Command::Command(const std::string& n, const std::string& d)
+  : name_(n), doc_(d) { }
 
-inline void
-Commands::declare(const std::string& n, 
-                  const Run& r, 
-                  const Parms& p, 
-                  const std::string& h)
-{
-  commands.emplace(n, Command(n, r, p, h));
+inline
+Command::~Command() { }
+
+inline const Parameters&
+Command::parms() const { return *this; }
+
+inline const std::string&
+Command::name() const { return name_; }
+
+inline const std::string&
+Command::help() const { return doc_; }
+
+inline
+Help_command::Help_command(Commands& cmds)
+  : Command("help", "Print help information on a topic")
+  , cmds_(cmds)
+{ }
+
+inline
+Commands::Commands() {
+  declare<Help_command>(*this);
 }
 
-inline void 
-Commands::help() const {
-  for(auto command : commands) {
-    std::cout << command.first << "\t\t"
-    << command.second.helptext << "\n";
+inline
+Commands::~Commands() {
+  for (auto p : *this)
+    delete p.second;
+}
+
+template<typename T, typename... Args>
+  inline Command*
+  Commands::declare(Args&&... args) {
+    Command* cmd = new T(std::forward<Args>(args)...);
+    (*this)[cmd->name()] = cmd;
+    return cmd;
   }
-}
 
-inline void 
-Commands::help(const std::string& cmd) const {
-  auto command = commands.find(cmd);
-  std::cout << command->first << "\t\t"
-  << command->second.helptext << "\n";
-}
 
-inline void
-Commands::run(const Arguments& args) {
-  if (args.get_listed(1) == "help"){
-    if (args.get_listed_size() > 2)
-      this->help(args.get_listed(2));
-    else
-      this->help();      
-  }
-  else 
-    commands.find(args.get_listed(1))->second.run(args);
-}
 
 // -------------------------------------------------------------------------- //
 // Initial argument
@@ -256,6 +257,7 @@ Arguments::has_initial(const std::string& n) {
 
 inline void
 Arguments::display_errors(const Command& cmd, const char* pre) {
+#if 0
   std::stringstream errors;
   std::stringstream warnings;
   for (auto arg : named_) {
@@ -294,6 +296,7 @@ Arguments::display_errors(const Command& cmd, const char* pre) {
     }
   }
   std::cerr << warnings.str() << errors.str();
+#endif
 }
 
 inline std::string
