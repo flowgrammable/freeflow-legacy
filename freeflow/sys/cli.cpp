@@ -104,7 +104,7 @@ parse_args(const Parameters& parms, Arguments& args, Parse_state& ps) {
 void 
 parse_env(const Parameters& parms, Arguments& args, const char* prefix) {
   Source src = ENVIRONMENT;
-  std::string pre = toupper(prefix);
+  std::string pre = to_upper(prefix);
   for (const auto& parm : parms) {
     std::string var = make_env_var(pre, parm.name());
     if (char* p = getenv(var.c_str()))

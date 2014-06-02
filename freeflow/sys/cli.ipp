@@ -12,14 +12,36 @@
 // or implied. See the License for the specific language governing
 // permissions and limitations under the License.
 
+#include <cctype>
+
 namespace freeflow {
 namespace cli {
+
+namespace {
+
+/// Transform a character array to be in all uppercase.
+///
+/// \todo Move these into a file alongside the String definition so
+/// we don't have to keep re-defining them or making them members of
+/// an anonymous namespace used in several translation units.
+inline std::string
+to_upper(const char* str) { 
+  std::string upper = str;
+  for (auto& c: upper) c = std::toupper(c); 
+  return upper;
+}
+
+/// Transform a string to be in all uppercase
+inline std::string
+to_upper(const std::string& str) { return to_upper(str.c_str()); }
+
+} // namespace
 
 /// Return an environment variable name constructed from the given
 /// prefix and parameter name.
 inline std::string
 make_env_var(const std::string& pre, const std::string& parm) {
-  return pre + "_" + toupper(parm);
+  return pre + "_" + to_upper(parm);
 }
 
 // -------------------------------------------------------------------------- //
@@ -429,19 +451,3 @@ Parse_state::Parse_state(const int& count, const int& curr, char* args[])
 
 } // namespace cli
 } // namespace freeflow
-
-/// Transform a string to be in all uppercase
-inline std::string
-toupper(const std::string& str) { 
-  std::string upper(str);
-  for (auto & c: upper) c = toupper(c); 
-  return upper;
-}
-
-/// Transform a character array to be in all uppercase
-inline std::string
-toupper(const char* str) { 
-  std::string upper(str);
-  for (auto & c: upper) c = toupper(c); 
-  return upper;
-}

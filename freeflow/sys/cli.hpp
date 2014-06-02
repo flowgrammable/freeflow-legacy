@@ -30,8 +30,6 @@ namespace cli {
 
 class Command;
 
-
-
 // -------------------------------------------------------------------------- //
 // Parameters
 
@@ -138,6 +136,7 @@ public:
 // -------------------------------------------------------------------------- //
 // Location
 
+/// \todo Scope ths inside location.
 enum Source {
   ENVIRONMENT,
   CONFIG,
@@ -177,7 +176,7 @@ public:
 
 private:
   json::Value value_;
-  Location loc_;
+  Location    loc_;
 };
 
 /// The Arguments type contains the parsed command line options, binding
@@ -195,7 +194,6 @@ public:
   json::Value get_named_value(const std::string&) const;
   Argument get_named_arg(const std::string&) const;
   
-  
   // Positional arguments
   void set_listed(const json::Value&);
   json::Value get_listed(const int&) const;
@@ -205,8 +203,8 @@ public:
   void display_errors(const Command&, const char*);
 
 private:
-  Argument_map     named_;    // Name/value mappings
-  Argument_list    listed_;   // Positional arguments.
+  Argument_map  named_;    // Name/value mappings
+  Argument_list listed_;   // Positional arguments.
 };
 
 
@@ -219,8 +217,8 @@ class Commands;
 /// The command class represents a command-line command ...
 class Command : private Parameters {
 public:
-  virtual ~Command();
   Command(const std::string&, const std::string&);
+  virtual ~Command();
 
   virtual bool run(const Arguments&) = 0;
 
@@ -306,8 +304,8 @@ struct Parse_state {
 
 // Parsing functions
 
-void parse_keyword_args(const Parameters&, Arguments&, Parse_state&);
 void parse_args(const Parameters&, Arguments&, Parse_state&);
+void parse_keyword_args(const Parameters&, Arguments&, Parse_state&);
 
 void parse_env(const Parameters&, Arguments&, const char*);
 void parse_env(const Parameters&, Arguments&, const std::string&);
