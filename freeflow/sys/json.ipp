@@ -69,10 +69,14 @@ Value::Value(const Value& x)
   }
 }
 
-// Equality checking
+/// Two JSON values are equal when they have the same JSON type and are
+/// holding the same value. In addition, NULL is always equal to NULL.
+/// Two arrays are equal when they contain the same values in the same order,
+/// and two objects are equal when they contain the same attributes, and have
+/// them set to the same values.
 inline
 bool operator==(const Value& a, const Value& b) {
-  // TODO: type promotions for bool, int, and real?
+  ///\TODO: type promotions for bool, int, and real?
   if (a.type() != b.type())
     return false;
   
@@ -86,7 +90,7 @@ bool operator==(const Value& a, const Value& b) {
     case Value::OBJECT:  return a.as_object() == b.as_object();
   }
   
-  // TODO: throw an exception for invalid type?
+  // Should be impossible, but gets rid of the warning
   return false;
 }
 
