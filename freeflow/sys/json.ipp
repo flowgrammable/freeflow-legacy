@@ -69,37 +69,6 @@ Value::Value(const Value& x)
   }
 }
 
-/// Two JSON values are equal when they have the same JSON type and are
-/// holding the same value. In addition, NULL is always equal to NULL.
-/// Two arrays are equal when they contain the same values in the same order,
-/// and two objects are equal when they contain the same attributes, and have
-/// them set to the same values.
-inline
-bool operator==(const Value& a, const Value& b) {
-  ///\TODO: type promotions for bool, int, and real?
-  if (a.type() != b.type())
-    return false;
-  
-  switch (a.type()) {
-    case Value::NIL:     return true;
-    case Value::BOOL:    return a.as_bool() == b.as_bool();
-    case Value::INT:     return a.as_int() == b.as_int();
-    case Value::REAL:    return a.as_real() == b.as_real();
-    case Value::STRING:  return a.as_string() == b.as_string();
-    case Value::ARRAY:   return a.as_array() == b.as_array();
-    case Value::OBJECT:  return a.as_object() == b.as_object();
-  }
-  
-  // Should be impossible, but gets rid of the warning
-  return false;
-}
-
-inline
-bool operator!=(const Value& a, const Value& b) {
-  return not (a == b);
-}
-
-
 // Value construction
 inline
 Value::Value(Null n)
@@ -226,6 +195,37 @@ Value::as_object() { return check(OBJECT, data_.o); }
 
 inline const Object&
 Value::as_object() const { return check(OBJECT, data_.o); }
+
+
+/// Two JSON values are equal when they have the same JSON type and are
+/// holding the same value. In addition, NULL is always equal to NULL.
+/// Two arrays are equal when they contain the same values in the same order,
+/// and two objects are equal when they contain the same attributes, and have
+/// them set to the same values.
+///
+/// \todo Consider type promotions for bool, int, and real?
+inline bool 
+operator==(const Value& a, const Value& b) {
+  if (a.type() != b.type())
+    return false;
+  
+  switch (a.type()) {
+    case Value::NIL:     return true;
+    case Value::BOOL:    return a.as_bool() == b.as_bool();
+    case Value::INT:     return a.as_int() == b.as_int();
+    case Value::REAL:    return a.as_real() == b.as_real();
+    case Value::STRING:  return a.as_string() == b.as_string();
+    case Value::ARRAY:   return a.as_array() == b.as_array();
+    case Value::OBJECT:  return a.as_object() == b.as_object();
+  }
+  
+  // Should be impossible, but gets rid of the warning
+  return false;
+}
+
+inline bool 
+operator!=(const Value& a, const Value& b) { return not (a == b); }
+
 
 // TODO: Implement a pretty printer for JSON. It would be nice
 // if we could integrate use the same pretty printing context

@@ -178,6 +178,10 @@ private:
   Data data_;
 };
 
+// Equality comparison
+bool operator==(const Value&, const Value&);
+bool operator!=(const Value&, const Value&);
+
 // JSON parsing.
 Value parse(File&);
 Value parse(Buffer&);
