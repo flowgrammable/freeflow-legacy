@@ -23,17 +23,6 @@ make_env_var(const std::string& pre, const std::string& parm) {
 }
 
 // -------------------------------------------------------------------------- //
-// Value type
-
-// inline
-// Value::Value(Error)
-//   : json::Value(), error_(true) { }
-
-// inline 
-// Value::operator bool() const { return not error_; }
-
-
-// -------------------------------------------------------------------------- //
 // Name
 
 inline

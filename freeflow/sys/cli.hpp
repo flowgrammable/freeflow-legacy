@@ -31,26 +31,6 @@ namespace cli {
 class Command;
 
 // -------------------------------------------------------------------------- //
-// Value types
-
-// /// The Value class extends JSON values to include additional error
-// /// information.
-// class Value : public json::Value {
-// public:
-//   static constexpr Error error { };
-
-//   using json::Value::Value;
-
-//   Value() = default;
-//   Value(Error);
-
-//   explicit operator bool() const;
-// private:
-//   bool error_ = false;
-// };
-
-
-// -------------------------------------------------------------------------- //
 // Parameters
 
 /// The type of a parameter is determined by a function. If a string can be
