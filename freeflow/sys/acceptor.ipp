@@ -14,14 +14,6 @@
 
 namespace freeflow {
 
-/// The default accept factor creates a new service that wraps the
-/// accepted socket.
-template<typename S>
-  inline S*
-  Default_accept_factory<S>::operator()(Reactor& r, Socket&& s) const {
-    return new S(r, std::move(s));
-  }
-
 /// Initialize the acceptor to work with the given reactor. The 
 /// additional arguments are forwraded to the accept factory.
 template<typename S, typename F>
