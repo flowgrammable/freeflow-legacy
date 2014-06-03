@@ -27,14 +27,14 @@ class Template;
 /// The Template application
 class Template : public ff::Application {
 public:
-  void load(ff::Controller&);
-  void unload(ff::Controller&);
+  Template(ff::Controller&);
+  ~Template();
 };
 
 
 /// Create instances of the Template application.
 class Factory : public ff::Application_factory {
-  ff::Application* construct();
+  ff::Application* create(ff::Controller&);
   void destroy(ff::Application*);
 };
 

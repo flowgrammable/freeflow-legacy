@@ -12,6 +12,6 @@
 # or implied. See the License for the specific language governing
 # permissions and limitations under the License.
 
-set(libs freeflow ${CMAKE_DL_LIBS})
+set(libs freeflow)
 
-add_unit_test(sdn_app_library app_library.cpp ${libs})
+add_unit_test(sys_signal signal.cpp ${libs})

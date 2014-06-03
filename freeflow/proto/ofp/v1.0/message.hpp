@@ -18,7 +18,6 @@
 #include <freeflow/sys/error.hpp>
 #include <freeflow/sys/buffer.hpp>
 #include <freeflow/proto/ofp/ofp.hpp>
-#include <freeflow/proto/ofp/protocol.hpp>
 #include <freeflow/proto/ofp/v1.0/error.hpp>
 #include <freeflow/proto/ofp/v1.0/port.hpp>
 #include <freeflow/proto/ofp/v1.0/queue.hpp>
@@ -72,6 +71,64 @@ struct Hello {
 /// communication.
 struct Error {
   static constexpr Message_type Kind = ERROR;
+
+  enum Type {
+    HELLO_FAILED,
+    BAD_REQUEST,
+    BAD_ACTION,
+    FLOW_MOD_FAILED,
+    PORT_MOD_FAILED,
+    QUEUE_OP_FAILED 
+  };
+
+  enum Hello_failed {
+    HF_INCOMPATIBLE = 0, ///< Incompatible version
+    HF_EPERM        = 1  ///< Permission error
+  };
+
+  enum Bad_request {
+    BR_BAD_VERSION    = 0, ///< Header version not supprted
+    BR_BAD_TYPE       = 1, ///< Message type not supported
+    BR_BAD_STAT       = 2, ///< Stat request type not supported
+    BR_BAD_VENDOR     = 3, ///< Vendor not supported
+    BR_BAD_SUBTYPE    = 4, ///< Vendor subtype not supported
+    BR_EPERM          = 5, ///< Permisssions error
+    BR_BAD_LEN        = 6, ///< Wrong message length
+    BR_BUFFER_EMPTY   = 7, ///< Specified buffer has already been used
+    BR_BUFFER_UNKNOWN = 8  ///< Specified buffer does not exist
+  };
+
+  enum Bad_action {
+    BA_BAD_TYPE        = 0, ///< Unknown action type
+    BA_BAD_LEN         = 1, ///< Wrong length for action
+    BA_BAD_VENDOR      = 2, ///< Unknown vendor id
+    BA_BAD_VENDOR_TYPE = 3, ///< Unknown action type for vendor id
+    BA_BAD_OUT_PORT    = 4, ///< Problem validating output action
+    BA_BAD_ARGUMENT    = 5, ///< Bad action argument
+    BA_EPERM           = 6, ///< Permissions error
+    BA_TOO_MANY        = 7, ///< Too many actions
+    BA_BAD_QUEUE       = 8  ///< Problem validating the input queue
+  };
+
+  enum Flow_mod_failed {
+    FMF_ALL_TABLES_FULL   = 0, ///< All tables are full
+    FMF_OVERLAP           = 1, ///< Cannot add overlapped flow
+    FMF_EPERM             = 2, ///< Perminssions error
+    FMF_BAD_EMERG_TIMEOUT = 3, ///< Operation timed out
+    FMF_BAD_COMMAND       = 4, ///< Unknown command
+    FMF_UNSUPPORTED       = 5  ///< Unsupported action list
+  };
+
+  enum Port_mod_failed {
+    PMF_BAD_PORT    = 0, ///< Invalid port
+    PMF_BAD_HW_ADDR = 1  ///< Hardware address is wrong
+  };
+
+  enum Queue_op_failed {
+    QOF_BAD_PORT  = 0, ///< Invalid port
+    QOF_BAD_QUEUE = 1, ///< Invalid queue
+    QOF_EPERM     = 2  ///< Permissions error
+  };
   
   Uint16 type;
   Uint16 code;

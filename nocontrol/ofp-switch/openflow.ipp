@@ -12,10 +12,15 @@
 // or implied. See the License for the specific language governing
 // permissions and limitations under the License.
 
-#ifndef NOCONTROL_CONFIG_HPP
-#define NOCONTROL_CONFIG_HPP
+namespace nocontrol {
 
-// Shorten the freeflow namespace throughout.
-namespace ff = freeflow;
+// -------------------------------------------------------------------------- //
+// Openflow handler
 
-#endif
+inline
+Ofp_handler::Ofp_handler(ff::Reactor& r, ff::Socket&& s, ff::Controller& c)
+  : ff::Socket_handler(r, ff::READ_EVENTS | ff::TIME_EVENTS, std::move(s))
+  , ctrl_(c)
+{ }
+
+} // namespace nocontrol

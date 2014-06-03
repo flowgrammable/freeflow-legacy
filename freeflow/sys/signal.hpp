@@ -15,10 +15,57 @@
 #ifndef FREEFLOW_SIGNAL_HPP
 #define FREEFLOW_SIGNAL_HPP
 
-#include <signal.h>
+#include <csignal>
+#include <cstring>
+
+#include <freeflow/sys/resource.hpp>
 
 namespace freeflow {
 
+using Signal_fn = void(*)(int);
+using Signal_info_fn = void(*)(int, siginfo_t*, void*);
+
+/// The Signal_action class describes behaviors to be taken when a
+/// signal is sent to ths proces.
+///
+/// This class is a simple wrapper on sigation that provides initialization
+/// semantics.
+///
+/// Note that by default, the action is constructed so that all signals
+/// are blocked during processing an signal handler.
+///
+/// \todo Allow the specification of flags, etc.
+struct Signal_action : sigaction {
+  Signal_action();
+  Signal_action(int);
+  Signal_action(Signal_fn);
+  Signal_action(Signal_info_fn);
+
+  System_result install(int);
+
+  explicit operator bool() const;
+};
+
+/// The Signal_mask type provides a means of specifying which
+/// signals should be blocked or not.
+struct Signal_set {
+  enum Init { NONE, ALL, DEFAULT };
+
+  Signal_set(Init = DEFAULT);
+
+  void insert(int);
+  void remove(int);
+  bool test(int);
+
+  static Signal_set all();
+  static Signal_set none();
+  static Signal_set current();
+
+  operator sigset_t*();
+  operator const sigset_t*() const;
+
+  sigset_t mask;
+};
 
 
 } // namespace freeflow 

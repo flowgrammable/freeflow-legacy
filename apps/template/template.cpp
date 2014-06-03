@@ -28,13 +28,13 @@ static Factory factory_;
 extern "C" void*
 factory() { return &factory_; }
 
-/// The construct() function is responsible for allocating new instances 
+/// The create() function is responsible for allocating new instances 
 /// of the application. 
 ///
 /// Note that this does not necessarily need to dynamically allocate a
 /// new object, it could return a singleton value instead.
 ff::Application* 
-Factory::construct() { return new Template(); }
+Factory::create(ff::Controller& c) { return new Template(c); }
 
 /// The destroy() function is responsible for disposing of application
 /// objects.
@@ -49,20 +49,18 @@ Factory::destroy(ff::Application* a) { delete a; }
 // -------------------------------------------------------------------------- //
 // Application
 
-/// The load() function is called by the controller after the the
-/// application has been constructed. This operation allows the application
-/// to initialize resources related to the controller instance (unlike
-/// the constructor, which does not have access to a controller instance).
-void
-Template::load(ff::Controller& ctrl) { 
-  std::cout << "Application 'Template' loaded to the controller\n";
+/// The constructor function is called by the controller to start the
+/// applicaiton. 
+Template::Template(ff::Controller& c) 
+  : Application(c) 
+{
+  std::cout << "* application 'template' loaded\n";
 }
 
 /// The unload() function is calle by the controller just before the
 /// application is destroyed. This provides a context for the application
 /// to release resources acquired during in during loading.
-void
-Template::unload(ff::Controller& ctrl) { 
-  std::cout << "Application 'Template' unloaded from the controller\n";
+Template::~Template() { 
+  std::cout << "* application 'template' unloaded\n";
 }
 

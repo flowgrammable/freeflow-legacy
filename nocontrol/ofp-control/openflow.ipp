@@ -12,22 +12,23 @@
 // or implied. See the License for the specific language governing
 // permissions and limitations under the License.
 
-#ifndef NOCONTROL_BRIDGE_HPP
-#define NOCONTROL_BRIDGE_HPP
-
-#include <freeflow/sdn/application.hpp>
-#include <freeflow/sdn/switch.hpp>
-
-#include <nocontrol/config.hpp>
-
 namespace nocontrol {
 
-class Bridge : ff::Application {
-public:
-  void start(ff::Switch&);
-  void stop(ff::Switch&);
+// -------------------------------------------------------------------------- //
+// Openflow handler
+
+// A scope guard that guarantees messages are always written before
+// returning from the function.
+struct Ofp_handler::Write_on_exit {
+  Write_on_exit(Ofp_handler& c) : conn(c) { }
+  ~Write_on_exit() { conn.write(); }
+  Ofp_handler& conn;
 };
 
-} // namespace nocontrol
+inline
+Ofp_handler::Ofp_handler(ff::Reactor& r, ff::Socket&& s, ff::Controller& c)
+  : ff::Socket_handler(r, ff::READ_EVENTS | ff::TIME_EVENTS, std::move(s))
+  , ctrl_(c)
+{ }
 
-#endif
+} // namespace nocontrol

@@ -1,4 +1,4 @@
-// Copyright (c) 2013-2014 Flowgrammable, LLC.
+// Copyright (c) 2013-2014 Flowgrammable.org
 // 
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,11 +12,23 @@
 // or implied. See the License for the specific language governing
 // permissions and limitations under the License.
 
-namespace freeflow {
+#include <iostream>
 
-/// The Ofp_listener accepts sockets on a particular port and creates
-inline
-Ofp_listener::Ofp_listener(const Address& a, Socket::Transport t, int bl)
-  : Listener_base<Ofp_switch>(a, t, bl) { }
+#include <freeflow/sys/signal.hpp>
 
-} // namespace freeflow
+using namespace freeflow;
+
+// FIXME: This could be better.
+
+void on_interrupt(int) {
+  std::cout << "signal: interrupt!\n";
+  exit(0);
+}
+
+int main() { 
+  Signal_action act = on_interrupt;
+  act.install(SIGINT);
+
+  // Loop until we get a SIGINT.
+  while (true) ;
+}

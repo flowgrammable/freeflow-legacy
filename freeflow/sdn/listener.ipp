@@ -14,27 +14,18 @@
 
 namespace freeflow {
 
-inline
-Listener::~Listener() { }
-
-Socket::Transport
-Listener::transport() const { return sock->transport; }
-
-inline const Address& 
-Listener::addr() const { return sock->local; }
-
-
-/// Create the listener 
 template<typename S>
-  inline
-  Listener_base::Listener_base(Reactor& r, 
-                               const Address& a, 
-                               Socket::Transport t, 
-                               int bl)
-    : Acceptor<S>(r)
-  {
-    this->listen(a, t, bl);
-    this->sock_ = &rc();
+  Default_listener_factory<S>::Default_listener_factory(Controller& c)
+    : ctrl_(c) { }
+
+template<typename S>
+  inline S*
+  Default_listener_factory<S>::operator()(Reactor& r, Socket&& s) const {
+    return new S(r, std::move(s), ctrl_);
   }
+
+template<typename S, typename F>
+  Listener<S, F>::Listener(Controller& c)
+    : Acceptor<S, F>(c, c) { }
 
 } // namespace freeflow

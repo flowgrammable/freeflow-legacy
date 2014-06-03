@@ -12,27 +12,10 @@
 // or implied. See the License for the specific language governing
 // permissions and limitations under the License.
 
-#include <iostream>
+#ifndef NOCONTROL_PRELUDE_HPP
+#define NOCONTROL_PRELUDE_HPP
 
-#include "noflow.hpp"
+// Shorten the freeflow namespace throughout.
+namespace ff = freeflow;
 
-/// The application factory.
-static Factory factory_;
-
-extern "C" void*
-factory() { return &factory_; }
-
-ff::Application* 
-Factory::create(ff::Controller& c) { return new Noflow(c); }
-
-void 
-Factory::destroy(ff::Application* a) { delete a; }
-
-/// \todo Dynamically configure the application so that it can terminate
-/// on different phases.
-Noflow::Noflow(ff::Controller& c)
-  : ff::Application(c) 
-{ 
-  std::cout << "starting noflow\n";
-}
-
+#endif

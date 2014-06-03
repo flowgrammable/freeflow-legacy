@@ -12,27 +12,56 @@
 // or implied. See the License for the specific language governing
 // permissions and limitations under the License.
 
+#include <typeinfo>
+
 namespace freeflow {
 
+// -------------------------------------------------------------------------- //
+// Application factory
+
+/// Tthe type of the application factory function.
+
+// \todo This will crash if function returns null.
+inline
+Application_library::Application_library(const Path& p) 
+  : Library(p)
+  , entry_(function<Application_factory_fn>("factory"))
+  , factory_(entry_())
+{
+  if (not factory_)
+    throw std::runtime_error("cannot resolve application symbol");
+}
+
+/// Return the factory function from the application.
+inline Application_factory*
+Application_library::factory() const { return factory_; }
+
+/// Create a new application through the library interface.
+inline Application*
+Application_library::create(Controller& c) const {
+  return factory_->create(c); 
+}
+
+/// Destroy 
+inline void
+Application_library::destroy(Application* app) const { 
+  return factory_->destroy(app); 
+}
+
+// -------------------------------------------------------------------------- //
+// Application
 
 inline
-Application_library::Application_library(const Path& p) : Library(p)
-{
-  factory_ = this->function<Application_factory_fn>("factory")();
-}
+Application::Application(Controller& c)
+  : ctrl_(c) { }
 
-inline Application_factory*
-Application_library::factory() const {
-  return factory_;
-}
+inline
+Application::~Application() { }
 
-/// The load event is sent when the controller instantiates the application.
-inline void
-Application::load(Controller&) { }
+/// Returns the controller on which the application was started.
+inline Controller&
+Application::controller() { return ctrl_; }
 
-/// The unload event is sent when the controller tears down the application.
-inline void
-Application::unload(Controller&) { }
 
 /// The bind event is sent whenever the application is bound to a switch.
 /// This happens immediately after the switch connects to the controller.
@@ -57,19 +86,13 @@ inline void
 Application::features_known(Switch&) { }
 
 /// The start event is sent when an application is first instantiated
-/// on the given switch. The start event intended to be point at which
-/// an application establishes all necessary resources to function.
-/// Examples include the announcement of program requirements, the
-/// allocation of tables, and the allocation of groups.
+/// as a process.
 inline void
-Application::start(Switch&) { }
+Application::start() { }
 
-/// The stop event is sent when an application is uninstalled, either
-/// because the connection was closed or because an operator requested
-/// shutdown. Any resources acquired during startup must be released
-/// during shutdown.
+/// The stop event is sent when an application process is terminated.
 inline void
-Application::stop(Switch&) { }
+Application::stop() { }
 
 /// The packet-in event is sent whenever a packet is transferred to
 /// the controller due to a table miss or a flow configuration.
