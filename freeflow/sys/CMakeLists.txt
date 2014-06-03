@@ -36,14 +36,13 @@ set(src fd_utils.cpp
         print.cpp
         cli.cpp)
 
-
 if(BSD)
   LIST(APPEND src kqueue.cpp)
 elseif(LINUX)
   LIST(APPEND src epoll.cpp)
 endif()
 
-# TODO: We need to install all of the .ipp files also.
+# Header and inline files are installed.
 set(hdr fd_utils.hpp
         meta.hpp
         data.hpp
@@ -51,7 +50,7 @@ set(hdr fd_utils.hpp
         time.hpp      time.ipp
         signal.hpp    signal.ipp
         path.hpp
-        resoource.hpp resource.ipp
+        resource.hpp  resource.ipp
         file.hpp      file.ipp
         socket.hpp    socket.ipp
         handler.hpp   handler.ipp
@@ -74,7 +73,11 @@ elseif(LINUX)
   LIST(APPEND hdr ${epoll.hpp})
 endif()
 
-add_library(freeflow SHARED ${src})
+
+# --------------------------------------------------------------------------- //
+# Targets
+
+add_shared_library(freeflow ${src})
 target_link_libraries(freeflow ${CMAKE_DL_LIBS})
 
 
@@ -82,6 +85,7 @@ target_link_libraries(freeflow ${CMAKE_DL_LIBS})
 # Installation
 
 install(FILES ${hdr} DESTINATION include/freeflow/sys)
+install(TARGETS freeflow LIBRARY DESTINATION lib)
 
 
 # --------------------------------------------------------------------------- //
