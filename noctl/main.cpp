@@ -97,9 +97,9 @@ main(int argc, char *argv[]) {
   // Check program args
   success &= check_args(parms, program_args);
 
-  // if (!success){ 
-  //   program_args.display_errors(*cmd, prefix);
-  // }
+  if (!success){ 
+    program_args.display_errors(prefix);
+  }
 // -------------------------------------------------------------------------- //
 
 // ---------- Parse the command and its named/positional arguments ---------- //
@@ -111,7 +111,6 @@ main(int argc, char *argv[]) {
   
   // Make sure the command exists
   std::string cmd_name = ps.argv[ps.current];
-  cout << cmd_name << endl;
   if (!cmds.count(cmd_name)) {
     std::cerr << "error: command not recognized\n";
     return -1;
@@ -127,8 +126,8 @@ main(int argc, char *argv[]) {
   success &= check_args(cmd->parms(), command_args);
 
   if (!success){ 
-    //program_args.display_errors(*cmd, prefix);
-    std::cout << "ERROR\n";
+    command_args.display_errors(prefix);
+    // std::cout << "ERROR\n";
     return -1;
   }
 

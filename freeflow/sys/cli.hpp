@@ -200,7 +200,7 @@ public:
   int get_listed_size() const;
 
   // Error handling
-  void display_errors(const Command&, const char*);
+  void display_errors(const char*);
 
 private:
   Argument_map  named_;    // Name/value mappings
