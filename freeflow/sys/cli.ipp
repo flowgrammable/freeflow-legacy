@@ -398,7 +398,13 @@ Bool_typed::operator()(const json::Value& s) const {
 
 inline json::Value
 Int_typed::operator()(const json::Value& s) const {
-  return {};
+  int i;
+  // FIXME: Validate the s is a string.
+  std::stringstream ss(s.as_string());
+  if (ss >> i) 
+    return i;
+  else 
+    return Error(json::TYPE_ERROR);
 }
 
 inline json::Value 

@@ -22,11 +22,13 @@
 #include <freeflow/sys/socket.hpp>
 #include <freeflow/sys/acceptor.hpp>
 #include <freeflow/sys/reactor.hpp>
+#include <freeflow/sys/cli.hpp>
 
 #include "service.hpp"
 
 using namespace std;
 using namespace freeflow;
+using namespace cli;
 
 struct Echo_server : Socket_handler {
   Echo_server(Reactor&, Socket&&);
@@ -92,6 +94,41 @@ using Echo_acceptor = Acceptor<Echo_server>;
 
 int 
 main(int argc, char* argv[]) {
+  bool success = true;
+  Parameters parms;
+  parms.declare("port, p", cli::Int_typed(), cli::REQUIRED, "The port of the echo server");
+
+  // Initialize the parse state
+  Parse_state ps(argc, 1, argv);
+  if (ps.argc == 1) {
+    std::cerr << "error: a port number must be provided\nusage: ./echo -port=<PORT> or ./echo --p=<PORT>";
+    return -1;
+  }
+
+  // Initialize the program arguments
+  cli::Arguments program_args;
+
+  // Parse the environment for program options
+  const char* prefix = "flog";
+  parse_env(parms, program_args, prefix);
+
+  // Parse the command-line for program options
+  parse_keyword_args(parms, program_args, ps);
+
+  // Check program args
+  success &= check_args(parms, program_args);
+
+  if (!success){ 
+    program_args.display_errors(prefix);
+  }
+
+  // Make sure no commands or positional arguments were provided
+  if (ps.current != ps.argc) {
+    std::cerr << "error: \n";
+    return -1;
+  }
+
+
   if (argc < 2) {
     std::cerr << "usage: ./echo port\n";
     return -1;
