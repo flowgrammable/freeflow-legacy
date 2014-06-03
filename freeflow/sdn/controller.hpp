@@ -20,10 +20,10 @@
 #include <unordered_set>
 
 #include <freeflow/sys/acceptor.hpp>
+#include <freeflow/sys/connector.hpp>
 #include <freeflow/sys/reactor.hpp>
 
 #include <freeflow/sdn/application.hpp>
-#include <freeflow/sdn/listener.hpp>
 
 namespace freeflow {
 
@@ -52,6 +52,7 @@ struct Process {
 };
 
 
+
 /// The Controller class is a reactor that provides services for running
 /// a service that queries, configures, or controls some component of the 
 /// SDN data model.
@@ -75,11 +76,23 @@ class Controller : public Reactor {
   using Library_map = std::unordered_map<std::string, Application_library*>;
   using Process_list = std::list<Process>;
   using Switch_set = std::unordered_set<Switch*>;
-
 public:
-  // Listener management
+  template<typename Handler>
+    struct Handler_factory;
+
+  template<typename Handler, typename Factory = Handler_factory<Handler>>
+    struct Acceptor;
+
+  template<typename Handler, typename Factory = Handler_factory<Handler>>
+    struct Connector;
+
+
+  // Listener and connector management
   template<typename T>
-    void add_listener(T*, const Address&, Socket::Transport);
+    void add_acceptor(T*, const Address&, Socket::Transport);
+
+  template<typename T>
+    void add_connector(T*, const Address&, Socket::Transport);
 
   // Application loading
   Application_library* load(const std::string&);
@@ -99,6 +112,31 @@ private:
   Process_list procs_;    // The hosted applications
   Switch_set   switches_; // Connected switches
 };
+
+/// The Handler_factory is responsible for the allocation of event
+/// handlers for for a given controller.
+template<typename Handler>
+  struct Controller::Handler_factory {
+    Handler_factory(Controller&);
+
+    Handler* operator()(Reactor&, Socket&&) const;
+
+  private:
+    Controller& ctrl_;
+  };
+
+/// An acceptor specifically bound to a controller.
+template<typename Handler, typename Factory>
+  struct Controller::Acceptor : freeflow::Acceptor<Handler, Factory> {
+    Acceptor(Controller& ctrl);
+  };
+
+
+/// An acceptor specifially bound to a controller.
+template<typename Handler, typename Factory>
+  struct Controller::Connector : freeflow::Connector<Handler, Factory> {
+    Connector(Controller& ctrl);
+  };
 
 } // namespace freeflow
 

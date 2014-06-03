@@ -20,11 +20,6 @@
 
 namespace freeflow {
 
-template<typename Service>
-  struct Default_accept_factory {
-    Service* operator()(Reactor&, Socket&&) const;
-  };
-
 /// The acceptor class is an instance of the acceptor design pattern.
 /// Its purpose is to decouple the acceptance of connections from the
 /// protocol or service implementation. When a connection is accepted,
@@ -36,7 +31,7 @@ template<typename Service>
 /// The Factory parameter provides the actual constructor for the
 /// accepted service. This allows users to inject additional informatoin
 /// into the created service when the connection is accepted.
-template<typename Service, typename Factory = Default_accept_factory<Service>>
+template<typename Service, typename Factory = Default_handler_factory<Service>>
   class Acceptor : public Socket_handler {
   public:
     using Transport = Socket::Transport;

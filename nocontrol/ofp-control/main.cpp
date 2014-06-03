@@ -64,11 +64,11 @@ main(int argc, char* argv[]) {
   Address ofp_addr {Ipv4_addr::any, 9000};
   Address ncp_addr {Ipv4_addr::any, 9001};
 
-  Ncp_listener ncp(c);
-  c.add_listener(&ncp, ncp_addr, tcp);
+  Ncp_acceptor ncp(c);
+  c.add_acceptor(&ncp, ncp_addr, tcp);
   
-  Ofp_listener ofp(c);
-  c.add_listener(&ofp, ofp_addr, tcp);
+  Ofp_acceptor ofp(c);
+  c.add_acceptor(&ofp, ofp_addr, tcp);
 
   // Add the signal handler
   Signal_handler sh(c);

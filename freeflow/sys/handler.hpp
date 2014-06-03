@@ -142,6 +142,23 @@ using Socket_handler = Basic_event_handler<Socket>;
 using File_handler = Basic_event_handler<File>;
 
 
+// -------------------------------------------------------------------------- //
+// Facilities
+
+/// The Default_handler_factory is used to allocate event handlers for
+/// asynchronous acceptors and conncetors. The Handler parameter is the
+/// type of the handler created. It is initialized over its reactor and
+/// the accepted or connected socket is moved into the class.
+template<typename Handler>
+  struct Default_handler_factory {
+    Handler* operator()(Reactor&, Socket&&) const;
+  };
+
+
+// -------------------------------------------------------------------------- //
+// Registry
+
+
 /// The handler registry maintains the set of handlers registered
 /// for the reactor loop. The set maintained by the registry is sparse;
 /// iteration over the set may include traversal over null pointers.

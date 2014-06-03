@@ -21,8 +21,8 @@ using namespace freeflow;
 // The echo client is extremely thin...
 struct Echo_client : Socket_handler {
 
-  Echo_client(Reactor& r)
-    : Socket_handler(r, NO_EVENTS) { }
+  Echo_client(Reactor& r, Socket&& s)
+    : Socket_handler(r, NO_EVENTS, std::move(s)) { }
 
   bool on_open() {
     std::cout << "* init client\n";
@@ -37,8 +37,8 @@ struct Echo_client : Socket_handler {
 
 // Read from standard input and send through the connection.
 struct Input_reader : Resource_handler {
-  Input_reader(Reactor& r, Echo_client& c)
-    : Resource_handler(r, READ_EVENTS, 0), conn(c) { }
+  Input_reader(Reactor& r)
+    : Resource_handler(r, READ_EVENTS, 0), conn(nullptr) { }
 
   // If there is no more data to read, indicate that we want
   // to terminate the reactor loop. Note that the read should
@@ -53,7 +53,7 @@ struct Input_reader : Resource_handler {
         return true;
       } else {
         buf[n] = 0;
-        send(conn.rc(), &buf[0], n);
+        send(conn->rc(), &buf[0], n);
       }
       return true;
     } else {
@@ -62,25 +62,37 @@ struct Input_reader : Resource_handler {
     }
   }
 
-  Echo_client& conn;
+  Echo_client* conn;
 };
 
-using My_connector = Connector<Echo_client>;
+/// The echo factory is responsible for creating the echo connection.
+/// It binds the created client to the input reader.
+struct Echo_factory {
+  Echo_factory(Input_reader& r)
+    : reader(r) { }
+
+  Echo_client* operator()(Reactor& r, Socket&& s) {
+    Echo_client* c = new Echo_client(r, std::move(s));
+    reader.conn = c;
+    return c;
+  }
+
+  Input_reader& reader;
+};
+
+using Echo_connector = Connector<Echo_client, Echo_factory>;
 
 int main() {
   Reactor r;
 
-  // The echo client maintains the client socket.
-  Echo_client client(r);
-
-  // // The reader accepts terminal input.
-  Input_reader reader(r, client);
+  // The reader accepts terminal input.
+  Input_reader reader(r);
+  r.add_handler(&reader);
 
   // Establishes the asynchronous connection.
-  My_connector conn(r);
-  conn.connect(&client, Address(Ipv4_addr::loopback, 9876), Socket::TCP);
+  Echo_connector conn(r, reader);
+  conn.connect(Address(Ipv4_addr::loopback, 9876), Socket::TCP);
 
   // Add the reader and run the event loop.
-  r.add_handler(&reader);
   r.run();
 }

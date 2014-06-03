@@ -40,7 +40,7 @@ private:
 /// The Ncp_acceptor is resposnble for accepting connections
 /// on the management port and construcitng service handlers to
 /// manage that connection.
-using Ncp_listener = ff::Listener<Ncp_handler>;
+using Ncp_acceptor = ff::Controller::Acceptor<Ncp_handler>;
 
 } // namesapce nocontrol
 

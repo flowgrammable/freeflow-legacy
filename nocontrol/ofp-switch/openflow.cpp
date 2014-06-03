@@ -33,6 +33,7 @@ Ofp_handler::on_open() {
 
 bool 
 Ofp_handler::on_close() {
+  std::cout << "* OFP switch disconnected\n";
   return true; 
 }
 
