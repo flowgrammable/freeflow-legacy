@@ -183,6 +183,9 @@ public:
   
   Object&       as_object();
   const Object& as_object() const;
+
+  Error&       as_error();
+  const Error& as_error() const;
   
   operator bool();
 

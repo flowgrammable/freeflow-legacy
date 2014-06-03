@@ -44,6 +44,13 @@ Error::code() const { return code_; }
 inline Error::Data
 Error::data() const { return data_; }
 
+/// Returns true when two errors have the same error code.
+inline bool 
+operator==(Error a, Error b) { return a.code() == b.code(); }
+
+inline bool 
+operator!=(Error a, Error b) { return not(a == b); }
+
 
 // -------------------------------------------------------------------------- //
 // System error
