@@ -35,8 +35,8 @@ target_link_libraries(freeflow-sdn)
 # --------------------------------------------------------------------------- //
 # Installation
 
-install(FILES ${hdr} DESTINATION include/freeflow/sdn)
 install(TARGETS freeflow-sdn LIBRARY DESTINATION lib)
+install(FILES ${hdr} DESTINATION include/freeflow/sdn)
 
 # --------------------------------------------------------------------------- //
 # Testing
