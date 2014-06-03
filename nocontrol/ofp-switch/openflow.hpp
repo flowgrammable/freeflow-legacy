@@ -17,12 +17,10 @@
 
 #include <freeflow/sys/socket.hpp>
 #include <freeflow/sys/handler.hpp>
-#include <freeflow/sys/acceptor.hpp>
+#include <freeflow/sys/connector.hpp>
 #include <freeflow/sdn/controller.hpp>
 
 #include "prelude.hpp"
-#include "queue.hpp"
-#include "machine.hpp"
 
 namespace nocontrol {
 
@@ -33,8 +31,6 @@ namespace nocontrol {
 /// \todo We're required to TLS for switch connections. This
 /// seems like the likely integration point for that work.
 class Ofp_handler : public ff::Socket_handler {
-  struct Write_on_exit;
-  enum State { VERSION, RUN };
 public:
   Ofp_handler(ff::Reactor&, ff::Socket&&, ff::Controller&);
 
@@ -44,21 +40,13 @@ public:
   bool on_time(int);
 
 private:
-  bool on_version();
-
-  bool read();
-  bool write();
-
-  ff::Controller&         ctrl_;
-  ff::ofp::Channel        ch_;
-  State                   state_;
-  ff::ofp::v1_0::Machine* sm_;
+  ff::Controller& ctrl_;
 };
 
 /// The Ofp_acceptor is responsible for accepting connections from
 /// switches and constructing service handlers to manage the OpenFlow
 /// protocol.
-using Ofp_listener = ff::Listener<Ofp_handler>;
+using Ofp_connector = ff::Connector<Ofp_handler>;
 
 } // namespace nocontrol
 

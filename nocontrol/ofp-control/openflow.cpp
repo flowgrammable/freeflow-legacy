@@ -40,12 +40,13 @@ Ofp_handler::on_open() {
   //
   // FIXME: Create the state machine for the greatest version of the
   // protocol supported.
-  sm_ = new Machine(ch_, &ctrl_);
+  sm_ = new ofp::v1_0::Machine(ch_, &ctrl_);
 
   // FIXME: How do we do this in a version independent manner? Note
   // that sm_ will be a base-class pointer in the not-so-distant future.
-  if (Trap err = sm_->send_hello())
-    return false;
+  //
+  // FIXME: Error handling. Merge Alexander's changes ASAP.
+  sm_->send_hello();
   state_ = VERSION;
 
   return true;
@@ -87,7 +88,7 @@ Ofp_handler::on_time(int t) {
 bool
 Ofp_handler::on_version() {
   ofp::Header h;
-  ch_.recv.peek(h);
+  ch_.recv.peek_msg(h);
 
   // Determine what version of the protocol we're running.
   //
@@ -99,7 +100,7 @@ Ofp_handler::on_version() {
     return true;
   } else {
     // FIXME: How do we do this in a version independent way?
-    send_error(Error::INCOMPATIBLE);
+    sm_->send_error(ofp::v1_0::Error::HF_INCOMPATIBLE);
     return false;
   }
 }

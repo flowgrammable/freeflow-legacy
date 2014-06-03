@@ -14,5 +14,11 @@
 
 include_directories(${CMAKE_SOURCE_DIR})
 
-add_subdirectory(ofp-control)
-add_subdirectory(ofp-switch)
+set(src main.cpp 
+        nocontrol.cpp
+        openflow.cpp)
+
+set(libs freeflow freeflow-ofp freeflow-ofp-1.0 freeflow-sdn)
+
+add_executable(ofp-switch ${src})
+target_link_libraries(ofp-switch ${libs} dl)
