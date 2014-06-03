@@ -246,12 +246,15 @@ Value::as_object() { return check(OBJECT, data_.o); }
 inline const Object&
 Value::as_object() const { return check(OBJECT, data_.o); }
 
+inline Error&
+Value::as_error() { return check(ERROR, data_.e); }
 
-/// Two JSON values are equal when they have the same JSON type and are
-/// holding the same value. In addition, NULL is always equal to NULL.
-/// Two arrays are equal when they contain the same values in the same order,
-/// and two objects are equal when they contain the same attributes, and have
-/// them set to the same values.
+inline const Error&
+Value::as_error() const { return check(ERROR, data_.e); }
+
+/// Returns true when two JSON values compare equal. Equality is defined
+/// in terms of the underlying value. Note that two values with different
+/// underlying type are not the same.
 ///
 /// \todo Consider type promotions for bool, int, and real?
 inline bool 
@@ -267,10 +270,9 @@ operator==(const Value& a, const Value& b) {
     case Value::STRING:  return a.as_string() == b.as_string();
     case Value::ARRAY:   return a.as_array() == b.as_array();
     case Value::OBJECT:  return a.as_object() == b.as_object();
+    case Value::ERROR:   return a.as_error() == b.as_error();
+    default:             return false; // Should be unreachable.
   }
-  
-  // Should be impossible, but gets rid of the warning
-  return false;
 }
 
 inline bool 
@@ -336,7 +338,7 @@ template<typename C, typename T>
     case Value::OBJECT:
       return print(os, v.as_object());
     case Value::ERROR:
-       return os << "ERROR!"; // TODO: smarter error messages?
+      return os << "ERROR!"; // TODO: smarter error messages?
     }
     return os;
   }
