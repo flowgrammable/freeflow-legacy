@@ -12,16 +12,24 @@
 # or implied. See the License for the specific language governing
 # permissions and limitations under the License.
 
-# TODO: It might be worthwhile to write a config header that includes
-# host, system, and compiler information.
-
 # ---------------------------------------------------------------------------- #
-# Endianness
+# Shared libraries
 
-include(TestBigEndian)
-test_big_endian(is_big)
-if (is_big)
-  add_definitions(-DFREEFLOW_BIG_ENDIAN)
-else()
-  add_definitions(-DFREEFLOW_LITTLE_ENDIAN)
-endif()
+## Creates a shared library from a set of source files and links against
+## the given libariries.
+##
+## Synopsis:
+##
+##    add_shared_library(tgt args*)
+##
+## Arguments:
+##
+##    tgt -- The name of the library target
+##    args -- A sequence of input files
+##
+## TODO: Allow the specification of libraries to link against.
+##
+macro(add_shared_library tgt)
+  add_library(${tgt} SHARED ${ARGN})
+  set_target_properties(${tgt} PROPERTIES VERSION ${FREEFLOW_VERSION})
+endmacro(add_shared_library)

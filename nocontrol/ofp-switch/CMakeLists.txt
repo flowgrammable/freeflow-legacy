@@ -1,4 +1,4 @@
-# Copyright (c) 2013-2014 Flowgrammable.org
+# Copyright (c) 2013-2014 Flowgrammable, LLC.
 # 
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,6 +12,13 @@
 # or implied. See the License for the specific language governing
 # permissions and limitations under the License.
 
-set(libs freeflow ${CMAKE_DL_LIBS})
+include_directories(${CMAKE_SOURCE_DIR})
 
-add_unit_test(sdn_app_library app_library.cpp ${libs})
+set(src main.cpp 
+        nocontrol.cpp
+        openflow.cpp)
+
+set(libs freeflow freeflow-ofp freeflow-ofp-1.0 freeflow-sdn)
+
+add_executable(ofp-switch ${src})
+target_link_libraries(ofp-switch ${libs} dl)

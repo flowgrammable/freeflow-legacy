@@ -15,20 +15,32 @@
 # ---------------------------------------------------------------------------- #
 # Build
 
-set(src ofp.cpp protocol.cpp)
+set(src ofp.cpp)
 
 set(hdr error.hpp
         ofp.hpp 
-        ofp.ipp
-        protocol.hpp
-        protocol.ipp)
+        ofp.ipp)
 
-add_library(freeflow-ofp ${src})
+
+# ---------------------------------------------------------------------------- #
+# Targets
+
+add_shared_library(freeflow-ofp ${src})
+target_link_libraries(freeflow-ofp freeflow)
+
+
+# ---------------------------------------------------------------------------- #
+# OpenFlow Versoin
 
 add_subdirectory(v1.0)
 add_subdirectory(v1.1)
 add_subdirectory(v1.2)
 add_subdirectory(v1.3.0)
+
+
+# ---------------------------------------------------------------------------- #
+# Examples
+
 add_subdirectory(examples)
 
 
@@ -41,5 +53,5 @@ add_subdirectory(ofp.test)
 # ---------------------------------------------------------------------------- #
 # Installation
 
+install(TARGETS freeflow-ofp LIBRARY DESTINATION lib)
 install(FILES ${hdr} DESTINATION include/freeflow/proto/ofp)
-

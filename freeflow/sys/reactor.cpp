@@ -13,9 +13,13 @@
 // permissions and limitations under the License.
 
 #include "reactor.hpp"
+#include "signal.hpp"
 
 namespace freeflow {
 namespace {
+
+// -------------------------------------------------------------------------- //
+// Event notification
 
 // Returns true iff the event handler is subscibed to events m.
 inline bool
@@ -56,7 +60,7 @@ notify_except(Event_handler* h, const Resource_set& rs, Resource_set& close) {
       close.insert(h->fd());
 }
 
-void
+inline void
 notify_timer(const Timer& t, Resource_set& close) {
   Event_handler* h = t.handler;
   if (should_notify(h, TIME_EVENTS))
@@ -64,7 +68,88 @@ notify_timer(const Timer& t, Resource_set& close) {
       close.insert(h->fd());
 }
 
+// -------------------------------------------------------------------------- //
+// Signaling infrastructure
+
+using Reactor_list = std::vector<Reactor*>;
+
+/// A global list of reactor instances. This allos multiple reactors
+/// to be running in a single thread or process.
+static Reactor_list reactors_;
+
+// The basic signal handler simply records the signal that
+// was received by the process. This is acted on in the
+// event loop.
+//
+// BUG: This is fundamentally broken. The handler needs to queue then
+// signal for each reactor instance.
+void
+signal_handler(int sig) { 
+  for (Reactor* r : reactors_)
+    r->send_signal(sig);
+}
+
 } // namespace
+
+// -------------------------------------------------------------------------- //
+// Reactor initialization
+
+namespace impl {
+
+inline Reactor*
+Reactor_init::self() { return reinterpret_cast<Reactor*>(this); }
+
+
+// Initialize the signal handler infrastructure. Note that this
+// happens only once.
+Reactor_init::Reactor_init() {
+  init_signals();
+
+  // Add the reactor to the global reactor list.
+  reactors_.push_back(self());
+}
+
+Reactor_init::~Reactor_init() {
+  // Remove this reactor from the registry.
+  // NOTE: This is not efficient, but we expect the number of reactors
+  // to be small.
+  reactors_.erase(std::find(reactors_.begin(), reactors_.end(), self()));
+}
+
+
+// One-time initialiation of signal handling.
+///
+/// \todo This should probably register handlers on a per-thread
+/// basis, if that's possible.
+///
+/// \todo Consider specifying the set of handled signals via a
+/// signal mask. We can simply iterate over that and install
+/// (or uninstall) the handler where appropriate.
+void 
+Reactor_init::init_signals() {
+  Signal_action sa;
+  if (not sa) {
+    sa = Signal_action(signal_handler);
+
+    // TODO: What set of signals do I really want here? These are
+    // commonly handled, but by no means the only viable set.
+    //
+    // NOTE: Do not handle signals that would cause the behavior or
+    // the program to become undefined if ignored.
+    sa.install(SIGHUP);
+    sa.install(SIGINT);
+    sa.install(SIGQUIT);
+    sa.install(SIGTERM);
+    sa.install(SIGUSR1);
+    sa.install(SIGUSR2);
+  }
+}
+
+} // namesspace impl
+
+
+// -------------------------------------------------------------------------- //
+// Reactor implementation
 
 // Notify each handler that events are (or may be) available.
 void
@@ -94,12 +179,28 @@ Reactor::notify_timers(Resource_set& close) {
 }
 
 /// If the handler is is in the close set, remove it from the reactor.
+///
+/// \todo Provide a mechanism for testing to see if any elements of
+/// a resource set are in fact set (i.e., the value is non-zero). If
+/// no handlers are set, don't iterate over handlers.
 void
 Reactor::close_handlers(const Resource_set& close) {
-   for (Event_handler* h : handlers_) {
+  for (Event_handler* h : handlers_) {
     if (h and close.test(h->fd()))
       remove_handler(h);
   }
+}
+
+// Notify each handler of each pending signal, and then clear the queue.
+inline void
+Reactor::notify_signal(Resource_set& close) {
+  for (int s : signals_)
+    for (Event_handler* h : handlers_) {
+      if (h and h->is_subscribed(SIGNAL_EVENTS))
+        if (not h->on_signal(s))
+          close.insert(h->fd());
+    }
+  signals_.clear();
 }
 
 /// Run the reactor's event loop until stoppage is indicated.
@@ -120,10 +221,29 @@ Reactor::run(Microseconds us) {
   // there were any events.
   Select_set dispatch = handlers_.wait();
   Selector select(handlers_.max() + 1, dispatch);    
-  if (select(us))
+
+  // Block all signals when calling select. This lets us proces them
+  // after the select call instead of asynchronously. Don't block
+  // signals that could result in undefined behavior.
+  //
+  // TODO: What if we block everything all the time, and simply
+  // check pending signals as part of the event loop. That seems like
+  // it might be more effective. It also means that none of our
+  // blocking system calls will actually be interrupted.
+  // Signal_set sigs = Signal_set::all();
+  
+  // Run select. Return when any event is detected, including signals.
+  int n = select();
+
+  // Notify handlers if signals are present. This is done 
+  notify_signal(close);
+  
+  // Check for read/write/except notifications if select indicates
+  // that some hav events.
+  if (n)
     notify_select(dispatch, close);
   
-  // Notfiy handlers of expired timers.
+  // Notify handlers of expired timers.
   notify_timers(close);
 
   // Close any outstanding handlers

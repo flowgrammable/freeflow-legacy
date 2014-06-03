@@ -23,7 +23,7 @@ namespace freeflow {
 /// them.
 inline
 Library::Library(const Path& p) 
-  : path_(p), handle_(dlopen(p.c_str(), RTLD_LOCAL | RTLD_NOW))
+  : path_(p), handle_(dlopen(p.c_str(), RTLD_LOCAL | RTLD_LAZY))
 {
   if (not handle_) 
     throw std::runtime_error(dlerror());
@@ -40,7 +40,7 @@ Library::symbol(const std::string& s) const {
   // NOTE: This does not use dlsym in the way recommended by Linux
   // man pages. However, this is not intended for general usage, but
   // very constrained usage, so it should be okay in this context.
-  void* p= dlsym(handle_, s.c_str());
+  void* p = dlsym(handle_, s.c_str());
   if (not p)
     throw std::runtime_error(dlerror());
   return p;

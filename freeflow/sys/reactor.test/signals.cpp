@@ -12,14 +12,33 @@
 // or implied. See the License for the specific language governing
 // permissions and limitations under the License.
 
-#include "bridge.hpp"
+#include <iostream>
 
-namespace nocontrol {
+#include <freeflow/sys/reactor.hpp>
 
-void
-Bridge::start(ff::Switch&) { }
+using namespace freeflow;
 
-void
-Bridge::stop(ff::Switch&) { }
+/// This handler the results of signals.
+struct Signal_handler : Resource_handler {
+  Signal_handler(Reactor& r)
+    : Resource_handler(r, SIGNAL_EVENTS, 0) { }
 
-} // namespace nocontrol
+  bool on_open() {
+    std::cout << "* starting " << ::getpid() << '\n';
+    return true;
+  }
+
+  // TODO: Emit a meaningful string
+  bool on_signal(int s) {
+    std::cout << "* signal: " << ::strsignal(s) << '\n';
+    return true;
+  }
+};
+
+
+int main() {
+  Reactor r;
+  Signal_handler sh(r);
+  r.add_handler(&sh);
+  r.run();
+}

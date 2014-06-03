@@ -21,12 +21,12 @@ namespace freeflow {
 Switch&
 Controller::connect(Socket& sock) {
   auto i = switches_.emplace(new Switch(*this, sock));
-  Switch& s = **i.first;
+  // Switch& s = **i.first;
 
   // TODO: Find the set applications to bind to the connected switch.
   // We need to consult some configuration table to determine this.
   // For now, I'm assuming that all applications bind to every switch.
-  s.bind(app_);
+  // s.bind(app_);
 
   return **i.first;
 }
@@ -34,7 +34,7 @@ Controller::connect(Socket& sock) {
 /// Remove the switch from the set.
 void
 Controller::disconnect(Switch& s) {
-  s.unbind();
+  // s.unbind();
   switches_.erase(&s);
   delete &s;
 }

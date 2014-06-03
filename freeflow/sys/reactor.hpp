@@ -20,12 +20,27 @@
 
 namespace freeflow {
 
+class Reactor;
+
+namespace impl {
+// A helper class for initializing reactor data.
+struct Reactor_init {
+  Reactor_init();
+  ~Reactor_init();
+
+  Reactor* self();
+
+  static void init_signals();
+};
+} // namespace impl
+
 /// The Reactor class implements an event processor that notifies handlers
 /// of resource events and availability, timer expiration, and signals.
 ///
 /// \todo This should probably be renamed Select_reactor and more tightly
 /// coupled with the handler registry.
-class Reactor {
+class Reactor : private impl::Reactor_init {
+  using Signal_queue = std::vector<int>;
 public:
   Reactor();
 
@@ -48,12 +63,16 @@ public:
   void reschedule_timer(Event_handler*, int, Microseconds);
   void cancel_timer(Event_handler*, int);
 
+  // Signal handling
+  void send_signal(int);
+
   // Control
   void run();
   void run(Microseconds);
   void stop();
 
 private:
+  void notify_signal(Resource_set&);
   void notify_select(const Select_set&, Resource_set&);
   void notify_timers(Resource_set&);
   void close_handlers(const Resource_set&);
@@ -71,7 +90,10 @@ private:
   /// The timer list maintains timers that have triggered since an
   /// expiration time. These are kept to prevent unnecessary
   /// reallocations of elements in the list.
-  Timer_list       expired_;  // List of triggered timers
+  Timer_list       expired_;
+
+  /// The signal queue maintains pending signals to the process.
+  Signal_queue     signals_;
 };
 
 } // namesapce freeflow
