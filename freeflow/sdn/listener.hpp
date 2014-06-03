@@ -21,28 +21,34 @@
 
 namespace freeflow {
 
-/// The listener class is is the abstract base class of all Acceptor
-/// instances listening for connections.
-class Listener {
-public:
-  virtual ~Listener();
+class Controller;
 
-  Socket::Trnsport transport() const;
-  const Address& addr() const;
-
-
-protected:
-  Socket* sock_ = nullptr;  // The listening address.
-};
-
-
-/// This class is a helper for listener implementaitons.
+/// The Default_listener_factory is responsible for the allocation of
+/// Services for a given controller.
 template<typename Service>
-  struct Listener_base : Acceptor<Service>, Listener {
-    Listener_base(Reactor& r, const Address&, Socket::Transport, int);
+  struct Default_listener_factory {
+    Default_listener_factory(Controller&);
+
+    Service* operator()(Reactor&, Socket&&) const;
+
+  private:
+    Controller& ctrl_;
+  };
+
+/// A listener is an acceptor bound to a controller. This class is
+/// primarily provided as a convenience, providing an appropriate
+/// default factory and useful constructor.
+///
+/// \todo Consider making this an actual component of the controller
+/// rather than just a trivial wrapper.
+template<typename Service, typename Factory = Default_listener_factory<Service>>
+  struct Listener : Acceptor<Service, Factory> {
+    Listener(Controller& ctrl);
   };
 
 } // namespace freeflow
+
+#include <freeflow/sdn/listener.ipp>
 
 #endif
 
