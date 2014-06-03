@@ -20,16 +20,16 @@
 ##
 ## Synopsis:
 ##
-##    add_shared_library(tgt src)
+##    add_shared_library(tgt args*)
 ##
 ## Arguments:
 ##
 ##    tgt -- The name of the library target
-##    src -- The set of input source files
+##    args -- A sequence of input files
 ##
 ## TODO: Allow the specification of libraries to link against.
 ##
-macro(add_shared_library tgt src libs)
-  add_library(${tgt} SHARED ${src})
+macro(add_shared_library tgt)
+  add_library(${tgt} SHARED ${ARGN})
   set_target_properties(${tgt} PROPERTIES VERSION ${FREEFLOW_VERSION})
 endmacro(add_shared_library)

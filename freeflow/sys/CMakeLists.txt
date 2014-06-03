@@ -77,6 +77,7 @@ endif()
 # --------------------------------------------------------------------------- //
 # Targets
 
+message("??? ${src}")
 add_shared_library(freeflow ${src})
 target_link_libraries(freeflow ${CMAKE_DL_LIBS})
 
