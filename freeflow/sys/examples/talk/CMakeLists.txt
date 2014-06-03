@@ -17,4 +17,6 @@ macro(add_example tgt)
   target_link_libraries(${tgt} freeflow)
 endmacro()
 
-add_example(echo_server, talk_client, talk_server)
+add_example(echo_server 
+            talk_client 
+            talk_server)
