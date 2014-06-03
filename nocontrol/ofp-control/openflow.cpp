@@ -56,6 +56,7 @@ Ofp_handler::on_open() {
 /// machine's destructor are not sent.
 bool 
 Ofp_handler::on_close() {
+  std::cout << "* Close OFP connection\n";
   delete sm_;
   return true; 
 }

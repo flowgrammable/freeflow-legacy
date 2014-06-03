@@ -21,30 +21,6 @@
 
 namespace freeflow {
 
-class Controller;
-
-/// The Default_listener_factory is responsible for the allocation of
-/// Services for a given controller.
-template<typename Service>
-  struct Default_listener_factory {
-    Default_listener_factory(Controller&);
-
-    Service* operator()(Reactor&, Socket&&) const;
-
-  private:
-    Controller& ctrl_;
-  };
-
-/// A listener is an acceptor bound to a controller. This class is
-/// primarily provided as a convenience, providing an appropriate
-/// default factory and useful constructor.
-///
-/// \todo Consider making this an actual component of the controller
-/// rather than just a trivial wrapper.
-template<typename Service, typename Factory = Default_listener_factory<Service>>
-  struct Listener : Acceptor<Service, Factory> {
-    Listener(Controller& ctrl);
-  };
 
 } // namespace freeflow
 

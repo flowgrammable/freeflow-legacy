@@ -46,7 +46,7 @@ private:
 /// The Ofp_acceptor is responsible for accepting connections from
 /// switches and constructing service handlers to manage the OpenFlow
 /// protocol.
-using Ofp_connector = ff::Connector<Ofp_handler>;
+using Ofp_connector = ff::Controller::Connector<Ofp_handler>;
 
 } // namespace nocontrol
 

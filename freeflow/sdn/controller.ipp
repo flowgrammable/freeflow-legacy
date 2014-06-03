@@ -26,16 +26,28 @@ Process::Process(Application* a, Application_library* l)
 
 /// Add a new handler that accepts connections from the specified address,
 /// over the tansport protocol. The templat parameter T designates the
-/// type of listener (and also the type of accepted service). It must be an
-/// instance of the Acceptor template. The created acceptor is managed by
-/// the reactor, and returned to the caller.
+/// type of acceptor (and also the type of accepted service). It must be an
+/// instance of the Controller::Acceptor template. The created acceptor is 
+/// managed by the reactor, and returned to the caller.
 ///
 /// \todo Provide an additional argument for the backlog.
 template<typename T>
   inline void
-  Controller::add_listener(T* h, const Address& a, Socket::Transport t) {
+  Controller::add_acceptor(T* h, const Address& a, Socket::Transport t) {
     h->listen(a, t);
     add_handler(h); // Shouldn't listen auto-register the acceptor?
+  }
+
+/// Add a new connector to the handler. This initiates a connection to
+/// given address over the specified transport. When the connection
+/// is established, a new event handler is registered with the controller.
+///
+/// \todo How do we diagnose async connection failures? Send a callback
+/// to the connector?
+template<typename T>
+  inline void
+  Controller::add_connector(T* h, const Address& a, Socket::Transport t) {
+    h->connect(a, t);
   }
 
 /// Returns true if the library is already loaded.
@@ -112,6 +124,28 @@ Controller::stop(Process* proc) {
   // Remove the process.
   procs_.erase(proc->pos);
 }
+
+
+// -------------------------------------------------------------------------- //
+// Controller components
+
+template<typename S>
+  Controller::Handler_factory<S>::Handler_factory(Controller& c)
+    : ctrl_(c) { }
+
+template<typename S>
+  inline S*
+  Controller::Handler_factory<S>::operator()(Reactor& r, Socket&& s) const {
+    return new S(r, std::move(s), ctrl_);
+  }
+
+template<typename S, typename F>
+  Controller::Acceptor<S, F>::Acceptor(Controller& c)
+    : freeflow::Acceptor<S, F>(c, c) { }
+
+template<typename S, typename F>
+  Controller::Connector<S, F>::Connector(Controller& c)
+    : freeflow::Connector<S, F>(c, c) { }
 
 } // namespace freeflow
 

@@ -26,6 +26,8 @@ template<typename S, typename F>
 /// Start listening for connections on the given address.
 ///
 /// \todo Improve error handling.
+///
+/// \todo Should this auto-register the handler? Maybe...
 template<typename S, typename F>
   inline void
   Acceptor<S, F>::listen(const Address& a, Transport t, int backlog) {

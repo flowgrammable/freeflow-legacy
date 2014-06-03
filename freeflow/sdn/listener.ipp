@@ -14,18 +14,4 @@
 
 namespace freeflow {
 
-template<typename S>
-  Default_listener_factory<S>::Default_listener_factory(Controller& c)
-    : ctrl_(c) { }
-
-template<typename S>
-  inline S*
-  Default_listener_factory<S>::operator()(Reactor& r, Socket&& s) const {
-    return new S(r, std::move(s), ctrl_);
-  }
-
-template<typename S, typename F>
-  Listener<S, F>::Listener(Controller& c)
-    : Acceptor<S, F>(c, c) { }
-
 } // namespace freeflow
