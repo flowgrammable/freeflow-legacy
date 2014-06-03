@@ -272,27 +272,27 @@ Arguments::display_errors(const char* pre) {
         case ENVIRONMENT: {
           errors << "error: environment variable '" 
                  << make_env_var(pre, arg.first) << "' " 
-                 <<  display_err_info(arg.second.get_value()/*.as_error*/) << "\n";
+                 <<  display_err_info(arg.second.get_value().as_error()) << "\n";
           break;
         }
         case CONFIG: {
           errors << "error: argument '" << arg.first << "' from config file " 
-                 << display_err_info(arg.second.get_value()/*.as_error*/) << "\n";
+                 << display_err_info(arg.second.get_value().as_error()) << "\n";
           break;
         }
         case COMMAND_LINE: {
           errors << "error: command-line argument '" << arg.first << "' " 
-                 << display_err_info(arg.second.get_value()/*.as_error*/) << "\n";
+                 << display_err_info(arg.second.get_value().as_error()) << "\n";
           break;
         }
         case FROM_DEFAULT: {
           errors << "error: default argument '" << arg.first << "' " 
-                 << display_err_info(arg.second.get_value()/*.as_error*/) << "\n";
+                 << display_err_info(arg.second.get_value().as_error()) << "\n";
           break;
         }
         case NOT_PROVIDED: {
           errors << "error: argument '" << arg.first << "' " 
-                 <<  display_err_info(arg.second.get_value()/*.as_error*/) << "\n";
+                 <<  display_err_info(arg.second.get_value().as_error()) << "\n";
         }
       }
     }
@@ -301,10 +301,10 @@ Arguments::display_errors(const char* pre) {
 }
 
 inline std::string
-display_err_info(const json::Value& v/*json::Error& e*/) { 
+display_err_info(const freeflow::Error& e) { 
   // return error-specific string
   std::string error_msg = "";
-  switch (v.data_.e.code()) {
+  switch (e.code()) {
     case json::TYPE_ERROR: {
       error_msg = "has invalid type";
       break;

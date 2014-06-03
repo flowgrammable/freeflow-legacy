@@ -101,7 +101,7 @@ main(int argc, char* argv[]) {
   // Initialize the parse state
   Parse_state ps(argc, 1, argv);
   if (ps.argc == 1) {
-    std::cerr << "error: a port number must be provided\nusage: ./echo -port=<PORT> or ./echo --p=<PORT>";
+    std::cerr << "error: a port number must be provided\n";
     return -1;
   }
 
@@ -120,20 +120,17 @@ main(int argc, char* argv[]) {
 
   if (!success){ 
     program_args.display_errors(prefix);
+    return -1;
   }
 
   // Make sure no commands or positional arguments were provided
   if (ps.current != ps.argc) {
-    std::cerr << "error: \n";
+    std::cerr << "error: invalid argument provided\n";
     return -1;
   }
 
-
-  if (argc < 2) {
-    std::cerr << "usage: ./echo port\n";
-    return -1;
-  }
-  Ip_port p = atoi(argv[1]);
+  // At this point we know the port was provided and nothing else
+  Ip_port p = program_args.get_named_value("port");
 
   // Create the reactor.
   Reactor r;
