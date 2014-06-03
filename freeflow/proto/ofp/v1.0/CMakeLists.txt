@@ -22,21 +22,24 @@ set(src port.cpp
         stats.cpp 
         message.cpp)
 
-set(hdr message.hpp 
-        message.ipp
-        port.hpp
-        port.ipp
-        queue.hpp
-        queue.ipp
-        match.hpp
-        match.ipp
-        action.hpp
-        action.ipp)
+set(hdr error.hpp
+        message.hpp message.ipp
+        port.hpp    port.ipp
+        queue.hpp   queue.ipp
+        match.hpp   match.ipp
+        action.hpp  action.ipp)
 
-add_library(freeflow-ofp-1.0 ${src})
+
+# ---------------------------------------------------------------------------- #
+# Build
+
+add_shared_library(freeflow-ofp-1.0 ${src})
+target_link_libraries(freeflow-ofp-1.0 freeflow)
+
 
 # ---------------------------------------------------------------------------- #
 # Installation
 
+install(TARGETS freeflow-ofp-1.0 LIBRARY DESTINATION lib)
 install(FILES ${hdr} DESTINATION include/freeflow/proto/ofp/v1.0)
 
