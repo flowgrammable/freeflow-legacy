@@ -130,7 +130,7 @@ main(int argc, char* argv[]) {
   }
 
   // At this point we know the port was provided and nothing else
-  Ip_port p = program_args.get_named_value("port");
+  Ip_port p = program_args.get_named_value("port").as_int();
   
   // Create the reactor.
   Reactor r;
