@@ -41,7 +41,7 @@ to_upper(const std::string& str) { return to_upper(str.c_str()); }
 /// prefix and parameter name.
 inline std::string
 make_env_var(const std::string& pre, const std::string& parm) {
-  return pre + "_" + to_upper(parm);
+  return to_upper(pre) + "_" + to_upper(parm);
 }
 
 // -------------------------------------------------------------------------- //
@@ -264,47 +264,40 @@ Arguments::has_named(const std::string& n) {
 }
 
 inline void
-Arguments::display_errors(const Command& cmd, const char* pre) {
-#if 0
+Arguments::display_errors(const char* pre) {
   std::stringstream errors;
-  std::stringstream warnings;
-  for (auto arg : named_) {
-    if(!cmd.parameters.count(arg.first) and get_initial(arg.first).from_cl()) {
-      warnings << "warning: command-line argument '" << arg.first
-               << "' is not accepted for this command and will be ignored\n";
-    }
-    else if (arg.second.type() == json::Value::ERROR) {
-      switch (get_initial(arg.first).get_source()) {
+  for (const auto & arg : named_) {
+    if (arg.second.get_value().type() == json::Value::ERROR) {
+      switch (arg.second.get_source()) {
         case ENVIRONMENT: {
           errors << "error: environment variable '" 
                  << make_env_var(pre, arg.first) << "' " 
-                 <<  display_err_info(arg.second/*.as_error*/) << "\n";
+                 <<  display_err_info(arg.second.get_value()/*.as_error*/) << "\n";
           break;
         }
         case CONFIG: {
           errors << "error: argument '" << arg.first << "' from config file " 
-                 << display_err_info(arg.second/*.as_error*/) << "\n";
+                 << display_err_info(arg.second.get_value()/*.as_error*/) << "\n";
           break;
         }
         case COMMAND_LINE: {
           errors << "error: command-line argument '" << arg.first << "' " 
-                 << display_err_info(arg.second/*.as_error*/) << "\n";
+                 << display_err_info(arg.second.get_value()/*.as_error*/) << "\n";
           break;
         }
         case FROM_DEFAULT: {
           errors << "error: default argument '" << arg.first << "' " 
-                 << display_err_info(arg.second/*.as_error*/) << "\n";
+                 << display_err_info(arg.second.get_value()/*.as_error*/) << "\n";
           break;
         }
         case NOT_PROVIDED: {
           errors << "error: argument '" << arg.first << "' " 
-                 <<  display_err_info(arg.second/*.as_error*/) << "\n";
+                 <<  display_err_info(arg.second.get_value()/*.as_error*/) << "\n";
         }
       }
     }
   }
-  std::cerr << warnings.str() << errors.str();
-#endif
+  std::cerr << errors.str();
 }
 
 inline std::string
@@ -385,21 +378,21 @@ Arguments::get_listed_size() const {
 
 inline json::Value 
 Null_typed::operator()(const json::Value& s) const {
-  // if (s == "null")
-  //   return {};
-  // else
-  //   return Error(json::TYPE_ERROR, 0);
+  if (s == "null" or s=="")
+    return {};
+  else
+    return Error(json::TYPE_ERROR, 0);
   return {};
 }
 
 inline json::Value 
 Bool_typed::operator()(const json::Value& s) const {
-  // if (s == "true")
-  //   return true;
-  // else if (s == "false")
-  //   return false;
-  // else 
-  //   return Error(json::TYPE_ERROR, 0);
+  if (s == "true")
+    return true;
+  else if (s == "false")
+    return false;
+  else 
+    return Error(json::TYPE_ERROR, 0);
   return {};
 }
 
