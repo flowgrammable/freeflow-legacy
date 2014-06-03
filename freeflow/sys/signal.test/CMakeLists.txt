@@ -1,4 +1,4 @@
-# Copyright (c) 2013-2014 Flowgrammable, LLC.
+# Copyright (c) 2013-2014 Flowgrammable.org
 # 
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,18 +12,6 @@
 # or implied. See the License for the specific language governing
 # permissions and limitations under the License.
 
-set(src domain.cpp
-        controller.cpp
-        switch.cpp
-        application.cpp
-        request.cpp)
+set(libs freeflow)
 
-set(hdr domain.hpp      domain.ipp
-        controller.hpp  controller.ipp
-        switch.hpp      switch.ipp
-        application.hpp application.ipp
-        request.hpp     request.ipp)
-
-add_library(freeflow-sdn SHARED ${src})
-
-add_subdirectory(application.test)
+add_unit_test(sys_signal signal.cpp ${libs})

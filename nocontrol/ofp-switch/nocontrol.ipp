@@ -12,27 +12,14 @@
 // or implied. See the License for the specific language governing
 // permissions and limitations under the License.
 
-#include <iostream>
+namespace nocontrol {
 
-#include "noflow.hpp"
+/// Initialize the event handler.
+///
+/// \todo Pre-allocate 1 page worth memory.
+inline
+Ncp_handler::Ncp_handler(ff::Reactor& r, ff::Socket&& s, ff::Controller& c)
+  : ff::Socket_handler(r, ff::READ_EVENTS, std::move(s)), ctrl_(c), buf_(4096)
+{ }
 
-/// The application factory.
-static Factory factory_;
-
-extern "C" void*
-factory() { return &factory_; }
-
-ff::Application* 
-Factory::create(ff::Controller& c) { return new Noflow(c); }
-
-void 
-Factory::destroy(ff::Application* a) { delete a; }
-
-/// \todo Dynamically configure the application so that it can terminate
-/// on different phases.
-Noflow::Noflow(ff::Controller& c)
-  : ff::Application(c) 
-{ 
-  std::cout << "starting noflow\n";
-}
-
+} // namesapce nocontrol

@@ -24,23 +24,17 @@ namespace ff = freeflow;
 class Factory;
 class Noflow;
 
-/// The noflow 
+/// The Noflow application is a diagnostic tool used to echo events
+/// sent from a swith.
 class Noflow : public ff::Application {
-  enum Stop { ON_BIND, ON_VERSION, ON_FEATURE };
 public:
-  void load(ff::Controller&);
-  void bind(ff::Switch&);
-  void version_known(ff::Switch&);
-  void features_known(ff::Switch&);
-
-private:
-  Stop stop_ = ON_BIND; // The stopping point.
+  Noflow(ff::Controller&);
 };
 
 
-/// Create instances of the noflow application.
+/// Create instances of the Noflow application.
 class Factory : public ff::Application_factory {
-  ff::Application* construct();
+  ff::Application* create(ff::Controller&);
   void destroy(ff::Application*);
 };
 

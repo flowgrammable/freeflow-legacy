@@ -12,18 +12,13 @@
 # or implied. See the License for the specific language governing
 # permissions and limitations under the License.
 
-set(src domain.cpp
-        controller.cpp
-        switch.cpp
-        application.cpp
-        request.cpp)
+include_directories(${CMAKE_SOURCE_DIR})
 
-set(hdr domain.hpp      domain.ipp
-        controller.hpp  controller.ipp
-        switch.hpp      switch.ipp
-        application.hpp application.ipp
-        request.hpp     request.ipp)
+set(src main.cpp 
+        nocontrol.cpp
+        openflow.cpp)
 
-add_library(freeflow-sdn SHARED ${src})
+set(libs freeflow freeflow-ofp freeflow-ofp-1.0 freeflow-sdn)
 
-add_subdirectory(application.test)
+add_executable(ofp-switch ${src})
+target_link_libraries(ofp-switch ${libs} dl)

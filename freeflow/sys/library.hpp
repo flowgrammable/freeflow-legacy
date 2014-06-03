@@ -17,6 +17,7 @@
 
 #include <dlfcn.h>
 
+#include <iostream>
 #include <stdexcept>
 
 #include <freeflow/sys/path.hpp>
@@ -35,6 +36,8 @@ namespace freeflow {
 ///
 /// The primray purpose of this class is to provide facilities for
 /// implemnting plugin loaders.
+///
+/// \todo Make this non-copyable and non-movable.
 class Library {
 public:  
   Library(const Path&);

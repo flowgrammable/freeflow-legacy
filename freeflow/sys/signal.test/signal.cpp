@@ -12,10 +12,23 @@
 // or implied. See the License for the specific language governing
 // permissions and limitations under the License.
 
-namespace nocontrol {
+#include <iostream>
 
-inline
-Control_factory::Control_factory(ff::Controller& c)
-  : ctrl(c) { }
+#include <freeflow/sys/signal.hpp>
 
-} // namesapce nocontrol
+using namespace freeflow;
+
+// FIXME: This could be better.
+
+void on_interrupt(int) {
+  std::cout << "signal: interrupt!\n";
+  exit(0);
+}
+
+int main() { 
+  Signal_action act = on_interrupt;
+  act.install(SIGINT);
+
+  // Loop until we get a SIGINT.
+  while (true) ;
+}

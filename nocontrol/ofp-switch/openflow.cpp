@@ -14,25 +14,38 @@
 
 #include <iostream>
 
-#include "noflow.hpp"
+#include <freeflow/sys/buffer.hpp>
+#include <freeflow/proto/ofp/ofp.hpp>
 
-/// The application factory.
-static Factory factory_;
+#include "openflow.hpp"
 
-extern "C" void*
-factory() { return &factory_; }
+using namespace freeflow;
 
-ff::Application* 
-Factory::create(ff::Controller& c) { return new Noflow(c); }
+namespace nocontrol {
 
-void 
-Factory::destroy(ff::Application* a) { delete a; }
+/// Create a state machine and initiate version negotiation. 
 
-/// \todo Dynamically configure the application so that it can terminate
-/// on different phases.
-Noflow::Noflow(ff::Controller& c)
-  : ff::Application(c) 
-{ 
-  std::cout << "starting noflow\n";
+bool
+Ofp_handler::on_open() {
+  std::cout << "* OFP switch connected\n";
+  return true;
 }
+
+bool 
+Ofp_handler::on_close() {
+  return true; 
+}
+
+bool
+Ofp_handler::on_read() {
+  return true;
+}
+
+/// When a timeout occurs, notify the protocol of the expired timer.
+bool
+Ofp_handler::on_time(int t) {
+  return true;
+}
+
+} // namespace nocontrol
 

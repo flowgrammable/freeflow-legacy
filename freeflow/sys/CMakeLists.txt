@@ -49,7 +49,7 @@ set(hdr fd_utils.hpp
         data.hpp
         error.hpp     error.ipp
         time.hpp      time.ipp
-        signal.hpp
+        signal.hpp    signal.ipp
         path.hpp
         resoource.hpp resource.ipp
         file.hpp      file.ipp
@@ -92,6 +92,7 @@ add_subdirectory(examples)
 # --------------------------------------------------------------------------- //
 # Testing
 add_subdirectory(data.test)
+add_subdirectory(signal.test)
 add_subdirectory(socket.test)
 add_subdirectory(reactor.test)
 add_subdirectory(acceptor.test)
