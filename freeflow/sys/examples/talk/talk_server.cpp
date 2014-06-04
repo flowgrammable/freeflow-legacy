@@ -29,12 +29,13 @@ using namespace cli;
 struct Talk_server : Socket_handler {
   Talk_server(Reactor&, Socket&&);
 
-  // bool on_open();
-  // bool on_close();
+  bool on_open();
+  bool on_close();
   bool on_read();
 
+  void send_all(const int&);
   std::ostream& log();
-
+  std::list<Socket*> clients;
   Buffer buf;
 };
 
@@ -43,17 +44,19 @@ Talk_server::Talk_server(Reactor& r, Socket&& s)
   : Socket_handler(r, READ_EVENTS, move(s)) 
   , buf(2048) { }
 
-// bool
-// Talk_server::on_open() {
-//   log() << "connected\n";
-//   return true;
-// }
+bool
+Talk_server::on_open() {
+  std::cout << "connected " <<  bracket(rc().peer) << "\n";
+  clients.push_back(&rc());
+  return true;
+}
 
-// bool
-// Talk_server::on_close() { 
-//   log() << "disconnected\n";
-//   return true;
-// }
+bool
+Talk_server::on_close() { 
+  std::cout << "disconnected " << bracket(rc().peer) << "\n";
+  clients.remove(&rc());
+  return true;
+}
 
 bool
 Talk_server::on_read() { 
@@ -77,6 +80,8 @@ Talk_server::on_read() {
   log() << buf.data();
   if (buf[n-1] != '\n')
     std::cout << '\n';
+
+  send_all(n);
   
   return true;
 }
@@ -86,30 +91,40 @@ Talk_server::log() {
   return std::cout << bracket(rc().peer) << ' ';
 }
 
-struct Talk_server_acceptor : Socket_handler {
-  Talk_server_acceptor(Reactor& r, const Address& a)
-    : Socket_handler(r, READ_EVENTS, Socket::IP4, Socket::TCP) 
-  { 
-    if (Trap err = rc().bind(a))
-      throw System_error(err.code());
-    if (Trap err = listen(rc()))
-      throw System_error(err.code());
+void
+Talk_server::send_all(const int& n) {
+  for (const auto& s : clients) {
+    send(*s, &buf[0], n);
   }
+}
 
-  // Acccept a connection and spin up a new service.
-  bool on_read() {
-    Socket s = accept(rc());
-    std::cout << "* accepted connection\n";
+// struct Talk_server_acceptor : Socket_handler {
+//   Talk_server_acceptor(Reactor& r, const Address& a)
+//     : Socket_handler(r, READ_EVENTS, Socket::IP4, Socket::TCP) 
+//   { 
+//     if (Trap err = rc().bind(a))
+//       throw System_error(err.code());
+//     if (Trap err = listen(rc()))
+//       throw System_error(err.code());
+//   }
 
-    reactor().new_handler<Talk_server>(std::move(s));
+//   // Acccept a connection and spin up a new service.
+//   bool on_read() {
+//     Socket s = accept(rc());
+//     std::cout << "* accepted connection\n";
 
-    return true;
-  }
-};
+//     reactor().new_handler<Talk_server>(std::move(s));
+
+//     return true;
+//   }
+// };
+
+using Talk_acceptor = Acceptor<Talk_server>;
 
 int 
 main(int argc, char* argv[]) {
-  bool success = true;
+  const char* prefix = "flog";
+
   Parameters parms;
   parms.declare("port, p", cli::Int_typed(), cli::REQUIRED, "The port of the talk server");
 
@@ -120,26 +135,19 @@ main(int argc, char* argv[]) {
     return -1;
   }
 
-  // Initialize the program arguments
+  // Parse for program options
   cli::Arguments program_args;
-
-  // Parse the environment for program options
-  const char* prefix = "flog";
   parse_env(parms, program_args, prefix);
-
-  // Parse the command-line for program options
   parse_keyword_args(parms, program_args, ps);
 
   // Check program args
-  success &= check_args(parms, program_args);
-
-  if (!success){ 
+  if (not check_args(parms, program_args)) { 
     program_args.display_errors(prefix);
     return -1;
   }
 
   // Make sure no commands or positional arguments were provided
-  if (ps.current != ps.argc) {
+  if (ps.current > 2) {
     std::cerr << "error: invalid argument provided\n";
     return -1;
   }
@@ -151,10 +159,11 @@ main(int argc, char* argv[]) {
   Reactor r;
   
   // Create and configure the reactor.
-  Talk_server_acceptor a(r, Address(Ipv4_addr::any, p));
+  Talk_acceptor a(r);
+  a.listen(Address(Ipv4_addr::any, p), Socket::TCP);
 
   // Add the acceptor.
   r.add_handler(&a);
 
-  //r.run();
+  r.run();
 }

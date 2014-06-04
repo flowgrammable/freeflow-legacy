@@ -106,7 +106,7 @@ main(int argc, char* argv[]) {
     return -1;
   }
 
-  // Parse the environment for program options
+  // Parse for program options
   cli::Arguments program_args;
   parse_env(parms, program_args, prefix);
   parse_args(parms, program_args, ps);
@@ -118,7 +118,7 @@ main(int argc, char* argv[]) {
   }
 
   // Make sure no commands or positional arguments were provided
-  if (ps.current != ps.argc) {
+  if (ps.current > 2) {
     std::cerr << "error: invalid argument provided\n";
     return -1;
   }
