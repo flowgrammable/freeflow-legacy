@@ -94,7 +94,8 @@ using Echo_acceptor = Acceptor<Echo_server>;
 
 int 
 main(int argc, char* argv[]) {
-  bool success = true;
+  const char* prefix = "flog";
+  
   Parameters parms;
   parms.declare("port, p", cli::Int_typed(), cli::REQUIRED, "The port of the echo server");
 
@@ -105,20 +106,13 @@ main(int argc, char* argv[]) {
     return -1;
   }
 
-  // Initialize the program arguments
-  cli::Arguments program_args;
-
   // Parse the environment for program options
-  const char* prefix = "flog";
+  cli::Arguments program_args;
   parse_env(parms, program_args, prefix);
-
-  // Parse the command-line for program options
-  parse_keyword_args(parms, program_args, ps);
+  parse_args(parms, program_args, ps);
 
   // Check program args
-  success &= check_args(parms, program_args);
-
-  if (!success){ 
+  if (not check_args(parms, program_args)) {
     program_args.display_errors(prefix);
     return -1;
   }
