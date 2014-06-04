@@ -38,4 +38,15 @@ main(int argc, char* argv[]) {
 
   json::Value v5 = std::string("hello");
   assert(v5.type() == json::Value::STRING);
+  
+  json::Value v6 = {1, 2, 3};
+  assert(v6.type() == json::Value::ARRAY);
+  
+  json::Value v7 = {
+    {"myBool", true},
+    {"myInt", 5},
+    {"myString", "hello"}
+  };
+  
+  assert(v7.type() == json::Value::OBJECT);
 }

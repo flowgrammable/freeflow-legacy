@@ -20,6 +20,8 @@
 #include <map>
 #include <vector>
 
+#include <typeinfo>
+
 #include <freeflow/sys/data.hpp>
 #include <freeflow/sys/error.hpp>
 
@@ -106,6 +108,9 @@ public:
       ERROR
   };
 
+  struct Array_tag { };
+  struct Object_tag { };
+
   union Data {
     Data() : n() { }
     Data(Null n) : n(n) { }
@@ -119,6 +124,15 @@ public:
     Data(Object&& o) : o(std::move(o)) { }
     Data(const Object& o) : o(o) { }
     Data(Error e) : e(e) { }
+
+    template<typename T>
+      Data(Object_tag, std::initializer_list<std::pair<T, Value>> l)
+        : o(l.begin(), l.end()) { }
+    
+    template<typename T>
+      Data(Array_tag, std::initializer_list<T> l)
+        : a(l.begin(), l.end()) { }
+
     ~Data() { }
 
     Null   n;
@@ -145,8 +159,12 @@ public:
   Value(Null);
   Value(std::nullptr_t);
   Value(Bool);
+  
+  // FIXME: This should be a template taking only integral
+  // (but not bool) types.
   Value(int);
   Value(Int);
+  
   Value(Real);
   Value(const char*);
   Value(std::string&&);
@@ -157,6 +175,14 @@ public:
   Value(const Array&);
   Value(Object&&);
   Value(const Object&);
+
+  Value(std::initializer_list<std::pair<std::string, Value>> l)
+    : type_(OBJECT), data_(Object_tag(), l) { }
+
+  template<typename T>
+  Value(std::initializer_list<T> l)
+    : type_(ARRAY), data_(Array_tag(), l) { }
+
   Value(Error);
 
   ~Value();
@@ -183,7 +209,7 @@ public:
   
   Object&       as_object();
   const Object& as_object() const;
-
+  
   Error&       as_error();
   const Error& as_error() const;
   
@@ -200,10 +226,6 @@ public:
   Type type_;
   Data data_;
 };
-
-// Equality comparison
-bool operator==(const Value&, const Value&);
-bool operator!=(const Value&, const Value&);
 
 // JSON parsing.
 Value parse(File&);
@@ -224,3 +246,4 @@ template<typename C, typename T>
 #include <freeflow/sys/json.ipp>
 
 #endif
+
