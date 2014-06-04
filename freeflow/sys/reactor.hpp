@@ -64,6 +64,7 @@ public:
   void cancel_timer(Event_handler*, int);
 
   // Signal handling
+  void handle_signal(int);
   void send_signal(int);
 
   // Control
