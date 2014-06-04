@@ -89,17 +89,15 @@ Connection::on_read() {
     std::cout << '\n';
 
   // Send the message to all clients
-  for (const auto& s : clients) {
+  for (const auto& s : clients)
     send(*s, &buf[0], n);
-  }
   
   return true;
 }
 
 std::ostream&
-Connection::log() {
-  return std::cout << bracket(rc().peer) << ' ';
-}
+Connection::log() { return std::cout << bracket(rc().peer) << ' '; }
+
 
 using Talk_acceptor = Acceptor<Connection>;
 
