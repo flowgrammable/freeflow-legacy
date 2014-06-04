@@ -31,7 +31,7 @@ Error::Error(Code c, Data d)
 /// Allows contextual conversion to bool, returning true if and only
 /// if there is no error (i.e., the underlying code has value 0).
 inline
-Error::operator bool() const { return (bool)code_; }
+Error::operator bool() const { return !code_; }
 
 /// Returns the error category.
 inline const Error_category&
@@ -85,9 +85,9 @@ Trap::Trap(Error e)
   : err_(e) { }
 
 /// Allows contextual conversion to bool, returning true if and only if
-/// the underlying error indicates failure.
+/// the underlying error does not indicate success.
 inline 
-Trap::operator bool() const { return !err_; }
+Trap::operator bool() const { return (bool)err_.code(); }
 
 /// Returns the underlying error.
 inline Error
