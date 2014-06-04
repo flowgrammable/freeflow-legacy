@@ -14,12 +14,97 @@
 
 namespace freeflow {
 
-/// \todo Improve error handling.
-template<typename S>
+namespace impl {
+// Put the socket into non-blocking mode for the lifetime of this object.
+// The socket is returned to blocking mode when the objects lifetime ends.
+struct Nonblocking_socket_guard {
+  Nonblocking_socket_guard(Socket& s) : s(s) { s.set_nonblocking(); }
+  ~Nonblocking_socket_guard() { s.set_blocking(); }
+  Socket& s;
+};
+} // namespace impl
+
+// -------------------------------------------------------------------------- //
+// Connection handler
+
+/// On initialization, initiate an asynchronous connection request.
+/// If an error occurs, an exception is thrown.
+///
+/// Note that apparentl;y a non-blocking connect receive notifications on 
+/// read, write, and except channels. The connection is valid iff a
+/// write notification is signaled first.
+template<typename H, typename F>
   inline
-  Connector<S>::Connector(Reactor& r)
-    : Socket_handler(r, WRITE_EVENTS) , eh_(nullptr)
-  { }
+  Connection_handler<H, F>::Connection_handler(Reactor& r, 
+                                               F& f,
+                                               const Address& a,
+                                               Transport t)
+    : Socket_handler(r, READ_EVENTS | WRITE_EVENTS | EXCEPT_EVENTS, a.family(), t)
+    , factory_(f), connect_(false)
+  { 
+    impl::Nonblocking_socket_guard g(rc()); // Enter non-blocking mode
+
+    // Inititate an asynchronous connect.
+    // FIXME: Error handling.
+    System_result res = rc().connect(a);
+    if (res.failed())
+      throw std::runtime_error(strerror(errno));
+  }
+
+/// The close handler is called when 
+template<typename H, typename F>
+  inline bool
+  Connection_handler<H, F>::on_close() {
+    // Create the new handler and register it with the reactor.
+    H* h = factory_(reactor(), std::move(rc()));
+    reactor().new_handler(h);
+
+    // Delete the intermediate event handler.
+    delete this;    
+    return true;
+  }
+
+/// Received when an error occurs during connection. This returns
+/// false, causing the handler to be removed from the reactor.
+template<typename H, typename F>
+  inline bool
+  Connection_handler<H, F>::on_read() { return failed(); }
+
+/// Received when a a connection is ready. This returns false, causing 
+/// the handler to be removed from the reactor. Note that the actual
+///
+/// \todo Check the SO_ERROR socket option for failure. Note that this
+/// may not be portable.
+template<typename H, typename F>
+  inline bool
+  Connection_handler<H, F>::on_write() { return succeeded(); }
+
+/// Received when an error occurs during connection. This returns
+/// false, causing the handler to be removed from the reactor.
+template<typename H, typename F>
+  inline bool
+  Connection_handler<H, F>::on_except() { return failed(); }
+
+
+// Sets the connection state to true and returns false.
+template<typename H, typename F>
+  inline bool
+  Connection_handler<H, F>::succeeded() { return not (connect_ = true); }
+
+// Sets the connection state to false and returns false.
+template<typename H, typename F>
+  inline bool
+  Connection_handler<H, F>::failed() { return (connect_ = false); }
+
+
+// -------------------------------------------------------------------------- //
+// Connector
+
+/// Initialize the connector
+template<typename H, typename F>
+  template<typename... Args>
+    Connector<H, F>::Connector(Reactor& r, Args&&... args)
+      : reactor_(r), factory_(std::forward<Args>(args)...) { }
 
 /// Initiate an asynchronous connection. When connection occurs, transfer
 /// event handling responsibility to the given handler. 
@@ -30,66 +115,21 @@ template<typename S>
 /// to the corresponding event handler.
 ///
 /// \todo Improve error handling.
-template<typename S>
-  inline void
-  Connector<S>::connect(S* h, const Address& a, Transport t) {
-    assert(not rc());
-    assert(not eh_);
+template<typename H, typename F>
+  inline bool
+  Connector<H, F>::connect(const Address& a, Transport t) {
+    // Create the handler, initiating the non-blocking connect.
+    Impl* h = nullptr;
+    try {
+      h = new Impl(reactor_, factory_, a, t);
+    } catch(...) {
+      delete h;
+      return false;
+    }
 
-    // Save the event handler.
-    eh_ = h;
-
-    // Initialize the socket. This will throw if there is an error.
-    assign(Socket(a.family(), t));
-    rc().set_nonblocking();
-
-    // Initiate the asynchronous connection.
-    System_result res = rc().connect(a);
-    if (res.failed())
-      throw std::runtime_error(strerror(errno));
-
-    // Return the socket to a blocking state for subsequent operations.
-    rc().set_blocking();
-
-    // Register the connector with the handler so that it can 
-    // receive the connection notification.
-    reactor().add_handler(this);
-  }
-
-/// Try to establish a connection to the given address using the specified
-/// transport protocol. After connection has completed, the event handler
-/// is added to the connector's reactor.
-///
-/// Note that immediate connection does not rely on the reactor to determine
-/// if the connection has completed.
-template<typename S>
-  inline void
-  Connector<S>::connect_now(S* h, const Address& a, Transport t) {
-    // Initialize the socket and initiate the connection.
-    Socket s(a.family(), t);
-    System_result res = s.connect(a);
-    if (res.failed())
-      throw std::runtime_error(strerror(errno));
-
-    h->assign(std::move(s));
-    reactor().add_handler(h);
-  }
-
-/// Called when the connection has completed or failed. This is only called
-/// if the connection was initiated in an asynchronous manner.
-template<typename S>
-  inline bool 
-  Connector<S>::on_write() {
-    // FIXME: Actually check that the connection succeeded!
-
-    // Transfer control of the connector the given service.
-    reactor().remove_handler(this);
-    eh_->assign(std::move(rc()));
-    reactor().add_handler(eh_);
-
-    // Reset the connector.
-    // FIXME: Is this sufficient for reset?
-    eh_ = nullptr;
+    // Add the handler to the reactor. Note that the handler will
+    // manage its own deletion.
+    reactor_.add_handler(h);
     return true;
   }
 

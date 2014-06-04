@@ -14,14 +14,12 @@
 
 set(src domain.cpp
         controller.cpp
-        listener.cpp
         switch.cpp
         application.cpp
         request.cpp)
 
 set(hdr domain.hpp      domain.ipp
         controller.hpp  controller.ipp
-        listener.hpp    listener.ipp
         switch.hpp      switch.ipp
         application.hpp application.ipp
         request.hpp     request.ipp)

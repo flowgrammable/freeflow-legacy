@@ -62,23 +62,18 @@ main(int argc, char* argv[]) {
   // the configuration (files, command line, etc).
   constexpr ff::Socket::Transport tcp = ff::Socket::TCP;
   Address ofp_addr {Ipv4_addr::any, 9000};
-  Address ncp_addr {Ipv4_addr::any, 9001};
+  // Address ncp_addr {Ipv4_addr::any, 9001};
 
-  Ncp_listener ncp(c);
-  c.add_listener(&ncp, ncp_addr, tcp);
+  // Ncp_acceptor ncp(c);
+  // c.add_acceptor(&ncp, ncp_addr, tcp);
   
-  // Ofp_handler ofp;
-  // Ofp_connector ofpc(c);
-  // c.add_connector(&ofp, ofp_addr, tcp);
+  Ofp_connector ofp(c);
+  c.add_connector(&ofp, ofp_addr, tcp);
 
   // Add the signal handler
   Signal_handler sh(c);
   c.add_handler(&sh);
 
-  // Load some default applications
-  c.start("flog_noflow.app");
-  c.start("flog_noflow.app"); // Yes, I'm loading this twice.
-  
   c.run();
 
   return 0;

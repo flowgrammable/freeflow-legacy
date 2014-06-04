@@ -52,15 +52,16 @@ void
 Handler_registry::remove(Event_handler* h) {
   assert(reg_[h->fd()] == h);
 
-  // Notify the handler that it will soon be inactive.
-  h->on_close();
-  
   // Update internal tables based on the handler's current subscriptions,
   // but do not modfiy the handler.
   on_unsubscribe(h);
   
   // Remove the handler.
   reg_[h->fd()] = nullptr;
+
+  // Notify the handler that it will soon be inactive. Be sure to do
+  // this last because the handler could delete itself.
+  h->on_close();
 }
 
 /// Update the handler's event mask by registering it to receive
