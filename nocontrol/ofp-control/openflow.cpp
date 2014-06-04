@@ -46,7 +46,8 @@ Ofp_handler::on_open() {
   // that sm_ will be a base-class pointer in the not-so-distant future.
   //
   // FIXME: Error handling. Merge Alexander's changes ASAP.
-  sm_->send_hello();
+  if (Trap err = sm_->send_hello())
+    return false;
   state_ = VERSION;
 
   return true;
