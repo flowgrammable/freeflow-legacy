@@ -20,8 +20,8 @@
 using namespace std;
 using namespace freeflow;
 
-Error expect_success() { return Error::SUCCESS; }
-Error expect_failure() { return Error::FAILURE; }
+Error expect_success() { return {}; }
+Error expect_failure() { return make_error_code(errc::operation_not_supported); }
 
 int 
 main(int argc, char* argv[]) {

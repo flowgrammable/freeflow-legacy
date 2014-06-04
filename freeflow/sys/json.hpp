@@ -20,6 +20,8 @@
 #include <map>
 #include <vector>
 
+#include <typeinfo>
+
 #include <freeflow/sys/data.hpp>
 #include <freeflow/sys/error.hpp>
 
@@ -78,6 +80,18 @@ using Object = std::map<String, Value>;
 /// Objects.
 using Pair = std::pair<String, Value>;
 
+/// The errc enumeration lists error codes for the JSON module.
+enum class errc {
+  SUCCESS,
+  PARSE_ERROR,
+  TYPE_ERROR,
+  VALUE_ERROR,
+  REQUIRED_VALUE
+};
+
+const std::error_category& error_category();
+std::error_code make_error_code(errc);
+
 
 /// The value class represents an abstract JSON value. It is one of the
 /// types specified above.
@@ -85,14 +99,6 @@ using Pair = std::pair<String, Value>;
 /// \todo The set of values can be readily extended with new literal types.
 /// For example, it might be useful to include ipv4 and ipv6 addresses,
 /// hex literals, or binary literals as new kinds of values.
-
-enum Error_code {
-  TYPE_ERROR,
-  PARSE_ERROR,
-  REQUIRED_ERROR,
-  VALUE_ERROR
-};
-
 class Value {
 public:
   enum Type {
@@ -105,6 +111,9 @@ public:
       OBJECT,
       ERROR
   };
+
+  struct Array_tag { };
+  struct Object_tag { };
 
   union Data {
     Data() : n() { }
@@ -119,6 +128,15 @@ public:
     Data(Object&& o) : o(std::move(o)) { }
     Data(const Object& o) : o(o) { }
     Data(Error e) : e(e) { }
+
+    template<typename T>
+      Data(Object_tag, std::initializer_list<std::pair<T, Value>> l)
+        : o(l.begin(), l.end()) { }
+    
+    template<typename T>
+      Data(Array_tag, std::initializer_list<T> l)
+        : a(l.begin(), l.end()) { }
+
     ~Data() { }
 
     Null   n;
@@ -145,8 +163,12 @@ public:
   Value(Null);
   Value(std::nullptr_t);
   Value(Bool);
+  
+  // FIXME: This should be a template taking only integral
+  // (but not bool) types.
   Value(int);
   Value(Int);
+  
   Value(Real);
   Value(const char*);
   Value(std::string&&);
@@ -157,6 +179,14 @@ public:
   Value(const Array&);
   Value(Object&&);
   Value(const Object&);
+
+  Value(std::initializer_list<std::pair<std::string, Value>> l)
+    : type_(OBJECT), data_(Object_tag(), l) { }
+
+  template<typename T>
+  Value(std::initializer_list<T> l)
+    : type_(ARRAY), data_(Array_tag(), l) { }
+
   Value(Error);
 
   ~Value();
@@ -183,7 +213,7 @@ public:
   
   Object&       as_object();
   const Object& as_object() const;
-
+  
   Error&       as_error();
   const Error& as_error() const;
   
@@ -200,10 +230,6 @@ private:
   Type type_;
   Data data_;
 };
-
-// Equality comparison
-bool operator==(const Value&, const Value&);
-bool operator!=(const Value&, const Value&);
 
 // JSON parsing.
 Value parse(File&);
@@ -224,3 +250,4 @@ template<typename C, typename T>
 #include <freeflow/sys/json.ipp>
 
 #endif
+

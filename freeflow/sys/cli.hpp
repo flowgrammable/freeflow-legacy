@@ -324,7 +324,7 @@ bool parse(const Parameters&,
            char*[], 
            const char*);
 
-inline std::string display_err_info(const freeflow::Error&);
+inline std::string display_err_info(const json::Value&);
 
 } // namespace cli
 } // namespace freeflow

@@ -21,7 +21,7 @@ namespace v1_0 {
 using ofp::to_view;
 using ofp::from_view;
 
-Errc
+Error
 to_view(View& v, const Port& p) {
   to_view(v, p.port_id);
   to_view(v, p.hw_addr);
@@ -36,7 +36,7 @@ to_view(View& v, const Port& p) {
 }
 
 
-Errc
+Error
 from_view(View& v, Port& p) {
   from_view(v, p.port_id);
   from_view(v, p.hw_addr);

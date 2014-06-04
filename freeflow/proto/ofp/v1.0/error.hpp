@@ -21,56 +21,55 @@ namespace freeflow {
 namespace ofp {
 namespace v1_0 {
 
-// Note that this class is named "Errc" (for error code) in this 
-// namespace to avoid collisions with the Error message.
-//
-// TODO: Renumber error codes in some meaningful way.
-struct Errc : ofp::Error {
-  static constexpr Code BAD_VERSION = 100;
+enum class errc {
+  bad_version,
 
-  /// The message type is unsupported
-  static constexpr Code BAD_MESSAGE_TYPE = 200;
-  static constexpr Code BAD_ACTION_TYPE = 300;
-  static constexpr Code BAD_STATS_TYPE = 400;
-  static constexpr Code BAD_PROPERTY_TYPE = 500;
+  bad_header_length,
+  
+  bad_message_type,
+  message_overflow,
+  
+  hello_overflow,
+  error_overflow,
+  echo_overflow,
+  vendor_overflow,
+  feature_overflow,
+  config_overflow,
+  packet_in_overflow ,
+  flow_removed_overflow,
+  port_status_overflow,
+  packet_out_overflow,
+  flow_mod_overflow,
+  port_mod_overflow,
+  stats_request_overflow,
+  stats_reply_overflow,
+  queue_config_request_overflow,
+  queue_config_reply_overflow,
 
-  static constexpr Code HELLO_OVERFLOW   = 201;
-  static constexpr Code ERROR_OVERFLOW   = 202;
-  static constexpr Code ECHO_OVERFLOW    = 203;
-  static constexpr Code VENDOR_OVERFLOW  = 204;
-  static constexpr Code FEATURE_OVERFLOW = 205;
-  static constexpr Code CONFIG_OVERFLOW  = 206;
-  static constexpr Code PACKET_IN_OVERFLOW     = 207;
-  static constexpr Code FLOW_REMOVED_OVERFLOW  = 208;
-  static constexpr Code PORT_STATUS_OVERFLOW   = 209;
-  static constexpr Code PACKET_OUT_OVERFLOW    = 210;
-  static constexpr Code FLOW_MOD_OVERFLOW      = 211;
-  static constexpr Code PORT_MOD_OVERFLOW      = 212;
-  static constexpr Code STATS_REQUEST_OVERFLOW = 213;
-  static constexpr Code STATS_REPLY_OVERFLOW   = 214;
-  static constexpr Code QUEUE_CONFIG_REQUEST_OVERFLOW = 215;
-  static constexpr Code QUEUE_CONFIG_REPLY_OVERFLOW   = 216;
-  static constexpr Code MESSAGE_OVERFLOW = 220;
+  bad_action_type,
+  bad_action_length,
+  action_overflow,
 
-  static constexpr Code ACTION_OVERFLOW = 250;
-  static constexpr Code BAD_ACTION_LENGTH = 301;
+  bad_stats_type,
+  flow_stats_overflow,
+  queue_stats_overflow,
+  vendor_stats_overflow,
+  bad_flow_stats_length,
+  bad_queue_stats_length,
 
-  static constexpr Code FLOW_STATS_OVERFLOW = 401;
-  static constexpr Code QUEUE_STATS_OVERFLOW = 402;
-  static constexpr Code VENDOR_STATS_OVERFLOW = 403;
-  static constexpr Code BAD_FLOW_STATS_LENGTH = 410;
-  static constexpr Code BAD_QUEUE_STATS_LENGTH = 411;
-
-  static constexpr Code PROPERTY_OVERFLOW = 550;
-  static constexpr Code BAD_PROPERTY_LENGTH = 501;
-  static constexpr Code BAD_QUEUE_LENGTH = 501;
-
-
-  using ofp::Error::Error;
+  bad_property_type,
+  property_overflow,
+  bad_property_length,
+  bad_queue_length,
 };
+
+const Error_category& error_category();
+Error_code make_error_code(errc);
 
 } // namespace v1_0
 } // namespace ofp
 } // namespace freeflow
+
+#include <freeflow/proto/ofp/v1.0/error.ipp>
 
 #endif

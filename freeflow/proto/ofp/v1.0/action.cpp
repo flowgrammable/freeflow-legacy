@@ -41,24 +41,24 @@ bytes(const Action_payload& m, Action_type t) {
   case ACTION_SET_TP_DST: return bytes(m.tp_port);
   case ACTION_VENDOR: return bytes(m.vendor);
   default:
-    throw Errc::BAD_ACTION_TYPE;
+    throw make_error_code(errc::bad_action_type);
   }
 }
 
 // -------------------------------------------------------------------------- //
 // To view
 
-Errc
+Error
 to_view(View& v, const Action_empty& m) { return {}; }
 
-Errc
+Error
 to_view(View& v, const Action_output& m) {
   to_view(v, m.port);
   to_view(v, m.max_len);
   return {};
 }
 
-Errc
+Error
 to_view(View& v, const Action_enqueue& m) {
   to_view(v, m.port);
   pad(v, 6);
@@ -66,65 +66,65 @@ to_view(View& v, const Action_enqueue& m) {
   return {};
 }
 
-Errc
+Error
 to_view(View& v, const Action_vlan_vid& m) {
   to_view(v, m.value);
   pad(v, 2);
   return {};
 }
 
-Errc
+Error
 to_view(View& v, const Action_vlan_pcp& m) {
   to_view(v, m.value);
   pad(v, 3);
   return {};
 }
 
-Errc
+Error
 to_view(View& v, const Action_dl_addr& m) {
   to_view(v, m.addr);
   pad(v, 6);
   return {};
 }
 
-Errc
+Error
 to_view(View& v, const Action_nw_addr& m) {
   to_view(v, m.addr);
   return {};
 }
 
-Errc
+Error
 to_view(View& v, const Action_nw_tos& m) {
   to_view(v, m.value);
   pad(v, 3);
   return {};
 }
 
-Errc
+Error
 to_view(View& v, const Action_tp_port& m) {
   to_view(v, m.port);
   pad(v, 2);
   return {};
 }
 
-Errc
+Error
 to_view(View& v, const Action_vendor& m) {
   to_view(v, m.vendor);
   return {};
 }
 
-Errc
+Error
 to_view(View& v, const Action_header& m) {
   if (not is_valid(m.type)) // Required semantic check
-    return Errc::BAD_ACTION_TYPE;
+    return make_error_code(errc::bad_action_type);
   if (m.length < bytes(m)) // Required semantic check
-    return Errc::BAD_ACTION_LENGTH;
+    return make_error_code(errc::bad_action_length);
   to_view(v, m.type);
   to_view(v, m.length);
   return {};
 }
 
-Errc
+Error
 to_view(View& v, const Action_payload& m, Action_type t) {
   switch(t) {
   case ACTION_OUTPUT: return to_view(v, m.output);
@@ -141,14 +141,14 @@ to_view(View& v, const Action_payload& m, Action_type t) {
   case ACTION_SET_TP_DST: return to_view(v, m.tp_port);
   case ACTION_VENDOR: return to_view(v, m.vendor);
   default:
-    throw Errc::BAD_ACTION_TYPE;
+    throw make_error_code(errc::bad_action_type);
   }
 }
 
-Errc
+Error
 to_view(View& v, const Action& m) {
   if (remaining(v) < bytes(m))
-    return Errc::ACTION_OVERFLOW;
+    return make_error_code(errc::action_overflow);
 
   if (Trap err = to_view(v, m.header))
     return err.code();
@@ -157,7 +157,7 @@ to_view(View& v, const Action& m) {
     if (Trap err = to_view(c, m.payload, m.header.type))
       return err.code();
   } else {
-    return Errc::ACTION_OVERFLOW;
+    return make_error_code(errc::action_overflow);
   }
 
   return {};
@@ -166,17 +166,17 @@ to_view(View& v, const Action& m) {
 // -------------------------------------------------------------------------- //
 // From view
 
-Errc
+Error
 from_view(View& v, Action_empty& m) { return {}; }
 
-Errc
+Error
 from_view(View& v, Action_output& m) {
   from_view(v, m.port);
   from_view(v, m.max_len);
   return {};
 }
 
-Errc
+Error
 from_view(View& v, Action_enqueue& m) {
   from_view(v, m.port);
   pad(v, 6);
@@ -184,65 +184,65 @@ from_view(View& v, Action_enqueue& m) {
   return {};
 }
 
-Errc
+Error
 from_view(View& v, Action_vlan_vid& m) {
   from_view(v, m.value);
   pad(v, 2);
   return {};
 }
 
-Errc
+Error
 from_view(View& v, Action_vlan_pcp& m) {
   from_view(v, m.value);
   pad(v, 3);
   return {};
 }
 
-Errc
+Error
 from_view(View& v, Action_dl_addr& m) {
   from_view(v, m.addr);
   pad(v, 6);
   return {};
 }
 
-Errc
+Error
 from_view(View& v, Action_nw_addr& m) {
   from_view(v, m.addr);
   return {};
 }
 
-Errc
+Error
 from_view(View& v, Action_nw_tos& m) {
   from_view(v, m.value);
   pad(v, 3);
   return {};
 }
 
-Errc
+Error
 from_view(View& v, Action_tp_port& m) {
   from_view(v, m.port);
   pad(v, 2);
   return {};
 }
 
-Errc
+Error
 from_view(View& v, Action_vendor& m) {
   from_view(v, m.vendor);
   return {};
 }
 
-Errc
+Error
 from_view(View& v, Action_header& m) {
   from_view(v, m.type);
   from_view(v, m.length);
   if (not is_valid(m.type)) // Required semantic check
-    return Errc::BAD_ACTION_TYPE;
+    return make_error_code(errc::bad_action_type);
   if (m.length < bytes(m)) // Required semantic check
-    return Errc::BAD_ACTION_LENGTH;
+    return make_error_code(errc::bad_action_length);
   return {};
 }
 
-Errc
+Error
 from_view(View& v, Action_payload& m, Action_type t) {
   switch(t) {
   case ACTION_OUTPUT: return from_view(v, m.output);
@@ -259,14 +259,14 @@ from_view(View& v, Action_payload& m, Action_type t) {
   case ACTION_SET_TP_DST: return from_view(v, m.tp_port);
   case ACTION_VENDOR: return from_view(v, m.vendor);
   default:
-    throw Errc::BAD_ACTION_TYPE;
+    throw make_error_code(errc::bad_action_type);
   }
 }
 
-Errc
+Error
 from_view(View& v, Action& m) {
   if (remaining(v) < bytes(m))
-    return Errc::ACTION_OVERFLOW;
+    return make_error_code(errc::action_overflow);
 
   if (Trap err = from_view(v, m.header))
     return err.code();
@@ -275,7 +275,7 @@ from_view(View& v, Action& m) {
     if (Trap err = from_view(c, m.payload, m.header.type))
       return err.code();
   } else {
-    return Errc::ACTION_OVERFLOW;
+    return make_error_code(errc::action_overflow);
   }
 
   return {};

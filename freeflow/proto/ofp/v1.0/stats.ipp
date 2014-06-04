@@ -65,12 +65,12 @@ bytes(const Stats_header& m) { return 4; }
 
 // To view
 
-inline Errc 
+inline Error 
 to_view(View&, const Empty_stats_request&) { return {}; }
 
 // From view
 
-inline Errc 
+inline Error 
 from_view(View&, Empty_stats_request&) { return {}; }
 
 // Validation

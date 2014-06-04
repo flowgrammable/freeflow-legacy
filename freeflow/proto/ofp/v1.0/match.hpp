@@ -62,8 +62,8 @@ struct Match {
 
 // Protocol
 constexpr std::size_t bytes(const Match&);
-Errc to_view(View&, const Match&);
-Errc from_view(View&, Match&);
+Error to_view(View&, const Match&);
+Error from_view(View&, Match&);
 
 } // namespace v1_0
 } // namespace ofp

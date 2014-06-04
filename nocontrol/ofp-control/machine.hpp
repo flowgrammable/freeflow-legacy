@@ -32,7 +32,7 @@ struct Machine {
 
   // Messaging infrastructure
   template<typename T>
-    void push_msg(const T&);
+    ff::Error push_msg(const T&);
 
   Uint32 xid();
 
@@ -45,14 +45,16 @@ struct Machine {
   bool on_message();
 
   // Asynchronous messagess
-  Error send_hello(const Buffer& = {});
-  Error send_error(Error::Hello_failed);
-  Error send_error(Error::Bad_request);
-  Error send_error(Error::Bad_action);
-  Error send_error(Error::Flow_mod_failed);
-  Error send_error(Error::Port_mod_failed);
-  Error send_error(Error::Queue_op_failed);
-  Error send_vendor();
+  ff::Error send_hello(const Buffer& = {});
+
+  /// FIXME: These should all be part of the ofp errc enumeration.
+  ff::Error send_error(Error_message::Hello_failed);
+  ff::Error send_error(Error_message::Bad_request);
+  ff::Error send_error(Error_message::Bad_action);
+  ff::Error send_error(Error_message::Flow_mod_failed);
+  ff::Error send_error(Error_message::Port_mod_failed);
+  ff::Error send_error(Error_message::Queue_op_failed);
+  ff::Error send_vendor();
 
   // Acknowledged requests
   void request_echo();

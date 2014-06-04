@@ -118,20 +118,7 @@ construct_v1_0(const File& f, const ofp::Header& h, View& v) {
 
 void 
 diagnose(const File& f, const ofp::Header& h, Error err) {
-  std::cerr << "error: " << f.path() << ": ";
-
-  // If there wasn't enough data for the header, then we can't
-  // read any parts of the header.
-  if (err.code() == ofp::Error::HEADER_OVERFLOW) {
-    std::cerr << "error: header overflow\n";
-    return;
-  }
-
-  // Check the header length.
-  if (err.code() == ofp::Error::BAD_HEADER_LENGTH) {
-    std::cerr << "error: bad header length\n";
-    return;
-  }
+  std::cerr << "error: " << f.path() << ": " << err.message() << '\n';
 
   // ... Do stuff.
   if (h.version > 1) {

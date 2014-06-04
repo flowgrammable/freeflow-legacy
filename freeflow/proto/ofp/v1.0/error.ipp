@@ -12,39 +12,17 @@
 // or implied. See the License for the specific language governing
 // permissions and limitations under the License.
 
+
 namespace freeflow {
 namespace ofp {
 namespace v1_0 {
 
-/// The v1.0 OFP state machine for controllers.
-inline
-Machine::Machine(Channel& ch, Controller* ctrl)
-  : ch_(ch), ctrl_(ctrl) { }
-
-
-/// Returns a new transaction id for the message.
-///
-/// FIXME: This is totally broken.
-inline Uint32
-Machine::xid() { return 0; }
-
-template<typename T>
-  inline ff::Error
-  Machine::push_msg(const T& x) {
-    Header h { T::Kind, Uint16(bytes(h) + bytes(x)), xid() };
-    return ch_.send.push_msg(h, x);
-  }
-
-inline ff::Error
-Machine::send_hello(const Buffer& data) {
-  return push_msg(Hello {data});
-}
-
-inline ff::Error
-Machine::send_error(Error_message::Hello_failed c) {
-  return push_msg(Error_message {Error_message::HELLO_FAILED, c});
+/// Returns an error code representing an OpenFlow error.
+inline Error_code 
+make_error_code(errc ec) {
+  return { static_cast<int>(ec), error_category() };
 }
 
 } // namespace v1_0
 } // namespace ofp
-} // namespace nocontrol
+} // freeflow

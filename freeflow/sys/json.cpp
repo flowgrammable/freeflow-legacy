@@ -24,6 +24,43 @@
 namespace freeflow {
 namespace json {
 
+// -------------------------------------------------------------------------- //
+// Errors
+
+namespace {
+// The error category class provides a classifier for JSON-related
+// errors and their messages.
+//
+// \todo Check that all overrides are correct and sufficient.
+struct Errors : std::error_category {
+  const char* name() const noexcept override;
+  std::string message(int) const override;
+};
+
+const char*
+Errors::name() const noexcept { return "json"; }
+
+std::string
+Errors::message(int ec) const {
+  switch (static_cast<errc>(ec)) {
+  case json::errc::SUCCESS: return "success";
+  case json::errc::PARSE_ERROR: return "parse error";
+  case json::errc::TYPE_ERROR: return "invalid type";
+  case json::errc::VALUE_ERROR: return "invalid value";
+  case json::errc::REQUIRED_VALUE: return "required value was not provided";
+  }
+  assert(false); // Unreachable
+  return "";
+}
+} // naamespace
+
+/// Returns the json error category.
+const std::error_category& 
+error_category() {
+  static Errors errs_;
+  return errs_;
+}
+
 namespace {
 
 // Returns true if c starts a keyword or identifier.

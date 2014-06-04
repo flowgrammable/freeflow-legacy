@@ -15,11 +15,10 @@
 # ---------------------------------------------------------------------------- #
 # Build
 
-set(src ofp.cpp)
+set(src ofp.cpp error.cpp)
 
-set(hdr error.hpp
-        ofp.hpp 
-        ofp.ipp)
+set(hdr error.hpp error.ipp
+        ofp.hpp   ofp.ipp)
 
 
 # ---------------------------------------------------------------------------- #

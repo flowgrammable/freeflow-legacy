@@ -301,28 +301,9 @@ Arguments::display_errors(const char* pre) {
 }
 
 inline std::string
-display_err_info(const freeflow::Error& e) { 
-  // return error-specific string
-  std::string error_msg = "";
-  switch (e.code()) {
-    case json::TYPE_ERROR: {
-      error_msg = "has invalid type";
-      break;
-    }
-    case json::PARSE_ERROR: {
-      error_msg = "caused an error during parsing"; // ?
-      break;
-    }
-    case json::REQUIRED_ERROR: {
-      error_msg = "is required but was not provided";
-      break;
-    }
-    case json::VALUE_ERROR: {
-      error_msg = "has a value that is not allowed";
-      break;
-    }
-  }
-  return error_msg;
+display_err_info(const json::Value& v) { 
+  Error err = v.as_error();
+  return err.message();
 }
 
 // Mutators
@@ -376,12 +357,17 @@ Arguments::get_listed_size() const {
 // -------------------------------------------------------------------------- //
 // Type checkers
 
+namespace {
+inline Error
+make_type_error() { return make_error_code(json::errc::TYPE_ERROR); }
+} // namespace
+
 inline json::Value 
 Null_typed::operator()(const json::Value& s) const {
   if (s == "null" or s=="")
     return {};
   else
-    return Error(json::TYPE_ERROR, 0);
+    return make_type_error();
   return {};
 }
 
@@ -392,7 +378,7 @@ Bool_typed::operator()(const json::Value& s) const {
   else if (s == "false")
     return false;
   else 
-    return Error(json::TYPE_ERROR, 0);
+    return make_type_error();
   return {};
 }
 
@@ -404,7 +390,7 @@ Int_typed::operator()(const json::Value& s) const {
   if (ss >> i) 
     return i;
   else 
-    return Error(json::TYPE_ERROR);
+    return make_type_error();
 }
 
 inline json::Value 
@@ -415,7 +401,7 @@ Real_typed::operator()(const json::Value& s) const {
   if (ss >> d) 
     return d;
   else 
-    return Error(json::TYPE_ERROR);
+    return make_type_error();
 }
 
 inline json::Value

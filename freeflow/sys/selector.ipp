@@ -12,6 +12,8 @@
 // or implied. See the License for the specific language governing
 // permissions and limitations under the License.
 
+#include <iostream>
+
 namespace freeflow {
 
 inline
@@ -43,7 +45,6 @@ select_result(int r) {
 /// to be pending until an I/O event occurs.
 inline int
 Selector::select(timespec* ts, const sigset_t* m) {
-  // Call select and interpret tee reuslt.
   System_result r = ::pselect(max_, read_, write_, except_, ts, m);
   if (r.failed())
     throw std::runtime_error(::strerror(errno));
