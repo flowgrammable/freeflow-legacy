@@ -70,4 +70,6 @@ Error_code make_error_code(errc);
 } // namespace ofp
 } // namespace freeflow
 
+#include <freeflow/proto/ofp/v1.0/error.ipp>
+
 #endif

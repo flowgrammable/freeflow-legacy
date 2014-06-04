@@ -41,8 +41,8 @@ Machine::send_hello(const Buffer& data) {
 }
 
 inline ff::Error
-Machine::send_error(Error::Hello_failed c) {
-  return push_msg(Error {Error::HELLO_FAILED, c});
+Machine::send_error(Error_message::Hello_failed c) {
+  return push_msg(Error_message {Error_message::HELLO_FAILED, c});
 }
 
 } // namespace v1_0
