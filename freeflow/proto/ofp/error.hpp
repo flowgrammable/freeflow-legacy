@@ -23,29 +23,22 @@ namespace ofp {
 // -------------------------------------------------------------------------- //
 // Common errors
 
-/// Extends the Error class with new codes specific to the OpenFlow
-/// protocol.
-struct Error : freeflow::Error {
-  /// Reading or writing the header would overflow the buffer.
-  static constexpr Code HEADER_OVERFLOW  = 100;
+enum class errc {
+  header_overflow,   // The header size exceeds available data
+  payload_overflow,  // The payload size exceeds available data
+  sequence_overflow, // A sequencesize exceeds available data
   
-  /// Reading or writing the payload would overflow the buffer. 
-  static constexpr Code PAYLOAD_OVERFLOW  = 101;
-
-  /// Reading or writing a seuqence would overflow the buffer. 
-  static constexpr Code SEQUENCE_OVERFLOW = 102;
-
-  /// The protocol version is unsupported.
-  static constexpr Code BAD_VERSION       = 103;
-
-  /// The header length is less than the size of the header.
-  static constexpr Code BAD_HEADER_LENGTH = 104;
-
-  using freeflow::Error::Error;
+  bad_version,       // A header version is incorrect
+  bad_header_length, // The header length is incorrect
+  bad_header_type,   // The header type is incorrect
 };
 
+const Error_category& error_category();
+Error_code make_error_code(errc);
 
 } // namespace ofp
 } // freeflow
+
+#include <freeflow/proto/ofp/error.ipp>
 
 #endif

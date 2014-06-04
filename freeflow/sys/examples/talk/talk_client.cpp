@@ -26,20 +26,56 @@ using namespace std;
 using namespace freeflow;
 using namespace cli;
 
+/// The talk client represents a client that is connected to a 
+/// talk server.
 struct Talk_client : Socket_handler {
 
   Talk_client(Reactor& r, Socket&& s)
-    : Socket_handler(r, NO_EVENTS, std::move(s)) { }
+    : Socket_handler(r, READ_EVENTS, std::move(s)) { }
 
-  bool on_open() {
+  bool 
+  on_open() {
     std::cout << "* init client\n";
     return true;
   }
 
-  bool on_close() {
+  bool 
+  on_close() {
     std::cout << "* end client\n";
     return true;
   }
+
+  bool 
+  on_read() { 
+    // Read data into the buffer.
+    Buffer buf(2048);
+    System_result r = rc().read(buf);
+
+    // Make sure that this didn't fail.
+    if (r.failed()) {
+      log() << "read error: '" << strerror(errno) << "'\n";
+      return false;
+    }
+
+    int n = r.value();
+    
+    // Close the socket if we read 0 bytes.
+    if (n == 0)
+      return false;
+    
+    // Log the message. Write a newline if needed.
+    log() << buf.data();
+    if (buf[n-1] != '\n')
+      std::cout << '\n';
+
+    return true;
+  }
+
+  std::ostream&
+  log() {
+    return std::cout << bracket(rc().peer) << ' ';
+  }
+
 };
 
 // Read from standard input and send through the connection.
@@ -72,10 +108,10 @@ struct Input_reader : Resource_handler {
   Talk_client* conn;
 };
 
-/// The echo factory is responsible for creating the echo connection.
+/// The Talk factory is responsible for creating the Talk connection.
 /// It binds the created client to the input reader.
-struct Echo_factory {
-  Echo_factory(Input_reader& r)
+struct Talk_factory {
+  Talk_factory(Input_reader& r)
     : reader(r) { }
 
   Talk_client* operator()(Reactor& r, Socket&& s) {
@@ -87,7 +123,7 @@ struct Echo_factory {
   Input_reader& reader;
 };
 
-using Echo_connector = Connector<Talk_client, Echo_factory>;
+using Talk_connector = Connector<Talk_client, Talk_factory>;
 
 int 
 main(int argc, char* argv[]) {
@@ -121,19 +157,20 @@ main(int argc, char* argv[]) {
     return -1;
   }
 
-  // At this point we know the port was provided and nothing else
+  // At this point we know the port and host were provided and nothing else
   Ip_port p = program_args.get_named_value("port").as_int();
   Address host(Address_info::IP4, program_args.get_named_value("host").as_string(), p);
   
   // Create the reactor.
   Reactor r;
   
-  // Create and configure the reactor.
-  // Talk_client_acceptor a(r);
-  // a.listen(host, Socket::TCP);
+  // The reader accepts terminal input.
+  Input_reader reader(r);
+  r.add_handler(&reader);
 
-  // Add the acceptor.
-  // r.add_handler(&a);
+  // Establishes the asynchronous connection.
+  Talk_connector conn(r, reader);
+  conn.connect(host, Socket::TCP);
 
-  // r.run();
+  r.run();
 }

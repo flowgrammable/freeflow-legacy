@@ -148,7 +148,8 @@ check_args(const Parameters& parms, Arguments& args) {
     // may be OPTIONAL or REQUIRED. Cases where 'which' is OPTIONAL can be
     // disregarded since no argument was provided.
     else if (parm.is_required()) {
-      args.set_named(parm, Argument(Error(json::REQUIRED_ERROR, 0), NOT_PROVIDED));
+      Error err = make_error_code(json::errc::REQUIRED_VALUE);
+      args.set_named(parm, Argument(err, NOT_PROVIDED));
       r &= false;
     }
   }

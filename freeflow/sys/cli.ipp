@@ -323,6 +323,9 @@ display_err_info(const freeflow::Error& e) {
     }
   }
   return error_msg;
+display_err_info(const json::Value& v) { 
+  Error err = v.as_error();
+  return err.message();
 }
 
 // Mutators
@@ -376,12 +379,17 @@ Arguments::get_listed_size() const {
 // -------------------------------------------------------------------------- //
 // Type checkers
 
+namespace {
+inline Error
+make_type_error() { return make_error_code(json::errc::TYPE_ERROR); }
+} // namespace
+
 inline json::Value 
 Null_typed::operator()(const json::Value& s) const {
   if (s == "null" or s=="")
     return {};
   else
-    return Error(json::TYPE_ERROR, 0);
+    return make_type_error();
   return {};
 }
 
@@ -392,7 +400,7 @@ Bool_typed::operator()(const json::Value& s) const {
   else if (s == "false")
     return false;
   else 
-    return Error(json::TYPE_ERROR, 0);
+    return make_type_error();
   return {};
 }
 
@@ -415,7 +423,7 @@ Real_typed::operator()(const json::Value& s) const {
   if (ss >> d) 
     return d;
   else 
-    return Error(json::TYPE_ERROR);
+    return make_type_error();
 }
 
 inline json::Value

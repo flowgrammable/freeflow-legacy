@@ -76,16 +76,16 @@ std::size_t bytes(const Property&);
 std::size_t bytes(const Queue&);
 
 // To view
-Errc to_view(View&, const Rate_property&);
-Errc to_view(View&, const Property_value&, Property_type);
-Errc to_view(View&, const Property&);
-Errc to_view(View&, const Queue&);
+Error to_view(View&, const Rate_property&);
+Error to_view(View&, const Property_value&, Property_type);
+Error to_view(View&, const Property&);
+Error to_view(View&, const Queue&);
 
 // From view
-Errc from_view(View&, Rate_property&);
-Errc from_view(View&, Property_value&, Property_type);
-Errc from_view(View&, Property&);
-Errc from_view(View&, Queue&);
+Error from_view(View&, Rate_property&);
+Error from_view(View&, Property_value&, Property_type);
+Error from_view(View&, Property&);
+Error from_view(View&, Queue&);
 
 // Validation
 constexpr bool is_valid(Property_type);

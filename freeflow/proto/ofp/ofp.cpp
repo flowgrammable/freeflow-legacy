@@ -22,11 +22,11 @@ namespace ofp {
 Error 
 to_view(View& v, const Header& h) {
   if (v.remaining() < bytes(h))
-    return Error::HEADER_OVERFLOW;
+    return make_error_code(errc::header_overflow);
 
   // Minimum semantic checking
   if (h.length < bytes(h));
-    return Error::BAD_HEADER_LENGTH;
+    return make_error_code(errc::bad_header_length);
 
   to_view(v, h.version);
   to_view(v, h.type);
@@ -37,7 +37,7 @@ to_view(View& v, const Header& h) {
 Error 
 from_view(View& v, Header& h) {
   if (v.remaining() < bytes(h))
-    return Error::HEADER_OVERFLOW;
+    return make_error_code(errc::header_overflow);
   
   from_view(v, h.version);
   from_view(v, h.type);
@@ -46,7 +46,7 @@ from_view(View& v, Header& h) {
 
   // Minimum semantic checking
   if (h.length < bytes(h))
-    return Error::BAD_HEADER_LENGTH;
+    return make_error_code(errc::bad_header_length);
   return {};
 }
 

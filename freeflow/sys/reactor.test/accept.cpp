@@ -45,9 +45,9 @@ struct My_acceptor : Socket_handler {
     : Socket_handler(r, READ_EVENTS, Socket::IP4, Socket::TCP) 
   { 
     if (Trap err = rc().bind(a))
-      throw System_error(err.code());
+      throw err.code();
     if (Trap err = listen(rc()))
-      throw System_error(err.code());
+      throw err.code();
   }
 
   // Acccept a connection and spin up a new service.

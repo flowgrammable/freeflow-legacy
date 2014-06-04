@@ -210,38 +210,38 @@ std::size_t bytes(const Stats_request_payload&, Stats_type);
 std::size_t bytes(const Stats_reply_payload&, Stats_type);
 
 // To view
-Errc to_view(View&, const Empty_stats_request&);
-Errc to_view(View&, const Flow_stats_request&);
-Errc to_view(View&, const Port_stats_request&);
-Errc to_view(View&, const Queue_stats_request&);
-Errc to_view(View&, const Vendor_stats_request&);
-Errc to_view(View&, const Description_stats&);
-Errc to_view(View&, const Flow_stats_entry&);
-Errc to_view(View&, const Aggregate_stats&);
-Errc to_view(View&, const Table_stats_entry&);
-Errc to_view(View&, const Port_stats_entry&);
-Errc to_view(View&, const Queue_stats_entry&);
-Errc to_view(View&, const Vendor_stats&);
-Errc to_view(View&, const Stats_header&);
-Errc to_view(View&, const Stats_request_payload&, Stats_type);
-Errc to_view(View&, const Stats_reply_payload&, Stats_type);
+Error to_view(View&, const Empty_stats_request&);
+Error to_view(View&, const Flow_stats_request&);
+Error to_view(View&, const Port_stats_request&);
+Error to_view(View&, const Queue_stats_request&);
+Error to_view(View&, const Vendor_stats_request&);
+Error to_view(View&, const Description_stats&);
+Error to_view(View&, const Flow_stats_entry&);
+Error to_view(View&, const Aggregate_stats&);
+Error to_view(View&, const Table_stats_entry&);
+Error to_view(View&, const Port_stats_entry&);
+Error to_view(View&, const Queue_stats_entry&);
+Error to_view(View&, const Vendor_stats&);
+Error to_view(View&, const Stats_header&);
+Error to_view(View&, const Stats_request_payload&, Stats_type);
+Error to_view(View&, const Stats_reply_payload&, Stats_type);
 
 // From view
-Errc from_view(View&, Empty_stats_request&);
-Errc from_view(View&, Flow_stats_request&);
-Errc from_view(View&, Port_stats_request&);
-Errc from_view(View&, Queue_stats_request&);
-Errc from_view(View&, Vendor_stats_request&);
-Errc from_view(View&, Description_stats&);
-Errc from_view(View&, Flow_stats_entry&);
-Errc from_view(View&, Aggregate_stats&);
-Errc from_view(View&, Table_stats_entry&);
-Errc from_view(View&, Port_stats_entry&);
-Errc from_view(View&, Queue_stats_entry&);
-Errc from_view(View&, Vendor_stats&);
-Errc from_view(View&, Stats_header&);
-Errc from_view(View&, Stats_request_payload&, Stats_type);
-Errc from_view(View&, Stats_reply_payload&, Stats_type);
+Error from_view(View&, Empty_stats_request&);
+Error from_view(View&, Flow_stats_request&);
+Error from_view(View&, Port_stats_request&);
+Error from_view(View&, Queue_stats_request&);
+Error from_view(View&, Vendor_stats_request&);
+Error from_view(View&, Description_stats&);
+Error from_view(View&, Flow_stats_entry&);
+Error from_view(View&, Aggregate_stats&);
+Error from_view(View&, Table_stats_entry&);
+Error from_view(View&, Port_stats_entry&);
+Error from_view(View&, Queue_stats_entry&);
+Error from_view(View&, Vendor_stats&);
+Error from_view(View&, Stats_header&);
+Error from_view(View&, Stats_request_payload&, Stats_type);
+Error from_view(View&, Stats_reply_payload&, Stats_type);
 
 // Validation
 constexpr bool is_valid(Stats_type);

@@ -46,7 +46,8 @@ Ofp_handler::on_open() {
   // that sm_ will be a base-class pointer in the not-so-distant future.
   //
   // FIXME: Error handling. Merge Alexander's changes ASAP.
-  sm_->send_hello();
+  if (Trap err = sm_->send_hello())
+    return false;
   state_ = VERSION;
 
   return true;
@@ -101,7 +102,7 @@ Ofp_handler::on_version() {
     return true;
   } else {
     // FIXME: How do we do this in a version independent way?
-    sm_->send_error(ofp::v1_0::Error::HF_INCOMPATIBLE);
+    sm_->send_error(ofp::v1_0::Error_message::HF_INCOMPATIBLE);
     return false;
   }
 }

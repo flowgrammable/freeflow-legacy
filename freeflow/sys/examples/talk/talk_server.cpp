@@ -26,8 +26,16 @@ using namespace std;
 using namespace freeflow;
 using namespace cli;
 
-struct Talk_server : Socket_handler {
-  Talk_server(Reactor&, Socket&&);
+/// This represents the clients that are connected to the talk server.
+///
+/// \todo: Change this to a vector or associative data structure
+std::list<Socket*> clients;
+
+/// Connection represents a single connection from a connected client. 
+/// It handles read events (messages) sent by a client and distributes 
+/// them back to all of the clients connected to the server.
+struct Connection : Socket_handler {
+  Connection(Reactor&, Socket&&);
 
   bool on_open();
   bool on_close();
@@ -35,31 +43,31 @@ struct Talk_server : Socket_handler {
 
   void send_all(const int&);
   std::ostream& log();
-  std::list<Socket*> clients;
+
   Buffer buf;
 };
 
 /// Note that this constructor can be inherited from Socket_handler.
-Talk_server::Talk_server(Reactor& r, Socket&& s)
+Connection::Connection(Reactor& r, Socket&& s)
   : Socket_handler(r, READ_EVENTS, move(s)) 
   , buf(2048) { }
 
 bool
-Talk_server::on_open() {
+Connection::on_open() {
   std::cout << "connected " <<  bracket(rc().peer) << "\n";
   clients.push_back(&rc());
   return true;
 }
 
 bool
-Talk_server::on_close() { 
+Connection::on_close() { 
   std::cout << "disconnected " << bracket(rc().peer) << "\n";
   clients.remove(&rc());
   return true;
 }
 
 bool
-Talk_server::on_read() { 
+Connection::on_read() { 
   // Read data into the buffer.
   Buffer buf(2048);
   System_result r = rc().read(buf);
@@ -87,39 +95,18 @@ Talk_server::on_read() {
 }
 
 std::ostream&
-Talk_server::log() {
+Connection::log() {
   return std::cout << bracket(rc().peer) << ' ';
 }
 
 void
-Talk_server::send_all(const int& n) {
+Connection::send_all(const int& n) {
   for (const auto& s : clients) {
     send(*s, &buf[0], n);
   }
 }
 
-// struct Talk_server_acceptor : Socket_handler {
-//   Talk_server_acceptor(Reactor& r, const Address& a)
-//     : Socket_handler(r, READ_EVENTS, Socket::IP4, Socket::TCP) 
-//   { 
-//     if (Trap err = rc().bind(a))
-//       throw System_error(err.code());
-//     if (Trap err = listen(rc()))
-//       throw System_error(err.code());
-//   }
-
-//   // Acccept a connection and spin up a new service.
-//   bool on_read() {
-//     Socket s = accept(rc());
-//     std::cout << "* accepted connection\n";
-
-//     reactor().new_handler<Talk_server>(std::move(s));
-
-//     return true;
-//   }
-// };
-
-using Talk_acceptor = Acceptor<Talk_server>;
+using Talk_acceptor = Acceptor<Connection>;
 
 int 
 main(int argc, char* argv[]) {
