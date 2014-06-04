@@ -41,7 +41,6 @@ struct Connection : Socket_handler {
   bool on_close();
   bool on_read();
 
-  void send_all(const int&);
   std::ostream& log();
 
   Buffer buf;
@@ -89,7 +88,10 @@ Connection::on_read() {
   if (buf[n-1] != '\n')
     std::cout << '\n';
 
-  send_all(n);
+  // Send the message to all clients
+  for (const auto& s : clients) {
+    send(*s, &buf[0], n);
+  }
   
   return true;
 }
@@ -97,13 +99,6 @@ Connection::on_read() {
 std::ostream&
 Connection::log() {
   return std::cout << bracket(rc().peer) << ' ';
-}
-
-void
-Connection::send_all(const int& n) {
-  for (const auto& s : clients) {
-    send(*s, &buf[0], n);
-  }
 }
 
 using Talk_acceptor = Acceptor<Connection>;

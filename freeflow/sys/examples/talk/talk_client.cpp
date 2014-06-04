@@ -64,16 +64,11 @@ struct Talk_client : Socket_handler {
       return false;
     
     // Log the message. Write a newline if needed.
-    log() << buf.data();
+    std::cout << buf.data();
     if (buf[n-1] != '\n')
       std::cout << '\n';
 
     return true;
-  }
-
-  std::ostream&
-  log() {
-    return std::cout << bracket(rc().peer) << ' ';
   }
 
 };
@@ -130,7 +125,7 @@ main(int argc, char* argv[]) {
   const char* prefix = "flog";
 
   Parameters parms;
-  parms.declare("host, h", cli::Int_typed(), cli::REQUIRED, "The host of the talk client");
+  parms.declare("host, h", cli::String_typed(), cli::REQUIRED, "The host of the talk client");
   parms.declare("port, p", cli::Int_typed(), cli::REQUIRED, "The port of the talk client");
 
   // Initialize the parse state
