@@ -24,4 +24,19 @@ set(hdr domain.hpp      domain.ipp
         application.hpp application.ipp
         request.hpp     request.ipp)
 
-add_library(freeflow-sdn ${src})
+# --------------------------------------------------------------------------- //
+# Targets
+
+add_shared_library(freeflow-sdn ${src})
+target_link_libraries(freeflow-sdn)
+
+# --------------------------------------------------------------------------- //
+# Installation
+
+install(TARGETS freeflow-sdn LIBRARY DESTINATION lib)
+install(FILES ${hdr} DESTINATION include/freeflow/sdn)
+
+# --------------------------------------------------------------------------- //
+# Testing
+
+add_subdirectory(application.test)

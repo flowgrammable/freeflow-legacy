@@ -32,8 +32,9 @@ set(src fd_utils.cpp
         syslog.cpp
         pipe.cpp
         json.cpp
+        library.cpp
         print.cpp
-        )
+        cli.cpp)
 
 if(BSD)
   LIST(APPEND src kqueue.cpp)
@@ -41,15 +42,15 @@ elseif(LINUX)
   LIST(APPEND src epoll.cpp)
 endif()
 
-# TODO: We need to install all of the .ipp files also.
+# Header and inline files are installed.
 set(hdr fd_utils.hpp
         meta.hpp
         data.hpp
         error.hpp     error.ipp
         time.hpp      time.ipp
-        signal.hpp
+        signal.hpp    signal.ipp
         path.hpp
-        resoource.hpp resource.ipp
+        resource.hpp  resource.ipp
         file.hpp      file.ipp
         socket.hpp    socket.ipp
         handler.hpp   handler.ipp
@@ -62,7 +63,9 @@ set(hdr fd_utils.hpp
         syslog.hpp
         pipe.hpp
         json.hpp      json.ipp
-        print.hpp     print.ipp)
+        library.hpp   library.ipp
+        print.hpp     print.ipp
+        cli.hpp       cli.ipp)
 
 if(BSD)
   LIST(APPEND hdr ${kqueue.hpp})
@@ -70,13 +73,19 @@ elseif(LINUX)
   LIST(APPEND hdr ${epoll.hpp})
 endif()
 
-add_library(freeflow ${src})
+
+# --------------------------------------------------------------------------- //
+# Targets
+
+add_shared_library(freeflow ${src})
+target_link_libraries(freeflow ${CMAKE_DL_LIBS})
 
 
 # --------------------------------------------------------------------------- //
 # Installation
 
 install(FILES ${hdr} DESTINATION include/freeflow/sys)
+install(TARGETS freeflow LIBRARY DESTINATION lib)
 
 
 # --------------------------------------------------------------------------- //
@@ -86,10 +95,13 @@ add_subdirectory(examples)
 
 # --------------------------------------------------------------------------- //
 # Testing
+
 add_subdirectory(data.test)
+add_subdirectory(signal.test)
 add_subdirectory(socket.test)
 add_subdirectory(reactor.test)
 add_subdirectory(acceptor.test)
 add_subdirectory(connector.test)
+add_subdirectory(library.test)
 add_subdirectory(json.test)
 

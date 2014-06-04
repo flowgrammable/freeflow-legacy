@@ -12,118 +12,133 @@
 // or implied. See the License for the specific language governing
 // permissions and limitations under the License.
 
-#include <iostream>
-#include <fstream>
-#include <iterator>
-#include <string>
+
+
+#include <assert.h>
 
 #include <freeflow/sys/socket.hpp>
 #include <freeflow/sys/json.hpp>
+#include <freeflow/sys/cli.hpp>
+
+#include "command.hpp"
 
 using namespace std;
 using namespace freeflow;
 
 
-struct Config {
-  Address ctrl_addr {Address::IP4, "127.0.0.1", 9001};
+struct Add_command : cli::Command {
+  Add_command() 
+    : Command("add", "Add something to something else")
+  {
+    declare("name", cli::String_typed(), cli::REQUIRED, "The name of the thing added");
+    declare("path", cli::String_typed(), cli::REQUIRED, "The path to the thing added");
+    declare("config", cli::String_typed(), cli::REQUIRED, "Path to a configuration file");
+    declare("version", cli::String_typed(), cli::REQUIRED, "The version of the thing added");
+    declare("flag", cli::Bool_typed(), cli::REQUIRED, "A mysterious flag");
+  }
+
+  bool run(const cli::Arguments& args) { 
+    std::cout << "Adding...\n";
+    return true; 
+  }
 };
 
-enum Command {
-  VERSION_CMD,
-  HELP_CMD,
-  RAW_CMD
+struct Del_command : cli::Command {
+  Del_command() 
+    : Command("del", "Remove something from something else")
+  {
+    declare("name", cli::String_typed(), cli::REQUIRED, "The name of the thing removed");
+    declare("path", cli::String_typed(), cli::REQUIRED, "The path to the thing being removed");
+    declare("config", cli::String_typed(), cli::REQUIRED, "Path to a configuration file");
+  }
+
+  bool run(const cli::Arguments& args) {
+    std::cout << "Removing...\n";
+    return true;
+  }
 };
 
-// Print version information.
-int 
-version() {
-  std::cout << "noctl v0.1\n";
-  std::cout << "Copyright (c) 2013-2014 Flowgrammable.org\n";
-  return 0;
-}
-
-int 
-help() {
-  std::cout << "noctl [prog-opts] command [cmd-opts] [cmd-args]\n";
-  return 0;
-}
 
 int
-raw(int arg, int argc, char* argv[]) {
-  if (arg == argc) {
-    std::cerr << "usage: noctl raw <json-file>\n";
+main(int argc, char *argv[]) {
+  bool success = true;
+  // Create program options.
+  cli::Parameters parms;
+  parms.declare("flag, f", cli::Bool_typed(), cli::REQUIRED, "Just a flag");
+  parms.declare("number", cli::Real_typed(), "42", "Just a number");
+  parms.declare("name", cli::String_typed(), "some value", "The name of something");
+  parms.declare("config", cli::String_typed(), cli::OPTIONAL, "The path to a configuration file");
+  parms.declare("path", cli::String_typed(), "*default path*", "Path to something");
+  parms.declare("version, v", cli::Real_typed(), cli::REQUIRED, "Version of something");
+
+  // Create commands.
+  cli::Commands cmds;
+  cmds.declare<Add_command>();
+  cmds.declare<Del_command>();
+
+// ---------------- Parse global arguments up to the command ---------------- //
+  // Initialize the parse state
+  cli::Parse_state ps(argc, 1, argv);
+  if (ps.argc == 1) {
+    std::cerr << "error: a command must be provided\n";
     return -1;
   }
 
-  string buf;
-  try {
-    // Read the json-file into a buffer.
-    ifstream f(argv[arg]);
-    istreambuf_iterator<char> iter(f);
-    istreambuf_iterator<char> end;
-    buf = string(iter, end);
-  } catch (...) {
-    std::cerr << "error: could not read file\n";
+  // Initialize the program arguments
+  cli::Arguments program_args;
+
+  // Parse the environment for program options
+  const char* prefix = "flog";
+  parse_env(parms, program_args, prefix);
+
+  // Parse the command-line for program options up to the command
+  parse_keyword_args(parms, program_args, ps);
+
+  // Check program args
+  success &= check_args(parms, program_args);
+
+  if (!success){ 
+    program_args.display_errors(prefix);
+  }
+// -------------------------------------------------------------------------- //
+
+// ---------- Parse the command and its named/positional arguments ---------- //
+  // Make sure a command name was provided
+  if (ps.current == ps.argc) {
+    std::cerr << "error: a command must be provided\n";
+    return -1;
+  }
+  
+  // Make sure the command exists
+  std::string cmd_name = ps.argv[ps.current];
+  if (!cmds.count(cmd_name)) {
+    std::cerr << "error: command not recognized\n";
     return -1;
   }
 
-  try {
-    Config conf;
-    Socket s(Socket::IP4, Socket::TCP);
+    // FIXME: If this returns null, it will crash.
+  cli::Command* cmd = cmds.find(cmd_name)->second;
+  cli::Arguments command_args;
+  // Parse command args
+  parse_args(cmd->parms(), command_args, ps);
 
-    // Connect to nocontrol.
-    System_result rc = connect(s, conf.ctrl_addr);
-    if (rc.failed())
-      std::cerr << "error: could not connect\n";
-    
-    // Write JSON to the socket.
-    System_result rw  = s.write(buf.c_str(), buf.size());
-    if (rw.completed())
-      std::cerr << "sent " << rw.value() << " bytes\n";
-    else
-      std::cout << "did not send data\n";
-  } catch (...) {
-    std::cerr << "error: could not send command\n";
-    return  -1;
+  // Check command args
+  success &= check_args(cmd->parms(), command_args);
+
+  if (!success){ 
+    command_args.display_errors(prefix);
+    // std::cout << "ERROR\n";
+    return -1;
   }
 
+  cmd->run(command_args);
   return 0;
+  // // Parse arguments.
+  // cli::Arguments args;
+  // if (parse(parms, cmds, args, argc, argv, "flog"))
+  //   return 0;
+  // else
+  //   return -1;    
+
+  // What command did I parse?
 }
-
-int 
-main(int argc, char* argv[]) {
-  // Parse command line arguments.
-  //
-  // FIXME: This is totally broken. Parsing options occurs in 3
-  // pases. First, the program options (applies to all commands),
-  // the the command, then the command options and arguments (which 
-  // actually depend on the command). Note that only one command
-  // is permitted.
-  Command cmd = HELP_CMD;
-  int arg = 1;
-  for (; arg < argc; ++arg) {
-    string s = argv[arg++];
-    if (s == "version") {
-      cmd = VERSION_CMD; 
-      break;
-    } else if (s == "help") {
-      cmd = HELP_CMD;
-      break;
-    } else if (s == "raw") {
-      cmd = RAW_CMD;
-      break; 
-    } else {
-      std::cerr << "error: unknown command\n";
-      help();
-      return -1;
-    }
-  }
-
-  switch (cmd) {
-  case VERSION_CMD: return version();
-  case HELP_CMD: return help();
-  case RAW_CMD: return raw(arg, argc, argv);
-  }
-
-}
-

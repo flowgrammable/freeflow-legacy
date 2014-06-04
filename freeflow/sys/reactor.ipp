@@ -14,11 +14,13 @@
 
 namespace freeflow {
 
+// Initialize the reactor.
 inline
 Reactor::Reactor()
   : running_(true), handlers_(), timers_(), expired_()
 {
   expired_.reserve(32);
+  signals_.reserve(32);
 }
 
 /// Register the handler with the reactor.
@@ -28,7 +30,8 @@ Reactor::add_handler(Event_handler* h) {
 }
 
 /// Unregister the handler with the reactor. Any outstanding timers
-/// are canceled before removing the handler. If the handler 
+/// are canceled before removing the handler. If the handler is managed
+/// by the reactor, then it is also deleted.
 inline void
 Reactor::remove_handler(Event_handler* h) { 
   timers_.cancel(h);
@@ -93,6 +96,11 @@ inline void
 Reactor::cancel_timer(Event_handler* h, int id) {
   timers_.cancel(h, id);
 }
+
+/// Send a signal to the queue. Note that signals are processed during
+/// the main event loop and not asynchronously.
+inline void
+Reactor::send_signal(int s) { signals_.push_back(s); }
 
 /// Stop the reactor from running.
 inline void

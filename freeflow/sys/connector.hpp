@@ -15,33 +15,59 @@
 #ifndef FREEFLOW_CONNECTOR_HPP
 #define FREEFLOW_CONNECTOR_HPP
 
+#include <vector>
+
 #include <freeflow/sys/socket.hpp>
 #include <freeflow/sys/handler.hpp>
+#include <freeflow/sys/reactor.hpp>
 
 namespace freeflow {
+
+/// The connection handler class is a helper class for the Connector
+/// pattern. It receives the initial write notification when the
+/// connection is accepted, and it spins off a handler of the specified
+/// type to manage the connection.
+template<typename Handler, typename Factory>
+  class Connection_handler : public Socket_handler {
+  public:
+    using Transport = Socket::Transport;
+    
+    Connection_handler(Reactor&, Factory&, const Address&, Transport);
+
+    bool on_close() override;
+    bool on_read() override;
+    bool on_write() override;
+    bool on_except() override;
+
+  private:
+    bool succeeded();
+    bool failed();
+
+  private:
+    Factory& factory_;
+    bool connect_;
+  };
 
 /// The Connector class is an instance of the connector design pattern.
 /// Its purpose is to decouple the connection processor from the protocol 
 /// or service implementation. When a connection is made, the connecting
 /// socket is transferred to a new service handler, and the connector
 /// is terminated.
-template<typename Service>
-  class Connector : public Socket_handler {
+template<typename Handler, typename Factory = Default_handler_factory<Handler>>
+  class Connector {
+    using Impl = Connection_handler<Handler, Factory>;
   public:
     using Transport = Socket::Transport;
-
-    Connector(Reactor&);
+    
+    template<typename... Args>
+      Connector(Reactor&, Args&&...);
 
     // Connection
-    void connect(Service*, const Address&, Transport);
-    void connect_now(Service*, const Address&, Transport);
-
-    // Events
-    bool on_close() { return true; }
-    bool on_write();
+    bool connect(const Address&, Transport);
 
   private:
-    Service* eh_;
+    Reactor& reactor_;
+    Factory  factory_;
   };
 
 } // namespace freeflow

@@ -18,8 +18,9 @@
 
 using namespace freeflow;
 
-int main(int argc, char* argv[]) {
-
+int
+main(int argc, char* argv[]) {
+  // Check to make sure value types are initialized properly
   json::Value v0;
   assert(v0.type() == json::Value::NIL);
   

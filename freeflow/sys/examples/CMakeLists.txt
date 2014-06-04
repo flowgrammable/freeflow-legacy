@@ -32,3 +32,6 @@ add_example(server)
 if(BSD)
   add_example(kqueue)
 endif()
+
+add_subdirectory(talk)
+

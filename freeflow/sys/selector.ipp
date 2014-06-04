@@ -16,7 +16,11 @@ namespace freeflow {
 
 inline
 Selector::Selector(int n, Select_set& ss)
-  : max_(n), read_(&ss.read.fds), write_(&ss.write.fds), except_(&ss.except.fds) { }
+  : max_(n)
+  , read_(&ss.read.fds)
+  , write_(&ss.write.fds)
+  , except_(&ss.except.fds) 
+{ }
 
 namespace impl {
 // Check the result of calling pselect. If a non-interruption error
@@ -33,10 +37,30 @@ select_result(int r) {
 }
 } // namespace impl
 
+
+/// If the pselect call is interruped, it will return 0. This allows
+/// a program to process events as they occur instead of allowing them
+/// to be pending until an I/O event occurs.
+inline int
+Selector::select(timespec* ts, const sigset_t* m) {
+  // Call select and interpret tee reuslt.
+  System_result r = ::pselect(max_, read_, write_, except_, ts, m);
+  if (r.failed())
+    throw std::runtime_error(::strerror(errno));
+  else if (r.interrupted())
+    return 0;
+  else
+    return r.value();
+}
+
 inline int
 Selector::operator()() {
-  int r = ::pselect(max_, read_, write_, except_, nullptr, nullptr);
-  return impl::select_result(r);
+  return select(nullptr, nullptr);
+}
+
+inline int
+Selector::operator()(const Signal_set& m) {
+  return select(nullptr, m);
 }
 
 inline int
@@ -45,9 +69,16 @@ Selector::operator()(Microseconds us) {
   timespec ts;
   ts.tv_sec = std::chrono::duration_cast<Seconds>(us).count();
   ts.tv_nsec = 1000 * (us.count() % 1000000);
-  
-  int r = ::pselect(max_, read_, write_, except_, &ts, nullptr);
-  return impl::select_result(r);
+  return select(&ts, nullptr);
+}
+
+inline int
+Selector::operator()(Microseconds us, const Signal_set& m) {
+  // FIXME: Make an API that translates time units to timespecs.
+  timespec ts;
+  ts.tv_sec = std::chrono::duration_cast<Seconds>(us).count();
+  ts.tv_nsec = 1000 * (us.count() % 1000000);
+  return select(&ts, m);
 }
 
 } // namespace freeflow

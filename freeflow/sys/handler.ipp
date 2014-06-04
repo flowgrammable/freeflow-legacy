@@ -148,6 +148,19 @@ template<typename T>
   inline const T& 
   Basic_event_handler<T>::rc() const { return this->rc_; }
 
+
+// -------------------------------------------------------------------------- //
+// Factory
+
+
+/// The default accept factor creates a new service that wraps the
+/// accepted socket.
+template<typename H>
+  inline H*
+  Default_handler_factory<H>::operator()(Reactor& r, Socket&& s) const {
+    return new H(r, std::move(s));
+  }
+
 // -------------------------------------------------------------------------- //
 // Registry
 

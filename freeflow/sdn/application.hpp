@@ -15,6 +15,8 @@
 #ifndef FREEFLOW_APPLICATION_HPP
 #define FREEFLOW_APPLICATION_HPP
 
+#include <freeflow/sys/library.hpp>
+
 namespace freeflow {
 
 class Controller;
@@ -24,16 +26,50 @@ class Flow;
 class Port;
 class Table;
 class Role;
+class Application;
+
+/// The Application_factory is an abstract base class whose derived 
+/// classes are responsible for creating applications. Objects of this 
+/// class are returned from the loading of application libraries.
+class Application_factory {
+public:
+  virtual Application* create(Controller&) = 0;
+  virtual void destroy(Application*) = 0;
+};
+
+/// The type of the factory function pointer
+using Application_factory_fn = Application_factory*(*)();
+
+
+/// The Application_library class represents a dynamically loaded
+/// library that implements (one or more?) freeflow applications.
+/// The factory is used to instantiate those applications whenever
+/// they are launched.
+class Application_library : Library {
+public:
+  Application_library(const Path&);
+  
+  // Accessors
+  Application_factory* factory() const;
+  
+  // Application management
+  Application* create(Controller&) const;
+  void destroy(Application*) const;
+  
+private:
+  Application_factory_fn entry_;   // Resolved etnry point
+  Application_factory*   factory_; // The factory object
+};
+
 
 /// The base class of all native Freeflow applications. This defines the
 /// abstract events sent to derived classes.
 class Application {
 public:
-  virtual ~Application() { }
+  Application(Controller&);
+  virtual ~Application();
 
-  // Application events
-  virtual void load(Controller&);
-  virtual void unload(Controller&);
+  Controller& controller();
 
   // Transport events
   virtual void bind(Switch&);
@@ -44,8 +80,8 @@ public:
   virtual void features_known(Switch&);
 
   // Startup events
-  virtual void start(Switch&);
-  virtual void stop(Switch&);
+  virtual void start();
+  virtual void stop();
 
   // Datapath events
   virtual void packet_in(Switch&, const Packet&);
@@ -53,7 +89,11 @@ public:
   virtual void port_status(Switch&, const Port&);
   virtual void table_status(Switch&, const Table&);
   virtual void role_status(Switch&, const Role&);
+
+private:
+  Controller& ctrl_;
 };
+
 
 } // namespace freeflow
 

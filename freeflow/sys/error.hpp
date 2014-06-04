@@ -77,6 +77,10 @@ private:
   Data data_;
 };
 
+// Equality comparison
+bool operator==(Error, Error);
+bool operator!=(Error, Error);
+
 /// A system error is an error code that represents a POSIX system error.
 /// This class derives from Error, providing special constructors.
 struct System_error : Error {

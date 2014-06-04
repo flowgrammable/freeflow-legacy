@@ -33,7 +33,7 @@ struct Connection : Socket_handler {
   // We don't need to keep calling this function.
   bool on_write() {
     // FIXME: Actually check that connection has succeeded.
-    std::cout << "* connected\"n";
+    std::cout << "* connected\n";
 
     // Don't receive write events any more.
     reactor().unsubscribe_events(this, WRITE_EVENTS);

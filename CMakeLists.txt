@@ -20,11 +20,19 @@ list(APPEND CMAKE_MODULE_PATH ${FREEFLOW_MODULE_PATH})
 project(FreeFlow C CXX)
 
 # ---------------------------------------------------------------------------- #
+# Configuration
+
+# The current freeflow version. This must be updated for each release.
+set(FREEFLOW_VERSION "0.1.0")
+
+
+# ---------------------------------------------------------------------------- #
 # Build options
 #
 # Project-specific options used to configure the build.
 
 option(FREEFLOW_BUILD_TESTS "Build unit tests" ON)
+
 
 # ---------------------------------------------------------------------------- #
 # Environment configuration
@@ -34,13 +42,16 @@ option(FREEFLOW_BUILD_TESTS "Build unit tests" ON)
 
 include(FreeFlowHost)
 include(FreeFlowCompiler)
+include(FreeFlowTargets)
 include(FreeFlowDepend)
 include(FreeFlowTest)
 include(FreeFlowDoc)
 
+
 # ---------------------------------------------------------------------------- #
 # Build
 
+add_subdirectory(apps)
 add_subdirectory(freeflow)
 add_subdirectory(nocontrol)
 add_subdirectory(noctl)
