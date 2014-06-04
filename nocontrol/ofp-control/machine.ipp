@@ -29,23 +29,20 @@ inline Uint32
 Machine::xid() { return 0; }
 
 template<typename T>
-  inline void 
+  inline ff::Error
   Machine::push_msg(const T& x) {
     Header h { T::Kind, Uint16(bytes(h) + bytes(x)), xid() };
-    ch_.send.push_msg(h, x);
+    return ch_.send.push_msg(h, x);
   }
 
-
-inline Error
+inline ff::Error
 Machine::send_hello(const Buffer& data) {
-  push_msg(Hello {data});
-  return {};
+  return push_msg(Hello {data});
 }
 
-inline Error
+inline ff::Error
 Machine::send_error(Error::Hello_failed c) {
-  push_msg(Error {Error::HELLO_FAILED, c});
-  return {};
+  return push_msg(Error {Error::HELLO_FAILED, c});
 }
 
 } // namespace v1_0
