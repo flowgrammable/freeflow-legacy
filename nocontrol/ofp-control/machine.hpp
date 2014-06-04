@@ -25,8 +25,10 @@ namespace ofp {
 namespace v1_0 {
 
 /// The v1.0 OFP state machine for controllers.
-struct Machine {
-  enum State { INIT, RUN };
+class Machine {
+public:
+  /// Records the current state.
+  enum State { INITIAL, NEGOTIATE, DISCOVER, ESTABLISHED, FINAL};
 
   Machine(Channel&, Controller*);
 
@@ -36,25 +38,35 @@ struct Machine {
 
   Uint32 xid();
 
-  // State machine
-  bool on_init();
-  bool on_run();
-  bool on_close();
+  State state() const;
 
-  // Events
-  bool on_message();
+  // State entry events
+  Error on_initial();
+  Error on_negotiate(int);
+  Error on_discover();
+  Error on_run();
+  Error on_close();
+  Error on_final();
+
+  // State transition events
+  Error on_message();
+  Error on_initial_message(const Header&);
+  Error on_initial_hello(const Header&);
+  Error on_initial_other();
+  Error on_initial_timeout();
 
   // Asynchronous messagess
-  ff::Error send_hello(const Buffer& = {});
+  Error send_hello(const Buffer& = {});
+  Error send_feature_request();
 
   /// FIXME: These should all be part of the ofp errc enumeration.
-  ff::Error send_error(Error_message::Hello_failed);
-  ff::Error send_error(Error_message::Bad_request);
-  ff::Error send_error(Error_message::Bad_action);
-  ff::Error send_error(Error_message::Flow_mod_failed);
-  ff::Error send_error(Error_message::Port_mod_failed);
-  ff::Error send_error(Error_message::Queue_op_failed);
-  ff::Error send_vendor();
+  Error send_error(Error_message::Hello_failed);
+  Error send_error(Error_message::Bad_request);
+  Error send_error(Error_message::Bad_action);
+  Error send_error(Error_message::Flow_mod_failed);
+  Error send_error(Error_message::Port_mod_failed);
+  Error send_error(Error_message::Queue_op_failed);
+  Error send_vendor();
 
   // Acknowledged requests
   void request_echo();

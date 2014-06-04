@@ -94,10 +94,12 @@ public:
   Trap(Error e);
 
   explicit operator bool() const;
+  operator Error() const;
 
   Error error() const;
   Error::Code code() const; 
   Error::Data data() const;
+
 
 private:
   Error err_;

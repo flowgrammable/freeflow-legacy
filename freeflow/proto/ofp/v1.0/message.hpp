@@ -69,6 +69,10 @@ struct Hello {
 
 /// The Error message is sent to indicate an error in a previous
 /// communication.
+///
+/// \todo Integrate error codes with errc. These should be composed
+/// by shifting the entire code into a 32-bit space s.t. the type is
+/// represents the high-order bits and the code the low-order bits.
 struct Error_message {
   static constexpr Message_type Kind = ERROR;
 

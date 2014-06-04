@@ -34,7 +34,6 @@ namespace nocontrol {
 /// seems like the likely integration point for that work.
 class Ofp_handler : public ff::Socket_handler {
   struct Write_on_exit;
-  enum State { VERSION, RUN };
 public:
   Ofp_handler(ff::Reactor&, ff::Socket&&, ff::Controller&);
 
@@ -44,14 +43,11 @@ public:
   bool on_time(int);
 
 private:
-  bool on_version();
-
   bool read();
   bool write();
 
   ff::Controller&         ctrl_;
   ff::ofp::Channel        ch_;
-  State                   state_;
   ff::ofp::v1_0::Machine* sm_;
 };
 

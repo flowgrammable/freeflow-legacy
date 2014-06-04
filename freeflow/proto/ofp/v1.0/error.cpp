@@ -67,6 +67,9 @@ Errors::message(int ec) const {
   case errc::property_overflow: return "property overflow";
   case errc::bad_property_length: return "bad property length";
   case errc::bad_queue_length: return "bad queue length";
+
+  case errc::connection_refused: return "connection refused";
+  case errc::incompatible_version: return "incompatble version";
   }
   assert(false); // Unreachable
   return "";

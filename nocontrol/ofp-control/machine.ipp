@@ -19,7 +19,7 @@ namespace v1_0 {
 /// The v1.0 OFP state machine for controllers.
 inline
 Machine::Machine(Channel& ch, Controller* ctrl)
-  : ch_(ch), ctrl_(ctrl) { }
+  : ch_(ch), state_(INITIAL), ctrl_(ctrl) { }
 
 
 /// Returns a new transaction id for the message.
@@ -29,18 +29,26 @@ inline Uint32
 Machine::xid() { return 0; }
 
 template<typename T>
-  inline ff::Error
+  inline Error
   Machine::push_msg(const T& x) {
     Header h { T::Kind, Uint16(bytes(h) + bytes(x)), xid() };
     return ch_.send.push_msg(h, x);
   }
 
-inline ff::Error
+inline Machine::State
+Machine::state() const { return state_; }
+
+inline Error
 Machine::send_hello(const Buffer& data) {
   return push_msg(Hello {data});
 }
 
-inline ff::Error
+inline Error
+Machine::send_feature_request() {
+  return { };
+}
+
+inline Error
 Machine::send_error(Error_message::Hello_failed c) {
   return push_msg(Error_message {Error_message::HELLO_FAILED, c});
 }

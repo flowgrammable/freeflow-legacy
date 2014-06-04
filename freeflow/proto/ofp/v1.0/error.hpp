@@ -61,6 +61,11 @@ enum class errc {
   property_overflow,
   bad_property_length,
   bad_queue_length,
+
+  // Semantic errors
+  // TODO: Write out the other errors in Error_message
+  connection_refused,     // HF_EPERM
+  incompatible_version,   // HF_INCOMPATIBLE
 };
 
 const Error_category& error_category();

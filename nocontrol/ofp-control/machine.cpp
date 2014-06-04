@@ -18,39 +18,78 @@ namespace freeflow {
 namespace ofp {
 namespace v1_0 {
 
-bool
-Machine::on_init() {
-  state_ = INIT;
-  send_hello();
-  return true;
+/// Called when the state machine enters its intial state.
+/// This sends the hello message.
+Error
+Machine::on_initial() {
+  state_ = INITIAL;
+  return send_hello();
 }
 
-// We've transferred into a closing state.
-bool
-Machine::on_close() {
-  return false;
+/// Called when the state machine enters version negotiation. Here,
+/// v is the version requested by the remote switch. If the version 
+/// is not supported, return an error, and associate  the requested version.
+Error
+Machine::on_negotiate(int v) {
+  // Enter version nen
+  state_ = NEGOTIATE;
+  if (v != VERSION)
+    return {make_error_code(errc::incompatible_version), v};
+  else
+    return {};
 }
 
-bool
+Error
+Machine::on_discover() {
+  state_ = DISCOVER;
+  return send_feature_request();
+}
+
+/// Called when the state machine enters its fianl state.
+/// This releases all resources prior to shutdown.
+Error
+Machine::on_final() {
+  return {};
+}
+
+Error
 Machine::on_message() {
-  // Peek at the header.
-  ofp::Header h;
-  ch_.recv.peek_msg(h);
+  /// Peek at the message header.
+  Header h;
+  if(Trap err = ch_.recv.peek_msg(h))
+    return err;
+  
+  // The handling depends on the state.
+  switch (state_) {
+  case INITIAL: return on_initial_message(h);
+  default: return {};
+  }
+  return {};
+}
 
-  // FIXME: Validate the version.
+// Tansition out of the initial state based on the message received.
+Error
+Machine::on_initial_message(const Header& h) {
+  if (h.type == HELLO)
+    return on_initial_hello(h);
+  else
+    return on_initial_other();
+}
 
-  // FIXME: We sohuld only have feature messages here.
-  // if (state_ == INIT) {
-  //   if (h.type == ofp::v1_0::HELLO)
-  //     return on_version();
-  //   else
-  //     return on_close();
-  // } else if (state_ == VERSION) {
+// Enter the 
+Error
+Machine::on_initial_hello(const Header& h) {
+  Hello m;
+  if (Trap err = ch_.recv.pop_msg(h, m))
+    return err;
+  on_negotiate(h.version);
+  return {};
+}
 
-  // } else if (state_ == RUN) {
 
-  // }
-  return true;
+Error
+Machine::on_initial_other() {
+  return {};
 }
 
 } // namespace v1_0

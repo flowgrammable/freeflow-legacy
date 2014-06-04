@@ -41,16 +41,10 @@ Ofp_handler::on_open() {
   // FIXME: Create the state machine for the greatest version of the
   // protocol supported.
   sm_ = new ofp::v1_0::Machine(ch_, &ctrl_);
-
-  // FIXME: How do we do this in a version independent manner? Note
-  // that sm_ will be a base-class pointer in the not-so-distant future.
-  //
-  // FIXME: Error handling. Merge Alexander's changes ASAP.
-  if (Trap err = sm_->send_hello())
+  if (not sm_->on_initial())
     return false;
-  state_ = VERSION;
-
-  return true;
+  else
+    return true;
 }
 
 /// Destroy the state machine. Note that messages sent in a state
@@ -58,6 +52,7 @@ Ofp_handler::on_open() {
 bool 
 Ofp_handler::on_close() {
   std::cout << "* Close OFP connection\n";
+  sm_->on_final();
   delete sm_;
   return true; 
 }
@@ -72,10 +67,27 @@ Ofp_handler::on_read() {
   if (not read()) 
     return false;
 
-  if (state_ == VERSION)
-    return on_version();
-  else
-    return sm_->on_message();
+  // Process the message.
+  Error err = sm_->on_message();
+
+  // If version negotation returns an error, then we need to replace
+  // the state machine with a new version.
+  //
+  // FIXME: Refactor into a separate function.
+  if (sm_->state() == ff::ofp::v1_0::Machine::NEGOTIATE) {
+    // FIXME: Create a state machine for the requested version, transferring
+    // previously created state information from the current machine
+    // to the new machine.
+    if (not err) {
+      std::cout << "* Negotiate new version\n";
+      return false;
+    }
+
+    // Enter feature discovery.
+    sm_->on_discover();
+  } else if (not err) {
+    return false;
+  }
 }
 
 /// When a timeout occurs, notify the protocol of the expired timer.
@@ -85,28 +97,6 @@ Ofp_handler::on_time(int t) {
   // return proto_->on_time(reactor(), t);
   return true;
 }
-
-
-bool
-Ofp_handler::on_version() {
-  ofp::Header h;
-  ch_.recv.peek_msg(h);
-
-  // Determine what version of the protocol we're running.
-  //
-  // FIXME: We only support version 1 for now. In the future, we'll need
-  // to allocate a new state machine if we find that the switch is
-  // running some other version of the protocol.
-  if (h.version == 1) {
-    state_ = RUN;
-    return true;
-  } else {
-    // FIXME: How do we do this in a version independent way?
-    sm_->send_error(ofp::v1_0::Error_message::HF_INCOMPATIBLE);
-    return false;
-  }
-}
-
 
 // Read from the socket to put message data into the read queue.
 //
