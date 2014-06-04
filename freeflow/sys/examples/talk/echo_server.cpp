@@ -22,11 +22,13 @@
 #include <freeflow/sys/socket.hpp>
 #include <freeflow/sys/acceptor.hpp>
 #include <freeflow/sys/reactor.hpp>
+#include <freeflow/sys/cli.hpp>
 
 #include "service.hpp"
 
 using namespace std;
 using namespace freeflow;
+using namespace cli;
 
 struct Echo_server : Socket_handler {
   Echo_server(Reactor&, Socket&&);
@@ -92,12 +94,38 @@ using Echo_acceptor = Acceptor<Echo_server>;
 
 int 
 main(int argc, char* argv[]) {
-  if (argc < 2) {
-    std::cerr << "usage: ./echo port\n";
+  const char* prefix = "flog";
+  
+  Parameters parms;
+  parms.declare("port, p", cli::Int_typed(), cli::REQUIRED, "The port of the echo server");
+
+  // Initialize the parse state
+  Parse_state ps(argc, 1, argv);
+  if (ps.argc == 1) {
+    std::cerr << "error: a port number must be provided\n";
     return -1;
   }
-  Ip_port p = atoi(argv[1]);
 
+  // Parse for program options
+  cli::Arguments program_args;
+  parse_env(parms, program_args, prefix);
+  parse_args(parms, program_args, ps);
+
+  // Check program args
+  if (not check_args(parms, program_args)) {
+    program_args.display_errors(prefix);
+    return -1;
+  }
+
+  // Make sure no commands or positional arguments were provided
+  if (ps.current > 2) {
+    std::cerr << "error: invalid argument provided\n";
+    return -1;
+  }
+
+  // At this point we know the port was provided and nothing else
+  Ip_port p = program_args.get_named_value("port").as_int();
+  
   // Create the reactor.
   Reactor r;
   

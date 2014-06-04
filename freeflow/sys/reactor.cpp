@@ -84,7 +84,7 @@ static Reactor_list reactors_;
 // BUG: This is fundamentally broken. The handler needs to queue then
 // signal for each reactor instance.
 void
-signal_handler(int sig) { 
+signal_handler(int sig) {
   for (Reactor* r : reactors_)
     r->send_signal(sig);
 }
@@ -95,56 +95,22 @@ signal_handler(int sig) {
 // Reactor initialization
 
 namespace impl {
-
 inline Reactor*
 Reactor_init::self() { return reinterpret_cast<Reactor*>(this); }
 
 
-// Initialize the signal handler infrastructure. Note that this
-// happens only once.
-Reactor_init::Reactor_init() {
-  init_signals();
-
-  // Add the reactor to the global reactor list.
-  reactors_.push_back(self());
+// Initialize the signal handler infrastructure. This adds the reactor to 
+// the global reactor list.
+Reactor_init::Reactor_init() { 
+  reactors_.push_back(self()); 
 }
 
+// Remove this reactor from the registry.
+// NOTE: This is not efficient, but we expect the number of reactors
+// to be small.
 Reactor_init::~Reactor_init() {
-  // Remove this reactor from the registry.
-  // NOTE: This is not efficient, but we expect the number of reactors
-  // to be small.
   reactors_.erase(std::find(reactors_.begin(), reactors_.end(), self()));
 }
-
-
-// One-time initialiation of signal handling.
-///
-/// \todo This should probably register handlers on a per-thread
-/// basis, if that's possible.
-///
-/// \todo Consider specifying the set of handled signals via a
-/// signal mask. We can simply iterate over that and install
-/// (or uninstall) the handler where appropriate.
-void 
-Reactor_init::init_signals() {
-  Signal_action sa;
-  if (not sa) {
-    sa = Signal_action(signal_handler);
-
-    // TODO: What set of signals do I really want here? These are
-    // commonly handled, but by no means the only viable set.
-    //
-    // NOTE: Do not handle signals that would cause the behavior or
-    // the program to become undefined if ignored.
-    sa.install(SIGHUP);
-    sa.install(SIGINT);
-    sa.install(SIGQUIT);
-    sa.install(SIGTERM);
-    sa.install(SIGUSR1);
-    sa.install(SIGUSR2);
-  }
-}
-
 } // namesspace impl
 
 
@@ -201,6 +167,12 @@ Reactor::notify_signal(Resource_set& close) {
           close.insert(h->fd());
     }
   signals_.clear();
+}
+
+inline void
+Reactor::handle_signal(int sig) {
+  Signal_action sa = signal_handler;
+  sa.install(sig);
 }
 
 /// Run the reactor's event loop until stoppage is indicated.

@@ -272,27 +272,27 @@ Arguments::display_errors(const char* pre) {
         case ENVIRONMENT: {
           errors << "error: environment variable '" 
                  << make_env_var(pre, arg.first) << "' " 
-                 <<  display_err_info(arg.second.get_value()/*.as_error*/) << "\n";
+                 <<  display_err_info(arg.second.get_value().as_error()) << "\n";
           break;
         }
         case CONFIG: {
           errors << "error: argument '" << arg.first << "' from config file " 
-                 << display_err_info(arg.second.get_value()/*.as_error*/) << "\n";
+                 << display_err_info(arg.second.get_value().as_error()) << "\n";
           break;
         }
         case COMMAND_LINE: {
           errors << "error: command-line argument '" << arg.first << "' " 
-                 << display_err_info(arg.second.get_value()/*.as_error*/) << "\n";
+                 << display_err_info(arg.second.get_value().as_error()) << "\n";
           break;
         }
         case FROM_DEFAULT: {
           errors << "error: default argument '" << arg.first << "' " 
-                 << display_err_info(arg.second.get_value()/*.as_error*/) << "\n";
+                 << display_err_info(arg.second.get_value().as_error()) << "\n";
           break;
         }
         case NOT_PROVIDED: {
           errors << "error: argument '" << arg.first << "' " 
-                 <<  display_err_info(arg.second.get_value()/*.as_error*/) << "\n";
+                 <<  display_err_info(arg.second.get_value().as_error()) << "\n";
         }
       }
     }
@@ -384,7 +384,13 @@ Bool_typed::operator()(const json::Value& s) const {
 
 inline json::Value
 Int_typed::operator()(const json::Value& s) const {
-  return {};
+  int i;
+  // FIXME: Validate the s is a string.
+  std::stringstream ss(s.as_string());
+  if (ss >> i) 
+    return i;
+  else 
+    return make_type_error();
 }
 
 inline json::Value 
