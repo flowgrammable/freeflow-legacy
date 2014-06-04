@@ -21,7 +21,7 @@ namespace v1_0 {
 using ofp::to_view;
 using ofp::from_view;
 
-Errc
+Error
 to_view(View& v, const Match& m) {
   to_view(v, m.wildcards);
   to_view(v, m.in_port);
@@ -39,7 +39,7 @@ to_view(View& v, const Match& m) {
   return {};  
 }
 
-Errc
+Error
 from_view(View& v, Match& m) {
   from_view(v, m.wildcards);
   from_view(v, m.in_port);

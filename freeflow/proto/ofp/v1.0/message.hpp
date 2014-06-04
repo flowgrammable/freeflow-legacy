@@ -69,7 +69,7 @@ struct Hello {
 
 /// The Error message is sent to indicate an error in a previous
 /// communication.
-struct Error {
+struct Error_message {
   static constexpr Message_type Kind = ERROR;
 
   enum Type {
@@ -404,7 +404,7 @@ union Payload {
   ~Payload() { }
   
   Hello                hello;
-  Error                error;
+  Error_message        error;
   Echo_request         echo_req;
   Echo_reply           echo_rep;
   Vendor               vendor;
@@ -454,7 +454,7 @@ using ofp::from_view;
 using ofp::bytes;
 
 std::size_t bytes(const Hello&);
-std::size_t bytes(const Error&);
+std::size_t bytes(const Error_message&);
 std::size_t bytes(const Echo_request&);
 std::size_t bytes(const Echo_reply&);
 std::size_t bytes(const Vendor&);
@@ -479,53 +479,53 @@ std::size_t bytes(const Payload&, Message_type);
 constexpr std::size_t bytes(const Header&);
 std::size_t bytes(const Message&);
 
-Errc to_view(View&, const Hello&);
-Errc to_view(View&, const Error&);
-Errc to_view(View&, const Echo_request&);
-Errc to_view(View&, const Echo_reply&);
-Errc to_view(View&, const Vendor&);
-Errc to_view(View&, const Feature_request&);
-Errc to_view(View&, const Feature_reply&);
-Errc to_view(View&, const Config&);
-Errc to_view(View&, const Packet_in&);
-Errc to_view(View&, const Flow_removed&);
-Errc to_view(View&, const Port_status&);
-Errc to_view(View&, const Packet_out&);
-Errc to_view(View&, const Flow_mod&);
-Errc to_view(View&, const Port_mod&);
-Errc to_view(View&, const Stats_request&);
-Errc to_view(View&, const Stats_reply&);
-Errc to_view(View&, const Barrier_request&);
-Errc to_view(View&, const Barrier_reply&);
-Errc to_view(View&, const Queue_config_request&);
-Errc to_view(View&, const Queue_config_reply&);
-Errc to_view(View&, const Payload&, Message_type);
-Errc to_view(View&, const Header&);
-Errc to_view(View&, const Message&);
+Error to_view(View&, const Hello&);
+Error to_view(View&, const Error_message&);
+Error to_view(View&, const Echo_request&);
+Error to_view(View&, const Echo_reply&);
+Error to_view(View&, const Vendor&);
+Error to_view(View&, const Feature_request&);
+Error to_view(View&, const Feature_reply&);
+Error to_view(View&, const Config&);
+Error to_view(View&, const Packet_in&);
+Error to_view(View&, const Flow_removed&);
+Error to_view(View&, const Port_status&);
+Error to_view(View&, const Packet_out&);
+Error to_view(View&, const Flow_mod&);
+Error to_view(View&, const Port_mod&);
+Error to_view(View&, const Stats_request&);
+Error to_view(View&, const Stats_reply&);
+Error to_view(View&, const Barrier_request&);
+Error to_view(View&, const Barrier_reply&);
+Error to_view(View&, const Queue_config_request&);
+Error to_view(View&, const Queue_config_reply&);
+Error to_view(View&, const Payload&, Message_type);
+Error to_view(View&, const Header&);
+Error to_view(View&, const Message&);
 
-Errc from_view(View&, Hello&);
-Errc from_view(View&, Error&);
-Errc from_view(View&, Echo_request&);
-Errc from_view(View&, Echo_reply&);
-Errc from_view(View&, Vendor&);
-Errc from_view(View&, Feature_request&);
-Errc from_view(View&, Feature_reply&);
-Errc from_view(View&, Config&);
-Errc from_view(View&, Packet_in&);
-Errc from_view(View&, Flow_removed&);
-Errc from_view(View&, Port_status&);
-Errc from_view(View&, Packet_out&);
-Errc from_view(View&, Flow_mod&);
-Errc from_view(View&, Port_mod&);
-Errc from_view(View&, Stats_request&);
-Errc from_view(View&, Stats_reply&);
-Errc from_view(View&, Barrier_request&);
-Errc from_view(View&, Barrier_reply&);
-Errc from_view(View&, Queue_config_request&);
-Errc from_view(View&, Queue_config_reply&);
-Errc from_view(View&, Payload&, Message_type);
-Errc from_view(View&, Header&);
-Errc from_view(View&, Message&);
+Error from_view(View&, Hello&);
+Error from_view(View&, Error_message&);
+Error from_view(View&, Echo_request&);
+Error from_view(View&, Echo_reply&);
+Error from_view(View&, Vendor&);
+Error from_view(View&, Feature_request&);
+Error from_view(View&, Feature_reply&);
+Error from_view(View&, Config&);
+Error from_view(View&, Packet_in&);
+Error from_view(View&, Flow_removed&);
+Error from_view(View&, Port_status&);
+Error from_view(View&, Packet_out&);
+Error from_view(View&, Flow_mod&);
+Error from_view(View&, Port_mod&);
+Error from_view(View&, Stats_request&);
+Error from_view(View&, Stats_reply&);
+Error from_view(View&, Barrier_request&);
+Error from_view(View&, Barrier_reply&);
+Error from_view(View&, Queue_config_request&);
+Error from_view(View&, Queue_config_reply&);
+Error from_view(View&, Payload&, Message_type);
+Error from_view(View&, Header&);
+Error from_view(View&, Message&);
 
 // Validation
 

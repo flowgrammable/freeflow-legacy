@@ -26,7 +26,7 @@ void
 construct(Payload& m, Message_type t) {
   switch(t) {
   case HELLO: new (&m.hello) Hello(); break;
-  case ERROR: new (&m.error) Error(); break;
+  case ERROR: new (&m.error) Error_message(); break;
   case ECHO_REQUEST: new (&m.echo_req) Echo_request(); break;
   case ECHO_REPLY: new (&m.echo_rep) Echo_reply(); break;
   case VENDOR: new (&m.vendor) Vendor(); break;
@@ -47,7 +47,7 @@ construct(Payload& m, Message_type t) {
   case BARRIER_REPLY: new (&m.barrier_rep) Barrier_reply(); break;
   case QUEUE_GET_CONFIG_REQUEST: new (&m.queue_config_request) Queue_config_request(); break;
   case QUEUE_GET_CONFIG_REPLY: new (&m.queue_config_reply) Queue_config_reply(); break;
-  default: throw Errc(Errc::BAD_MESSAGE_TYPE);
+  default: throw make_error_code(errc::bad_message_type);
   }
 }
 
@@ -56,7 +56,7 @@ void
 destroy(Payload& m, Message_type t) {
   switch(t) {
   case HELLO: m.hello.~Hello(); break;
-  case ERROR: m.error.~Error(); break;
+  case ERROR: m.error.~Error_message(); break;
   case ECHO_REQUEST: m.echo_req.~Echo_request(); break;
   case ECHO_REPLY: m.echo_rep.~Echo_reply(); break;
   case VENDOR: m.vendor.~Vendor(); break;
@@ -77,7 +77,7 @@ destroy(Payload& m, Message_type t) {
   case BARRIER_REPLY: m.barrier_rep.~Barrier_reply(); break;
   case QUEUE_GET_CONFIG_REQUEST: m.queue_config_request.~Queue_config_request(); break;
   case QUEUE_GET_CONFIG_REPLY: m.queue_config_reply.~Queue_config_reply(); break;
-  default: throw Errc(Errc::BAD_MESSAGE_TYPE);
+  default: throw make_error_code(errc::bad_message_type);
   }
 }
 
@@ -110,61 +110,60 @@ bytes(const Payload& m, Message_type t) {
   case BARRIER_REPLY: return bytes(m.barrier_rep);
   case QUEUE_GET_CONFIG_REQUEST: return bytes(m.queue_config_request);
   case QUEUE_GET_CONFIG_REPLY: return bytes(m.queue_config_reply);
-  default:
-    throw Errc(Errc::BAD_MESSAGE_TYPE);
+  default: throw make_error_code(errc::bad_message_type);
   }
 }
 
 // -------------------------------------------------------------------------- //
 // To view
 
-Errc
+Error
 to_view(View& v, const Hello& m) {
   if (remaining(v) < bytes(m))
-    return Errc::HELLO_OVERFLOW;
+    return make_error_code(errc::hello_overflow);
   to_view(v, m.data);
   return {};
 }
 
-Errc
-to_view(View& v, const Error& m) {
+Error
+to_view(View& v, const Error_message& m) {
   if (remaining(v) < bytes(m))
-    return Errc::ERROR_OVERFLOW;
+    return make_error_code(errc::error_overflow);
   to_view(v, m.type);
   to_view(v, m.code);
   to_view(v, m.data);
   return {};
 }
 
-Errc
+Error
 to_view(View& v, const Echo_request& m) {
   if (remaining(v) < bytes(m))
-    return Errc::HELLO_OVERFLOW;
+    return make_error_code(errc::hello_overflow);
   to_view(v, m.data);
   return {};
 }
 
-Errc
+Error
 to_view(View& v, const Echo_reply& m) {
   if (remaining(v) < bytes(m))
-    return Errc::HELLO_OVERFLOW;
+    return make_error_code(errc::hello_overflow);
   to_view(v, m.data);
   return {};
 }
 
-Errc
+Error
 to_view(View& v, const Vendor& m) {
   if (remaining(v) < bytes(m))
-    return Errc::VENDOR_OVERFLOW;
+    return make_error_code(errc::vendor_overflow);
   to_view(v, m.vendor_id);
   to_view(v, m.data);
   return {};
 }
 
-Errc
+Error
 to_view(View& v, const Feature_reply& m) {
   if (remaining(v) < bytes(m))
-    return Errc::FEATURE_OVERFLOW;
+    return make_error_code(errc::feature_overflow);
   to_view(v, m.datapath_id);
   to_view(v, m.nbuffers);
   to_view(v, m.ntables);
@@ -175,28 +174,28 @@ to_view(View& v, const Feature_reply& m) {
   return {};
 }
 
-Errc
+Error
 to_view(View& v, const Get_config_reply& m) {
   if (remaining(v) < bytes(m))
-    return Errc::CONFIG_OVERFLOW;
+    return make_error_code(errc::config_overflow);
   to_view(v, m.flags);
   to_view(v, m.miss_send_len);
   return {};
 }
 
-Errc
+Error
 to_view(View& v, const Set_config& m) {
   if (remaining(v) < bytes(m))
-    return Errc::CONFIG_OVERFLOW;
+    return make_error_code(errc::config_overflow);
   to_view(v, m.flags);
   to_view(v, m.miss_send_len);
   return {};
 }
 
-Errc
+Error
 to_view(View& v, const Packet_in& m) {
   if (remaining(v) < bytes(m))
-    return Errc::PACKET_IN_OVERFLOW;
+    return make_error_code(errc::packet_in_overflow);
   to_view(v, m.buffer_id);
   to_view(v, m.total_len);
   to_view(v, m.in_port);
@@ -206,10 +205,10 @@ to_view(View& v, const Packet_in& m) {
   return {};
 }
 
-Errc
+Error
 to_view(View& v, const Flow_removed& m) {
   if (remaining(v) < bytes(m))
-    return Errc::FLOW_REMOVED_OVERFLOW;
+    return make_error_code(errc::flow_removed_overflow);
   to_view(v, m.match);
   to_view(v, m.cookie);
   to_view(v, m.priority);
@@ -224,20 +223,20 @@ to_view(View& v, const Flow_removed& m) {
   return {};
 }
 
-Errc
+Error
 to_view(View& v, const Port_status& m) {
   if (remaining(v) < bytes(m))
-    return Errc::PACKET_OUT_OVERFLOW;
+    return make_error_code(errc::packet_out_overflow);
   to_view(v, m.reason);
   pad(v, 7);
   to_view(v, m.port);
   return {};
 }
 
-Errc
+Error
 to_view(View& v, const Packet_out& m) {
   if (remaining(v) < bytes(m))
-    return Errc::PACKET_OUT_OVERFLOW;
+    return make_error_code(errc::packet_out_overflow);
 
   to_view(v, m.buffer_id);
   to_view(v, m.port);
@@ -247,17 +246,17 @@ to_view(View& v, const Packet_out& m) {
     if (Trap err = to_view(v, m.actions))
       return err.code();
   } else {
-    return Errc::PACKET_OUT_OVERFLOW;
+    return make_error_code(errc::packet_out_overflow);
   }
 
   to_view(v, m.data);
   return {};
 }
 
-Errc
+Error
 to_view(View& v, const Flow_mod& m) {
   if (remaining(v) < bytes(m))
-    return Errc::FLOW_MOD_OVERFLOW;
+    return make_error_code(errc::flow_mod_overflow);
   to_view(v, m.match);
   to_view(v, m.cookie);
   to_view(v, m.command);
@@ -270,10 +269,10 @@ to_view(View& v, const Flow_mod& m) {
   return to_view(v, m.actions);
 }
 
-Errc
+Error
 to_view(View& v, const Port_mod& m) {
   if (remaining(v) < bytes(m))
-    return Errc::PORT_MOD_OVERFLOW;
+    return make_error_code(errc::port_mod_overflow);
   to_view(v, m.port);
   to_view(v, m.hw_addr);
   to_view(v, m.config);
@@ -282,47 +281,47 @@ to_view(View& v, const Port_mod& m) {
   return {};
 }
 
-Errc
+Error
 to_view(View& v, const Stats_request& m) {
   if (remaining(v) < bytes(m))
-    return Errc::STATS_REQUEST_OVERFLOW;
+    return make_error_code(errc::stats_request_overflow);
   to_view(v, m.header);
   return to_view(v, m.payload, m.header.type);
 }
 
-Errc
+Error
 to_view(View& v, const Stats_reply& m) {
   if (remaining(v) < bytes(m))
-    return Errc::STATS_REPLY_OVERFLOW;
+    return make_error_code(errc::stats_reply_overflow);
   to_view(v, m.header);
   return to_view(v, m.payload, m.header.type);
 }
 
-Errc 
+Error 
 to_view(View& v, const Queue_config_request& m) {
   if (remaining(v) < bytes(m))
-    return Errc::QUEUE_CONFIG_REQUEST_OVERFLOW;
+    return make_error_code(errc::queue_config_request_overflow);
   to_view(v, m.port);
   return {};
 }
 
-Errc
+Error
 to_view(View& v, const Queue_config_reply& m) {
   if (remaining(v) < bytes(m))
-    return Errc::QUEUE_CONFIG_REPLY_OVERFLOW;
+    return make_error_code(errc::queue_config_reply_overflow);
   to_view(v, m.port);
   to_view(v, m.queues);
   return {};
 }
 
-Errc
+Error
 to_view(View& v, const Header& m) {
   if (not is_valid(m.version)) // Optional semantic check
-    return Errc::BAD_VERSION;
+    return make_error_code(errc::bad_version);
   if (not is_valid(m.type)) // Required semantic check
-    return Errc::BAD_MESSAGE_TYPE;
+    return make_error_code(errc::bad_message_type);
   if (m.length < bytes(m)) // Required semantic check
-    return Errc::BAD_HEADER_LENGTH;
+    return make_error_code(ofp::errc::bad_header_length);
   to_view(v, m.version);
   to_view(v, m.type);
   to_view(v, m.length);
@@ -330,7 +329,7 @@ to_view(View& v, const Header& m) {
   return {};
 }
 
-Errc
+Error
 to_view(View& v, const Payload& m, Message_type t) {
   switch(t) {
   case HELLO: return to_view(v, m.hello);
@@ -355,14 +354,14 @@ to_view(View& v, const Payload& m, Message_type t) {
   case BARRIER_REPLY: return to_view(v, m.barrier_rep);
   case QUEUE_GET_CONFIG_REQUEST: return to_view(v, m.queue_config_request);
   case QUEUE_GET_CONFIG_REPLY: return to_view(v, m.queue_config_reply);
-  default: return Errc::BAD_MESSAGE_TYPE;
+  default: return make_error_code(errc::bad_message_type);
   }
 }
 
-Errc
+Error
 to_view(View& v, const Message& m) {
   if (remaining(v) < bytes(m))
-    return Errc::MESSAGE_OVERFLOW; // FIXME: not the right code?
+    return make_error_code(errc::message_overflow); // FIXME: not the right code?
 
   to_view(v, m.header);
   
@@ -374,36 +373,36 @@ to_view(View& v, const Message& m) {
 // -------------------------------------------------------------------------- //
 // From view
 
-Errc
+Error
 from_view(View& v, Hello& m) {
   // No overflow check is needed (the buffer can be 0 bytes).
   from_view(v, m.data);
   return {};
 }
 
-Errc
-from_view(View& v, Error& m) {
+Error
+from_view(View& v, Error_message& m) {
   if (remaining(v) < bytes(m))
-    return Errc::ERROR_OVERFLOW;
+    return make_error_code(errc::error_overflow);
   from_view(v, m.type);
   from_view(v, m.code);
   from_view(v, m.data);
   return {};
 }
 
-Errc
+Error
 from_view(View& v, Vendor& m) {
   if (remaining(v) < bytes(m))
-    return Errc::VENDOR_OVERFLOW;
+    return make_error_code(errc::vendor_overflow);
   from_view(v, m.vendor_id);
   from_view(v, m.data);
   return {};
 }
 
-Errc
+Error
 from_view(View& v, Feature_reply& m) {
   if (remaining(v) < bytes(m))
-    return Errc::FEATURE_OVERFLOW;
+    return make_error_code(errc::feature_overflow);
   from_view(v, m.datapath_id);
   from_view(v, m.nbuffers);
   from_view(v, m.ntables);
@@ -414,28 +413,28 @@ from_view(View& v, Feature_reply& m) {
   return {};
 }
 
-Errc
+Error
 from_view(View& v, Get_config_reply& m) {
   if (remaining(v) < bytes(m))
-    return Errc::CONFIG_OVERFLOW;
+    return make_error_code(errc::config_overflow);
   from_view(v, m.flags);
   from_view(v, m.miss_send_len);
   return {};
 }
 
-Errc
+Error
 from_view(View& v, Set_config& m) {
   if (remaining(v) < bytes(m))
-    return Errc::CONFIG_OVERFLOW;
+    return make_error_code(errc::config_overflow);
   from_view(v, m.flags);
   from_view(v, m.miss_send_len);
   return {};
 }
 
-Errc
+Error
 from_view(View& v, Packet_in& m) {
   if (remaining(v) < bytes(m))
-    return Errc::PACKET_IN_OVERFLOW;
+    return make_error_code(errc::packet_in_overflow);
   from_view(v, m.buffer_id);
   from_view(v, m.total_len);
   from_view(v, m.in_port);
@@ -445,10 +444,10 @@ from_view(View& v, Packet_in& m) {
   return {};
 }
 
-Errc
+Error
 from_view(View& v, Flow_removed& m) {
   if (remaining(v) < bytes(m))
-    return Errc::FLOW_REMOVED_OVERFLOW;
+    return make_error_code(errc::flow_removed_overflow);
   from_view(v, m.match);
   from_view(v, m.cookie);
   from_view(v, m.priority);
@@ -463,20 +462,20 @@ from_view(View& v, Flow_removed& m) {
   return {};
 }
 
-Errc
+Error
 from_view(View& v, Port_status& m) {
   if (remaining(v) < bytes(m))
-    return Errc::PORT_STATUS_OVERFLOW;
+    return make_error_code(errc::port_status_overflow);
   from_view(v, m.reason);
   pad(v, 7);
   from_view(v, m.port);
   return {};
 }
 
-Errc
+Error
 from_view(View& v, Packet_out& m) {
   if (remaining(v) < bytes(m))
-    return Errc::PACKET_OUT_OVERFLOW;
+    return make_error_code(errc::packet_out_overflow);
 
   from_view(v, m.buffer_id);
   from_view(v, m.port);
@@ -486,17 +485,17 @@ from_view(View& v, Packet_out& m) {
     if (Trap err = from_view(v, m.actions))
       return err.code();
   } else {
-    return Errc::PACKET_OUT_OVERFLOW;
+    return make_error_code(errc::packet_out_overflow);
   }
 
   from_view(v, m.data);
   return {};
 }
 
-Errc
+Error
 from_view(View& v, Flow_mod& m) {
   if (remaining(v) < bytes(m))
-    return Errc::FLOW_MOD_OVERFLOW;
+    return make_error_code(errc::flow_mod_overflow);
   from_view(v, m.match);
   from_view(v, m.cookie);
   from_view(v, m.command);
@@ -509,10 +508,10 @@ from_view(View& v, Flow_mod& m) {
   return from_view(v, m.actions);
 }
 
-Errc
+Error
 from_view(View& v, Port_mod& m) {
   if (remaining(v) < bytes(m))
-    return Errc::PORT_MOD_OVERFLOW;
+    return make_error_code(errc::port_mod_overflow);
   from_view(v, m.port);
   from_view(v, m.hw_addr);
   from_view(v, m.config);
@@ -521,57 +520,57 @@ from_view(View& v, Port_mod& m) {
   return {};
 }
 
-Errc
+Error
 from_view(View& v, Stats_request& m) {
   if (remaining(v) < bytes(m))
-    return Errc::STATS_REQUEST_OVERFLOW;
+    return make_error_code(errc::stats_request_overflow);
   from_view(v, m.header);
   return from_view(v, m.payload, m.header.type);
 }
 
-Errc
+Error
 from_view(View& v, Stats_reply& m) {
   if (remaining(v) < bytes(m))
-    return Errc::STATS_REPLY_OVERFLOW;
+    return make_error_code(errc::stats_reply_overflow);
   from_view(v, m.header);
   return from_view(v, m.payload, m.header.type);
 }
 
-Errc 
+Error 
 from_view(View& v, Queue_config_request& m) {
   if (remaining(v) < bytes(m))
-    return Errc::QUEUE_CONFIG_REQUEST_OVERFLOW;
+    return make_error_code(errc::queue_config_request_overflow);
   from_view(v, m.port);
   return {};
 }
 
-Errc
+Error
 from_view(View& v, Queue_config_reply& m) {
   if (remaining(v) < bytes(m))
-    return Errc::QUEUE_CONFIG_REPLY_OVERFLOW;
+    return make_error_code(errc::queue_config_reply_overflow);
   from_view(v, m.port);
   from_view(v, m.queues);
   return {};
 }
 
-Errc
+Error
 from_view(View& v, Header& m) {
   if (remaining(v) < bytes(m))
-    return Errc::MESSAGE_OVERFLOW; // FIXME: not the right code?
+    return make_error_code(errc::message_overflow); // FIXME: not the right code?
   from_view(v, m.version);
   from_view(v, m.type);
   from_view(v, m.length);
   from_view(v, m.xid);
   if (not is_valid(m.version)) // Optional semantic check
-    return Errc::BAD_VERSION;
+    return make_error_code(errc::bad_version);
   if (not is_valid(m.type)) // Required semantic check
-    return Errc::BAD_MESSAGE_TYPE;
+    return make_error_code(errc::bad_message_type);
   if (m.length < bytes(m)) // Required semantic check
-    return Errc::BAD_HEADER_LENGTH;
+    return make_error_code(errc::bad_header_length);
   return {};
 }
 
-Errc
+Error
 from_view(View& v, Payload& m, Message_type t) {
   construct(m, t); // Guarantee initialization
   switch(t) {
@@ -597,14 +596,14 @@ from_view(View& v, Payload& m, Message_type t) {
   case BARRIER_REPLY: return from_view(v, m.barrier_rep);
   case QUEUE_GET_CONFIG_REQUEST: return from_view(v, m.queue_config_request);
   case QUEUE_GET_CONFIG_REPLY: return from_view(v, m.queue_config_reply);
-  default: return Errc::BAD_MESSAGE_TYPE;
+  default: return make_error_code(errc::bad_message_type);
   }
 }
 
-Errc
+Error
 from_view(View& v, Message& m) {
   if (remaining(v) < bytes(m))
-    return Errc::MESSAGE_OVERFLOW;
+    return make_error_code(errc::message_overflow);
 
   from_view(v, m.header);
 

@@ -33,7 +33,7 @@ enum class errc {
   bad_header_type,   // The header type is incorrect
 };
 
-const Error_category& ofp_error_category();
+const Error_category& error_category();
 Error_code make_error_code(errc);
 
 } // namespace ofp

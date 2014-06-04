@@ -44,7 +44,7 @@ Errors::message(int ec) const {
 } // namesapce
 
 const Error_category&
-ofp_error_category() {
+error_category() {
   static Errors errs_;
   return errs_;
 }

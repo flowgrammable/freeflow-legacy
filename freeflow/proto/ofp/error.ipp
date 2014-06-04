@@ -19,9 +19,8 @@ namespace ofp {
 /// Returns an error code representing an OpenFlow error.
 inline Error_code 
 make_error_code(errc ec) {
-  return { static_cast<int>(ec), ofp_error_category() };
+  return { static_cast<int>(ec), error_category() };
 }
-
 
 } // namespace ofp
 } // freeflow

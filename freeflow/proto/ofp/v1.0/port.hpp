@@ -96,8 +96,8 @@ using Port_list = Sequence<Port>;
 
 // Protocol
 constexpr std::size_t bytes(const Port&);
-Errc to_view(View&, const Port&);
-Errc from_view(View&, Port&);
+Error to_view(View&, const Port&);
+Error from_view(View&, Port&);
 
 } // namespace v1_0
 } // namespace ofp
