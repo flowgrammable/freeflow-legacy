@@ -19,24 +19,24 @@ namespace ofp {
 namespace v1_0 {
 
 // To view
-Errc
+Error
 to_view(View& v, const Rate_property& m) {
   to_view(v, m.rate);
   pad(v, 6);
   return {};
 }
 
-Errc
+Error
 to_view(View& v, const Property_value& m, Property_type t) {
   return to_view(v, m.rate);
 }
 
-Errc
+Error
 to_view(View& v, const Property& m) {
   if (not is_valid(m.property)) // Requried semantic check
-    return Errc::BAD_PROPERTY_TYPE;
+    return make_error_code(errc::bad_property_type);
   if (m.length < bytes(m)) // Required semantic check
-    return Errc::BAD_PROPERTY_LENGTH;
+    return make_error_code(errc::bad_property_length);
   
   to_view(v, m.property);
   to_view(v, m.length);
@@ -48,12 +48,12 @@ to_view(View& v, const Property& m) {
     return {};
 }
 
-Errc
+Error
 to_view(View& v, const Queue& m) {
   if (remaining(v) < bytes(m))
-    return Errc::PROPERTY_OVERFLOW;
+    return make_error_code(errc::property_overflow);
   if (m.length < bytes(m))
-    return Errc::BAD_QUEUE_LENGTH;
+    return make_error_code(errc::bad_queue_length);
   to_view(v, m.queue_id);
   to_view(v, m.length);
   pad(v, 2);
@@ -62,28 +62,28 @@ to_view(View& v, const Queue& m) {
 }
 
 // From view
-Errc
+Error
 from_view(View& v, Rate_property& m) {
   from_view(v, m.rate);
   pad(v, 6);
   return {};
 }
 
-Errc
+Error
 from_view(View& v, Property_value& m, Property_type t) {
   return from_view(v, m.rate);
 }
 
-Errc
+Error
 from_view(View& v, Property& m) {
   from_view(v, m.property);
   from_view(v, m.length);
   pad(v, 4);
 
   if (not is_valid(m.property)) // Required semantic check
-    return Errc::BAD_PROPERTY_TYPE;
+    return make_error_code(errc::bad_property_type);
   if (m.length < bytes(m)) // Required semantic check
-    return Errc::BAD_PROPERTY_LENGTH;
+    return make_error_code(errc::bad_property_length);
 
   if (Constrained_view c = constrain(v, m.length - bytes(m)))
     return to_view(c, m.value, m.property);
@@ -91,12 +91,12 @@ from_view(View& v, Property& m) {
     return {};
 }
 
-Errc
+Error
 from_view(View& v, Queue& m) {
   if (remaining(v) < bytes(m))
-    return Errc::PROPERTY_OVERFLOW;
+    return make_error_code(errc::property_overflow);
   if (m.length < bytes(m))
-    return Errc::BAD_QUEUE_LENGTH;
+    return make_error_code(errc::bad_queue_length);
   from_view(v, m.queue_id);
   from_view(v, m.length);
   pad(v, 2);

@@ -31,7 +31,7 @@ construct(Stats_reply_payload& m, Stats_type t) {
   case STATS_VENDOR: new (&m.vendor) Vendor_stats(); break;
   default: break;
   }
-  throw Errc::BAD_STATS_TYPE;
+  throw make_error_code(errc::bad_stats_type);
 }
 
 void 
@@ -46,7 +46,7 @@ destroy(Stats_reply_payload& m, Stats_type t) {
   case STATS_VENDOR: m.vendor.~Vendor_stats(); break;
   default: break;
   }
-  throw Errc::BAD_STATS_TYPE;
+  throw make_error_code(errc::bad_stats_type);
 }
 
 
@@ -65,7 +65,7 @@ bytes(const Stats_request_payload& m, Stats_type t) {
   case STATS_VENDOR: return bytes(m.vendor);
   default: break;
   }
-  throw Errc::BAD_STATS_TYPE;
+  throw make_error_code(errc::bad_stats_type);
 }
 
 std::size_t 
@@ -80,13 +80,13 @@ bytes(const Stats_reply_payload& m, Stats_type t) {
   case STATS_VENDOR: return bytes(m.vendor);
   default: break;
   }
-  throw Errc::BAD_STATS_TYPE;
+  throw make_error_code(errc::bad_stats_type);
 }
 
 // -------------------------------------------------------------------------- //
 // To view
 
-Errc 
+Error 
 to_view(View& v, const Flow_stats_request& m) {
   to_view(v, m.match);
   to_view(v, m.table_id);
@@ -95,14 +95,14 @@ to_view(View& v, const Flow_stats_request& m) {
   return {};
 }
 
-Errc 
+Error 
 to_view(View& v, const Port_stats_request& m) {
   to_view(v, m.port_number);
   pad(v, 6);
   return {};
 }
 
-Errc 
+Error 
 to_view(View& v, const Queue_stats_request& m) {
   to_view(v, m.port_number);
   pad(v, 2);
@@ -110,13 +110,13 @@ to_view(View& v, const Queue_stats_request& m) {
   return {};
 }
 
-Errc 
+Error 
 to_view(View& v, const Vendor_stats_request& m) {
   to_view(v, m.vendor_id);
   return {};
 }
 
-Errc 
+Error 
 to_view(View& v, const Description_stats& m) {
   to_view(v, m.mfr_desc);
   to_view(v, m.hw_desc);
@@ -126,10 +126,10 @@ to_view(View& v, const Description_stats& m) {
   return {};
 }
 
-Errc 
+Error 
 to_view(View& v, const Flow_stats_entry& m) {
   if (m.length < bytes(m)) // Required semantic check
-    return Errc::BAD_FLOW_STATS_LENGTH;
+    return make_error_code(errc::bad_flow_stats_length);
 
   to_view(v, m.length);
   to_view(v, m.table_id);
@@ -148,10 +148,10 @@ to_view(View& v, const Flow_stats_entry& m) {
   if (Constrained_view c = constrain(v, m.length - bytes(m)))
     return to_view(c, m.actions);
   return
-    Errc::FLOW_STATS_OVERFLOW;
+    make_error_code(errc::flow_stats_overflow);
 }
 
-Errc 
+Error 
 to_view(View& v, const Aggregate_stats& m) {
   to_view(v, m.packet_count);
   to_view(v, m.byte_count);
@@ -160,7 +160,7 @@ to_view(View& v, const Aggregate_stats& m) {
   return {};
 }
 
-Errc 
+Error 
 to_view(View& v, const Table_stats_entry& m) {
   to_view(v, m.table_id);
   pad(v, 3);
@@ -173,7 +173,7 @@ to_view(View& v, const Table_stats_entry& m) {
   return {};
 }
 
-Errc 
+Error 
 to_view(View& v, const Port_stats_entry& m) {
   to_view(v, m.port_number);
   pad(v, 6);
@@ -192,10 +192,10 @@ to_view(View& v, const Port_stats_entry& m) {
   return {};
 }
 
-Errc 
+Error 
 to_view(View& v, const Queue_stats_entry& m) {
   if (m.length != 32) // Required semantic check
-    return Errc::BAD_QUEUE_STATS_LENGTH;
+    return make_error_code(errc::bad_queue_stats_length);
   to_view(v, m.length);
   pad(v, 2);
   to_view(v, m.tx_bytes);
@@ -204,25 +204,25 @@ to_view(View& v, const Queue_stats_entry& m) {
   return {};
 }
 
-Errc 
+Error 
 to_view(View& v, const Vendor_stats& m) {
   if (remaining(v) < bytes(m))
-    return Errc::VENDOR_STATS_OVERFLOW;
+    return make_error_code(errc::vendor_stats_overflow);
   to_view(v, m.vendor_id);
   to_view(v, m.data);
   return {};
 }
 
-Errc 
+Error 
 to_view(View& v, const Stats_header& m) {
   if (not is_valid(m.type)) // Required semantic check
-    return Errc::BAD_STATS_TYPE;
+    return make_error_code(errc::bad_stats_type);
   to_view(v, m.type);
   to_view(v, m.flags);
   return {};
 }
 
-Errc
+Error
 to_view(View& v, const Stats_request_payload& m, Stats_type t) {
   switch(t) {
   case STATS_DESC: return to_view(v, m.empty);
@@ -234,10 +234,10 @@ to_view(View& v, const Stats_request_payload& m, Stats_type t) {
   case STATS_VENDOR: return to_view(v, m.vendor);  
   default: break;
   }
-  throw Errc::BAD_STATS_TYPE;
+  throw make_error_code(errc::bad_stats_type);
 }
 
-Errc
+Error
 to_view(View& v, const Stats_reply_payload& m, Stats_type t) {
   switch(t) {
   case STATS_DESC: return to_view(v, m.desc);
@@ -249,13 +249,13 @@ to_view(View& v, const Stats_reply_payload& m, Stats_type t) {
   case STATS_VENDOR: return to_view(v, m.vendor);  
   default: break;
   }
-  throw Errc::BAD_STATS_TYPE;
+  throw make_error_code(errc::bad_stats_type);
 }
 
 // -------------------------------------------------------------------------- //
 // From view
 
-Errc 
+Error 
 from_view(View& v, Flow_stats_request& m) {
   from_view(v, m.match);
   from_view(v, m.table_id);
@@ -264,14 +264,14 @@ from_view(View& v, Flow_stats_request& m) {
   return {};
 }
 
-Errc 
+Error 
 from_view(View& v, Port_stats_request& m) {
   from_view(v, m.port_number);
   pad(v, 6);
   return {};
 }
 
-Errc 
+Error 
 from_view(View& v, Queue_stats_request& m) {
   from_view(v, m.port_number);
   pad(v, 2);
@@ -279,13 +279,13 @@ from_view(View& v, Queue_stats_request& m) {
   return {};
 }
 
-Errc 
+Error 
 from_view(View& v, Vendor_stats_request& m) {
   from_view(v, m.vendor_id);
   return {};
 }
 
-Errc 
+Error 
 from_view(View& v, Description_stats& m) {
   from_view(v, m.mfr_desc);
   from_view(v, m.hw_desc);
@@ -295,7 +295,7 @@ from_view(View& v, Description_stats& m) {
   return {};
 }
 
-Errc 
+Error 
 from_view(View& v, Flow_stats_entry& m) {
   from_view(v, m.length);
   from_view(v, m.table_id);
@@ -312,15 +312,15 @@ from_view(View& v, Flow_stats_entry& m) {
   from_view(v, m.byte_count);
 
   if (m.length < bytes(m)) // Required semantic check
-    return Errc::BAD_FLOW_STATS_LENGTH;
+    return make_error_code(errc::bad_flow_stats_length);
 
   if (Constrained_view c = constrain(v, m.length - bytes(m)))
     return from_view(c, m.actions);
   return
-    Errc::FLOW_STATS_OVERFLOW;
+    make_error_code(errc::flow_stats_overflow);
 }
 
-Errc 
+Error 
 from_view(View& v, Aggregate_stats& m) {
   from_view(v, m.packet_count);
   from_view(v, m.byte_count);
@@ -329,7 +329,7 @@ from_view(View& v, Aggregate_stats& m) {
   return {};
 }
 
-Errc 
+Error 
 from_view(View& v, Table_stats_entry& m) {
   from_view(v, m.table_id);
   pad(v, 3);
@@ -342,7 +342,7 @@ from_view(View& v, Table_stats_entry& m) {
   return {};
 }
 
-Errc 
+Error 
 from_view(View& v, Port_stats_entry& m) {
   from_view(v, m.port_number);
   pad(v, 6);
@@ -361,7 +361,7 @@ from_view(View& v, Port_stats_entry& m) {
   return {};
 }
 
-Errc 
+Error 
 from_view(View& v, Queue_stats_entry& m) {
   from_view(v, m.length);
   pad(v, 2);
@@ -370,29 +370,29 @@ from_view(View& v, Queue_stats_entry& m) {
   from_view(v, m.tx_errors);
 
   if (m.length != 32) // Required semantic check
-    return Errc::BAD_QUEUE_STATS_LENGTH;
+    return make_error_code(errc::bad_queue_stats_length);
   return {};
 }
 
-Errc 
+Error 
 from_view(View& v, Vendor_stats& m) {
   if (remaining(v) < bytes(m))
-    return Errc::VENDOR_STATS_OVERFLOW;
+    return make_error_code(errc::vendor_stats_overflow);
   from_view(v, m.vendor_id);
   from_view(v, m.data);
   return {};
 }
 
-Errc 
+Error 
 from_view(View& v, Stats_header& m) {
   from_view(v, m.type);
   from_view(v, m.flags);
   if (not is_valid(m.type)) // Required semantic check
-    return Errc::BAD_STATS_TYPE;
+    return make_error_code(errc::bad_stats_type);
   return {};
 }
 
-Errc
+Error
 from_view(View& v, Stats_request_payload& m, Stats_type t) {
   switch(t) {
   case STATS_DESC: return from_view(v, m.empty);
@@ -404,10 +404,10 @@ from_view(View& v, Stats_request_payload& m, Stats_type t) {
   case STATS_VENDOR: return from_view(v, m.vendor);  
   default: break;
   }
-  throw Errc::BAD_STATS_TYPE;
+  throw make_error_code(errc::bad_stats_type);
 }
 
-Errc
+Error
 from_view(View& v, Stats_reply_payload& m, Stats_type t) {
   construct(m, t); // Guarantee that non-trivial members are valid
   switch(t) {
@@ -420,7 +420,7 @@ from_view(View& v, Stats_reply_payload& m, Stats_type t) {
   case STATS_VENDOR: return from_view(v, m.vendor);  
   default: break;
   }
-  throw Errc::BAD_STATS_TYPE;
+  throw make_error_code(errc::bad_stats_type);
 }
 
 } // namespace v1_0

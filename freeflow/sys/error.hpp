@@ -18,11 +18,21 @@
 #include <cassert>
 #include <cerrno>
 #include <cstdint>
+#include <system_error>
 #include <stdexcept>
 
 #include <freeflow/sys/meta.hpp>
 
 namespace freeflow {
+
+/// The Error_category type provdes a classifier for error codes and
+/// provides facilities for generating error messgaes.
+///
+/// \todo Make this an actual class and provide an overload of message()
+/// that takes additional error data for custom formatting.
+using Error_category = std::error_category;
+
+using Error_code = std::error_code;
 
 /// The Error class contains error codes and associated data from various
 /// operations.
@@ -38,39 +48,24 @@ namespace freeflow {
 /// is actually present. To capture the opposite, see the Valid 
 class Error {
 public:
-  /// The error code is an unsigned value indicating a specific kind of 
-  /// error.
-  using Code = std::size_t;
+  /// The error code is an internal representation of the error. This
+  /// combines a numeric code with an error category.
+  using Code = Error_code;
 
-  /// An error did not occur.
-  static constexpr Code SUCCESS = 0;
-  
-  /// An unspecified failure. There is no associated error data.
-  static constexpr Code FAILURE = -1;
-  
-  /// A POSIX system error. The error data is set to the corresponding
-  /// error number (errno).
-  static constexpr Code SYSTEM_ERROR = 1;
-  
-  /// An attempt to read or write past the end of a View or Buffer. The
-  /// error data is the number of bytes by which the boundary was overrun.
-  static constexpr Code BUFFER_OVERRUN = 2;
-  
   /// Associated data is interpreted by the error code. Errors involving 
   /// insufficient or excess data will associate the number of bytes by
   /// which a read or write would overflow or underflow a boundary.
   using Data = std::intptr_t;
 
-  constexpr Error();
-  constexpr Error(Code, Data = 0);
+  Error();
+  Error(Code, Data = 0);
 
-  template<typename T, typename = Requires<Derived_from<T, Error>()>>
-    constexpr Error(T);
+  explicit operator bool() const;
 
-  constexpr operator bool() const;
-
+  const Error_category& category() const;
   Code code() const;
   Data data() const;
+  std::string message() const;
 
 private:
   Code code_;
@@ -81,17 +76,12 @@ private:
 bool operator==(Error, Error);
 bool operator!=(Error, Error);
 
-/// A system error is an error code that represents a POSIX system error.
-/// This class derives from Error, providing special constructors.
-struct System_error : Error {
-  System_error() = default;
-  System_error(int);
-};
-
 
 // Error constructors.
 Error ok(bool b, Error err);
+
 Error system_error();
+Error system_error(int n);
 
 
 /// A Trap object is used to capture failures in if statements, allowing
@@ -101,9 +91,9 @@ Error system_error();
 ///     print(f.error());
 class Trap {
 public:
-  constexpr Trap(Error e);
+  Trap(Error e);
 
-  constexpr operator bool() const;
+  explicit operator bool() const;
 
   Error error() const;
   Error::Code code() const; 

@@ -215,7 +215,7 @@ template<typename T>
   Error 
   to_view(View& v, const Sequence<T>& s) {
     if (v.remaining() < bytes(s))
-      return Error::SEQUENCE_OVERFLOW;
+      return make_error_code(errc::sequence_overflow);
     for (const auto& x : s)
       to_view(v, x);
     return {};

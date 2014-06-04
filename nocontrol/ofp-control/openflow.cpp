@@ -102,7 +102,7 @@ Ofp_handler::on_version() {
     return true;
   } else {
     // FIXME: How do we do this in a version independent way?
-    sm_->send_error(ofp::v1_0::Error::HF_INCOMPATIBLE);
+    sm_->send_error(ofp::v1_0::Error_message::HF_INCOMPATIBLE);
     return false;
   }
 }

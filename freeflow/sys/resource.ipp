@@ -132,7 +132,7 @@ System_result::operator Trap() const { return error(); }
 
 /// Create a failed result with the given error code.
 inline System_result
-System_result::fail(int n) { return System_result(FAILED, System_error(n)); }
+System_result::fail(int n) { return System_result(FAILED, system_error(n)); }
 
 /// Create a deferred result.
 inline System_result
@@ -140,7 +140,7 @@ System_result::defer() { return System_result(DEFERRED); }
 
 /// Create a deferred result with the given error code.
 inline System_result
-System_result::defer(int n) { return System_result(DEFERRED, System_error(n)); }
+System_result::defer(int n) { return System_result(DEFERRED, system_error(n)); }
 
 /// Create a completed result with the given value.
 inline System_result
@@ -157,7 +157,7 @@ System_result::copy_value(const System_result& x) {
 inline void
 System_result::init_value(ssize_t n) { 
   if (failed())
-    data_.error = System_error(errno);
+    data_.error = system_error(errno);
   else if (completed())
     data_.value = n;
 }
