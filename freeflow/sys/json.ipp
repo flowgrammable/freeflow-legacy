@@ -34,6 +34,19 @@ String::is_quoted() const {
     return (*this)[0] == '"';
 }
 
+// -------------------------------------------------------------------------- //
+// Errors
+
+/// Create an error code for the given JSON error.
+inline
+std::error_code make_error_code(errc ec) {
+  return { static_cast<int>(ec), error_category() };
+}
+
+
+// -------------------------------------------------------------------------- //
+// Value
+
 inline
 Value::Value()
   : type_(NIL), data_() { }

@@ -36,9 +36,9 @@ template<typename S, typename F>
 
     // Bind to the given address and listen for connections.
     if (Trap err = rc().bind(a))
-      throw System_error(err.code());
+      throw err.code();
     if (Trap err = rc().listen(backlog))
-      throw System_error(err.code());
+      throw err.code();
   }
 
 /// Called when a connection is available. This invokes the acceptor

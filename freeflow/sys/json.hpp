@@ -78,6 +78,18 @@ using Object = std::map<String, Value>;
 /// Objects.
 using Pair = std::pair<String, Value>;
 
+/// The errc enumeration lists error codes for the JSON module.
+enum class errc {
+  SUCCESS,
+  PARSE_ERROR,
+  TYPE_ERROR,
+  VALUE_ERROR,
+  REQUIRED_VALUE
+};
+
+const std::error_category& error_category();
+std::error_code make_error_code(errc);
+
 
 /// The value class represents an abstract JSON value. It is one of the
 /// types specified above.
@@ -85,14 +97,6 @@ using Pair = std::pair<String, Value>;
 /// \todo The set of values can be readily extended with new literal types.
 /// For example, it might be useful to include ipv4 and ipv6 addresses,
 /// hex literals, or binary literals as new kinds of values.
-
-enum Error_code {
-  TYPE_ERROR,
-  PARSE_ERROR,
-  REQUIRED_ERROR,
-  VALUE_ERROR
-};
-
 class Value {
 public:
   enum Type {

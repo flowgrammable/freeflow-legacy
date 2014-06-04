@@ -385,7 +385,7 @@ Socket::accept() {
   socklen_t n = local.len();
   int s = ::accept(fd(), peer.addr(), &n);
   if (s < 0)
-    throw System_error(s);
+    throw system_error(s);
   return Socket(s, transport, local, peer);
 }
 
@@ -393,7 +393,7 @@ inline std::size_t
 Socket::recv(void* buf, std::size_t n, int f) {
   ssize_t r = ::recv(fd(), buf, n, f);
   if (r < 0)
-    throw System_error(r);
+    throw system_error(r);
   return r;  
 }
 
@@ -402,7 +402,7 @@ Socket::recv_from(void* buf, std::size_t n, Address& a) {
   socklen_t l;
   ssize_t r = ::recvfrom(fd(), buf, n, 0, a.addr(), &l);
   if (r < 0)
-    throw System_error(r);
+    throw system_error(r);
   return r;
 }
 
@@ -410,7 +410,7 @@ inline std::size_t
 Socket::send(const void* buf, std::size_t n, int f) {
   ssize_t r = ::send(fd(), buf, n, f);
   if (r < 0)
-    throw System_error(r);
+    throw system_error(r);
   return r;
 }
 
@@ -418,7 +418,7 @@ inline std::size_t
 Socket::send_to(const void* buf, std::size_t n, const Address& a) {
   ssize_t r = ::sendto(fd(), buf, n, 0, a.addr(), a.len());
   if (r < 0)
-    throw System_error(r);
+    throw system_error(r);
   return r;
 }
 

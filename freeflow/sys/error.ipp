@@ -17,32 +17,36 @@ namespace freeflow {
 // -------------------------------------------------------------------------- //
 // Error
 
-/// Initialize the message with the SUCCESS code.
-constexpr 
-Error::Error() : code_(SUCCESS), data_() { }
+/// Construct an error value that signifies success.
+inline 
+Error::Error() 
+  : code_(), data_() { }
 
-/// Initialize the message result with the result code and data.
-constexpr 
-Error::Error(Code c, Data d) : code_(c), data_(d) { }
+/// Construt an error value with the given code. Additiional data
+/// may also be associated with the error.
+inline
+Error::Error(Code c, Data d) 
+  : code_(c), data_(d) { }
 
-/// Allow implicit upcasting from derived types.
-template<typename T, typename X>
-  constexpr
-  Error::Error(T err)
-    : code_(err.code()), data_(err.data()) { }
+/// Allows contextual conversion to bool, returning true if and only
+/// if there is no error (i.e., the underlying code has value 0).
+inline
+Error::operator bool() const { return (bool)code_; }
 
-/// Allows contextual conversion to bool, returning true iff and only
-/// if code != SUCCESS 
-constexpr 
-Error::operator bool() const { return code_ == SUCCESS; }
+/// Returns the error category.
+inline const Error_category&
+Error::category() const { return code_.category(); }
 
 /// Returns the error code.
 inline Error::Code 
 Error::code() const { return code_; }
 
-/// Returns the error data.
+/// Returns associated error data.
 inline Error::Data
 Error::data() const { return data_; }
+
+inline std::string
+Error::message() const { return code_.message(); }
 
 /// Returns true when two errors have the same error code.
 inline bool 
@@ -50,16 +54,6 @@ operator==(Error a, Error b) { return a.code() == b.code(); }
 
 inline bool 
 operator!=(Error a, Error b) { return not(a == b); }
-
-
-// -------------------------------------------------------------------------- //
-// System error
-
-/// Construct a system error from the given result code. This associates
-/// the POSIX error code as the result type.
-inline
-System_error::System_error(int r) 
-  : Error(r < 0 ? SYSTEM_ERROR : SUCCESS, errno) { }
 
 
 // -------------------------------------------------------------------------- //
@@ -74,7 +68,11 @@ ok(bool b, Error err) { return b ? Error() : err; }
 
 /// Returns an error code that encapsulates the current system error.
 inline Error
-system_error() { return {Error::SYSTEM_ERROR, errno}; }
+system_error() { return system_error(errno); }
+
+/// Returns an error value corresponding to the given system error.
+inline Error
+system_error(int n) { return make_error_code(static_cast<std::errc>(n)); }
 
 
 // -------------------------------------------------------------------------- //
@@ -82,13 +80,13 @@ system_error() { return {Error::SYSTEM_ERROR, errno}; }
 
 /// Initialzie the trap with an error. This allows implicit conversions
 /// to trap objects.
-constexpr 
+inline
 Trap::Trap(Error e)
   : err_(e) { }
 
 /// Allows contextual conversion to bool, returning true if and only if
 /// the underlying error indicates failure.
-constexpr 
+inline 
 Trap::operator bool() const { return !err_; }
 
 /// Returns the underlying error.
