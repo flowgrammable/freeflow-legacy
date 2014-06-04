@@ -26,34 +26,31 @@ using namespace std;
 using namespace freeflow;
 using namespace cli;
 
-/// The talk client represents a client that is connected to a 
+/// The Connection class represents a client that is connected to a 
 /// talk server.
-struct Talk_client : Socket_handler {
+struct Connection : Socket_handler {
 
-  Talk_client(Reactor& r, Socket&& s)
+  Connection(Reactor& r, Socket&& s)
     : Socket_handler(r, READ_EVENTS, std::move(s)) { }
 
-  bool 
-  on_open() {
+  bool on_open() {
     std::cout << "* init client\n";
     return true;
   }
 
-  bool 
-  on_close() {
+  bool on_close() {
     std::cout << "* end client\n";
     return true;
   }
 
-  bool 
-  on_read() { 
+  bool on_read() {
     // Read data into the buffer.
     Buffer buf(2048);
     System_result r = rc().read(buf);
 
     // Make sure that this didn't fail.
     if (r.failed()) {
-      log() << "read error: '" << strerror(errno) << "'\n";
+      std::cout << "read error: '" << strerror(errno) << "'\n";
       return false;
     }
 
@@ -70,7 +67,6 @@ struct Talk_client : Socket_handler {
 
     return true;
   }
-
 };
 
 // Read from standard input and send through the connection.
@@ -100,17 +96,16 @@ struct Input_reader : Resource_handler {
     }
   }
 
-  Talk_client* conn;
+  Connection* conn;
 };
 
 /// The Talk factory is responsible for creating the Talk connection.
 /// It binds the created client to the input reader.
-struct Talk_factory {
-  Talk_factory(Input_reader& r)
-    : reader(r) { }
+struct Factory {
+  Factory(Input_reader& r) : reader(r) { }
 
-  Talk_client* operator()(Reactor& r, Socket&& s) {
-    Talk_client* c = new Talk_client(r, std::move(s));
+  Connection* operator()(Reactor& r, Socket&& s) {
+    Connection* c = new Connection(r, std::move(s));
     reader.conn = c;
     return c;
   }
@@ -118,7 +113,8 @@ struct Talk_factory {
   Input_reader& reader;
 };
 
-using Talk_connector = Connector<Talk_client, Talk_factory>;
+
+using Talk_connector = Connector<Connection, Factory>;
 
 int 
 main(int argc, char* argv[]) {
@@ -138,7 +134,7 @@ main(int argc, char* argv[]) {
   // Parse for program options
   cli::Arguments program_args;
   parse_env(parms, program_args, prefix);
-  parse_keyword_args(parms, program_args, ps);
+  parse_args(parms, program_args, ps);
 
   // Check program args
   if (not check_args(parms, program_args)) { 
