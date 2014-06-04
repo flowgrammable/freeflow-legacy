@@ -32,6 +32,7 @@ namespace freeflow {
 /// that takes additional error data for custom formatting.
 using Error_category = std::error_category;
 
+using Error_code = std::error_code;
 
 /// The Error class contains error codes and associated data from various
 /// operations.
@@ -49,7 +50,7 @@ class Error {
 public:
   /// The error code is an internal representation of the error. This
   /// combines a numeric code with an error category.
-  using Code = std::error_code;
+  using Code = Error_code;
 
   /// Associated data is interpreted by the error code. Errors involving 
   /// insufficient or excess data will associate the number of bytes by

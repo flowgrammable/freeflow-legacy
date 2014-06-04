@@ -15,7 +15,7 @@
 # ---------------------------------------------------------------------------- #
 # Build
 
-set(src ofp.cpp)
+set(src ofp.cpp error.cpp)
 
 set(hdr error.hpp
         ofp.hpp 
