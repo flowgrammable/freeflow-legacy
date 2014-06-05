@@ -51,47 +51,42 @@ Machine::in_discovery() const { return state_ == DISCOVER; }
 inline bool
 Machine::in_processing() const { return state_ == PROCESS; }
 
+/// Send a hello message contaning the given data.
+inline Error
+Machine::send_hello(const Buffer& data) { return push_msg(Hello {data}); }
 
 inline Error
-Machine::send_hello(const Buffer& data) {
-  return push_msg(Hello {data});
+Machine::send_error(Error_message::Hello_failed c, const Buffer& buf) {
+  return push_msg(Error_message {Error_message::HELLO_FAILED, c, buf});
 }
 
 inline Error
-Machine::send_feature_request() {
-  return { };
+Machine::send_error(Error_message::Bad_request c, const Buffer& buf) {
+  return push_msg(Error_message {Error_message::BAD_REQUEST, c, buf});
 }
 
 inline Error
-Machine::send_error(Error_message::Hello_failed c) {
-  return push_msg(Error_message {Error_message::HELLO_FAILED, c});
+Machine::send_error(Error_message::Bad_action c, const Buffer& buf) {
+  return push_msg(Error_message {Error_message::BAD_ACTION, c, buf});
 }
 
 inline Error
-Machine::send_error(Error_message::Bad_request c) {
-  return push_msg(Error_message {Error_message::BAD_REQUEST, c});
+Machine::send_error(Error_message::Flow_mod_failed c, const Buffer& buf) {
+  return push_msg(Error_message {Error_message::FLOW_MOD_FAILED, c, buf});
 }
 
 inline Error
-Machine::send_error(Error_message::Bad_action c) {
-  return push_msg(Error_message {Error_message::BAD_ACTION, c});
+Machine::send_error(Error_message::Port_mod_failed c, const Buffer& buf) {
+  return push_msg(Error_message {Error_message::PORT_MOD_FAILED, c, buf});
 }
 
 inline Error
-Machine::send_error(Error_message::Flow_mod_failed c) {
-  return push_msg(Error_message {Error_message::FLOW_MOD_FAILED, c});
+Machine::send_error(Error_message::Queue_op_failed c, const Buffer& buf) {
+  return push_msg(Error_message {Error_message::QUEUE_OP_FAILED, c, buf});
 }
 
 inline Error
-Machine::send_error(Error_message::Port_mod_failed c) {
-  return push_msg(Error_message {Error_message::PORT_MOD_FAILED, c});
-}
-
-inline Error
-Machine::send_error(Error_message::Queue_op_failed c) {
-  return push_msg(Error_message {Error_message::QUEUE_OP_FAILED, c});
-}
-
+Machine::request_features() { return push_msg(Feature_request {}); }
 
 } // namespace v1_0
 } // namespace ofp

@@ -49,54 +49,52 @@ public:
   Error on_negotiate(int);
   Error on_reject();
   Error on_discover();
-  Error on_run();
-  Error on_close();
+  Error on_process();
   Error on_final();
-
 
   // State transition events
   Error on_message();
-  Error on_initial_message(const Header&);
-  Error on_initial_hello(const Header&);
-  Error on_initial_other();
-  Error on_initial_timeout();
+  Error on_negotiate_message(const Header&);
+  Error on_negotiate_timeout();
+
+  Error on_discover_message(const Header&);
+  Error on_discover_timeout();
+
+  Error on_process_message(const Header&);
+
+private:
 
   // Asynchronous messagess
   Error send_hello(const Buffer& = {});
-  
-  Error send_error(Error_message::Hello_failed);
-  Error send_error(Error_message::Bad_request);
-  Error send_error(Error_message::Bad_action);
-  Error send_error(Error_message::Flow_mod_failed);
-  Error send_error(Error_message::Port_mod_failed);
-  Error send_error(Error_message::Queue_op_failed);
-  
-  Error send_feature_request();
-
-  /// FIXME: These should all be part of the ofp errc enumeration.
-  Error send_vendor();
+  Error send_error(Error_message::Hello_failed, const Buffer& = {});
+  Error send_error(Error_message::Bad_request, const Buffer& = {});
+  Error send_error(Error_message::Bad_action, const Buffer& = {});
+  Error send_error(Error_message::Flow_mod_failed, const Buffer& = {});
+  Error send_error(Error_message::Port_mod_failed, const Buffer& = {});
+  Error send_error(Error_message::Queue_op_failed, const Buffer& = {});
+  Error send_vendor(const Buffer& = {});
 
   // Acknowledged requests
-  void request_echo();
-  void request_features();
-  void request_ip_config();
-  void request_queue_config();
-  void request_stats();
-  void request_barrier();
+  Error request_echo();
+  Error request_features();
+  Error request_ip_config();
+  Error request_queue_config();
+  Error request_stats();
+  Error request_barrier();
 
   // State-modifying messages.
-  void set_config();
+  Error set_config();
   
-  void send_packet();
-  void release_packet();
-  void modify_flow();
-  void remove_flow();
-  void modify_port();
+  Error send_packet();
+  Error release_packet();
+  Error modify_flow();
+  Error remove_flow();
+  Error modify_port();
 
   // Events
-  void on_packet();
-  void on_flow_removed();
-  void on_port_status();
+  Error on_packet();
+  Error on_flow_removed();
+  Error on_port_status();
 
 private:
   Channel&        ch_;    // Communicaitons channel

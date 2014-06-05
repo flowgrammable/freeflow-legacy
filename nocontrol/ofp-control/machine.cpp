@@ -19,19 +19,19 @@ namespace ofp {
 namespace v1_0 {
 
 /// Called when the state machine enters its intial state.
-/// This sends the hello message.
+/// Transition immediately to the negotiating state and send
+/// the hello message.
 Error
 Machine::on_initial() {
-  state_ = INITIAL;
+  state_ = NEGOTIATE;
   return send_hello();
 }
 
 /// Called when the state machine enters version negotiation. Here,
 /// v is the version requested by the remote switch. If the version 
-/// is not supported, return an error, and associate  the requested version.
+/// is not supported, return a system error.
 Error
 Machine::on_negotiate(int v) {
-  state_ = NEGOTIATE;
   if (v != VERSION)
     return {make_error_code(std::errc::protocol_not_supported), v};
   else
@@ -49,7 +49,15 @@ Machine::on_reject() {
 Error
 Machine::on_discover() {
   state_ = DISCOVER;
-  return send_feature_request();
+  return request_features();
+}
+
+/// Enter into the processing state. There are no protocol actions 
+/// associtaed with this transition.
+Error
+Machine::on_process() {
+  state_ = PROCESS;
+  return {};
 }
 
 /// Called when the state machine enters its fianl state.
@@ -68,53 +76,80 @@ Machine::on_message() {
   
   // The handling depends on the state.
   switch (state_) {
-  case INITIAL: return on_initial_message(h);
+  case NEGOTIATE: return on_negotiate_message(h);
+  case DISCOVER: return on_discover_message(h);
+  case PROCESS: return on_process_message(h);
   default: return {};
   }
   return {};
 }
 
 // -------------------------------------------------------------------------- //
-// Initial state transitions
-
-/// Tansition out of the initial state based on the message received.
-Error
-Machine::on_initial_message(const Header& h) {
-  if (h.type == HELLO)
-    return on_initial_hello(h);
-  else
-    return on_initial_other();
-}
+// Version negotiation transitions
 
 /// Receiving a hello message causes a transition to the negotiating
 /// state.
+///
+/// Receiving any messagte other than hello results in disconnection.
+/// Note that this could be an Error message indicating version negotiation
+/// failure.
 Error
-Machine::on_initial_hello(const Header& h) {
+Machine::on_negotiate_message(const Header& h) {
+  if (h.type != HELLO)
+    return make_error_code(std::errc::protocol_error);
+
   Hello m;
   if (Trap err = ch_.recv.pop_msg(h, m))
     return err;
   return on_negotiate(h.version);
 }
 
-/// Receiving any messagte other than hello results in disconnection.
-/// Note that there are no OFP error messages corresponding to receiving
-/// bad hello messages, so we just return a protocol error.
-///
-/// Note that this could be an Error message indicating version negotiation
-/// failure.
+/// Receiving a timeout now results in protocol termination.
 Error
-Machine::on_initial_other() {
-  return make_error_code(std::errc::protocol_error);
+Machine::on_negotiate_timeout() {
+  return make_error_code(std::errc::timed_out);
+}
+
+
+// -------------------------------------------------------------------------- //
+// Feature discovery transitions
+
+/// Receiving a feature reply causes a transition to the processing
+/// state. Here, we create a switch object corresponding to the
+/// the features contained in the reply.
+///
+/// Receiving any messagte other than a feature reply results in 
+/// disconnection. This could be an Error message indicating version 
+/// negotiation failure or feature negotiation failure.
+Error
+Machine::on_discover_message(const Header& h) {
+  if (h.type != FEATURE_REPLY)
+    return make_error_code(std::errc::protocol_error);
+
+  Feature_reply m;
+  if (Trap err = ch_.recv.pop_msg(h, m))
+    return err;
+
+  // FIXME: Actually build or cnfigure the switch object.
+
+  return on_process();
 }
 
 /// Receiving a timeout now results in protocol termination.
 Error
-Machine::on_initial_timeout() {
+Machine::on_discover_timeout() {
   return make_error_code(std::errc::timed_out);
 }
 
+
 // -------------------------------------------------------------------------- //
-// Feature discovery transitions
+// Processing state transitions
+
+// FIXME: Do something here.
+Error
+Machine::on_process_message(const Header& h) {
+  return {};
+}
 
 
 } // namespace v1_0

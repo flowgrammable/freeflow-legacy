@@ -108,6 +108,8 @@ Ofp_handler::check_version(ff::Error err) {
   // Enter feature discovery.
   if (Trap err = sm_->on_discover())
     return false;
+  else
+    return true;
 }
 
 /// Replace the state machine with one of the specified version.
