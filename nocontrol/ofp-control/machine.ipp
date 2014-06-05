@@ -19,7 +19,7 @@ namespace v1_0 {
 /// The v1.0 OFP state machine for controllers.
 inline
 Machine::Machine(Channel& ch, Controller* ctrl)
-  : ch_(ch), state_(INITIAL), ctrl_(ctrl) { }
+  : ch_(ch), state_(CLOSED), ctrl_(ctrl) { }
 
 
 /// Returns a new transaction id for the message.
@@ -42,14 +42,6 @@ Machine::state() const { return state_; }
 /// Returns true if the state machine is negotiaing the protocol version.
 inline bool
 Machine::in_negotiation() const { return state_ == NEGOTIATE; }
-
-/// Returns true if the state machine is discovering features.
-inline bool
-Machine::in_discovery() const { return state_ == DISCOVER; }
-
-/// Returns true if the state mahcine is processing events.
-inline bool
-Machine::in_processing() const { return state_ == PROCESS; }
 
 /// Send a hello message contaning the given data.
 inline Error

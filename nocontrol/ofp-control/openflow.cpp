@@ -41,7 +41,7 @@ Ofp_handler::on_open() {
   // FIXME: Create the state machine for the greatest version of the
   // protocol supported.
   sm_ = new ofp::v1_0::Machine(ch_, &ctrl_);
-  if (not sm_->on_initial())
+  if (not sm_->enter_hello_wait())
     return false;
   else
     return true;
@@ -52,7 +52,9 @@ Ofp_handler::on_open() {
 bool 
 Ofp_handler::on_close() {
   std::cout << "* Close OFP connection\n";
-  sm_->on_final();
+
+  // FIXME: Send a message to the SM?
+
   delete sm_;
   return true; 
 }
@@ -101,12 +103,14 @@ Ofp_handler::check_version(ff::Error err) {
       return false;
 
     // Try changing versions. If that fails, drop the connection.
-    if (not change_version(err.data()))
+    if (not change_version(err.data())) {
+      sm_->enter_version_rejection();
       return false;
+    }
   }
 
   // Enter feature discovery.
-  if (Trap err = sm_->on_discover())
+  if (Trap err = sm_->enter_feature_wait())
     return false;
   else
     return true;
@@ -120,13 +124,6 @@ Ofp_handler::check_version(ff::Error err) {
 bool
 Ofp_handler::change_version(int v) {
   std::cout << "* Request OFP version " << v << '\n';
-
-  // FIXME: This isn't right. Actually change versions and don't
-  // immediately drop the connection.
-  if (Trap err = sm_->on_reject())
-    return false;
-  
-  // FIXME: Don't do this.
   return false;
 }
 

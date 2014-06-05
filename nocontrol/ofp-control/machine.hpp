@@ -28,7 +28,9 @@ namespace v1_0 {
 class Machine {
 public:
   /// Records the current state.
-  enum State { INITIAL, NEGOTIATE, DISCOVER, PROCESS, FINAL};
+  enum State { 
+    CLOSED, HELLO_WAIT, NEGOTIATE, REJECT, FEATURE_WAIT, ESTABLISHED 
+  };
 
   Machine(Channel&, Controller*);
 
@@ -41,29 +43,26 @@ public:
   // State queries
   State state() const;
   bool in_negotiation() const;
-  bool in_discovery() const;
-  bool in_processing() const;
 
   // State entry events
-  Error on_initial();
-  Error on_negotiate(int);
-  Error on_reject();
-  Error on_discover();
-  Error on_process();
-  Error on_final();
+  Error enter_hello_wait();
+  Error enter_version_negotiation();
+  Error enter_version_rejection();
+  Error enter_feature_wait();
+  Error enter_established();
 
-  // State transition events
+  // State transitions
   Error on_message();
-  Error on_negotiate_message(const Header&);
-  Error on_negotiate_timeout();
-
-  Error on_discover_message(const Header&);
-  Error on_discover_timeout();
-
-  Error on_process_message(const Header&);
 
 private:
+  // State transition events
+  Error on_hello_wait_message(const Header&);
+  Error on_hello_wait_timeout();
+  Error on_feature_wait_message(const Header&);
+  Error on_feature_wait_timeout();
+  Error on_established_message(const Header&);
 
+private:
   // Asynchronous messagess
   Error send_hello(const Buffer& = {});
   Error send_error(Error_message::Hello_failed, const Buffer& = {});

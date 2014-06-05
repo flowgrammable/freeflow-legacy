@@ -18,12 +18,11 @@ namespace freeflow {
 namespace ofp {
 namespace v1_0 {
 
-/// Called when the state machine enters its intial state.
-/// Transition immediately to the negotiating state and send
-/// the hello message.
+/// Called when the state machine begins waiting for a hello message.
+/// Send a hello message to the switch.
 Error
-Machine::on_initial() {
-  state_ = NEGOTIATE;
+Machine::enter_hello_wait() {
+  state_ = HELLO_WAIT;
   return send_hello();
 }
 
@@ -31,39 +30,31 @@ Machine::on_initial() {
 /// v is the version requested by the remote switch. If the version 
 /// is not supported, return a system error.
 Error
-Machine::on_negotiate(int v) {
-  if (v != VERSION)
-    return {make_error_code(std::errc::protocol_not_supported), v};
-  else
-    return {};
+Machine::enter_version_negotiation() { 
+  state_ = NEGOTIATE; 
+  return {};
 }
 
 /// Called when negotiation has failed, this sends an error messgae
 /// rejecting the incompatible version.
 Error
-Machine::on_reject() {
+Machine::enter_version_rejection() {
+  state_ = REJECT;
   return send_error(Error_message::HF_INCOMPATIBLE);
 }
 
 /// Enter into the feature discovery state. Send a feature request.
 Error
-Machine::on_discover() {
-  state_ = DISCOVER;
+Machine::enter_feature_wait() {
+  state_ = FEATURE_WAIT;
   return request_features();
 }
 
 /// Enter into the processing state. There are no protocol actions 
 /// associtaed with this transition.
 Error
-Machine::on_process() {
-  state_ = PROCESS;
-  return {};
-}
-
-/// Called when the state machine enters its fianl state.
-/// This releases all resources prior to shutdown.
-Error
-Machine::on_final() {
+Machine::enter_established() {
+  state_ = ESTABLISHED;
   return {};
 }
 
@@ -76,9 +67,9 @@ Machine::on_message() {
   
   // The handling depends on the state.
   switch (state_) {
-  case NEGOTIATE: return on_negotiate_message(h);
-  case DISCOVER: return on_discover_message(h);
-  case PROCESS: return on_process_message(h);
+  case HELLO_WAIT: return on_hello_wait_message(h);
+  case FEATURE_WAIT: return on_feature_wait_message(h);
+  case ESTABLISHED: return on_established_message(h);
   default: return {};
   }
   return {};
@@ -94,19 +85,29 @@ Machine::on_message() {
 /// Note that this could be an Error message indicating version negotiation
 /// failure.
 Error
-Machine::on_negotiate_message(const Header& h) {
+Machine::on_hello_wait_message(const Header& h) {
   if (h.type != HELLO)
     return make_error_code(std::errc::protocol_error);
 
+  // Enter the version negotiation state.
+  enter_version_negotiation();
+
+  // Decode the error.
   Hello m;
   if (Trap err = ch_.recv.pop_msg(h, m))
     return err;
-  return on_negotiate(h.version);
+
+  // Tentatively reject the connection if the version is not the
+  // same. The handler may allocate a new state machine.
+  if (h.version != VERSION)
+    return {make_error_code(std::errc::protocol_not_supported), h.version};
+  else
+    return {};
 }
 
 /// Receiving a timeout now results in protocol termination.
 Error
-Machine::on_negotiate_timeout() {
+Machine::on_hello_wait_timeout() {
   return make_error_code(std::errc::timed_out);
 }
 
@@ -122,7 +123,7 @@ Machine::on_negotiate_timeout() {
 /// disconnection. This could be an Error message indicating version 
 /// negotiation failure or feature negotiation failure.
 Error
-Machine::on_discover_message(const Header& h) {
+Machine::on_feature_wait_message(const Header& h) {
   if (h.type != FEATURE_REPLY)
     return make_error_code(std::errc::protocol_error);
 
@@ -130,14 +131,16 @@ Machine::on_discover_message(const Header& h) {
   if (Trap err = ch_.recv.pop_msg(h, m))
     return err;
 
+  // FIXME: Enter a feature discovery phase? Probbly not necesssary.
+  //
   // FIXME: Actually build or cnfigure the switch object.
 
-  return on_process();
+  return enter_established();
 }
 
 /// Receiving a timeout now results in protocol termination.
 Error
-Machine::on_discover_timeout() {
+Machine::on_feature_wait_timeout() {
   return make_error_code(std::errc::timed_out);
 }
 
@@ -147,7 +150,7 @@ Machine::on_discover_timeout() {
 
 // FIXME: Do something here.
 Error
-Machine::on_process_message(const Header& h) {
+Machine::on_established_message(const Header& h) {
   return {};
 }
 
