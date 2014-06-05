@@ -35,8 +35,22 @@ template<typename T>
     return ch_.send.push_msg(h, x);
   }
 
+/// Returns the current state of the machine,
 inline Machine::State
 Machine::state() const { return state_; }
+
+/// Returns true if the state machine is negotiaing the protocol version.
+inline bool
+Machine::in_negotiation() const { return state_ == NEGOTIATE; }
+
+/// Returns true if the state machine is discovering features.
+inline bool
+Machine::in_discovery() const { return state_ == DISCOVER; }
+
+/// Returns true if the state mahcine is processing events.
+inline bool
+Machine::in_processing() const { return state_ == PROCESS; }
+
 
 inline Error
 Machine::send_hello(const Buffer& data) {
@@ -52,6 +66,32 @@ inline Error
 Machine::send_error(Error_message::Hello_failed c) {
   return push_msg(Error_message {Error_message::HELLO_FAILED, c});
 }
+
+inline Error
+Machine::send_error(Error_message::Bad_request c) {
+  return push_msg(Error_message {Error_message::BAD_REQUEST, c});
+}
+
+inline Error
+Machine::send_error(Error_message::Bad_action c) {
+  return push_msg(Error_message {Error_message::BAD_ACTION, c});
+}
+
+inline Error
+Machine::send_error(Error_message::Flow_mod_failed c) {
+  return push_msg(Error_message {Error_message::FLOW_MOD_FAILED, c});
+}
+
+inline Error
+Machine::send_error(Error_message::Port_mod_failed c) {
+  return push_msg(Error_message {Error_message::PORT_MOD_FAILED, c});
+}
+
+inline Error
+Machine::send_error(Error_message::Queue_op_failed c) {
+  return push_msg(Error_message {Error_message::QUEUE_OP_FAILED, c});
+}
+
 
 } // namespace v1_0
 } // namespace ofp

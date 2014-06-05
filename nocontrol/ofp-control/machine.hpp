@@ -28,7 +28,7 @@ namespace v1_0 {
 class Machine {
 public:
   /// Records the current state.
-  enum State { INITIAL, NEGOTIATE, DISCOVER, ESTABLISHED, FINAL};
+  enum State { INITIAL, NEGOTIATE, DISCOVER, PROCESS, FINAL};
 
   Machine(Channel&, Controller*);
 
@@ -38,15 +38,21 @@ public:
 
   Uint32 xid();
 
+  // State queries
   State state() const;
+  bool in_negotiation() const;
+  bool in_discovery() const;
+  bool in_processing() const;
 
   // State entry events
   Error on_initial();
   Error on_negotiate(int);
+  Error on_reject();
   Error on_discover();
   Error on_run();
   Error on_close();
   Error on_final();
+
 
   // State transition events
   Error on_message();
@@ -57,15 +63,17 @@ public:
 
   // Asynchronous messagess
   Error send_hello(const Buffer& = {});
-  Error send_feature_request();
-
-  /// FIXME: These should all be part of the ofp errc enumeration.
+  
   Error send_error(Error_message::Hello_failed);
   Error send_error(Error_message::Bad_request);
   Error send_error(Error_message::Bad_action);
   Error send_error(Error_message::Flow_mod_failed);
   Error send_error(Error_message::Port_mod_failed);
   Error send_error(Error_message::Queue_op_failed);
+  
+  Error send_feature_request();
+
+  /// FIXME: These should all be part of the ofp errc enumeration.
   Error send_vendor();
 
   // Acknowledged requests

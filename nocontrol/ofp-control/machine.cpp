@@ -31,14 +31,21 @@ Machine::on_initial() {
 /// is not supported, return an error, and associate  the requested version.
 Error
 Machine::on_negotiate(int v) {
-  // Enter version nen
   state_ = NEGOTIATE;
   if (v != VERSION)
-    return {make_error_code(errc::incompatible_version), v};
+    return {make_error_code(std::errc::protocol_not_supported), v};
   else
     return {};
 }
 
+/// Called when negotiation has failed, this sends an error messgae
+/// rejecting the incompatible version.
+Error
+Machine::on_reject() {
+  return send_error(Error_message::HF_INCOMPATIBLE);
+}
+
+/// Enter into the feature discovery state. Send a feature request.
 Error
 Machine::on_discover() {
   state_ = DISCOVER;
@@ -67,7 +74,10 @@ Machine::on_message() {
   return {};
 }
 
-// Tansition out of the initial state based on the message received.
+// -------------------------------------------------------------------------- //
+// Initial state transitions
+
+/// Tansition out of the initial state based on the message received.
 Error
 Machine::on_initial_message(const Header& h) {
   if (h.type == HELLO)
@@ -76,21 +86,36 @@ Machine::on_initial_message(const Header& h) {
     return on_initial_other();
 }
 
-// Enter the 
+/// Receiving a hello message causes a transition to the negotiating
+/// state.
 Error
 Machine::on_initial_hello(const Header& h) {
   Hello m;
   if (Trap err = ch_.recv.pop_msg(h, m))
     return err;
-  on_negotiate(h.version);
-  return {};
+  return on_negotiate(h.version);
 }
 
-
+/// Receiving any messagte other than hello results in disconnection.
+/// Note that there are no OFP error messages corresponding to receiving
+/// bad hello messages, so we just return a protocol error.
+///
+/// Note that this could be an Error message indicating version negotiation
+/// failure.
 Error
 Machine::on_initial_other() {
-  return {};
+  return make_error_code(std::errc::protocol_error);
 }
+
+/// Receiving a timeout now results in protocol termination.
+Error
+Machine::on_initial_timeout() {
+  return make_error_code(std::errc::timed_out);
+}
+
+// -------------------------------------------------------------------------- //
+// Feature discovery transitions
+
 
 } // namespace v1_0
 } // namespace ofp

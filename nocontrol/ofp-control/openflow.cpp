@@ -72,22 +72,10 @@ Ofp_handler::on_read() {
 
   // If version negotation returns an error, then we need to replace
   // the state machine with a new version.
-  //
-  // FIXME: Refactor into a separate function.
-  if (sm_->state() == ff::ofp::v1_0::Machine::NEGOTIATE) {
-    // FIXME: Create a state machine for the requested version, transferring
-    // previously created state information from the current machine
-    // to the new machine.
-    if (not err) {
-      std::cout << "* Negotiate new version\n";
-      return false;
-    }
+  if (sm_->in_negotiation())
+    return check_version(err);
 
-    // Enter feature discovery.
-    sm_->on_discover();
-  } else if (not err) {
-    return false;
-  }
+  return (bool)err;
 }
 
 /// When a timeout occurs, notify the protocol of the expired timer.
@@ -96,6 +84,48 @@ Ofp_handler::on_time(int t) {
   // Write_on_exit g(*this);
   // return proto_->on_time(reactor(), t);
   return true;
+}
+
+/// Check the result of receiving a mesage tha triggered version
+/// negotiation. If the error indicates that the protocol is not
+/// supported, try changing the protocol version. If any other error
+/// occurs, drop the connection.
+///
+/// After the approproate protocol version is set, enter its
+/// discovery phase.
+bool
+Ofp_handler::check_version(ff::Error err) {
+  if (not err) {
+    // On any other error, drop the connection.
+    if (err.code() != std::errc::protocol_not_supported)
+      return false;
+
+    // Try changing versions. If that fails, drop the connection.
+    if (not change_version(err.data()))
+      return false;
+  }
+
+  // Enter feature discovery.
+  if (Trap err = sm_->on_discover())
+    return false;
+}
+
+/// Replace the state machine with one of the specified version.
+/// This need to swap out the internal state maintained by the
+/// existing state machine.
+///
+/// \todo Actually implement this function.
+bool
+Ofp_handler::change_version(int v) {
+  std::cout << "* Request OFP version " << v << '\n';
+
+  // FIXME: This isn't right. Actually change versions and don't
+  // immediately drop the connection.
+  if (Trap err = sm_->on_reject())
+    return false;
+  
+  // FIXME: Don't do this.
+  return false;
 }
 
 // Read from the socket to put message data into the read queue.

@@ -43,6 +43,10 @@ public:
   bool on_time(int);
 
 private:
+  bool check_version(ff::Error);
+  bool change_version(int);
+
+private:
   bool read();
   bool write();
 

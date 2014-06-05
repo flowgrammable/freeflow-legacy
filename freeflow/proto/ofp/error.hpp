@@ -15,15 +15,16 @@
 #ifndef FREEFLOW_OFP_ERROR_HPP
 #define FREEFLOW_OFP_ERROR_HPP
 
+#include <freeflow/sys/data.hpp>
 #include <freeflow/sys/error.hpp>
 
 namespace freeflow {
 namespace ofp {
 
 // -------------------------------------------------------------------------- //
-// Common errors
+// Error codes
 
-enum class errc {
+enum class errc : Uint32 {
   header_overflow,   // The header size exceeds available data
   payload_overflow,  // The payload size exceeds available data
   sequence_overflow, // A sequencesize exceeds available data
