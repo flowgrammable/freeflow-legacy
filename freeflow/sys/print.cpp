@@ -44,14 +44,22 @@ void Printer::print(const json::String& s){
 }
 
 void Printer::print(const json::Pair& p){
-  os_ << p.first << ": " << p.second;
+  os_ << p.first;
+  json::Value temp = p.second;
+  print(temp);
+}
+
+void Printer::print(const json::String& s, const json::Value& v) {
+  os_ << s;
+  json::Value temp = v;
+  print(temp);
 }
 
 // Print beginning of object
 void Printer::start_object() {
  ++indent_; 
  tab_  += "   ";
- os_<< '{' << "\n" << tab_ ;
+ os_ << "\n" << tab_ ;
 }
 
 // Print end of object. 
@@ -60,27 +68,28 @@ void Printer::end_object() {
  tab_.clear();
  for(int i=0; i < indent_; i++)
   tab_+=" ";
-os_ << '}' << "\n" << tab_;
+os_ << "\n" << tab_;
 }
 
 // Print object
 void Printer::print(const json::Object& o) {
   start_object();     
   for(auto& it : o){
-  os_ << it.first << " : ";
-  // print(it.second);
+  os_ << it.first;
+  json::Value temp = it.second;
+  print(temp);
  }
  end_object();
 }
 
 // Print beginning of an array.
 void Printer::start_array() {
-  os_  << '[';
+  // \TODO Indentation for arrays?
 }
 
 // Print end of array
 void Printer::end_array() {
-  os_ << ']';
+  // \TODO Indentation for arrays?
 }
 
 // Print array
@@ -96,12 +105,13 @@ void Printer::print(const json::Array& a) {
       os_ << it;
       break;
       case json::Value::ARRAY:
-      // print(it);
-      break;
       case json::Value::OBJECT:
-      // print(it);
+      case json::Value::ERROR:
+      json::Value temp = it;
+      print(temp);
       break;
     }
+    // \TODO Add default case.
   }
   end_array();
 }
