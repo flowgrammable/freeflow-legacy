@@ -34,12 +34,12 @@ struct Connection : Socket_handler {
     : Socket_handler(r, READ_EVENTS, std::move(s)) { }
 
   bool on_open() {
-    std::cout << "* init client\n";
+    std::cout << "* Connected client to server\n";
     return true;
   }
 
   bool on_close() {
-    std::cout << "* end client\n";
+    std::cout << "* Disconnected client from server\n";
     return true;
   }
 

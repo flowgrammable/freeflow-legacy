@@ -67,13 +67,14 @@ Connection::on_close() {
 
 bool
 Connection::on_read() { 
+  std::stringstream msg;
   // Read data into the buffer.
   Buffer buf(2048);
   System_result r = rc().read(buf);
 
   // Make sure that this didn't fail.
   if (r.failed()) {
-    log() << "read error: '" << strerror(errno) << "'\n";
+    // log() << "read error: '" << strerror(errno) << "'\n";
     return false;
   }
 
@@ -82,11 +83,19 @@ Connection::on_read() {
   // Close the socket if we read 0 bytes.
   if (n == 0)
     return false;
+
+  // Append the IP address of the sender to the beginning of the msg
+  msg << bracket(rc().peer) << ": " << buf.data();
+
+  // Clear the buffer and fill it back up with the new [ip]: msg format
+  buf.clear();
+  for (const char& c : msg.str()) 
+    buf.push_back(c);
+
+  n = buf.size();
   
-  // Log the message. Write a newline if needed.
-  log() << buf.data();
-  if (buf[n-1] != '\n')
-    std::cout << '\n';
+  // Log the message on the server
+  std::cout << buf.data();
 
   // Send the message to all clients
   for (const auto& s : clients)
@@ -94,10 +103,6 @@ Connection::on_read() {
   
   return true;
 }
-
-std::ostream&
-Connection::log() { return std::cout << bracket(rc().peer) << ' '; }
-
 
 using Talk_acceptor = Acceptor<Connection>;
 
