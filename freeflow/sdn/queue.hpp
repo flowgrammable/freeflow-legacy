@@ -15,7 +15,17 @@
 #ifndef FREEFLOW_QUEUE_HPP
 #define FREEFLOW_QUEUE_HPP
 
+#include <vector>
+
 namespace freeflow {
+
+struct Queue {
+  
+};
+
+struct Queues {
+  std::vector<Queue> queues;
+};
 
 } // namespace freeflow
 

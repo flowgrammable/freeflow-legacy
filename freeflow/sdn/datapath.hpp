@@ -22,9 +22,9 @@
 namespace freeflow {
 
 struct Datapath {
-  std::vector<Port> ports;
+  Ports ports;
   std::vector<Flow_table> tables;
-  std::vector<Buffer> buffers;
+  std::vector<Buffer> buffers; // change to Packet_buffer class
 };
 
 } // namespace freeflow
