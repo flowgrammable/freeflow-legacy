@@ -15,31 +15,76 @@
 #ifndef FREEFLOW_PORT_HPP
 #define FREEFLOW_PORT_HPP
 
+#include <freeflow/proto/ofp/ofp.hpp>
 #include <freeflow/sdn/queue.hpp>
 #include <freeflow/sys/data.hpp>
+
 
 namespace freeflow {
 
 
-
+///The Port structure represents a port on a switch ...
 struct Port {
-  Uint32 port_number;
-  Queues queues;
+
+  // static constexpr Uint32 MAX         = 0xffffff00;
+  // static constexpr Uint32 IN_PORT     = 0xfffffff8;
+  // static constexpr Uint32 TABLE       = 0xfffffff9;
+  // static constexpr Uint32 NORMAL      = 0xfffffffa;
+  // static constexpr Uint32 FLOOD       = 0xfffffffb;
+  // static constexpr Uint32 ALL         = 0xfffffffc;
+  // static constexpr Uint32 CONTROLLER  = 0xfffffffd;
+  // static constexpr Uint32 LOCAL       = 0xfffffffe;
+  // static constexpr Uint32 NONE        = 0xffffffff; // how to handle
+  // static constexpr Uint32 ANY         = 0xffffffff; // these two??
+
+  /// The Mode enumeration represents the communication system of 
+  /// the port. It can either be half-duplex or full-duplex.
+  enum Mode { 
+    HALF_DUPLEX,  // Two-way communication with one direction at a time
+    FULL_DUPLEX   // Two-way communication with both directions simultaneously
+  };
+
+  /// The Medium enum represents the cable medium for the port
+  enum Medium { 
+    COPPER,
+    FIBER
+  };
+
+  Uint32        port_number;
+  Queues        queues;
+
+  ofp::Mac_addr hw_addr;    // From FeatureRes.ports[]
+  std::string   name;       // From FeatureRes.ports[]
+  int           speed;      // From FeatureRes.ports[].supported
+  Mode          mode;       // From FeatureRes.ports[].supported
+  Medium        medium;     // From FeatureRes.ports[].supported
+  bool          auto_neg;   // From FeatureRes.ports[].supported
+  bool          pause;      // From FeatureRes.ports[].supported
+  bool          pause_asym; // From FeatureRes.ports[].supported
+
 };
 
+/// The Ports structure represents a list of ports and some information 
+/// related to them.
 struct Ports {
+  bool port_stats;  // From FeatureRes.capabilities
+  bool stp;         // From FeatureRes.capabilities
+  bool all;         // 
+  bool controller;  // 
+  bool local;       // 
+  bool table;       // 
+  bool in_port;     // 
+  bool normal;      // 
+  bool flood;       // 
+  bool none;        // 
+
   std::vector<Port> ports;
 
 };
 
 
-// todo: does it matter that port stats entry does not have padding 
-// after id in freeflow/proto/ofp/v1.0/stats.hpp ?
-
-// Structure of an ofp port stats response. Unsupported counters have
-// all bits set to 1.
-// 
-// Is this needed?
+// The Port_stats structure contains all of the counters for a port.
+// Any counters that are not supported have all bits set to 1.
 struct Port_stats {
   Uint32 port_number;   // Physical port number
   Uint64 rx_packets;    // Number of received packets

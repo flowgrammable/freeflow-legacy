@@ -19,7 +19,7 @@ inline
 Switch::Switch(Controller& c, Socket& s)
   : ctrl_(c), sock_(s) { }
 
-/// Return the controller associated with the swithc.
+/// Return the controller associated with the switch.
 inline Controller& 
 Switch::controller() { return ctrl_; }
 

@@ -17,13 +17,20 @@
 
 #include <vector>
 
+#include <freeflow/sys/data.hpp>
+
 namespace freeflow {
 
 struct Queue {
-  
+  Uint32 queue_id;
+  bool   min_rate; // From QueueGetConfigRes.queues[].property
+  int    rate;     // From QueueGetConfigRes.queues[].rate
+
 };
 
 struct Queues {
+  bool pause_asym;   // From FeatureRes.ports[].supported
+  bool queue_stats;  // From FeatureRes.capabilities
   std::vector<Queue> queues;
 };
 

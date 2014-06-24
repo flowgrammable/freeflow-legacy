@@ -15,6 +15,7 @@
 #ifndef FREEFLOW_TABLE_HPP
 #define FREEFLOW_TABLE_HPP
 
+#include <string>
 #include <vector>
 
 #include <freeflow/sdn/match.hpp>
@@ -22,17 +23,27 @@
 
 namespace freeflow {
 
-struct Flow;
+// A Table is used to store Flows and counters.
+template<typename T>
+  using Table = std::vector<T>;
 
-struct Flow_table {
-  std::vector<Flow> flows;
-};
 
 struct Flow{
-  Match match;
+  Match  match;
   Action action;
   // Instruction instruction; ?
 };
+
+struct Flow_table {
+  int flowtable_id; // is this needed? maybe use the vector index instead?
+  std::string name; // From StatsRes.Table.name
+  bool table_stats; // From FeatureRes.capabilities
+  bool flow_stats;  // From FeatureRes.capabilities
+
+  Table<Flow> flows;
+};
+
+
 
 } // namespace freeflow
 
