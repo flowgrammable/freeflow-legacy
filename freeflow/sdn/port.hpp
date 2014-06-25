@@ -66,20 +66,17 @@ struct Port {
 
 /// The Ports structure represents a list of ports and some information 
 /// related to them.
-struct Ports {
+struct Ports : public std::vector<Port>{
   bool port_stats;  // From FeatureRes.capabilities
   bool stp;         // From FeatureRes.capabilities
-  bool all;         // 
-  bool controller;  // 
-  bool local;       // 
-  bool table;       // 
-  bool in_port;     // 
-  bool normal;      // 
-  bool flood;       // 
-  bool none;        // 
-
-  std::vector<Port> ports;
-
+  bool all;         // True
+  bool controller;  // True
+  bool local;       // True
+  bool table;       // True
+  bool in_port;     // True
+  bool normal;      // ?
+  bool flood;       // ?
+  bool none;        // True
 };
 
 

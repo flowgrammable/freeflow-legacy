@@ -28,8 +28,8 @@
 
 namespace freeflow {
 
-class Controller;
-class Switch;
+// class Controller;
+// class Switch;
 
 namespace ofp {
 

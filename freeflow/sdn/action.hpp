@@ -18,7 +18,18 @@
 namespace freeflow {
 
 struct Action {
-  
+  bool output;       // From FeatureRes.actions
+  bool set_vlan_vid; // From FeatureRes.actions
+  bool set_vlan_pcp; // From FeatureRes.actions
+  bool strip_vlan;   // From FeatureRes.actions
+  bool set_dl_src;   // From FeatureRes.actions
+  bool set_dl_dst;   // From FeatureRes.actions
+  bool set_nw_src;   // From FeatureRes.actions
+  bool set_nw_dst;   // From FeatureRes.actions
+  bool set_nw_tos;   // From FeatureRes.actions
+  bool set_tp_src;   // From FeatureRes.actions
+  bool set_tp_dst;   // From FeatureRes.actions
+  bool enqueue;      // From FeatureRes.actions
 };
 
 } // namespace freeflow

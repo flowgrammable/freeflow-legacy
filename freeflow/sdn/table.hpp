@@ -28,7 +28,7 @@ template<typename T>
   using Table = std::vector<T>;
 
 
-struct Flow{
+struct Flow {
   Match  match;
   Action action;
   // Instruction instruction; ?

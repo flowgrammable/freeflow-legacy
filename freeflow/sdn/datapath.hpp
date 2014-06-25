@@ -22,6 +22,16 @@
 namespace freeflow {
 
 struct Datapath {
+  Uint64      datapath_id;   // From FeatureRes
+  bool        ip_reassembly; // From FeatureRes.capabilities
+  
+  // std::string mfr_desc;      // From StatsReq.Desc.mfr_desc
+  // std::string hw_desc;       // From StatsReq.Desc.hw_desc
+  // std::string sw_desc;       // From StatsReq.Desc.sw_desc
+  // std::string serial_num;    // From StatsReq.Desc.serial_num
+  // std::string dp_desc;       // From StatsReq.Desc.dp_desc
+
+
   Ports ports;
   std::vector<Flow_table> tables;
   std::vector<Buffer> buffers; // change to Packet_buffer class

@@ -151,6 +151,8 @@ Protocol::feature_recv(Reactor& r) {
   v1_0::Feature_reply p;
   get_payload(h, p);
 
+  switch_->features_config(h, p);
+
   // Inidate that the switch is done being configured.
   switch_->configured();
 

@@ -88,7 +88,7 @@ Ofp_handler::on_time(int t) {
   return true;
 }
 
-/// Check the result of receiving a mesage tha triggered version
+/// Check the result of receiving a mesage that triggered version
 /// negotiation. If the error indicates that the protocol is not
 /// supported, try changing the protocol version. If any other error
 /// occurs, drop the connection.
@@ -130,7 +130,7 @@ Ofp_handler::change_version(int v) {
 // Read from the socket to put message data into the read queue.
 //
 // FIXME: This is incredibly brittle, and its slow. First, each message
-// requires twp reads and two allocations. Second, we may not actually
+// requires two reads and two allocations. Second, we may not actually
 // receive everything in each read, meaning we're going to miss data.
 // Third, error handling is totally broken.
 //

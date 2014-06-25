@@ -17,9 +17,14 @@
 
 #include <cassert>
 
+
 #include <freeflow/sys/data.hpp>
+#include <freeflow/sdn/datapath.hpp>
 #include <freeflow/sdn/application.hpp>
 #include <freeflow/sdn/request.hpp>
+#include <freeflow/proto/ofp/v1.0/message.hpp>
+// #include <freeflow/proto/ofp/protocol.hpp>
+// #include <freeflow/proto/ofp/v1.0/protocol.hpp>
 
 namespace freeflow {
 
@@ -58,10 +63,13 @@ public:
 
   Request_queue& requests();
 
+  void features_config(ofp::Header, ofp::v1_0::Feature_reply);
+
 private:
   Controller&   ctrl_;
   Socket&       sock_;
   Request_queue reqs_;
+  Datapath dp_;
   
   // The hosted application.
   // TODO: Should be applications.

@@ -112,9 +112,9 @@ Application::flow_removed(Switch&, const Flow&) { }
 inline void
 Application::port_status(Switch&, const Port&) { }
 
-/// \todo Document me.
-inline void
-Application::table_status(Switch&, const Table&) { }
+// /// \todo Document me.
+// inline void
+// Application::table_status(Switch&, const Table&) { }
 
 /// \todo Document me.
 inline void
