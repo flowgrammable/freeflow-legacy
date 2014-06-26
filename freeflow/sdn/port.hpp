@@ -15,16 +15,17 @@
 #ifndef FREEFLOW_PORT_HPP
 #define FREEFLOW_PORT_HPP
 
+#include <string>
+
 #include <freeflow/sdn/queue.hpp>
 #include <freeflow/sys/data.hpp>
-#include <freeflow/proto/ofp/ofp.hpp>
-#include <freeflow/proto/ofp/v1.0/message.hpp>
-
-
 
 namespace freeflow {
 
-bool get_bit(int, int);
+/// A MAC address is a 48-bit identifier that uniquely identifies the device.
+struct Mac_addr {
+  Uint8 addr[6];
+};
 
 ///The Port structure represents a port on a switch ...
 struct Port {
@@ -61,7 +62,6 @@ struct Port {
   /// the features advertised by the port, the features supported by the
   /// port, and the features of the port advertised by peers.
   struct Features {
-    void set_features(ofp::v1_0::Port::Features);
     int    speed;     
     Mode   mode;      
     Medium medium;    
@@ -70,14 +70,14 @@ struct Port {
     bool   pause_asym;
   };
 
-  Uint32        port_number; // Physical port number
-  Queues        queues;      // Queues linked to this port
-  ofp::Mac_addr hw_addr;     // From FeatureRes.ports[]
-  std::string   name;        // From FeatureRes.ports[]
-  Features      current;     // From FeatureRes.ports[].supported
-  Features      advertised;  // From FeatureRes.ports[].supported
-  Features      supported;   // From FeatureRes.ports[].supported
-  Features      peer;        // From FeatureRes.ports[].supported
+  Uint32      port_number; // Physical port number
+  Queues      queues;      // Queues linked to this port
+  Mac_addr    hw_addr;     // From FeatureRes.ports[]
+  std::string name;        // From FeatureRes.ports[]
+  Features    current;     // From FeatureRes.ports[].supported
+  Features    advertised;  // From FeatureRes.ports[].supported
+  Features    supported;   // From FeatureRes.ports[].supported
+  Features    peer;        // From FeatureRes.ports[].supported
 };
 
 /// The Ports structure represents a list of ports and some information 

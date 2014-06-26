@@ -37,6 +37,7 @@ public:
 
   // Observers
   Controller& controller();
+  Datapath& datapath();
 
   // Transport
   // FIXME: Get socket address and other information.
@@ -59,15 +60,13 @@ public:
   void terminate();
 
   Request_queue& requests();
-
-  void features_config(ofp::Header, ofp::v1_0::Feature_reply);
-
+  
 private:
   Controller&   ctrl_;
   Socket&       sock_;
   Request_queue reqs_;
   Datapath dp_;
-  
+
   // The hosted application.
   // TODO: Should be applications.
   Application* app_; 

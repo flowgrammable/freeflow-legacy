@@ -31,7 +31,6 @@ struct Datapath {
   // std::string serial_num;    // From StatsReq.Desc.serial_num
   // std::string dp_desc;       // From StatsReq.Desc.dp_desc
 
-
   Ports ports;
   std::vector<Flow_table> flow_tables;
   std::vector<Buffer> buffers; // change to Packet_buffer class
@@ -42,3 +41,5 @@ struct Datapath {
 #include <freeflow/sdn/datapath.ipp>
 
 #endif
+
+

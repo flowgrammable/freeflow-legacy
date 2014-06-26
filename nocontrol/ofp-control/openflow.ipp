@@ -31,4 +31,15 @@ Ofp_handler::Ofp_handler(ff::Reactor& r, ff::Socket&& s, ff::Controller& c)
   , ctrl_(c)
 { }
 
+inline void 
+set_mac_addr(freeflow::Mac_addr a, const freeflow::ofp::Mac_addr& b) {
+  for (int i=0; i < 6; ++i) 
+    a.addr[i] = b.addr[i];
+}
+
+/// Extract the nth bit from the number passed in.
+/// \todo where to move this?
+inline bool
+get_bit(int number, int n) { return (number & (1 << n)) >> n; }
+
 } // namespace nocontrol

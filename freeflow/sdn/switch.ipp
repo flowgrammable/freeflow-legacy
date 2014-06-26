@@ -23,6 +23,10 @@ Switch::Switch(Controller& c, Socket& s)
 inline Controller& 
 Switch::controller() { return ctrl_; }
 
+/// Return the switch's datapath.
+inline Datapath& 
+Switch::datapath() { return dp_; }
+
 /// Returns the negotiated protocol version.
 ///
 /// \todo Find a more abstract scheme for managing the protocol. Also,
@@ -42,26 +46,6 @@ Switch::set_protocol(Uint8 v, Uint8 e) {
   proto_vsn = v;
   proto_exp = e;
   app_->version_known(*this);
-}
-
-/// Configure the features and capabilities of a switch.
-inline void 
-Switch::features_config(ofp::Header h, ofp::v1_0::Feature_reply r) {
-  // Configure datapath members
-  dp_.datapath_id   = r.datapath_id;
-  dp_.ip_reassembly = get_bit(r.capabilities, 6);
-
-  // Configure ports
-  for (const ofp::v1_0::Port& port : r.ports) {
-    Port p;
-    p.port_number = port.port_id;
-    p.hw_addr     = port.hw_addr;
-    p.name        = port.name.str();
-    p.current.set_features(port.current);
-    p.advertised.set_features(port.advertised);
-    p.supported.set_features(port.supported);
-    p.peer.set_features(port.peer);
-  }
 }
 
 /// Indicate that the switch is ready to begin operation. The features-known
