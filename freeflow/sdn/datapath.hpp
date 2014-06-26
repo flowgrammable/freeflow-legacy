@@ -33,7 +33,7 @@ struct Datapath {
 
 
   Ports ports;
-  std::vector<Flow_table> tables;
+  std::vector<Flow_table> flow_tables;
   std::vector<Buffer> buffers; // change to Packet_buffer class
 };
 

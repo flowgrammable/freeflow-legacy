@@ -22,9 +22,6 @@
 #include <freeflow/sdn/datapath.hpp>
 #include <freeflow/sdn/application.hpp>
 #include <freeflow/sdn/request.hpp>
-#include <freeflow/proto/ofp/v1.0/message.hpp>
-// #include <freeflow/proto/ofp/protocol.hpp>
-// #include <freeflow/proto/ofp/v1.0/protocol.hpp>
 
 namespace freeflow {
 

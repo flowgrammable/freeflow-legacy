@@ -44,11 +44,7 @@ Switch::set_protocol(Uint8 v, Uint8 e) {
   app_->version_known(*this);
 }
 
-/// Extract the nth bit from the number passed in.
-/// \todo where to move this?
-inline bool
-get_bit(int number, int n) { return (number & (1 << n)) >> n; }
-
+/// Configure the features and capabilities of a switch.
 inline void 
 Switch::features_config(ofp::Header h, ofp::v1_0::Feature_reply r) {
   // Configure datapath members
@@ -59,15 +55,12 @@ Switch::features_config(ofp::Header h, ofp::v1_0::Feature_reply r) {
   for (const ofp::v1_0::Port& port : r.ports) {
     Port p;
     p.port_number = port.port_id;
-    p.hw_addr = port.hw_addr;
-    p.name = port.name.str();
-    // p.speed 
-    // p.mode
-    // p.medium
-    // p.auto_neg
-    // p.pause
-    // p.pause_asym
-
+    p.hw_addr     = port.hw_addr;
+    p.name        = port.name.str();
+    p.current.set_features(port.current);
+    p.advertised.set_features(port.advertised);
+    p.supported.set_features(port.supported);
+    p.peer.set_features(port.peer);
   }
 }
 

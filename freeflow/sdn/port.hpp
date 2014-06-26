@@ -15,13 +15,16 @@
 #ifndef FREEFLOW_PORT_HPP
 #define FREEFLOW_PORT_HPP
 
-#include <freeflow/proto/ofp/ofp.hpp>
 #include <freeflow/sdn/queue.hpp>
 #include <freeflow/sys/data.hpp>
+#include <freeflow/proto/ofp/ofp.hpp>
+#include <freeflow/proto/ofp/v1.0/message.hpp>
+
 
 
 namespace freeflow {
 
+bool get_bit(int, int);
 
 ///The Port structure represents a port on a switch ...
 struct Port {
@@ -40,8 +43,8 @@ struct Port {
   /// The Mode enumeration represents the communication system of 
   /// the port. It can either be half-duplex or full-duplex.
   enum Mode { 
-    HALF_DUPLEX,  // Two-way communication with one direction at a time
-    FULL_DUPLEX   // Two-way communication with both directions simultaneously
+    HALF_DUPLEX, // Two-way communication, one direction at a time
+    FULL_DUPLEX  // Two-way communication, both directions simultaneously
   };
 
   /// The Medium enum represents the cable medium for the port
@@ -50,18 +53,31 @@ struct Port {
     FIBER
   };
 
-  Uint32        port_number;
-  Queues        queues;
+  /// The Port::Features structure represents the features of the port.
+  /// This includes the speed, communication mode and link information 
+  /// such as the type of medium, auto-negotiation state, and pause.
+  ///
+  /// An object of this structure exists for the current port features, 
+  /// the features advertised by the port, the features supported by the
+  /// port, and the features of the port advertised by peers.
+  struct Features {
+    void set_features(ofp::v1_0::Port::Features);
+    int    speed;     
+    Mode   mode;      
+    Medium medium;    
+    bool   auto_neg;  
+    bool   pause;     
+    bool   pause_asym;
+  };
 
-  ofp::Mac_addr hw_addr;    // From FeatureRes.ports[]
-  std::string   name;       // From FeatureRes.ports[]
-  int           speed;      // From FeatureRes.ports[].supported
-  Mode          mode;       // From FeatureRes.ports[].supported
-  Medium        medium;     // From FeatureRes.ports[].supported
-  bool          auto_neg;   // From FeatureRes.ports[].supported
-  bool          pause;      // From FeatureRes.ports[].supported
-  bool          pause_asym; // From FeatureRes.ports[].supported
-
+  Uint32        port_number; // Physical port number
+  Queues        queues;      // Queues linked to this port
+  ofp::Mac_addr hw_addr;     // From FeatureRes.ports[]
+  std::string   name;        // From FeatureRes.ports[]
+  Features      current;     // From FeatureRes.ports[].supported
+  Features      advertised;  // From FeatureRes.ports[].supported
+  Features      supported;   // From FeatureRes.ports[].supported
+  Features      peer;        // From FeatureRes.ports[].supported
 };
 
 /// The Ports structure represents a list of ports and some information 
