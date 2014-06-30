@@ -24,7 +24,7 @@ class Switch;
 class Packet;
 class Flow;
 class Port;
-//class Table;
+class Flow_table;
 class Role;
 class Application;
 
@@ -87,8 +87,7 @@ public:
   virtual void packet_in(Switch&, const Packet&);
   virtual void flow_removed(Switch&, const Flow&);
   virtual void port_status(Switch&, const Port&);
-  // FIXME: Re-enable this. How can this work with multiple types of tables?
-  // virtual void table_status(Switch&, const Table&);
+  virtual void table_status(Switch&, const Flow_table&);
   virtual void role_status(Switch&, const Role&);
 
 private:

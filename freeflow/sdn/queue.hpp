@@ -16,6 +16,7 @@
 #define FREEFLOW_QUEUE_HPP
 
 #include <vector>
+#include <map>
 
 #include <freeflow/sys/data.hpp>
 

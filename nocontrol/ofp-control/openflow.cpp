@@ -183,13 +183,17 @@ Ofp_handler::write() {
 
 /// Configure the features and capabilities of a switch.
 inline void 
-datapath_config(Datapath& dp, ofp::v1_0::Feature_reply r) {
+datapath_config(Datapath& dp, const ofp::v1_0::Feature_reply& r) {
   // Configure datapath members
   dp.datapath_id   = r.datapath_id;
-  dp.ip_reassembly = get_bit(r.capabilities, 6);
+  dp.ip_reassembly = get_bit(r.capabilities, 5);
 
-  // Configure ports
-  //dp.ports
+  // Configure Ports
+  // TODO: many fields still need to be set... this is NOT done yet.. at all
+  dp.ports.port_stats = get_bit(r.capabilities, 2);
+  dp.ports.stp = get_bit(r.capabilities, 3);
+  // TODO: set up Port_stats table (map). Should a Stats_req be sent to do this?
+  // if (dp.ports.port_stats) // set up Port_stats
   for (const ofp::v1_0::Port& port : r.ports) {
     Port p;
     p.port_number = port.port_id;
@@ -199,14 +203,20 @@ datapath_config(Datapath& dp, ofp::v1_0::Feature_reply r) {
     features_config(p.advertised, port.advertised);
     features_config(p.supported, port.supported);
     features_config(p.peer, port.peer);
-    dp.ports.push_back(std::move(p));
+    // TODO: set up Queues before emplacing to the map
+    dp.ports.emplace(p.port_number, p);
   }
+
+  // Configure Flow_tables
+  // TODO: actually configure the tables...
+  dp.flow_tables.flow_stats = get_bit(r.capabilities, 0);
+  dp.flow_tables.table_stats = get_bit(r.capabilities, 1);
 }
 
-/// Set the features of the port based on the features contained
+/// Set the features of a port based on the features contained
 /// in an OpenFlow v1.0 Feature_reply message.
 inline void
-features_config(Port::Features to, ofp::v1_0::Port::Features from) {
+features_config(Port::Features& to, const ofp::v1_0::Port::Features& from) {
 
   // 10 MB half duplex
   if (get_bit(from, 0)) {

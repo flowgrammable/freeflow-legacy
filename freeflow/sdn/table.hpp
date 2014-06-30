@@ -16,6 +16,7 @@
 #define FREEFLOW_TABLE_HPP
 
 #include <string>
+#include <map>
 #include <vector>
 
 #include <freeflow/sdn/match.hpp>
@@ -23,27 +24,30 @@
 
 namespace freeflow {
 
-// A Table is used to store Flows and counters.
-template<typename T>
-  using Table = std::vector<T>;
+// TODO: Determine whether this struct is necessary or not.
+// struct Flow {
+//   Match  match;
+//   Action action;
+// };
 
-
-struct Flow {
-  Match  match;
-  Action action;
-  // Instruction instruction; ?
+/// The Flow_table structure represents a table of flows consisting 
+/// of a Match and an Action for a switch. This is stored as a map 
+/// associating a Match with an Action.
+///
+/// todo\ Should this be set up as a vector of Flows, or is this an
+/// appropriate implementation?
+struct Flow_table : public std::map<Match, Action> {
+// struct Flow_table : public std::vector<Flow> {
+  int flowtable_id; // ID of the flow table
+  std::string name; // From StatsRes.Table.name
 };
 
-struct Flow_table {
-  int flowtable_id; // is this needed? maybe use the vector index instead?
-  std::string name; // From StatsRes.Table.name
+/// Flow_tables represents a sequence of Flow_table objects in the 
+/// form of a flowtable_id to Flow_table mapping. 
+struct Flow_tables : public std::map<int, Flow_table> {
   bool table_stats; // From FeatureRes.capabilities
   bool flow_stats;  // From FeatureRes.capabilities
-
-  Table<Flow> flows;
 };
-
-
 
 } // namespace freeflow
 

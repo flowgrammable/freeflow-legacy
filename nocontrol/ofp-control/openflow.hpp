@@ -64,8 +64,8 @@ using Ofp_acceptor = ff::Controller::Acceptor<Ofp_handler>;
 void set_mac_addr(freeflow::Mac_addr, const freeflow::ofp::Mac_addr&);
 
 bool get_bit(int, int);
-void features_config(ff::Port::Features, ff::ofp::v1_0::Port::Features);
-void datapath_config(ff::Datapath&, ff::ofp::v1_0::Feature_reply);
+void features_config(ff::Port::Features&, const ff::ofp::v1_0::Port::Features&);
+void datapath_config(ff::Datapath&, const ff::ofp::v1_0::Feature_reply&);
 
 
 } // namespace nocontrol

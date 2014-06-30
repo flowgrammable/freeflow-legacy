@@ -113,8 +113,8 @@ inline void
 Application::port_status(Switch&, const Port&) { }
 
 // /// \todo Document me.
-// inline void
-// Application::table_status(Switch&, const Table&) { }
+inline void
+Application::table_status(Switch&, const Flow_table&) { }
 
 /// \todo Document me.
 inline void

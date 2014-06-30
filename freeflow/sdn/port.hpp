@@ -28,18 +28,21 @@ struct Mac_addr {
 };
 
 ///The Port structure represents a port on a switch ...
+///
+/// todo\ Doesn't this need some of the info from the ofp Config or ofp State?
 struct Port {
-
-  // static constexpr Uint32 MAX         = 0xffffff00;
-  // static constexpr Uint32 IN_PORT     = 0xfffffff8;
-  // static constexpr Uint32 TABLE       = 0xfffffff9;
-  // static constexpr Uint32 NORMAL      = 0xfffffffa;
-  // static constexpr Uint32 FLOOD       = 0xfffffffb;
-  // static constexpr Uint32 ALL         = 0xfffffffc;
-  // static constexpr Uint32 CONTROLLER  = 0xfffffffd;
-  // static constexpr Uint32 LOCAL       = 0xfffffffe;
-  // static constexpr Uint32 NONE        = 0xffffffff; // how to handle
-  // static constexpr Uint32 ANY         = 0xffffffff; // these two??
+  static constexpr Uint32 MAX         = 0xffffff00;
+  static constexpr Uint32 IN_PORT     = 0xfffffff8;
+  static constexpr Uint32 TABLE       = 0xfffffff9;
+  static constexpr Uint32 NORMAL      = 0xfffffffa;
+  static constexpr Uint32 FLOOD       = 0xfffffffb;
+  static constexpr Uint32 ALL         = 0xfffffffc;
+  static constexpr Uint32 CONTROLLER  = 0xfffffffd;
+  static constexpr Uint32 LOCAL       = 0xfffffffe;
+  static constexpr Uint32 NONE        = 0xffffffff; 
+  // static constexpr Uint32 ANY         = 0xffffffff; 
+  // TODO: is there any semantic difference between ANY and NONE? For now
+  // they will be treated the same.
 
   /// The Mode enumeration represents the communication system of 
   /// the port. It can either be half-duplex or full-duplex.
@@ -58,7 +61,7 @@ struct Port {
   /// This includes the speed, communication mode and link information 
   /// such as the type of medium, auto-negotiation state, and pause.
   ///
-  /// An object of this structure exists for the current port features, 
+  /// An instance of this structure exists for the current port features, 
   /// the features advertised by the port, the features supported by the
   /// port, and the features of the port advertised by peers.
   struct Features {
@@ -80,9 +83,9 @@ struct Port {
   Features    peer;        // From FeatureRes.ports[].supported
 };
 
-/// The Ports structure represents a list of ports and some information 
+/// The Ports structure represents a sequence of ports and some information 
 /// related to them.
-struct Ports : public std::vector<Port>{
+struct Ports : public std::map<Uint32, Port> {
   bool port_stats;  // From FeatureRes.capabilities
   bool stp;         // From FeatureRes.capabilities
   bool all;         // True
@@ -95,10 +98,12 @@ struct Ports : public std::vector<Port>{
   bool none;        // True
 };
 
-
-// The Port_stats structure contains all of the counters for a port.
-// Any counters that are not supported have all bits set to 1.
-struct Port_stats {
+/// The Port_stats_entry structure contains all of the counters for a
+/// port. Any counters that are not supported have all bits set to 1.
+///
+/// todo\ overload bool operators for these counters to check whether
+/// they are supported or not
+struct Port_stats_entry {
   Uint32 port_number;   // Physical port number
   Uint64 rx_packets;    // Number of received packets
   Uint64 tx_packets;    // Number of transmitted packets
@@ -115,6 +120,10 @@ struct Port_stats {
   Uint32 duration_sec;  // Seconds port has been alive
   Uint32 duration_nsec; // Nanoseconds alive beyond duration_sec
 };
+
+/// Port_stats represents a table of Port_stats_entry objects in the 
+/// form of a port_number to Port_stats_entry mapping. 
+using Port_stats = std::map<Uint32, Port_stats_entry>;
 
 } // namespace freeflow
 
