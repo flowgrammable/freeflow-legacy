@@ -38,15 +38,16 @@ public:
   Printer(std::ostream& os)
     : os_(os), indent_(0) { }
 
-  void print(json::Null);
-  void print(json::Bool);
-  void print(json::Int);
-  void print(json::Real);
-  void print(const json::String&);
-  void print(const json::Pair&);
-  void print(const json::String&, const json::Value&);
-  void print(const json::Object&);
-  void print(const json::Array&);
+  void print(const json::Value&);
+  void print_null(json::Null);
+  void print_bool(json::Bool);
+  void print_int(json::Int);
+  void print_real(json::Real);
+  void print_pair(const json::Pair&);
+  void print_pair(const json::String&, const json::Value&);
+  void print_object(const json::Object&);
+  void print_array(const json::Array&);
+  //void print_error(const json::Error&);
 
   // Object formatting
   void start_object();

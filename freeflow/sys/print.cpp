@@ -22,100 +22,91 @@
 
 namespace freeflow {
 
-// Print primitive data types.
-void Printer::print(json::Null n) {
- os_ << n;
-} 
-
-void Printer::print(json::Bool b) {
- os_ << b;
+// Generic print function. Used to call specific print functions.
+void
+Printer::print(const json::Value& v) {
+ 
 }
 
-void Printer::print(json::Int i) {
- os_ << i;
+void 
+Printer::print_null(json::Null n) {
+  os_ << n; 
 }
 
-void Printer::print(json::Real r) {
- os_ << r;
+void
+Printer::print_bool(json::Bool b) {
+  os_ << b;
 }
 
-void Printer::print(const json::String& s){
- os_ << s;
+void 
+Printer::print_int(json::Int z) {
+  os_ << z;
 }
 
-void Printer::print(const json::Pair& p){
+void
+Printer::print_real(json::Real r) {
+  os_ << r;
+}
+
+void 
+Printer::print_pair(const json::Pair& p){
   os_ << p.first;
-  json::Value temp = p.second;
-  print(temp);
+  print(p.second);
 }
 
-void Printer::print(const json::String& s, const json::Value& v) {
+void 
+Printer::print_pair(const json::String& s, const json::Value& v) {
   os_ << s;
-  json::Value temp = v;
-  print(temp);
+  print(v);
 }
 
 // Print beginning of object
 void Printer::start_object() {
  ++indent_; 
- tab_  += "   ";
+ tab_.insert(0, indent_, char(32));
  os_ << "\n" << tab_ ;
 }
 
 // Print end of object. 
-void Printer::end_object() {
+void 
+Printer::end_object() {
  --indent_;
  tab_.clear();
- for(int i=0; i < indent_; i++)
-  tab_+=" ";
-os_ << "\n" << tab_;
+ tab_.insert(0, indent_, char(32));
+ os_ << "\n" << tab_;
 }
 
 // Print object
-void Printer::print(const json::Object& o) {
-  start_object();     
-  for(auto& it : o){
-  os_ << it.first;
-  json::Value temp = it.second;
-  print(temp);
- }
- end_object();
+void 
+Printer::print_object(const json::Object& o) {
+
 }
 
 // Print beginning of an array.
-void Printer::start_array() {
-  // \TODO Indentation for arrays?
+void 
+Printer::start_array() {
+
 }
 
 // Print end of array
-void Printer::end_array() {
-  // \TODO Indentation for arrays?
+void 
+Printer::end_array() {
+
 }
 
 // Print array
-void Printer::print(const json::Array& a) {
-  start_array();
-  for(auto& it : a){
-    switch(it.type()){
-      case json::Value::NIL:
-      case json::Value::BOOL:
-      case json::Value::INT:
-      case json::Value::REAL:
-      case json::Value::STRING:
-      os_ << it;
-      break;
-      case json::Value::ARRAY:
-      case json::Value::OBJECT:
-      case json::Value::ERROR:
-      json::Value temp = it;
-      print(temp);
-      break;
-    }
-    // \TODO Add default case.
-  }
-  end_array();
+void 
+Printer::print_array(const json::Array& a) {
+
 }
 
+// Print error messages
+/*
+void
+Printer::print_error(const json::Error& e){
+  os_ << e;
+}
+*/
 
 } // freeflow
 
