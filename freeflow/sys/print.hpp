@@ -43,11 +43,12 @@ public:
   void print_bool(json::Bool);
   void print_int(json::Int);
   void print_real(json::Real);
+  void print_string(json::String);
   void print_pair(const json::Pair&);
   void print_pair(const json::String&, const json::Value&);
   void print_object(const json::Object&);
   void print_array(const json::Array&);
-  //void print_error(const json::Error&);
+  void print_error();
 
   // Object formatting
   void start_object();
