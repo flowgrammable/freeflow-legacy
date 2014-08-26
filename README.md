@@ -16,6 +16,9 @@ $TOP/
 Configuration
 -------------
 
+#Note - export CXX=<gcc 4.8+ compiler>
+#Note - export CC=<g++ 4.8+ compiler>
+
 Configuration and building the project requires CMake, and is typically
 built "outside" of the source tree. My general strategy is to create a
 separate build directory inside the source code tree, like this.
