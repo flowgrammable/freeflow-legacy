@@ -151,6 +151,8 @@ Protocol::feature_recv(Reactor& r) {
   v1_0::Feature_reply p;
   get_payload(h, p);
 
+  datapath_config(switch_->datapath(), p);
+
   // Inidate that the switch is done being configured.
   switch_->configured();
 

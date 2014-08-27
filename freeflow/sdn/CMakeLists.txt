@@ -16,13 +16,25 @@ set(src domain.cpp
         controller.cpp
         switch.cpp
         application.cpp
-        request.cpp)
+        request.cpp
+        datapath.cpp
+        table.cpp
+        port.cpp
+        match.cpp
+        action.cpp
+        queue.cpp)
 
 set(hdr domain.hpp      domain.ipp
         controller.hpp  controller.ipp
         switch.hpp      switch.ipp
         application.hpp application.ipp
-        request.hpp     request.ipp)
+        request.hpp     request.ipp
+        datapath.hpp    datapath.ipp
+        table.hpp       table.ipp
+        port.hpp        port.ipp
+        match.hpp       match.ipp
+        action.hpp      action.ipp
+        queue.hpp       queue.ipp)
 
 # --------------------------------------------------------------------------- //
 # Targets

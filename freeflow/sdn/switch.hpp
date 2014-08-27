@@ -17,7 +17,9 @@
 
 #include <cassert>
 
+
 #include <freeflow/sys/data.hpp>
+#include <freeflow/sdn/datapath.hpp>
 #include <freeflow/sdn/application.hpp>
 #include <freeflow/sdn/request.hpp>
 
@@ -35,6 +37,7 @@ public:
 
   // Observers
   Controller& controller();
+  Datapath& datapath();
 
   // Transport
   // FIXME: Get socket address and other information.
@@ -57,12 +60,13 @@ public:
   void terminate();
 
   Request_queue& requests();
-
+  
 private:
   Controller&   ctrl_;
   Socket&       sock_;
   Request_queue reqs_;
-  
+  Datapath dp_;
+
   // The hosted application.
   // TODO: Should be applications.
   Application* app_; 

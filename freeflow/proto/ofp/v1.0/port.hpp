@@ -66,7 +66,7 @@ struct Port {
 
   /// Describes the features of a port.
   enum Features : Uint32 {
-    TEN_MB_HD     = 0x0000001, 
+    TEN_MB_HD     = 0x00000001, 
     TEN_MB_FD     = 0x00000002, 
     HUNDRED_MB_HD = 0x00000004, 
     HUNDRED_MB_FD = 0x00000008, 

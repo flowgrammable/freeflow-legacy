@@ -119,7 +119,7 @@ Machine::on_hello_wait_timeout() {
 /// state. Here, we create a switch object corresponding to the
 /// the features contained in the reply.
 ///
-/// Receiving any messagte other than a feature reply results in 
+/// Receiving any message other than a feature reply results in 
 /// disconnection. This could be an Error message indicating version 
 /// negotiation failure or feature negotiation failure.
 Error
@@ -134,6 +134,7 @@ Machine::on_feature_wait_message(const Header& h) {
   // FIXME: Enter a feature discovery phase? Probbly not necesssary.
   //
   // FIXME: Actually build or cnfigure the switch object.
+
 
   return enter_established();
 }

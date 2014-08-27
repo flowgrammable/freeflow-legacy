@@ -55,10 +55,18 @@ private:
   ff::ofp::v1_0::Machine* sm_;
 };
 
+
 /// The Ofp_acceptor is responsible for accepting connections from
 /// switches and constructing service handlers to manage the OpenFlow
 /// protocol.
 using Ofp_acceptor = ff::Controller::Acceptor<Ofp_handler>;
+
+void set_mac_addr(freeflow::Mac_addr, const freeflow::ofp::Mac_addr&);
+
+bool get_bit(int, int);
+void features_config(ff::Port::Features&, const ff::ofp::v1_0::Port::Features&);
+void datapath_config(ff::Datapath&, const ff::ofp::v1_0::Feature_reply&);
+
 
 } // namespace nocontrol
 

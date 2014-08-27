@@ -158,8 +158,7 @@ struct Vendor {
   Buffer data;
 };
 
-/// The featuress class provides scoping for capabilities and supported
-/// actions.
+/// The features class provides scoping for capabilities and supported actions.
 struct Features {
   enum Capability : Uint32 {
     FLOW_STATS   = 0x00000001,

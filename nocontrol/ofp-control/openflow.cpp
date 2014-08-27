@@ -88,7 +88,7 @@ Ofp_handler::on_time(int t) {
   return true;
 }
 
-/// Check the result of receiving a mesage tha triggered version
+/// Check the result of receiving a mesage that triggered version
 /// negotiation. If the error indicates that the protocol is not
 /// supported, try changing the protocol version. If any other error
 /// occurs, drop the connection.
@@ -130,7 +130,7 @@ Ofp_handler::change_version(int v) {
 // Read from the socket to put message data into the read queue.
 //
 // FIXME: This is incredibly brittle, and its slow. First, each message
-// requires twp reads and two allocations. Second, we may not actually
+// requires two reads and two allocations. Second, we may not actually
 // receive everything in each read, meaning we're going to miss data.
 // Third, error handling is totally broken.
 //
@@ -174,6 +174,107 @@ Ofp_handler::write() {
     rc().write(b);
   }
   return true;
+}
+
+
+
+// -------------------------------------------------------------------------- //
+// Switch configuration
+
+/// Configure the features and capabilities of a switch.
+inline void 
+datapath_config(Datapath& dp, const ofp::v1_0::Feature_reply& r) {
+  // Configure datapath members
+  dp.datapath_id   = r.datapath_id;
+  dp.ip_reassembly = get_bit(r.capabilities, 5);
+
+  // Configure Ports
+  // TODO: many fields still need to be set... this is NOT done yet.. at all
+  dp.ports.port_stats = get_bit(r.capabilities, 2);
+  dp.ports.stp = get_bit(r.capabilities, 3);
+  // TODO: set up Port_stats table (map). Should a Stats_req be sent to do this?
+  // if (dp.ports.port_stats) // set up Port_stats
+  for (const ofp::v1_0::Port& port : r.ports) {
+    Port p;
+    p.port_number = port.port_id;
+    set_mac_addr(p.hw_addr, port.hw_addr);
+    p.name = port.name.str();
+    features_config(p.current, port.current);
+    features_config(p.advertised, port.advertised);
+    features_config(p.supported, port.supported);
+    features_config(p.peer, port.peer);
+    // TODO: set up Queues before emplacing to the map
+    dp.ports.emplace(p.port_number, p);
+  }
+
+  // Configure Flow_tables
+  // TODO: actually configure the tables...
+  dp.flow_tables.flow_stats = get_bit(r.capabilities, 0);
+  dp.flow_tables.table_stats = get_bit(r.capabilities, 1);
+}
+
+/// Set the features of a port based on the features contained
+/// in an OpenFlow v1.0 Feature_reply message.
+inline void
+features_config(Port::Features& to, const ofp::v1_0::Port::Features& from) {
+
+  // 10 MB half duplex
+  if (get_bit(from, 0)) {
+    to.speed = 10000;
+    to.mode  = Port::HALF_DUPLEX;
+  }
+
+  // 10 MB full duplex
+  else if (get_bit(from, 1)) {
+    to.speed = 10000;
+    to.mode  = Port::FULL_DUPLEX;
+  }
+
+  // 100 MB half dulex
+  else if (get_bit(from, 2)) {
+    to.speed = 100000; 
+    to.mode  = Port::HALF_DUPLEX;
+  }
+
+  // 100 MB full dulex
+  else if (get_bit(from, 3)) {
+    to.speed = 100000;
+    to.mode  = Port::FULL_DUPLEX;
+  }
+  
+  // 1 GB half dulex
+  else if (get_bit(from, 4)) {
+    to.speed = 1000000;
+    to.mode  = Port::HALF_DUPLEX;
+  }
+  
+  // 1 GB full dulex
+  else if (get_bit(from, 5)) {
+    to.speed = 1000000;
+    to.mode  = Port::FULL_DUPLEX;
+  }
+
+  // 10 GB full duplex
+  else if (get_bit(from, 6)) {
+    to.speed = 10000000;
+    to.mode  = Port::FULL_DUPLEX;
+  }
+
+  // else error? v1.3 uses max_speed or curr_speed but v1.0 doesn't have them
+
+  // Copper medium
+  if (get_bit(from, 7)) 
+    to.medium = Port::COPPER;
+
+  // Fiber medium
+  else if (get_bit(from, 8))
+    to.medium = Port::FIBER;
+
+  // else error? is this data necessary enough to warrant an error?
+
+  to.auto_neg   = get_bit(from, 9);
+  to.pause      = get_bit(from, 10);
+  to.pause_asym = get_bit(from, 11);
 }
 
 } // namespace nocontrol
