@@ -78,13 +78,13 @@ Signal_set::Signal_set(Init f) {
 }
 
 inline void 
-Signal_set::insert(int s) { ::sigaddset(&mask, s); }
+Signal_set::insert(int s) { sigaddset(&mask, s); }
 
 inline void 
-Signal_set::remove(int s) { ::sigdelset(&mask, s); }
+Signal_set::remove(int s) { sigdelset(&mask, s); }
 
 inline bool 
-Signal_set::test(int s) { return ::sigismember(&mask, s); }
+Signal_set::test(int s) { return sigismember(&mask, s); }
 
 inline Signal_set 
 Signal_set::all() { return {ALL}; }
