@@ -14,49 +14,129 @@
 
 #include <iostream>
 #include <string>
+#include <map>
+#include <utility>
 
 #include <freeflow/sys/print.hpp>
 #include <freeflow/sys/json.hpp>
 
 namespace freeflow {
 
-// Print primitive data types.
-void Printer::print(json::Null n) {
-	os_ << n;
-}	
-
-void Printer::print(json::Bool b) {
-	os_ << b;
+// Generic print function. Used to call specific print functions.
+void
+Printer::print(const json::Value& v) {
+  switch(v.type_) {
+    case json::Value::NIL: 
+      print_null(v.data_.n);
+    case json::Value::BOOL:
+      print_bool(v.data_.b);
+    case json::Value::INT:
+      print_int(v.data_.z);
+    case json::Value::REAL:
+      print_real(v.data_.r);
+    case json::Value::STRING:
+      print_string(v.data_.s);
+    case json::Value::ARRAY:
+      print_array(v.data_.a);
+    case json::Value::OBJECT:
+      print_object(v.data_.o);
+    case json::Value::ERROR:
+      print_error();
+    break;
+  }
 }
 
-void Printer::print(json::Int i) {
-	os_ << i;
+void 
+Printer::print_null(json::Null n) {
+  os_ << n;
 }
 
-void Printer::print(json::Real r) {
-	os_ << r;
+void
+Printer::print_bool(json::Bool b) {
+  os_ << b;
 }
 
-void Printer::print(const json::String& s){
-	os_ << s;
+void 
+Printer::print_int(json::Int z) {
+  os_ << z;
 }
 
-// After '{' increment indent_, add spaces to tab and insert newline.
+void
+Printer::print_real(json::Real r) {
+  os_ << r;
+}
+
+void
+Printer::print_string(json::String s) {
+  os_ << s;
+}
+
+void 
+Printer::print_pair(const json::Pair& p){
+  os_ << p.first;
+  print(p.second);
+}
+
+void 
+Printer::print_pair(const json::String& s, const json::Value& v) {
+  os_ << s;
+  print(v);
+}
+
+// Print beginning of object
 void Printer::start_object() {
-	++indent_; 
-	tab_  += "   ";
-	os_ << "\n" << tab_;
+  os_ << "{ \n";
+ ++indent_; 
+ tab_.insert(0, indent_, char(32));
+ os_ << tab_ ;
 }
 
-void Printer::end_object() {
-	--indent_;
-	// Remove spaces from tab_
+// Print end of object. 
+void 
+Printer::end_object() {
+ --indent_;
+ tab_.clear();
+ tab_.insert(0, indent_, char(32));
+ os_ << "\n }," << tab_;
 }
 
 // Print object
-void Printer::print(const json::Object& o) {
-
+void 
+Printer::print_object(const json::Object& o) {
+  start_object();
+  for(auto& iter : o) {
+    os_ << "\"" << iter.first << "\" :";
+    print(iter.second);
+  }
+  end_object();
 }
 
+// Print beginning of an array.
+void 
+Printer::start_array() {
+  os_ << "[ \n";
+}
+
+// Print end of array
+void 
+Printer::end_array() {
+  os_ << "] \n";
+}
+
+// Print array
+void 
+Printer::print_array(const json::Array& a) {
+  start_array();
+  for(unsigned int x = 0; x < a.size(); x++) {
+    print(a[x]);
+  }
+  end_array();
+}
+
+// Print error messages
+void
+Printer::print_error(){
+  
+}
 } // freeflow
 
