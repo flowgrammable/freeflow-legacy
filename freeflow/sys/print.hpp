@@ -49,6 +49,7 @@ public:
   void print_object(const json::Object&);
   void print_array(const json::Array&);
   void print_error();
+  void print_indent();
 
   // Object formatting
   void start_object();
@@ -60,7 +61,6 @@ public:
 
   std::ostream& os_;     // The underlying stream     
   int           indent_; // The current indent level
-  std::string   tab_;    // A string contaning the current "tab".
  };
 
 } // namespace

@@ -25,24 +25,17 @@ namespace freeflow {
 // Generic print function. Used to call specific print functions.
 void
 Printer::print(const json::Value& v) {
-  switch(v.type_) {
-    case json::Value::NIL: 
-      print_null(v.data_.n);
-    case json::Value::BOOL:
-      print_bool(v.data_.b);
-    case json::Value::INT:
-      print_int(v.data_.z);
-    case json::Value::REAL:
-      print_real(v.data_.r);
-    case json::Value::STRING:
-      print_string(v.data_.s);
-    case json::Value::ARRAY:
-      print_array(v.data_.a);
-    case json::Value::OBJECT:
-      print_object(v.data_.o);
-    case json::Value::ERROR:
-      print_error();
-    break;
+  switch(v.type()) {
+  case json::Value::NIL: return print_null(v.as_null());
+  case json::Value::BOOL: return print_bool(v.as_bool());
+  case json::Value::INT: return print_int(v.as_int());
+  case json::Value::REAL: return print_real(v.as_real());
+  case json::Value::STRING: return print_string(v.as_string());
+  case json::Value::ARRAY:  return print_array(v.as_array());
+  case json::Value::OBJECT: return print_object(v.as_object());
+  case json::Value::ERROR: return print_error();
+  break;
+    assert(false);
   }
 }
 
@@ -85,28 +78,30 @@ Printer::print_pair(const json::String& s, const json::Value& v) {
 
 // Print beginning of object
 void Printer::start_object() {
-  os_ << "{ \n";
- ++indent_; 
- tab_.insert(0, indent_, char(32));
- os_ << tab_ ;
+  os_ << "{\n";
+ ++indent_;
 }
 
 // Print end of object. 
 void 
 Printer::end_object() {
  --indent_;
- tab_.clear();
- tab_.insert(0, indent_, char(32));
- os_ << "\n }," << tab_;
+ os_ << '\n';
+ print_indent();
+ os_ << "}\n";
 }
 
 // Print object
 void 
 Printer::print_object(const json::Object& o) {
   start_object();
-  for(auto& iter : o) {
-    os_ << "\"" << iter.first << "\" :";
-    print(iter.second);
+  auto iter = o.begin();
+  auto end = o.end();
+  while (iter != end) {
+    print_indent();
+    print_pair(*iter);
+    if (std::next(iter) != end)
+      os_ << ",\n";
   }
   end_object();
 }
@@ -115,28 +110,42 @@ Printer::print_object(const json::Object& o) {
 void 
 Printer::start_array() {
   os_ << "[ \n";
+  ++indent_;
 }
 
 // Print end of array
 void 
 Printer::end_array() {
+  --indent_;
+  os_ << '\n';
+  print_indent();
   os_ << "] \n";
 }
 
-// Print array
+// Print arrays.
 void 
 Printer::print_array(const json::Array& a) {
   start_array();
-  for(unsigned int x = 0; x < a.size(); x++) {
-    print(a[x]);
+
+  auto iter = a.begin();
+  auto end = a.end();
+  while (iter != end) {
+    print(*iter);
+    print_indent();
   }
   end_array();
 }
 
 // Print error messages
+// TODO: Implement me!
 void
-Printer::print_error(){
-  
+Printer::print_error() { 
 }
+
+void
+Printer::print_indent() {
+  os_ << std::string(indent_ * 2, ' ');
+}
+
 } // freeflow
 
