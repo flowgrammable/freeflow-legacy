@@ -12,8 +12,6 @@
 // or implied. See the License for the specific language governing
 // permissions and limitations under the License.
 
-
-
 #include <assert.h>
 
 #include <freeflow/sys/socket.hpp>
@@ -24,7 +22,6 @@
 
 using namespace std;
 using namespace freeflow;
-
 
 struct Add_command : cli::Command {
   Add_command() 
@@ -58,11 +55,8 @@ struct Del_command : cli::Command {
   }
 };
 
-
 int
 main(int argc, char *argv[]) {
-  bool success = true;
-  // Create program options.
   cli::Parameters parms;
   parms.declare("flag, f", cli::Bool_typed(), cli::REQUIRED, "Just a flag");
   parms.declare("number", cli::Real_typed(), "42", "Just a number");
@@ -76,7 +70,6 @@ main(int argc, char *argv[]) {
   cmds.declare<Add_command>();
   cmds.declare<Del_command>();
 
-// ---------------- Parse global arguments up to the command ---------------- //
   // Initialize the parse state
   cli::Parse_state ps(argc, 1, argv);
   if (ps.argc == 1) {
@@ -95,14 +88,9 @@ main(int argc, char *argv[]) {
   parse_keyword_args(parms, program_args, ps);
 
   // Check program args
-  success &= check_args(parms, program_args);
-
-  if (!success){ 
+  if (not check_args(parms, program_args))
     program_args.display_errors(prefix);
-  }
-// -------------------------------------------------------------------------- //
 
-// ---------- Parse the command and its named/positional arguments ---------- //
   // Make sure a command name was provided
   if (ps.current == ps.argc) {
     std::cerr << "error: a command must be provided\n";
@@ -116,29 +104,19 @@ main(int argc, char *argv[]) {
     return -1;
   }
 
-    // FIXME: If this returns null, it will crash.
+  // FIXME: If this returns null, it will crash.
   cli::Command* cmd = cmds.find(cmd_name)->second;
   cli::Arguments command_args;
+  
   // Parse command args
   parse_args(cmd->parms(), command_args, ps);
 
   // Check command args
-  success &= check_args(cmd->parms(), command_args);
-
-  if (!success){ 
+  if (not check_args(cmd->parms(), command_args)) {
     command_args.display_errors(prefix);
-    // std::cout << "ERROR\n";
     return -1;
   }
 
+  // FIXME: Return from this?
   cmd->run(command_args);
-  return 0;
-  // // Parse arguments.
-  // cli::Arguments args;
-  // if (parse(parms, cmds, args, argc, argv, "flog"))
-  //   return 0;
-  // else
-  //   return -1;    
-
-  // What command did I parse?
 }
