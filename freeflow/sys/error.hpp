@@ -84,6 +84,66 @@ Error system_error();
 Error system_error(int n);
 
 
+namespace impl {
+// Implementation of the Expected class template.
+template<typename T>
+  union Expected_value {
+    // No-op construction, when calls are required/
+    Expected_value(const Expected_value&) { }
+    Expected_value(Expected_value&&) { }
+    ~Expected_value() { }
+
+    Expected_value(const T&);
+    Expected_value(T&&);
+    Expected_value(Error);
+    
+    T value;
+    Error error;
+  };
+} // namespace impl
+
+/// An expected value encodes the result of an operation or an error
+/// value if that operation did not successfully complete.
+template<typename T>
+  class Expected {
+    enum Which { FAILURE, SUCCESS };
+    using Data = impl::Expected_value<T>;
+  public:
+    Expected() = delete;
+
+    // Copy semantics
+    Expected(const Expected&);
+    Expected& operator=(const Expected&);
+
+    // Move semantics
+    Expected(Expected&&);
+    Expected& operator=(Expected&&);
+
+    // Value initialization.
+    Expected(const T&);
+    Expected(T&&);
+    Expected(Error);
+
+    ~Expected();
+
+    explicit operator bool() const;
+
+    const T& get() const;
+    T&& take();
+
+    Error error() const;
+
+  private:
+    void construct(const Expected&);
+    void construct(Expected&&);
+    void destroy();
+
+  private:
+    Which which_;
+    Data data_;
+  };
+
+
 /// A Trap object is used to capture failures in if statements, allowing
 /// the following kinds of programs.
 ///

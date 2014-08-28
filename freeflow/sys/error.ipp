@@ -74,6 +74,129 @@ system_error() { return system_error(errno); }
 inline Error
 system_error(int n) { return make_error_code(static_cast<std::errc>(n)); }
 
+// -------------------------------------------------------------------------- //
+// Expected value
+
+namespace impl {
+template<typename T>
+  inline
+  Expected_value<T>::Expected_value(const T& x)
+    : value(x) { }
+
+template<typename T>
+  inline 
+  Expected_value<T>::Expected_value(T&& x)
+    : value(std::move(x)) { }
+
+template<typename T>
+  inline
+  Expected_value<T>::Expected_value(Error e)
+    : error(e) { }
+}
+
+template<typename T>
+  inline
+  Expected<T>::Expected(const Expected& x)
+    : which_(x.which_)
+  { construct(x); }
+
+template<typename T>
+  inline Expected<T>&
+  Expected<T>::operator=(const Expected& x) {
+    destroy();
+    which_ = x.which_;
+    init(x);
+    return *this;
+  }
+
+template<typename T>
+  inline
+  Expected<T>::Expected(Expected&& x)
+    : which_(x.which_)
+  { construct(std::move(x)); }
+
+template<typename T>
+  inline Expected<T>&
+  Expected<T>::operator=(Expected&& x) {
+    destroy();
+    which_ = x.which_;
+    init(std::move(x));
+    return *this;
+  }
+
+template<typename T>
+  inline
+  Expected<T>::Expected(const T& x)
+    : which_(SUCCESS), data_(x) { }
+
+template<typename T>
+  inline
+  Expected<T>::Expected(T&& x)
+    : which_(SUCCESS), data_(std::move(x)) { }
+
+template<typename T>
+  inline
+  Expected<T>::Expected(Error e)
+    : which_(FAILURE), data_(e) { }
+
+/// Allows contextual conversion to bool. Returns true when the expected
+/// value is not an error.
+template<typename T>
+  inline
+  Expected<T>::operator bool() const { return which_; }
+
+/// Get the expected value. Behavior is undefined if this object indicates
+/// an error.
+template<typename T>
+  inline const T&
+  Expected<T>::get() const {
+    assert(which_);
+    return data_.value;
+  }
+
+/// Move the expected value from this object. Behavior is undefined if
+/// this object indicates an error.
+template<typename T>
+  inline T&&
+  Expected<T>::take() {
+    assert(which_);
+    return std::move(data_.value);
+  }
+
+template<typename T>
+  inline Error
+  Expected<T>::error() const {
+    assert(!which_);
+    return data_.error;
+  }
+
+template<typename T>
+  inline void
+  Expected<T>::construct(const Expected& x) {
+    if (which_)
+      new (&data_.value) T(x.data_.value);
+    else
+      new (&data_.error) Error(x.data_.error);
+  }
+
+template<typename T>
+  inline void
+  Expected<T>::construct(Expected&& x) {
+    if (which_)
+      new (&data_.value) T(std::move(x.data_.value));
+    else
+      new (&data_.error) Error(std::move(x.data_.error));
+  }
+
+template<typename T>
+  inline void
+  Expected<T>::destroy() {
+    if (which_)
+      data_.value.~T();
+    else
+      data_.value.~Error();
+  }
+
 
 // -------------------------------------------------------------------------- //
 // Trap
